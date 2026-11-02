@@ -102,3 +102,4 @@ export function DivisionBlock({ division }: DivisionBlockProps) {
     </article>
   )
 }
+

@@ -15,3 +15,4 @@ export interface ServiceDivision {
   services: ServiceOffering[]
   faq: { question: string; answer: string }[]
 }
+
