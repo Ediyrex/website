@@ -1,6 +1,5 @@
 export { HeroSection } from './HeroSection'
+export { SocialProofBar } from './SocialProofBar'
 export { DivisionsSection } from './DivisionsSection'
-export { FeaturedWorkSection } from './FeaturedWorkSection'
-export { ProcessSection } from './ProcessSection'
-export { CtaSection } from './CtaSection'
-
+export { PhilosophyBanner } from './PhilosophyBanner'
+export { EditorialCtaSection } from './EditorialCtaSection'

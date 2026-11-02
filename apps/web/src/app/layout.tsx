@@ -1,67 +1,38 @@
 import type { Metadata, Viewport } from 'next'
-import { Manrope, Inter, IBM_Plex_Mono } from 'next/font/google'
+import { Plus_Jakarta_Sans, Playfair_Display, JetBrains_Mono } from 'next/font/google'
 import '@/styles/globals.css'
-import { SITE } from '@/shared/constants'
+import { Header, Footer } from '@/shared/components/layout'
 
-const manrope = Manrope({
+const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
-  variable: '--font-heading',
+  variable: '--font-sans',
   display: 'swap',
+  weight: ['400', '500', '600', '700', '800'],
 })
 
-const inter = Inter({
+const playfair = Playfair_Display({
   subsets: ['latin'],
-  variable: '--font-body',
+  variable: '--font-serif',
   display: 'swap',
+  weight: ['400', '500', '600', '700'],
+  style: ['normal', 'italic'],
 })
 
-const ibmPlexMono = IBM_Plex_Mono({
-  weight: ['400', '500'],
+const jetbrains = JetBrains_Mono({
   subsets: ['latin'],
   variable: '--font-mono',
   display: 'swap',
+  weight: ['400', '500'],
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL(SITE.url),
-  title: {
-    default: SITE.name,
-    template: `%s — ${SITE.name}`,
-  },
-  description: SITE.description,
-  keywords: [
-    'creative studio',
-    'media production',
-    'digital design',
-    'AI automation',
-    'web development',
-    'brand films',
-    'India',
-  ],
-  authors: [{ name: SITE.name, url: SITE.url }],
-  creator: SITE.name,
-  openGraph: {
-    type: 'website',
-    locale: 'en_IN',
-    url: SITE.url,
-    siteName: SITE.name,
-    title: SITE.name,
-    description: SITE.description,
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: SITE.name,
-    description: SITE.description,
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: { index: true, follow: true },
-  },
+  title: 'EDIYREX® — Creative Media. Powerful Web. Intelligent Agents.',
+  description:
+    'We create high-impact content, build modern web experiences, and automate real work with AI agents and intelligent workflows.',
 }
 
 export const viewport: Viewport = {
-  themeColor: '#08090B',
+  themeColor: '#050507',
   colorScheme: 'dark',
   width: 'device-width',
   initialScale: 1,
@@ -71,10 +42,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`scroll-smooth ${manrope.variable} ${inter.variable} ${ibmPlexMono.variable}`}
+      className={`scroll-smooth ${jakarta.variable} ${playfair.variable} ${jetbrains.variable}`}
     >
-      <body className="antialiased bg-[#08090B] text-[#F0EDE8]">
-        {children}
+      <body className="antialiased bg-[#050507] text-[#FFFFFF] font-sans selection:bg-[#FF5500]/30 selection:text-white">
+        <Header />
+        <main className="min-h-screen">
+          {children}
+        </main>
+        <Footer />
       </body>
     </html>
   )
