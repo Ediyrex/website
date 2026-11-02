@@ -191,3 +191,4 @@ export default async function CaseStudyPage({ params }: CaseStudyPageProps) {
     </article>
   )
 }
+

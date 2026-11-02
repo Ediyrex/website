@@ -2,98 +2,16 @@
 
 /* ============================================================
    EDIYREX STUDIO — GLOBAL STYLES & DESIGN TOKENS
+   Tailwind CSS v4 Configuration
    ============================================================ */
 
-/* ------------------------------------------------------------
-   Google Fonts
-   ------------------------------------------------------------ */
-@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap");
-
-/* ------------------------------------------------------------
-   CSS Custom Properties — Design Tokens
-   ------------------------------------------------------------ */
-:root {
-  /* --- Colour Palette --- */
-  --color-canvas:       #08090B;   /* Primary background */
-  --color-surface:      #12151A;   /* Card / elevated surfaces */
-  --color-surface-2:    #1C2028;   /* Secondary surface / borders */
-  --color-border:       #252A33;   /* Subtle borders */
-  --color-border-muted: #1A1F26;   /* Very subtle separators */
-
-  /* Accent — Champagne Gold */
-  --color-accent:       #D6B77A;
-  --color-accent-light: #E8CFA0;
-  --color-accent-dim:   #A88A52;
-  --color-accent-muted: rgba(214, 183, 122, 0.12);
-
-  /* Text */
-  --color-text-primary:   #F0EDE8;   /* Warm white */
-  --color-text-secondary: #9AA0AB;   /* Muted grey */
-  --color-text-tertiary:  #5C6370;   /* Disabled / hint */
-  --color-text-accent:    #D6B77A;   /* Champagne text */
-  --color-text-inverse:   #08090B;   /* Text on light surfaces */
-
-  /* Feedback */
-  --color-success: #4CAF8A;
-  --color-warning: #E8A838;
-  --color-error:   #E05252;
-  --color-info:    #5B9CF6;
-
-  /* --- Typography --- */
-  --font-heading: 'Manrope', system-ui, sans-serif;
-  --font-body:    'Inter', system-ui, sans-serif;
-  --font-mono:    'IBM Plex Mono', 'Fira Code', monospace;
-
-  /* --- Spacing Scale (in rem) --- */
-  --space-1:  0.25rem;
-  --space-2:  0.5rem;
-  --space-3:  0.75rem;
-  --space-4:  1rem;
-  --space-5:  1.25rem;
-  --space-6:  1.5rem;
-  --space-8:  2rem;
-  --space-10: 2.5rem;
-  --space-12: 3rem;
-  --space-16: 4rem;
-  --space-20: 5rem;
-  --space-24: 6rem;
-  --space-32: 8rem;
-
-  /* --- Border Radius --- */
-  --radius-sm:  0.375rem;
-  --radius-md:  0.625rem;
-  --radius-lg:  1rem;
-  --radius-xl:  1.5rem;
-  --radius-full: 9999px;
-
-  /* --- Motion --- */
-  --duration-fast:   150ms;
-  --duration-normal: 250ms;
-  --duration-slow:   400ms;
-  --duration-slower: 600ms;
-  --ease-out:   cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-in:    cubic-bezier(0.4, 0, 1, 1);
-  --ease-inout: cubic-bezier(0.4, 0, 0.2, 1);
-
-  /* --- Shadows --- */
-  --shadow-sm:  0 1px 3px rgba(0, 0, 0, 0.4);
-  --shadow-md:  0 4px 16px rgba(0, 0, 0, 0.5);
-  --shadow-lg:  0 8px 32px rgba(0, 0, 0, 0.6);
-  --shadow-xl:  0 20px 60px rgba(0, 0, 0, 0.7);
-  --shadow-accent: 0 0 40px rgba(214, 183, 122, 0.08);
-
-  /* --- Layout --- */
-  --container-max:    1280px;
-  --container-wide:   1440px;
-  --container-narrow: 768px;
-  --section-gap:      clamp(4rem, 10vw, 8rem);
-}
-
-/* ------------------------------------------------------------
-   Tailwind CSS v4 Theme Extension
-   ------------------------------------------------------------ */
 @theme {
-  /* Colours */
+  /* Fonts mapped to Next.js font variables */
+  --font-heading: var(--font-heading), 'Manrope', system-ui, sans-serif;
+  --font-body:    var(--font-body), 'Inter', system-ui, sans-serif;
+  --font-mono:    var(--font-mono), 'IBM Plex Mono', monospace;
+
+  /* Studio Color Palette */
   --color-canvas:         #08090B;
   --color-surface:        #12151A;
   --color-surface-2:      #1C2028;
@@ -105,13 +23,31 @@
   --color-text-secondary: #9AA0AB;
   --color-text-tertiary:  #5C6370;
 
-  /* Fonts */
-  --font-heading: 'Manrope', system-ui, sans-serif;
-  --font-body:    'Inter', system-ui, sans-serif;
-  --font-mono:    'IBM Plex Mono', 'Fira Code', monospace;
-
-  /* Custom spacing */
+  /* Custom Spacing */
   --spacing-section: clamp(4rem, 10vw, 8rem);
+}
+
+:root {
+  --color-canvas:       #08090B;
+  --color-surface:      #12151A;
+  --color-surface-2:    #1C2028;
+  --color-border:       #252A33;
+  --color-border-muted: #1A1F26;
+
+  --color-accent:       #D6B77A;
+  --color-accent-light: #E8CFA0;
+  --color-accent-dim:   #A88A52;
+  --color-accent-muted: rgba(214, 183, 122, 0.12);
+
+  --color-text-primary:   #F0EDE8;
+  --color-text-secondary: #9AA0AB;
+  --color-text-tertiary:  #5C6370;
+  --color-text-accent:    #D6B77A;
+
+  --container-max:    1280px;
+  --container-wide:   1440px;
+  --container-narrow: 768px;
+  --section-gap:      clamp(4rem, 10vw, 8rem);
 }
 
 /* ------------------------------------------------------------
@@ -120,7 +56,7 @@
 @layer base {
   *, *::before, *::after {
     box-sizing: border-box;
-    border-color: var(--color-border);
+    border-color: #252A33;
   }
 
   html {
@@ -128,68 +64,61 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    background-color: #08090B;
   }
 
   body {
-    background-color: var(--color-canvas);
-    color: var(--color-text-primary);
+    background-color: #08090B;
+    color: #F0EDE8;
     font-family: var(--font-body);
     font-size: 1rem;
     line-height: 1.6;
     min-height: 100dvh;
+    overflow-x: hidden;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
     font-weight: 700;
     line-height: 1.15;
-    color: var(--color-text-primary);
+    color: #F0EDE8;
     letter-spacing: -0.02em;
   }
 
-  h1 { font-size: clamp(2.5rem, 6vw, 5rem); }
-  h2 { font-size: clamp(1.875rem, 4vw, 3rem); }
-  h3 { font-size: clamp(1.375rem, 2.5vw, 2rem); }
-  h4 { font-size: clamp(1.125rem, 1.8vw, 1.5rem); }
+  h1 { font-size: clamp(2.25rem, 5vw, 4.5rem); }
+  h2 { font-size: clamp(1.75rem, 3.5vw, 3rem); }
+  h3 { font-size: clamp(1.25rem, 2vw, 1.875rem); }
+  h4 { font-size: clamp(1.1rem, 1.5vw, 1.35rem); }
 
   p {
-    color: var(--color-text-secondary);
+    color: #9AA0AB;
     line-height: 1.75;
   }
 
   a {
     color: inherit;
     text-decoration: none;
-    transition: color var(--duration-fast) var(--ease-out);
+    transition: color 200ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   code, pre {
     font-family: var(--font-mono);
-    font-size: 0.875em;
-  }
-
-  img, video {
-    max-width: 100%;
-    height: auto;
-    display: block;
   }
 
   ::selection {
     background-color: rgba(214, 183, 122, 0.25);
-    color: var(--color-text-primary);
+    color: #F0EDE8;
   }
 
-  /* Scrollbar */
   ::-webkit-scrollbar        { width: 6px; }
-  ::-webkit-scrollbar-track  { background: var(--color-canvas); }
-  ::-webkit-scrollbar-thumb  { background: var(--color-border); border-radius: 99px; }
-  ::-webkit-scrollbar-thumb:hover { background: var(--color-text-tertiary); }
+  ::-webkit-scrollbar-track  { background: #08090B; }
+  ::-webkit-scrollbar-thumb  { background: #252A33; border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover { background: #5C6370; }
 
-  /* Focus ring */
   :focus-visible {
-    outline: 2px solid var(--color-accent);
+    outline: 2px solid #D6B77A;
     outline-offset: 3px;
-    border-radius: var(--radius-sm);
+    border-radius: 0.375rem;
   }
 }
 
@@ -197,80 +126,49 @@
    Utility Classes
    ------------------------------------------------------------ */
 @layer utilities {
-  /* Container */
   .container-main {
     width: 100%;
-    max-width: var(--container-max);
+    max-width: 1280px;
     margin-inline: auto;
-    padding-inline: clamp(1rem, 5vw, 2rem);
+    padding-inline: clamp(1rem, 4vw, 2rem);
   }
 
   .container-wide {
     width: 100%;
-    max-width: var(--container-wide);
+    max-width: 1440px;
     margin-inline: auto;
-    padding-inline: clamp(1rem, 5vw, 2rem);
+    padding-inline: clamp(1rem, 4vw, 2rem);
   }
 
   .container-narrow {
     width: 100%;
-    max-width: var(--container-narrow);
+    max-width: 768px;
     margin-inline: auto;
-    padding-inline: clamp(1rem, 5vw, 2rem);
+    padding-inline: clamp(1rem, 4vw, 2rem);
   }
 
-  /* Section spacing */
   .section-gap {
-    padding-block: var(--section-gap);
+    padding-block: clamp(4rem, 8vw, 7rem);
   }
 
-  /* Accent text */
-  .text-accent { color: var(--color-accent); }
-  .text-primary { color: var(--color-text-primary); }
-  .text-secondary { color: var(--color-text-secondary); }
-  .text-tertiary { color: var(--color-text-tertiary); }
-
-  /* Accent gradient text */
   .text-gradient-accent {
-    background: linear-gradient(135deg, var(--color-accent-light) 0%, var(--color-accent) 50%, var(--color-accent-dim) 100%);
+    background: linear-gradient(135deg, #E8CFA0 0%, #D6B77A 50%, #A88A52 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  /* Surface backgrounds */
-  .bg-canvas   { background-color: var(--color-canvas); }
-  .bg-surface  { background-color: var(--color-surface); }
-  .bg-surface-2 { background-color: var(--color-surface-2); }
-
-  /* Label / tag style (mono, small) */
   .label-mono {
     font-family: var(--font-mono);
     font-size: 0.75rem;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--color-accent);
+    color: #D6B77A;
   }
 
-  /* Subtle divider */
   .divider {
     width: 100%;
     height: 1px;
-    background: var(--color-border);
-  }
-
-  /* Noise texture overlay */
-  .noise-overlay {
-    position: relative;
-  }
-  .noise-overlay::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-    opacity: 0.03;
-    pointer-events: none;
-    border-radius: inherit;
+    background: #252A33;
   }
 }
-

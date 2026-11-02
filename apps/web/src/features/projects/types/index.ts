@@ -22,3 +22,4 @@ export interface CaseStudy {
     company: string
   }
 }
+

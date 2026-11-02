@@ -1,6 +1,26 @@
 import type { Metadata, Viewport } from 'next'
+import { Manrope, Inter, IBM_Plex_Mono } from 'next/font/google'
 import '@/styles/globals.css'
 import { SITE } from '@/shared/constants'
+
+const manrope = Manrope({
+  subsets: ['latin'],
+  variable: '--font-heading',
+  display: 'swap',
+})
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-body',
+  display: 'swap',
+})
+
+const ibmPlexMono = IBM_Plex_Mono({
+  weight: ['400', '500'],
+  subsets: ['latin'],
+  variable: '--font-mono',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
@@ -49,11 +69,13 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="scroll-smooth">
-      <body className="antialiased">
+    <html
+      lang="en"
+      className={`scroll-smooth ${manrope.variable} ${inter.variable} ${ibmPlexMono.variable}`}
+    >
+      <body className="antialiased bg-[#08090B] text-[#F0EDE8]">
         {children}
       </body>
     </html>
   )
 }
-
