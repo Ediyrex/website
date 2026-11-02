@@ -4,22 +4,50 @@ import { ArrowUpRight, Play } from 'lucide-react'
 
 export function HeroSection() {
   return (
-    <section className="relative pt-24 pb-12 overflow-hidden bg-[#08090b]">
-      <div className="container-main relative">
-        {/* Subtle Decorative Corner Brackets */}
-        <div className="border-t border-l border-[#2a2f3a] w-5 h-5 absolute -top-1 -left-1 pointer-events-none" />
-        <div className="border-t border-r border-[#2a2f3a] w-5 h-5 absolute -top-1 -right-1 pointer-events-none" />
+    <section className="relative min-h-[580px] lg:min-h-[640px] flex items-center pt-24 pb-16 overflow-hidden bg-[#08090b]">
+      {/* High-Resolution Background Composition */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <Image
+          src="/images/hero-camera-original.jpg"
+          alt="Cinematic production camera and modern software terminal interface"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-right lg:object-[82%_center]"
+        />
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center min-h-[480px]">
-          {/* Left Content (approx 58%) */}
-          <div className="lg:col-span-7 flex flex-col items-start z-10 pr-0 lg:pr-4">
-            {/* Eyebrow */}
-            <p className="text-[11px] font-mono tracking-[0.24em] text-[#8c92a4] uppercase mb-5">
+        {/* Gradient Mask to keep left text area completely crisp, legible and dark */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-gradient-to-r from-[#08090b] via-[#08090b]/90 to-transparent w-full lg:w-[62%]"
+        />
+        {/* Soft bottom transition mask */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#08090b] to-transparent"
+        />
+        {/* Soft top transition mask under header */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[#08090b] to-transparent"
+        />
+      </div>
+
+      <div className="container-main relative z-10 w-full">
+        {/* Subtle Decorative Corner Brackets (as in reference) */}
+        <div className="border-t border-l border-[#2a2f3a] w-5 h-5 absolute -top-10 left-0 pointer-events-none" />
+        <div className="border-t border-r border-[#2a2f3a] w-5 h-5 absolute -top-10 right-0 pointer-events-none" />
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          {/* Left Content (Dominates left ~60%) */}
+          <div className="lg:col-span-7 flex flex-col items-start pr-0 lg:pr-6">
+            {/* Eyebrow Label */}
+            <p className="text-[11px] font-mono tracking-[0.24em] text-[#8c92a4] uppercase mb-6">
               A CREATIVE × TECHNOLOGY STUDIO
             </p>
 
             {/* Main Headline */}
-            <h1 className="font-sans font-extrabold text-[42px] sm:text-[56px] lg:text-[62px] leading-[0.98] tracking-[-0.03em] text-[#f5f3ee] uppercase mb-6">
+            <h1 className="font-sans font-extrabold text-[44px] sm:text-[60px] lg:text-[66px] leading-[0.98] tracking-[-0.03em] text-[#f5f3ee] uppercase mb-6">
               CREATIVE <br />
               MEDIA. <br />
               POWERFUL WEB. <br />
@@ -29,12 +57,12 @@ export function HeroSection() {
               </span>
             </h1>
 
-            {/* Supporting Copy */}
-            <p className="text-[13px] sm:text-[14px] text-[#8c92a4] max-w-[460px] leading-relaxed mb-8">
+            {/* Supporting Paragraph */}
+            <p className="text-[13px] sm:text-[14px] text-[#8c92a4] max-w-[460px] leading-relaxed mb-9">
               We create high-impact content, build modern web experiences, and automate real work with AI agents and intelligent workflows.
             </p>
 
-            {/* CTAs */}
+            {/* Dual CTAs */}
             <div className="flex flex-wrap items-center gap-4">
               <Link
                 href="/contact"
@@ -54,32 +82,13 @@ export function HeroSection() {
             </div>
           </div>
 
-          {/* Right Hero Image (Cinema Camera + Terminal Windows) */}
-          <div className="lg:col-span-5 relative flex items-center justify-center">
-            {/* Restrained warm orange lighting from the hero */}
-            <div
-              aria-hidden="true"
-              className="absolute -right-10 top-1/2 -translate-y-1/2 w-80 h-80 rounded-full pointer-events-none opacity-30 blur-[70px]"
-              style={{
-                background: 'radial-gradient(circle, #ff5e1e 0%, transparent 70%)',
-              }}
-            />
-
-            <div className="relative w-full aspect-[16/12] rounded-xl overflow-hidden shadow-2xl border border-[#1d222b]">
-              <Image
-                src="/images/hero-camera.png"
-                alt="Cinema camera and software terminal interface representation"
-                fill
-                priority
-                className="object-cover object-right"
-              />
-
-              {/* Vertical Service Label on right edge */}
-              <div className="absolute right-3 bottom-3 z-20 flex flex-col items-end text-[9px] font-mono tracking-widest text-[#777d87] leading-tight">
-                <span className="text-[#f5f3ee] font-bold">MEDIA</span>
-                <span className="text-[#8c92a4]">WEB</span>
-                <span>AGENTS</span>
-              </div>
+          {/* Right Area: Empty spacer so the camera and terminals shine through naturally */}
+          <div className="lg:col-span-5 relative min-h-[320px] lg:min-h-[460px] flex items-end justify-end pointer-events-none">
+            {/* Vertical Division Indicator on right edge (as seen in screenshot) */}
+            <div className="absolute right-0 bottom-4 z-20 flex flex-col items-end text-[9px] font-mono tracking-widest text-[#777d87] leading-tight select-none">
+              <span className="text-[#f5f3ee] font-bold">MEDIA</span>
+              <span className="text-[#8c92a4]">WEB</span>
+              <span>AGENTS</span>
             </div>
           </div>
         </div>
