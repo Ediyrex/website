@@ -3,56 +3,67 @@ import { Zap, Layers, TrendingUp } from 'lucide-react'
 
 export function PhilosophyBanner() {
   return (
-    <section className="py-10 bg-[#08090b]">
-      <div className="container-main">
-        {/* Horizontal Rounded Banner with Right Mountain Photograph */}
-        <div className="relative rounded-2xl bg-[#0d0f12] border border-[#252a32] overflow-hidden min-h-[170px] flex flex-col md:flex-row items-center justify-between">
-          {/* Left Content Area */}
-          <div className="relative z-10 p-7 md:p-9 max-w-lg">
-            <p className="text-[10px] font-mono tracking-[0.2em] text-[#777d87] uppercase mb-2">
+    <section className="bg-[#08090B] py-8">
+      <div className="w-full max-w-[1360px] mx-auto px-5 sm:px-8 lg:px-10">
+        <div
+          className="relative rounded-2xl overflow-hidden"
+          style={{
+            background: '#0D0F12',
+            border: '1px solid #252A32',
+            minHeight: 180,
+          }}
+        >
+          {/* Left content */}
+          <div
+            className="relative z-10 flex flex-col justify-center"
+            style={{ padding: '32px 40px', maxWidth: 480 }}
+          >
+            <p
+              className="font-inter font-medium uppercase text-[#777D87] mb-2"
+              style={{ fontSize: 10, letterSpacing: '0.2em' }}
+            >
               WHY EDIYREX
             </p>
-
-            <h3 className="font-sans font-extrabold text-[22px] sm:text-[28px] leading-[1.08] text-[#f5f3ee] uppercase tracking-[-0.02em] mb-6">
-              ONE TEAM FOR <br />
+            <h3
+              className="font-manrope font-extrabold uppercase text-[#F5F3EE] mb-6"
+              style={{ fontSize: 'clamp(20px, 2.4vw, 28px)', lineHeight: 1.08, letterSpacing: '-0.02em' }}
+            >
+              ONE TEAM FOR
+              <br />
               CREATIVE &amp; AUTOMATION.
             </h3>
 
-            {/* Three Points with Line Icons */}
-            <div className="flex flex-wrap items-center gap-5 sm:gap-7">
-              <div className="flex items-center gap-2 text-[11px] font-medium text-[#f5f3ee]">
-                <Zap size={13} className="text-[#f5f3ee] stroke-[2]" />
+            {/* Three pillars */}
+            <div className="flex flex-wrap items-center gap-6">
+              <div className="flex items-center gap-2 font-inter font-medium text-[#F5F3EE]" style={{ fontSize: 11 }}>
+                <Zap size={13} strokeWidth={2} />
                 <span>Creative + Technical</span>
               </div>
-
-              <div className="flex items-center gap-2 text-[11px] font-medium text-[#b2b4ba]">
-                <Layers size={13} className="text-[#8c92a4] stroke-[2]" />
+              <div className="flex items-center gap-2 font-inter font-medium text-[#B2B4BA]" style={{ fontSize: 11 }}>
+                <Layers size={13} strokeWidth={2} className="text-[#8C92A4]" />
                 <span>End-to-End Execution</span>
               </div>
-
-              <div className="flex items-center gap-2 text-[11px] font-medium text-[#b2b4ba]">
-                <TrendingUp size={13} className="text-[#8c92a4] stroke-[2]" />
+              <div className="flex items-center gap-2 font-inter font-medium text-[#B2B4BA]" style={{ fontSize: 11 }}>
+                <TrendingUp size={13} strokeWidth={2} className="text-[#8C92A4]" />
                 <span>Built for Growth</span>
               </div>
             </div>
           </div>
 
-          {/* Right Monochrome Mountain Image fading into background */}
-          <div className="relative w-full md:w-[48%] h-48 md:h-[220px] self-stretch">
-            {/* Dark gradient mask from left to blend with background */}
+          {/* Right mountain image — absolutely positioned, fills right half */}
+          <div className="absolute inset-y-0 right-0 w-[48%] md:w-[45%] hidden md:block">
+            {/* Left-edge gradient mask blending into card background */}
             <div
               aria-hidden="true"
-              className="absolute inset-0 bg-gradient-to-r from-[#0d0f12] via-transparent to-transparent z-10 pointer-events-none hidden md:block"
-            />
-            <div
-              aria-hidden="true"
-              className="absolute inset-0 bg-gradient-to-t from-[#0d0f12] via-transparent to-transparent z-10 pointer-events-none md:hidden"
+              className="absolute inset-y-0 left-0 w-28 z-10 pointer-events-none"
+              style={{ background: 'linear-gradient(to right, #0D0F12, transparent)' }}
             />
             <Image
               src="/images/banner-mountains.png"
-              alt="Dramatic monochrome mountain peak in fog"
+              alt="Dramatic monochrome mountain peak"
               fill
-              className="object-cover object-right"
+              className="object-cover object-center"
+              sizes="45vw"
             />
           </div>
         </div>

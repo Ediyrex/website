@@ -3,12 +3,14 @@
 :root {
   --background: #08090B;
   --background-elevated: #0D0F12;
+  --surface: #12151A;
   --text-primary: #F5F3EE;
   --text-secondary: #D0CFCC;
   --text-muted: #777D87;
   --border: #292929;
+  --border-subtle: #252A32;
+  --border-strong: #3A414B;
   --warm-accent: #D6B77A;
-  --orange-accent: #E87520;
 }
 
 @theme {
@@ -53,5 +55,26 @@
   }
   .font-inter {
     font-family: var(--font-inter);
+  }
+  /* Legacy alias used in older components */
+  .container-main {
+    width: 100%;
+    max-width: 1360px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  @media (min-width: 640px) {
+    .container-main {
+      padding-left: 32px;
+      padding-right: 32px;
+    }
+  }
+  @media (min-width: 1024px) {
+    .container-main {
+      padding-left: 40px;
+      padding-right: 40px;
+    }
   }
 }

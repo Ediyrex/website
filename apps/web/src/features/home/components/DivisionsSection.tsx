@@ -2,172 +2,172 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowUpRight } from 'lucide-react'
 
+const CARDS = [
+  {
+    num: '01',
+    href: '/services#media',
+    img: '/images/card-media.png',
+    imgAlt: 'Cinematic camera in warm orange light',
+    title: 'MEDIA',
+    desc: 'Production, editing and content that tells your story and gets results.',
+    tags: ['Shoot', 'Video Editing', 'Motion Graphics', 'Podcast', 'Graphic Design', 'Content Creation'],
+  },
+  {
+    num: '02',
+    href: '/services#web',
+    img: '/images/card-web.png',
+    imgAlt: 'Dark laptop displaying a modern web interface',
+    title: 'WEB',
+    desc: 'Modern, fast and scalable web experiences for brands and businesses.',
+    tags: ['Web Development', 'Web Apps', 'UI/UX', 'E-commerce', 'Extensions', 'Dashboards'],
+  },
+  {
+    num: '03',
+    href: '/services#agents',
+    img: '/images/card-agents.png',
+    imgAlt: 'Illuminated AI keycap with star glyph',
+    title: 'AGENTS &\nAUTOMATION',
+    desc: 'AI agents and automation systems that save time, reduce work and scale ops.',
+    tags: ['AI Chatbots', 'Voice Agents', 'Custom Agents', 'n8n Workflows', 'Business Automation', 'RAG'],
+  },
+]
+
 export function DivisionsSection() {
   return (
-    <section id="capabilities" className="py-14 bg-[#08090b]">
-      <div className="container-main">
-        {/* Section Four: Capabilities introduction */}
-        <div className="relative mb-12">
-          {/* Top-Right Decorative Bracket */}
-          <div className="border-t border-r border-[#2a2f3a] w-5 h-5 absolute -top-1 -right-1 pointer-events-none hidden md:block" />
+    <section className="bg-[#08090B] pt-14 pb-10">
+      <div className="w-full max-w-[1360px] mx-auto px-5 sm:px-8 lg:px-10">
 
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
-            {/* Left Headline */}
+        {/* Section header */}
+        <div className="relative mb-10">
+          {/* Top-right decorative bracket */}
+          <div
+            aria-hidden="true"
+            className="absolute -top-1 -right-1 pointer-events-none hidden md:block"
+            style={{ width: 16, height: 16, borderTop: '1px solid #2A2F3A', borderRight: '1px solid #2A2F3A' }}
+          />
+
+          <div className="flex flex-col md:flex-row md:items-end gap-8 md:gap-0 md:justify-between">
+            {/* Left headline */}
             <div>
-              <p className="text-[10px] font-mono tracking-[0.2em] text-[#777d87] uppercase mb-3">
+              <p
+                className="font-inter font-medium uppercase text-[#777D87] mb-3"
+                style={{ fontSize: 10, letterSpacing: '0.2em' }}
+              >
                 OUR CAPABILITIES
               </p>
-              <h2 className="font-sans font-extrabold text-[36px] sm:text-[46px] leading-[0.98] tracking-[-0.03em] text-[#f5f3ee] uppercase">
-                THREE <br />
-                WAYS WE <br />
-                CREATE <br />
-                <span className="font-editorial-italic font-normal tracking-normal lowercase text-[#f5f3ee]">
+              <h2
+                className="font-manrope font-extrabold uppercase text-[#F5F3EE]"
+                style={{ fontSize: 'clamp(32px, 4vw, 48px)', lineHeight: 0.98, letterSpacing: '-0.03em' }}
+              >
+                THREE
+                <br />
+                WAYS WE
+                <br />
+                CREATE
+                <br />
+                <em
+                  className="not-italic"
+                  style={{
+                    fontFamily: 'Georgia, "Times New Roman", serif',
+                    fontStyle: 'italic',
+                    fontWeight: 400,
+                    letterSpacing: '-0.01em',
+                    textTransform: 'lowercase',
+                  }}
+                >
                   impact.
-                </span>
+                </em>
               </h2>
             </div>
 
-            {/* Right Paragraph aligned around middle */}
-            <p className="text-[13px] sm:text-[14px] text-[#b2b4ba] max-w-[340px] leading-relaxed">
+            {/* Right paragraph — sits at headline middle on desktop */}
+            <p
+              className="font-inter font-normal text-[#B2B4BA] leading-relaxed md:self-center"
+              style={{ fontSize: 13, maxWidth: 340 }}
+            >
               From cinematic content to scalable web products and AI agents that actually work — Ediyrex brings creativity and technology together to move your business forward.
             </p>
           </div>
         </div>
 
-        {/* Section Five: Three Service Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {/* Card 01: MEDIA */}
-          <div className="rounded-xl bg-[#0d0f12] border border-[#252a32] hover:border-[#3a414b] transition-all duration-300 p-5 flex flex-col justify-between group">
-            <div>
-              {/* Card Image Area with Number & Arrow */}
-              <div className="relative aspect-[16/10] w-full rounded-lg bg-[#12151a] border border-[#1f232c] mb-5 overflow-hidden">
+        {/* Three service cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {CARDS.map((card) => (
+            <div
+              key={card.num}
+              className="group flex flex-col rounded-xl bg-[#0D0F12] border border-[#252A32] hover:border-[#3A414B] transition-all duration-300 p-5"
+            >
+              {/* Card image */}
+              <div
+                className="relative w-full rounded-lg bg-[#12151A] border border-[#1F232C] mb-5 overflow-hidden"
+                style={{ aspectRatio: '16/10' }}
+              >
                 <Image
-                  src="/images/card-media.png"
-                  alt="Media production studio camera filming with warm lighting"
+                  src={card.img}
+                  alt={card.imgAlt}
                   fill
                   className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 33vw"
                 />
-                <span className="absolute top-2.5 left-2.5 text-[10px] font-mono text-[#b2b4ba] z-10 font-bold drop-shadow">
-                  01
+                {/* Number label */}
+                <span
+                  className="absolute top-3 left-3 z-10 font-inter font-bold text-[#B2B4BA] drop-shadow"
+                  style={{ fontSize: 10 }}
+                >
+                  {card.num}
                 </span>
+                {/* Arrow link */}
                 <Link
-                  href="/services#media"
-                  className="absolute top-2.5 right-2.5 text-[#b2b4ba] group-hover:text-[#f5f3ee] transition-colors z-10 p-1"
+                  href={card.href}
+                  className="absolute top-2.5 right-2.5 z-10 p-1 text-[#777D87] group-hover:text-[#F5F3EE] transition-colors"
                 >
                   <ArrowUpRight size={14} />
                 </Link>
               </div>
 
-              {/* Title & Description */}
-              <h3 className="font-sans font-extrabold text-[20px] tracking-wide text-[#f5f3ee] mb-1.5 uppercase">
-                MEDIA
+              {/* Title */}
+              <h3
+                className="font-manrope font-extrabold uppercase text-[#F5F3EE] mb-1.5 leading-tight"
+                style={{ fontSize: 20, letterSpacing: '0.02em' }}
+              >
+                {card.title.split('\n').map((line, i) => (
+                  <span key={i}>
+                    {i > 0 && <br />}
+                    {line}
+                  </span>
+                ))}
               </h3>
-              <p className="text-[12px] text-[#b2b4ba] leading-relaxed mb-5">
-                Production, editing and content that tells your story and gets results.
+
+              {/* Description */}
+              <p
+                className="font-inter font-normal text-[#B2B4BA] mb-5 leading-relaxed flex-1"
+                style={{ fontSize: 12 }}
+              >
+                {card.desc}
               </p>
-            </div>
 
-            {/* Outlined Tags */}
-            <div className="flex flex-wrap gap-1.5 pt-3.5 border-t border-[#1a1d24]">
-              {['Shoot', 'Video Editing', 'Motion Graphics', 'Podcast', 'Graphic Design', 'Content Creation'].map((tag) => (
-                <span
-                  key={tag}
-                  className="px-2.5 py-0.5 rounded-full border border-[#2b303c] text-[10px] text-[#b2b4ba] font-medium"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Card 02: WEB */}
-          <div className="rounded-xl bg-[#0d0f12] border border-[#252a32] hover:border-[#3a414b] transition-all duration-300 p-5 flex flex-col justify-between group">
-            <div>
-              {/* Card Image Area */}
-              <div className="relative aspect-[16/10] w-full rounded-lg bg-[#12151a] border border-[#1f232c] mb-5 overflow-hidden">
-                <Image
-                  src="/images/card-web.png"
-                  alt="Laptop displaying dark modern web interface"
-                  fill
-                  className="object-cover"
-                />
-                <span className="absolute top-2.5 left-2.5 text-[10px] font-mono text-[#b2b4ba] z-10 font-bold drop-shadow">
-                  02
-                </span>
-                <Link
-                  href="/services#web"
-                  className="absolute top-2.5 right-2.5 text-[#b2b4ba] group-hover:text-[#f5f3ee] transition-colors z-10 p-1"
-                >
-                  <ArrowUpRight size={14} />
-                </Link>
+              {/* Tags */}
+              <div
+                className="flex flex-wrap gap-1.5 pt-3.5"
+                style={{ borderTop: '1px solid #1A1D24' }}
+              >
+                {card.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="font-inter font-medium text-[#B2B4BA]"
+                    style={{
+                      fontSize: 10,
+                      padding: '2px 10px',
+                      borderRadius: 999,
+                      border: '1px solid #2B303C',
+                    }}
+                  >
+                    {tag}
+                  </span>
+                ))}
               </div>
-
-              {/* Title & Description */}
-              <h3 className="font-sans font-extrabold text-[20px] tracking-wide text-[#f5f3ee] mb-1.5 uppercase">
-                WEB
-              </h3>
-              <p className="text-[12px] text-[#b2b4ba] leading-relaxed mb-5">
-                Modern, fast and scalable web experiences for brands and businesses.
-              </p>
             </div>
-
-            {/* Outlined Tags */}
-            <div className="flex flex-wrap gap-1.5 pt-3.5 border-t border-[#1a1d24]">
-              {['Web Development', 'Web Apps', 'UI/UX', 'E-commerce', 'Extensions', 'Dashboards'].map((tag) => (
-                <span
-                  key={tag}
-                  className="px-2.5 py-0.5 rounded-full border border-[#2b303c] text-[10px] text-[#b2b4ba] font-medium"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Card 03: AGENTS & AUTOMATION */}
-          <div className="rounded-xl bg-[#0d0f12] border border-[#252a32] hover:border-[#3a414b] transition-all duration-300 p-5 flex flex-col justify-between group">
-            <div>
-              {/* Card Image Area */}
-              <div className="relative aspect-[16/10] w-full rounded-lg bg-[#12151a] border border-[#1f232c] mb-5 overflow-hidden">
-                <Image
-                  src="/images/card-agents.png"
-                  alt="Keycap with illuminated AI spark symbol"
-                  fill
-                  className="object-cover"
-                />
-                <span className="absolute top-2.5 left-2.5 text-[10px] font-mono text-[#b2b4ba] z-10 font-bold drop-shadow">
-                  03
-                </span>
-                <Link
-                  href="/services#agents"
-                  className="absolute top-2.5 right-2.5 text-[#b2b4ba] group-hover:text-[#f5f3ee] transition-colors z-10 p-1"
-                >
-                  <ArrowUpRight size={14} />
-                </Link>
-              </div>
-
-              {/* Title & Description */}
-              <h3 className="font-sans font-extrabold text-[20px] tracking-wide text-[#f5f3ee] mb-1.5 uppercase leading-tight">
-                AGENTS &amp; <br />
-                AUTOMATION
-              </h3>
-              <p className="text-[12px] text-[#b2b4ba] leading-relaxed mb-5">
-                AI agents and automation systems that save time, reduce work and scale ops.
-              </p>
-            </div>
-
-            {/* Outlined Tags */}
-            <div className="flex flex-wrap gap-1.5 pt-3.5 border-t border-[#1a1d24]">
-              {['AI Chatbots', 'Voice Agents', 'Custom Agents', 'n8n Workflows', 'Business Automation', 'RAG'].map((tag) => (
-                <span
-                  key={tag}
-                  className="px-2.5 py-0.5 rounded-full border border-[#2b303c] text-[10px] text-[#b2b4ba] font-medium"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </section>

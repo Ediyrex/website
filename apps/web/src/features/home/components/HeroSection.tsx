@@ -5,9 +5,9 @@ export function HeroSection() {
   return (
     <section
       className="relative overflow-hidden bg-[#08090B]"
-      style={{ paddingTop: '72px' /* header height offset */ }}
+      style={{ paddingTop: '72px' }}
     >
-      {/* ─── Full-bleed background via CSS (bypasses Next.js compression) ─── */}
+      {/* ── Full-bleed crisp background (CSS, bypasses Next.js compression) ── */}
       <div
         aria-hidden="true"
         className="absolute inset-0 z-0 pointer-events-none select-none"
@@ -19,53 +19,64 @@ export function HeroSection() {
         }}
       />
 
-      {/* Left-to-right dark gradient so headline stays legible */}
+      {/* Left-fade gradient so headline stays legible */}
       <div
         aria-hidden="true"
         className="absolute inset-0 z-[1] pointer-events-none"
         style={{
           background:
-            'linear-gradient(to right, #08090B 28%, rgba(8,9,11,0.82) 46%, rgba(8,9,11,0.35) 62%, transparent 78%)',
+            'linear-gradient(to right, #08090B 30%, rgba(8,9,11,0.80) 48%, rgba(8,9,11,0.25) 65%, transparent 80%)',
         }}
       />
-      {/* Bottom fade to section below */}
+      {/* Bottom blend */}
       <div
         aria-hidden="true"
-        className="absolute inset-x-0 bottom-0 h-20 z-[2] pointer-events-none"
+        className="absolute inset-x-0 bottom-0 h-16 z-[2] pointer-events-none"
+        style={{ background: 'linear-gradient(to top, #08090B 0%, transparent 100%)' }}
+      />
+
+      {/* ── Corner brackets ── */}
+      <div
+        aria-hidden="true"
+        className="absolute z-[3] pointer-events-none"
         style={{
-          background: 'linear-gradient(to top, #08090B 0%, transparent 100%)',
+          top: 84,
+          left: 20,
+          width: 14,
+          height: 14,
+          borderTop: '1px solid #3A414B',
+          borderLeft: '1px solid #3A414B',
+        }}
+      />
+      <div
+        aria-hidden="true"
+        className="absolute z-[3] pointer-events-none"
+        style={{
+          top: 84,
+          right: 20,
+          width: 14,
+          height: 14,
+          borderTop: '1px solid #3A414B',
+          borderRight: '1px solid #3A414B',
         }}
       />
 
-      {/* ─── Corner bracket decorations ─── */}
-      <div
-        aria-hidden="true"
-        className="absolute top-[84px] left-5 sm:left-8 z-[3] pointer-events-none"
-        style={{ width: 14, height: 14, borderTop: '1px solid #3A414B', borderLeft: '1px solid #3A414B' }}
-      />
-      <div
-        aria-hidden="true"
-        className="absolute top-[84px] right-5 sm:right-8 z-[3] pointer-events-none"
-        style={{ width: 14, height: 14, borderTop: '1px solid #3A414B', borderRight: '1px solid #3A414B' }}
-      />
-
-      {/* ─── Content container ─── */}
-      {/*
-        px-5 sm:px-8 keeps content flush to real edges.
-        max-w-[1360px] gives full use of wide monitors without over-stretching on ultrawide.
-      */}
+      {/* ── Content ── */}
       <div className="relative z-[4] w-full max-w-[1360px] mx-auto px-5 sm:px-8 lg:px-10">
         <div className="grid grid-cols-12 min-h-[460px] lg:min-h-[510px] items-center">
 
-          {/* ── Left: text column (6/12 cols on lg+) ── */}
-          <div className="col-span-12 lg:col-span-6 flex flex-col items-start pt-10 pb-16 lg:pb-24">
+          {/* Left text column */}
+          <div className="col-span-12 lg:col-span-6 flex flex-col items-start pt-10 pb-14 lg:pb-20">
 
             {/* Eyebrow */}
-            <p className="font-inter font-medium text-[10.5px] tracking-[1.6px] uppercase text-[#F5F3EE]/75 mb-[18px]">
+            <p
+              className="font-inter font-medium uppercase text-[#F5F3EE]/75 mb-[18px]"
+              style={{ fontSize: 10.5, letterSpacing: '1.6px' }}
+            >
               A CREATIVE × TECHNOLOGY STUDIO
             </p>
 
-            {/* Headline */}
+            {/* Stacked headline */}
             <h1
               className="font-manrope uppercase text-[#F5F3EE] mb-6"
               style={{
@@ -73,7 +84,7 @@ export function HeroSection() {
                 fontSize: 'clamp(38px, 4.8vw, 54px)',
                 lineHeight: 0.95,
                 letterSpacing: '-2.5px',
-                maxWidth: 580,
+                maxWidth: 590,
               }}
             >
               CREATIVE
@@ -116,12 +127,11 @@ export function HeroSection() {
             </div>
           </div>
 
-          {/* ── Right: camera shows through, vertical label ── */}
+          {/* Right: camera bleeds through — vertical label only */}
           <div className="hidden lg:flex lg:col-span-6 relative min-h-[460px] lg:min-h-[510px] items-end justify-end pointer-events-none">
-            {/* Vertical text label: MEDIA / WEB / AGENTS */}
             <div
-              className="absolute right-0 bottom-20 z-20 flex flex-col items-end select-none"
-              style={{ gap: 2 }}
+              className="absolute right-0 bottom-16 z-20 flex flex-col items-center select-none"
+              style={{ gap: 3 }}
             >
               {[
                 { label: 'MEDIA', bright: true },
@@ -131,23 +141,17 @@ export function HeroSection() {
                 <span
                   key={label}
                   className="font-inter font-medium tracking-widest"
-                  style={{
-                    fontSize: 9,
-                    color: bright ? '#F5F3EE' : '#555D69',
-                    lineHeight: 1.3,
-                  }}
+                  style={{ fontSize: 9, color: bright ? '#F5F3EE' : '#555D69', lineHeight: 1.4 }}
                 >
                   {label}
                 </span>
               ))}
-              {/* thin vertical rule */}
               <div
                 style={{
-                  marginTop: 5,
+                  marginTop: 6,
                   width: 1,
-                  height: 32,
+                  height: 30,
                   background: 'linear-gradient(to bottom, #3A414B, transparent)',
-                  alignSelf: 'center',
                 }}
               />
             </div>
