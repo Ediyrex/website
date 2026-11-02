@@ -1,45 +1,33 @@
 @import "tailwindcss";
 
 :root {
-  --background: #08090b;
-  --background-elevated: #0d0f12;
-  --surface: #12151a;
-  --surface-hover: #191d23;
-
-  --text-primary: #f5f3ee;
-  --text-secondary: #b2b4ba;
-  --text-muted: #777d87;
-
-  --border-subtle: #252a32;
-  --border-strong: #3a414b;
-
-  --accent-primary: #d6b77a;
-  --accent-hover: #e6cc99;
-  --accent-deep: #9b7a43;
-  --text-on-accent: #17130b;
+  --background: #08090B;
+  --background-elevated: #0D0F12;
+  --text-primary: #F5F3EE;
+  --text-secondary: #D0CFCC;
+  --text-muted: #777D87;
+  --border: #292929;
+  --warm-accent: #D6B77A;
+  --orange-accent: #E87520;
 }
 
 @theme {
-  --font-sans: var(--font-sans), 'Manrope', system-ui, -apple-system, sans-serif;
-  --font-serif: var(--font-serif), 'Playfair Display', Georgia, serif;
-  --font-mono: var(--font-mono), 'JetBrains Mono', monospace;
+  --font-manrope: var(--font-manrope), 'Manrope', sans-serif;
+  --font-inter: var(--font-inter), 'Inter', sans-serif;
+  --font-sans: var(--font-inter), 'Inter', sans-serif;
 
-  --color-background: #08090b;
-  --color-background-elevated: #0d0f12;
-  --color-surface: #12151a;
-  --color-surface-hover: #191d23;
-  --color-border-subtle: #252a32;
-  --color-border-strong: #3a414b;
-
-  --color-text-primary: #f5f3ee;
-  --color-text-secondary: #b2b4ba;
-  --color-text-muted: #777d87;
+  --color-background: #08090B;
+  --color-background-elevated: #0D0F12;
+  --color-border: #292929;
+  --color-text-primary: #F5F3EE;
+  --color-text-secondary: #D0CFCC;
+  --color-text-muted: #777D87;
 }
 
 @layer base {
   *, *::before, *::after {
     box-sizing: border-box;
-    border-color: #252a32;
+    border-color: #292929;
   }
 
   html {
@@ -47,33 +35,23 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    background-color: #08090b;
+    background-color: #08090B;
   }
 
   body {
-    background-color: #08090b;
-    color: #f5f3ee;
-    font-family: var(--font-sans);
+    background-color: #08090B;
+    color: #F5F3EE;
+    font-family: var(--font-inter);
     overflow-x: hidden;
     margin: 0;
-  }
-
-  ::selection {
-    background-color: rgba(255, 94, 30, 0.3);
-    color: #ffffff;
   }
 }
 
 @layer utilities {
-  .container-main {
-    width: 100%;
-    max-width: 1040px;
-    margin-inline: auto;
-    padding-inline: clamp(1rem, 3.5vw, 2.5rem);
+  .font-manrope {
+    font-family: var(--font-manrope);
   }
-
-  .font-editorial-italic {
-    font-family: var(--font-serif);
-    font-style: italic;
+  .font-inter {
+    font-family: var(--font-inter);
   }
 }

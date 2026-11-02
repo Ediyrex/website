@@ -16,28 +16,30 @@ export function Header() {
   const pathname = usePathname()
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-[#08090b]/92 backdrop-blur-md border-b border-[#181a20]">
-      <div className="container-main flex items-center justify-between h-[68px]">
-        {/* Brand Wordmark with registered icon */}
-        <Link href="/" className="flex items-center gap-0.5 group">
-          <span className="font-sans font-extrabold text-[17px] tracking-[0.05em] text-[#f5f3ee]">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-[#08090B]/90 backdrop-blur-md border-b border-[#292929]/50">
+      <div className="max-w-[1240px] mx-auto px-6 sm:px-10 flex items-center justify-between h-[72px]">
+        {/* Left wordmark: EDIYREX® */}
+        <Link href="/" className="flex items-center group">
+          <span className="font-manrope font-extrabold text-[22px] tracking-[-0.02em] text-[#F5F3EE]">
             EDIYREX
           </span>
-          <span className="text-[10px] font-bold text-[#8c92a4] -translate-y-1">®</span>
+          <span className="font-manrope font-extrabold text-[12px] text-[#F5F3EE] ml-0.5 -translate-y-1">
+            ®
+          </span>
         </Link>
 
-        {/* Center Navigation */}
-        <nav className="hidden md:flex items-center gap-7">
+        {/* Center/right navigation */}
+        <nav className="hidden md:flex items-center gap-8">
           {NAV_ITEMS.map((item) => {
             const isHome = item.href === '/' && pathname === '/'
             return (
               <Link
                 key={item.label}
                 href={item.href}
-                className={`text-[13px] tracking-wide transition-colors duration-200 ${
+                className={`font-inter font-medium text-[11.5px] tracking-wide transition-colors duration-200 relative py-1 ${
                   isHome
-                    ? 'text-[#f5f3ee] font-medium border-b border-[#f5f3ee] pb-0.5'
-                    : 'text-[#8c92a4] hover:text-[#f5f3ee]'
+                    ? 'text-[#F5F3EE] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[1px] after:bg-[#F5F3EE]'
+                    : 'text-[#777D87] hover:text-[#F5F3EE]'
                 }`}
               >
                 {item.label}
@@ -46,14 +48,14 @@ export function Header() {
           })}
         </nav>
 
-        {/* Right CTA Button */}
+        {/* Far right: Start a Project ↗ */}
         <div className="flex items-center">
           <Link
             href="/contact"
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-[#2b303c] hover:border-[#f5f3ee] text-[12px] font-medium text-[#f5f3ee] transition-all duration-200 hover:bg-white/5"
+            className="inline-flex items-center justify-center gap-1.5 w-[122px] h-[34px] rounded-[11px] border border-[#3A414B] hover:border-[#F5F3EE] bg-transparent text-[#F5F3EE] font-inter font-semibold text-[11.5px] transition-all duration-200 hover:bg-white/5"
           >
             <span>Start a Project</span>
-            <ArrowUpRight size={13} className="text-[#8c92a4]" />
+            <ArrowUpRight size={13} className="text-[#D0CFCC] stroke-[2.2]" />
           </Link>
         </div>
       </div>
