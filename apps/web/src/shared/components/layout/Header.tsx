@@ -16,8 +16,8 @@ export function Header() {
   const pathname = usePathname()
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-[#08090B]/90 backdrop-blur-md border-b border-[#292929]/50">
-      <div className="max-w-[1240px] mx-auto px-6 sm:px-10 flex items-center justify-between h-[72px]">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-[#08090B]/90 backdrop-blur-md border-b border-[#292929]/60">
+      <div className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-16 flex items-center justify-between h-[72px]">
         {/* Left wordmark: EDIYREX® */}
         <Link href="/" className="flex items-center group">
           <span className="font-manrope font-extrabold text-[22px] tracking-[-0.02em] text-[#F5F3EE]">

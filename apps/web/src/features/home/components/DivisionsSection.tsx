@@ -35,7 +35,7 @@ const CARDS = [
 export function DivisionsSection() {
   return (
     <section className="bg-[#08090B] pt-14 pb-10">
-      <div className="w-full max-w-[1360px] mx-auto px-5 sm:px-8 lg:px-10">
+      <div className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-16">
 
         {/* Section header */}
         <div className="relative mb-10">
@@ -91,7 +91,7 @@ export function DivisionsSection() {
         </div>
 
         {/* Three service cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {CARDS.map((card) => (
             <div
               key={card.num}

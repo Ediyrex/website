@@ -4,7 +4,7 @@ import { ArrowUpRight } from 'lucide-react'
 export function EditorialCtaSection() {
   return (
     <section className="bg-[#08090B] pt-20 pb-28 relative overflow-hidden">
-      <div className="w-full max-w-[1360px] mx-auto px-5 sm:px-8 lg:px-10 relative z-10">
+      <div className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-16 relative z-10">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-10">
 
           {/* Left: large serif headline */}

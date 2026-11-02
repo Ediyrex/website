@@ -4,7 +4,7 @@ import { Zap, Layers, TrendingUp } from 'lucide-react'
 export function PhilosophyBanner() {
   return (
     <section className="bg-[#08090B] py-8">
-      <div className="w-full max-w-[1360px] mx-auto px-5 sm:px-8 lg:px-10">
+      <div className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-16">
         <div
           className="relative rounded-2xl overflow-hidden"
           style={{
@@ -16,7 +16,7 @@ export function PhilosophyBanner() {
           {/* Left content */}
           <div
             className="relative z-10 flex flex-col justify-center"
-            style={{ padding: '32px 40px', maxWidth: 480 }}
+            style={{ padding: '32px 40px', maxWidth: 500 }}
           >
             <p
               className="font-inter font-medium uppercase text-[#777D87] mb-2"
@@ -50,9 +50,8 @@ export function PhilosophyBanner() {
             </div>
           </div>
 
-          {/* Right mountain image — absolutely positioned, fills right half */}
+          {/* Right mountain image — absolutely positioned */}
           <div className="absolute inset-y-0 right-0 w-[48%] md:w-[45%] hidden md:block">
-            {/* Left-edge gradient mask blending into card background */}
             <div
               aria-hidden="true"
               className="absolute inset-y-0 left-0 w-28 z-10 pointer-events-none"
