@@ -12,34 +12,35 @@ export function HeroSection() {
           alt="Cinematic production camera and modern software terminal interface"
           fill
           priority
+          quality={100}
           sizes="100vw"
           className="object-cover object-right lg:object-[82%_center]"
         />
 
-        {/* Gradient Mask to keep left text area completely crisp, legible and dark */}
+        {/* Cinematic gradient mask - perfectly calibrated to leave the orange anamorphic streak and camera bright and punchy */}
         <div
           aria-hidden="true"
-          className="absolute inset-0 bg-gradient-to-r from-[#08090b] via-[#08090b]/90 to-transparent w-full lg:w-[62%]"
+          className="absolute inset-0 bg-gradient-to-r from-[#08090b] via-[#08090b]/85 to-transparent w-full lg:w-[58%]"
         />
-        {/* Soft bottom transition mask */}
+        {/* Soft bottom edge blend */}
         <div
           aria-hidden="true"
-          className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#08090b] to-transparent"
+          className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#08090b] to-transparent"
         />
-        {/* Soft top transition mask under header */}
+        {/* Soft top edge blend under header */}
         <div
           aria-hidden="true"
-          className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[#08090b] to-transparent"
+          className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[#08090b] to-transparent"
         />
       </div>
 
       <div className="container-main relative z-10 w-full">
-        {/* Subtle Decorative Corner Brackets (as in reference) */}
+        {/* Decorative Corner Brackets */}
         <div className="border-t border-l border-[#2a2f3a] w-5 h-5 absolute -top-10 left-0 pointer-events-none" />
         <div className="border-t border-r border-[#2a2f3a] w-5 h-5 absolute -top-10 right-0 pointer-events-none" />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-          {/* Left Content (Dominates left ~60%) */}
+          {/* Left Content Column */}
           <div className="lg:col-span-7 flex flex-col items-start pr-0 lg:pr-6">
             {/* Eyebrow Label */}
             <p className="text-[11px] font-mono tracking-[0.24em] text-[#8c92a4] uppercase mb-6">
@@ -82,9 +83,9 @@ export function HeroSection() {
             </div>
           </div>
 
-          {/* Right Area: Empty spacer so the camera and terminals shine through naturally */}
+          {/* Right Spacer & Metadata */}
           <div className="lg:col-span-5 relative min-h-[320px] lg:min-h-[460px] flex items-end justify-end pointer-events-none">
-            {/* Vertical Division Indicator on right edge (as seen in screenshot) */}
+            {/* Vertical Division Indicator on right edge */}
             <div className="absolute right-0 bottom-4 z-20 flex flex-col items-end text-[9px] font-mono tracking-widest text-[#777d87] leading-tight select-none">
               <span className="text-[#f5f3ee] font-bold">MEDIA</span>
               <span className="text-[#8c92a4]">WEB</span>
