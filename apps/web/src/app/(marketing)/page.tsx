@@ -1,5 +1,11 @@
 import type { Metadata } from 'next'
-import { HeroSection, SocialProofBar } from '@/features/home/components'
+import {
+  HeroSection,
+  SocialProofBar,
+  DivisionsSection,
+  PhilosophyBanner,
+  EditorialCtaSection,
+} from '@/features/home/components'
 
 export const metadata: Metadata = {
   title: 'EDIYREX® — Creative Media. Powerful Web. Intelligent Agents.',
@@ -12,6 +18,9 @@ export default function HomePage() {
     <>
       <HeroSection />
       <SocialProofBar />
+      <DivisionsSection />
+      <PhilosophyBanner />
+      <EditorialCtaSection />
     </>
   )
 }
