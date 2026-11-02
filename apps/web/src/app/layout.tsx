@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from 'next'
-import { Plus_Jakarta_Sans, Playfair_Display, JetBrains_Mono } from 'next/font/google'
+import { Manrope, Playfair_Display, JetBrains_Mono } from 'next/font/google'
 import '@/styles/globals.css'
 import { Header, Footer } from '@/shared/components/layout'
 
-const jakarta = Plus_Jakarta_Sans({
+const manrope = Manrope({
   subsets: ['latin'],
   variable: '--font-sans',
   display: 'swap',
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#050507',
+  themeColor: '#08090b',
   colorScheme: 'dark',
   width: 'device-width',
   initialScale: 1,
@@ -42,9 +42,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`scroll-smooth ${jakarta.variable} ${playfair.variable} ${jetbrains.variable}`}
+      className={`scroll-smooth ${manrope.variable} ${playfair.variable} ${jetbrains.variable}`}
     >
-      <body className="antialiased bg-[#050507] text-[#FFFFFF] font-sans selection:bg-[#FF5500]/30 selection:text-white">
+      <body className="antialiased bg-[#08090b] text-[#f5f3ee] font-sans selection:bg-[#ff5e1e]/30 selection:text-white">
         <Header />
         <main className="min-h-screen">
           {children}

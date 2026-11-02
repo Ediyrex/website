@@ -1,50 +1,59 @@
+import Image from 'next/image'
 import { Zap, Layers, TrendingUp } from 'lucide-react'
 
 export function PhilosophyBanner() {
   return (
-    <section className="py-12 bg-[#050507]">
+    <section className="py-10 bg-[#08090b]">
       <div className="container-main">
-        {/* Wide Dark Frosted Banner with Mountains visual background */}
-        <div className="relative rounded-2xl bg-gradient-to-r from-[#0D0F14] via-[#10131B] to-[#0A0B0F] border border-[#1E222D] p-8 md:p-12 overflow-hidden shadow-2xl">
-          {/* Subtle Mountain Contour / Gradient Texture Overlay */}
-          <div
-            aria-hidden="true"
-            className="absolute right-0 top-0 bottom-0 w-full md:w-3/5 opacity-25 pointer-events-none"
-            style={{
-              background:
-                'radial-gradient(ellipse at 80% 50%, rgba(255, 255, 255, 0.15) 0%, transparent 60%)',
-            }}
-          />
-
-          <div className="relative z-10 max-w-xl">
-            {/* Kicker */}
-            <p className="text-[11px] font-mono tracking-widest text-[#8C92A4] uppercase mb-3">
+        {/* Horizontal Rounded Banner with Right Mountain Photograph */}
+        <div className="relative rounded-2xl bg-[#0d0f12] border border-[#252a32] overflow-hidden min-h-[170px] flex flex-col md:flex-row items-center justify-between">
+          {/* Left Content Area */}
+          <div className="relative z-10 p-7 md:p-9 max-w-lg">
+            <p className="text-[10px] font-mono tracking-[0.2em] text-[#777d87] uppercase mb-2">
               WHY EDIYREX
             </p>
 
-            {/* Headline */}
-            <h3 className="font-sans font-extrabold text-2xl sm:text-4xl leading-tight text-white uppercase mb-8">
+            <h3 className="font-sans font-extrabold text-[22px] sm:text-[28px] leading-[1.08] text-[#f5f3ee] uppercase tracking-[-0.02em] mb-6">
               ONE TEAM FOR <br />
               CREATIVE &amp; AUTOMATION.
             </h3>
 
-            {/* Three Value Bullets */}
-            <div className="flex flex-wrap items-center gap-6 sm:gap-8 pt-4 border-t border-[#1C202B]">
-              <div className="flex items-center gap-2 text-xs font-semibold text-[#D1D5E0]">
-                <Zap size={14} className="text-[#FF5E1E]" />
+            {/* Three Points with Line Icons */}
+            <div className="flex flex-wrap items-center gap-5 sm:gap-7">
+              <div className="flex items-center gap-2 text-[11px] font-medium text-[#f5f3ee]">
+                <Zap size={13} className="text-[#f5f3ee] stroke-[2]" />
                 <span>Creative + Technical</span>
               </div>
 
-              <div className="flex items-center gap-2 text-xs font-semibold text-[#D1D5E0]">
-                <Layers size={14} className="text-[#8C92A4]" />
+              <div className="flex items-center gap-2 text-[11px] font-medium text-[#b2b4ba]">
+                <Layers size={13} className="text-[#8c92a4] stroke-[2]" />
                 <span>End-to-End Execution</span>
               </div>
 
-              <div className="flex items-center gap-2 text-xs font-semibold text-[#D1D5E0]">
-                <TrendingUp size={14} className="text-[#8C92A4]" />
+              <div className="flex items-center gap-2 text-[11px] font-medium text-[#b2b4ba]">
+                <TrendingUp size={13} className="text-[#8c92a4] stroke-[2]" />
                 <span>Built for Growth</span>
               </div>
             </div>
+          </div>
+
+          {/* Right Monochrome Mountain Image fading into background */}
+          <div className="relative w-full md:w-[48%] h-48 md:h-[220px] self-stretch">
+            {/* Dark gradient mask from left to blend with background */}
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 bg-gradient-to-r from-[#0d0f12] via-transparent to-transparent z-10 pointer-events-none hidden md:block"
+            />
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 bg-gradient-to-t from-[#0d0f12] via-transparent to-transparent z-10 pointer-events-none md:hidden"
+            />
+            <Image
+              src="/images/banner-mountains.png"
+              alt="Dramatic monochrome mountain peak in fog"
+              fill
+              className="object-cover object-right"
+            />
           </div>
         </div>
       </div>
