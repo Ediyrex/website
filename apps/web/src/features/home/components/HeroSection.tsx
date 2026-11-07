@@ -4,7 +4,7 @@ import { ArrowUpRight, Play } from 'lucide-react'
 export function HeroSection() {
   return (
     <section
-      className="relative overflow-hidden bg-[#08090B] min-h-[calc(100vh-86px)] min-h-[calc(100dvh-86px)] flex flex-col justify-center"
+      className="relative overflow-hidden bg-[#000000] min-h-[calc(100vh-86px)] min-h-[calc(100dvh-86px)] flex flex-col justify-center"
       style={{ paddingTop: '72px' }}
     >
       {/* ── Background artwork layer: Full-bleed edge to edge ── */}
@@ -24,12 +24,21 @@ export function HeroSection() {
           />
         </picture>
 
-        {/* Left shade gradient guaranteeing headline legibility while letting artwork & light streaks shine */}
+        {/* Subtle atmospheric Cobalt Blue glow behind camera & windows */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              'linear-gradient(to right, #08090B 0%, #08090B 28%, rgba(8,9,11,0.85) 46%, rgba(8,9,11,0.2) 66%, transparent 85%)',
+              'radial-gradient(circle at 82% 40%, rgba(44, 52, 128, 0.22) 0%, rgba(44, 52, 128, 0.05) 45%, transparent 70%)',
+          }}
+        />
+
+        {/* Left shade gradient guaranteeing headline legibility against pure #000000 */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              'linear-gradient(to right, #000000 0%, #000000 28%, rgba(0,0,0,0.88) 46%, rgba(0,0,0,0.25) 66%, transparent 85%)',
           }}
         />
 
@@ -37,22 +46,22 @@ export function HeroSection() {
         <div
           className="absolute inset-x-0 bottom-0 h-16 pointer-events-none"
           style={{
-            background: 'linear-gradient(to top, #08090B 0%, transparent 100%)',
+            background: 'linear-gradient(to top, #000000 0%, transparent 100%)',
           }}
         />
       </div>
 
       {/* ── Main Hero Content Container ── */}
       <div className="relative z-10 w-full max-w-[1440px] 2xl:max-w-[1560px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-16 py-10 lg:py-16 my-auto flex-1 flex flex-col justify-center">
-        {/* Open corner brackets aligned with content grid */}
+        {/* Open corner brackets framed in Cobalt Blue */}
         <div
           aria-hidden="true"
           className="absolute top-4 left-6 sm:left-10 lg:left-14 xl:left-16 pointer-events-none"
           style={{
             width: 14,
             height: 14,
-            borderTop: '1px solid #3A414B',
-            borderLeft: '1px solid #3A414B',
+            borderTop: '1.5px solid #2C3480',
+            borderLeft: '1.5px solid #2C3480',
           }}
         />
         <div
@@ -61,25 +70,25 @@ export function HeroSection() {
           style={{
             width: 14,
             height: 14,
-            borderTop: '1px solid #3A414B',
-            borderRight: '1px solid #3A414B',
+            borderTop: '1.5px solid #2C3480',
+            borderRight: '1.5px solid #2C3480',
           }}
         />
 
         <div className="grid grid-cols-12 items-center">
           {/* Left Column: Eyebrow, Stacked Headline, Description, CTAs */}
           <div className="col-span-12 lg:col-span-7 xl:col-span-6 flex flex-col items-start py-6">
-            {/* Eyebrow: Inter Medium, 10.5px, letter spacing 1.6px */}
+            {/* Eyebrow */}
             <p
-              className="font-inter font-medium uppercase text-[#F5F3EE]/80 mb-[18px]"
+              className="font-inter font-medium uppercase text-[#FFFFFF]/85 mb-[18px]"
               style={{ fontSize: 10.5, letterSpacing: '1.6px' }}
             >
               A CREATIVE × TECHNOLOGY STUDIO
             </p>
 
-            {/* Headline: Manrope 800, tight tracking, exact line breaks */}
+            {/* Headline */}
             <h1
-              className="font-manrope uppercase text-[#F5F3EE] mb-6"
+              className="font-manrope uppercase text-[#FFFFFF] mb-6"
               style={{
                 fontWeight: 800,
                 fontSize: 'clamp(38px, 4.4vw, 54px)',
@@ -97,20 +106,20 @@ export function HeroSection() {
               <span className="whitespace-nowrap">INTELLIGENT AGENTS.</span>
             </h1>
 
-            {/* Supporting Copy: Inter Regular 13.5px, line-height 1.4 */}
+            {/* Supporting Copy */}
             <p
-              className="font-inter font-normal text-[#D0CFCC] mb-8"
+              className="font-inter font-normal text-[#D1D5DB] mb-8"
               style={{ fontSize: 13.5, lineHeight: 1.45, maxWidth: 450 }}
             >
               We create high-impact content, build modern web experiences,
               and automate real work with AI agents and intelligent workflows.
             </p>
 
-            {/* CTAs: 140x37px primary ivory button + secondary link */}
+            {/* CTAs */}
             <div className="flex items-center gap-[26px]">
               <Link
                 href="/contact"
-                className="inline-flex items-center justify-center gap-1.5 rounded-[10px] bg-[#F5F3EE] hover:bg-white text-[#17130B] font-inter font-semibold transition-colors duration-200"
+                className="inline-flex items-center justify-center gap-1.5 rounded-[10px] bg-[#FFFFFF] hover:bg-[#F2F4F8] text-[#000000] font-inter font-semibold transition-colors duration-200 shadow-[0_0_24px_rgba(255,255,255,0.15)]"
                 style={{ width: 140, height: 37, fontSize: 11.5 }}
               >
                 <span>Start a Project</span>
@@ -119,18 +128,17 @@ export function HeroSection() {
 
               <Link
                 href="/work"
-                className="inline-flex items-center gap-[9px] font-inter font-medium text-[#F5F3EE] hover:text-[#D0CFCC] transition-colors duration-200"
+                className="inline-flex items-center gap-[9px] font-inter font-medium text-[#FFFFFF] hover:text-[#D1D5DB] transition-colors duration-200"
                 style={{ fontSize: 11.5 }}
               >
                 <span>Explore Our Work</span>
-                <Play size={10} className="fill-[#F5F3EE] stroke-[#F5F3EE]" />
+                <Play size={10} className="fill-[#FFFFFF] stroke-[#FFFFFF]" />
               </Link>
             </div>
           </div>
 
-          {/* Right Column: Spacer that allows camera & windows to shine, with vertical label */}
+          {/* Right Column: Vertical label MEDIA / WEB / AGENTS */}
           <div className="hidden lg:flex lg:col-span-5 xl:col-span-6 relative min-h-[380px] xl:min-h-[440px] items-end justify-end pointer-events-none">
-            {/* Vertical label: MEDIA / WEB / AGENTS */}
             <div
               className="absolute right-0 bottom-8 z-20 flex flex-col items-center select-none"
               style={{ gap: 3 }}
@@ -145,7 +153,7 @@ export function HeroSection() {
                   className="font-inter font-medium tracking-widest"
                   style={{
                     fontSize: 9,
-                    color: bright ? '#F5F3EE' : '#68707C',
+                    color: bright ? '#FFFFFF' : '#7E8597',
                     lineHeight: 1.4,
                   }}
                 >
@@ -155,9 +163,9 @@ export function HeroSection() {
               <div
                 style={{
                   marginTop: 6,
-                  width: 1,
+                  width: 1.5,
                   height: 32,
-                  background: 'linear-gradient(to bottom, #3A414B, transparent)',
+                  background: 'linear-gradient(to bottom, #2C3480, transparent)',
                 }}
               />
             </div>

@@ -34,29 +34,29 @@ const CARDS = [
 
 export function DivisionsSection() {
   return (
-    <section className="bg-[#08090B] pt-14 pb-10">
+    <section className="bg-[#000000] pt-16 pb-12">
       <div className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-16">
 
         {/* Section header */}
-        <div className="relative mb-10">
-          {/* Top-right decorative bracket */}
+        <div className="relative mb-12">
+          {/* Top-right decorative bracket in Cobalt Blue */}
           <div
             aria-hidden="true"
             className="absolute -top-1 -right-1 pointer-events-none hidden md:block"
-            style={{ width: 16, height: 16, borderTop: '1px solid #2A2F3A', borderRight: '1px solid #2A2F3A' }}
+            style={{ width: 16, height: 16, borderTop: '1.5px solid #2C3480', borderRight: '1.5px solid #2C3480' }}
           />
 
           <div className="flex flex-col md:flex-row md:items-end gap-8 md:gap-0 md:justify-between">
             {/* Left headline */}
             <div>
               <p
-                className="font-inter font-medium uppercase text-[#777D87] mb-3"
+                className="font-inter font-medium uppercase text-[#7E8597] mb-3"
                 style={{ fontSize: 10, letterSpacing: '0.2em' }}
               >
                 OUR CAPABILITIES
               </p>
               <h2
-                className="font-manrope font-extrabold uppercase text-[#F5F3EE]"
+                className="font-manrope font-extrabold uppercase text-[#FFFFFF]"
                 style={{ fontSize: 'clamp(32px, 4vw, 48px)', lineHeight: 0.98, letterSpacing: '-0.03em' }}
               >
                 THREE
@@ -73,6 +73,7 @@ export function DivisionsSection() {
                     fontWeight: 400,
                     letterSpacing: '-0.01em',
                     textTransform: 'lowercase',
+                    color: '#FFFFFF',
                   }}
                 >
                   impact.
@@ -80,10 +81,10 @@ export function DivisionsSection() {
               </h2>
             </div>
 
-            {/* Right paragraph — sits at headline middle on desktop */}
+            {/* Right paragraph */}
             <p
-              className="font-inter font-normal text-[#B2B4BA] leading-relaxed md:self-center"
-              style={{ fontSize: 13, maxWidth: 340 }}
+              className="font-inter font-normal text-[#D1D5DB] leading-relaxed md:self-center"
+              style={{ fontSize: 13.5, maxWidth: 350 }}
             >
               From cinematic content to scalable web products and AI agents that actually work — Ediyrex brings creativity and technology together to move your business forward.
             </p>
@@ -95,23 +96,23 @@ export function DivisionsSection() {
           {CARDS.map((card) => (
             <div
               key={card.num}
-              className="group flex flex-col rounded-xl bg-[#0D0F12] border border-[#252A32] hover:border-[#3A414B] transition-all duration-300 p-5"
+              className="group flex flex-col rounded-xl bg-[#07090E] border border-[#161A24] hover:border-[#2C3480] hover:shadow-[0_0_28px_rgba(44,52,128,0.2)] transition-all duration-300 p-5"
             >
               {/* Card image */}
               <div
-                className="relative w-full rounded-lg bg-[#12151A] border border-[#1F232C] mb-5 overflow-hidden"
+                className="relative w-full rounded-lg bg-[#0C0F17] border border-[#1C2230] mb-5 overflow-hidden"
                 style={{ aspectRatio: '16/10' }}
               >
                 <Image
                   src={card.img}
                   alt={card.imgAlt}
                   fill
-                  className="object-cover"
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
                   sizes="(max-width: 768px) 100vw, 33vw"
                 />
                 {/* Number label */}
                 <span
-                  className="absolute top-3 left-3 z-10 font-inter font-bold text-[#B2B4BA] drop-shadow"
+                  className="absolute top-3 left-3 z-10 font-inter font-bold text-[#FFFFFF] drop-shadow"
                   style={{ fontSize: 10 }}
                 >
                   {card.num}
@@ -119,7 +120,7 @@ export function DivisionsSection() {
                 {/* Arrow link */}
                 <Link
                   href={card.href}
-                  className="absolute top-2.5 right-2.5 z-10 p-1 text-[#777D87] group-hover:text-[#F5F3EE] transition-colors"
+                  className="absolute top-2.5 right-2.5 z-10 p-1 text-[#7E8597] group-hover:text-[#FFFFFF] transition-colors"
                 >
                   <ArrowUpRight size={14} />
                 </Link>
@@ -127,7 +128,7 @@ export function DivisionsSection() {
 
               {/* Title */}
               <h3
-                className="font-manrope font-extrabold uppercase text-[#F5F3EE] mb-1.5 leading-tight"
+                className="font-manrope font-extrabold uppercase text-[#FFFFFF] mb-1.5 leading-tight"
                 style={{ fontSize: 20, letterSpacing: '0.02em' }}
               >
                 {card.title.split('\n').map((line, i) => (
@@ -140,8 +141,8 @@ export function DivisionsSection() {
 
               {/* Description */}
               <p
-                className="font-inter font-normal text-[#B2B4BA] mb-5 leading-relaxed flex-1"
-                style={{ fontSize: 12 }}
+                className="font-inter font-normal text-[#D1D5DB] mb-5 leading-relaxed flex-1"
+                style={{ fontSize: 12.5 }}
               >
                 {card.desc}
               </p>
@@ -149,17 +150,18 @@ export function DivisionsSection() {
               {/* Tags */}
               <div
                 className="flex flex-wrap gap-1.5 pt-3.5"
-                style={{ borderTop: '1px solid #1A1D24' }}
+                style={{ borderTop: '1px solid #141724' }}
               >
                 {card.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="font-inter font-medium text-[#B2B4BA]"
+                    className="font-inter font-medium text-[#D1D5DB]"
                     style={{
                       fontSize: 10,
                       padding: '2px 10px',
                       borderRadius: 999,
-                      border: '1px solid #2B303C',
+                      border: '1px solid #1C2230',
+                      backgroundColor: '#07090E',
                     }}
                   >
                     {tag}

@@ -17,14 +17,14 @@ export function Header() {
   const pathname = usePathname()
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-[#08090B]/90 backdrop-blur-md border-b border-[#292929]/60">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-[#000000]/90 backdrop-blur-md border-b border-[#161A24]">
       <div className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-16 flex items-center justify-between h-[72px]">
         {/* Left wordmark: EDIYREX® */}
         <Link href="/" className="flex items-center group">
-          <span className="font-manrope font-extrabold text-[22px] tracking-[-0.02em] text-[#F5F3EE]">
+          <span className="font-manrope font-extrabold text-[22px] tracking-[-0.02em] text-[#FFFFFF]">
             EDIYREX
           </span>
-          <span className="font-manrope font-extrabold text-[12px] text-[#F5F3EE] ml-0.5 -translate-y-1">
+          <span className="font-manrope font-extrabold text-[12px] text-[#FFFFFF] ml-0.5 -translate-y-1">
             ®
           </span>
         </Link>
@@ -42,8 +42,8 @@ export function Header() {
                 href={item.href}
                 className={`font-inter font-medium text-[11.5px] tracking-wide transition-colors duration-200 relative py-1 ${
                   isActive
-                    ? 'text-[#F5F3EE] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[1px] after:bg-[#F5F3EE]'
-                    : 'text-[#777D87] hover:text-[#F5F3EE]'
+                    ? 'text-[#FFFFFF] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[1.5px] after:bg-[#2C3480]'
+                    : 'text-[#7E8597] hover:text-[#FFFFFF]'
                 }`}
               >
                 {item.label}
@@ -56,10 +56,10 @@ export function Header() {
         <div className="flex items-center">
           <Link
             href="/contact"
-            className="inline-flex items-center justify-center gap-1.5 w-[124px] h-[35px] rounded-[11px] border border-[#3A414B] hover:border-[#F5F3EE] bg-transparent text-[#F5F3EE] font-inter font-semibold text-[11.5px] transition-all duration-200 hover:bg-white/5"
+            className="inline-flex items-center justify-center gap-1.5 w-[124px] h-[35px] rounded-[11px] border border-[#2C3480] hover:border-[#414CA3] bg-[#2C3480]/15 hover:bg-[#2C3480]/30 text-[#FFFFFF] font-inter font-semibold text-[11.5px] transition-all duration-200"
           >
             <span>Start a Project</span>
-            <ArrowUpRight size={13} className="text-[#D0CFCC] stroke-[2.2]" />
+            <ArrowUpRight size={13} className="text-[#D1D5DB] stroke-[2.2]" />
           </Link>
         </div>
       </div>

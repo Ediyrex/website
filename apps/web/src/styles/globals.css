@@ -1,16 +1,19 @@
 @import "tailwindcss";
 
 :root {
-  --background: #08090B;
-  --background-elevated: #0D0F12;
-  --surface: #12151A;
-  --text-primary: #F5F3EE;
-  --text-secondary: #D0CFCC;
-  --text-muted: #777D87;
-  --border: #292929;
-  --border-subtle: #252A32;
-  --border-strong: #3A414B;
-  --warm-accent: #D6B77A;
+  --background: #000000;
+  --background-elevated: #07090E;
+  --surface: #0C0F17;
+  --surface-hover: #121622;
+  --text-primary: #FFFFFF;
+  --text-secondary: #D1D5DB;
+  --text-muted: #7E8597;
+  --border: #161A24;
+  --border-subtle: #1C2230;
+  --border-strong: #2C3480;
+  --accent-cobalt: #2C3480;
+  --accent-cobalt-light: #414CA3;
+  --accent-cobalt-glow: rgba(44, 52, 128, 0.25);
 }
 
 @theme {
@@ -18,18 +21,19 @@
   --font-inter: var(--font-inter), 'Inter', sans-serif;
   --font-sans: var(--font-inter), 'Inter', sans-serif;
 
-  --color-background: #08090B;
-  --color-background-elevated: #0D0F12;
-  --color-border: #292929;
-  --color-text-primary: #F5F3EE;
-  --color-text-secondary: #D0CFCC;
-  --color-text-muted: #777D87;
+  --color-background: #000000;
+  --color-background-elevated: #07090E;
+  --color-border: #161A24;
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #D1D5DB;
+  --color-text-muted: #7E8597;
+  --color-cobalt: #2C3480;
 }
 
 @layer base {
   *, *::before, *::after {
     box-sizing: border-box;
-    border-color: #292929;
+    border-color: #161A24;
   }
 
   html {
@@ -37,12 +41,12 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    background-color: #08090B;
+    background-color: #000000;
   }
 
   body {
-    background-color: #08090B;
-    color: #F5F3EE;
+    background-color: #000000;
+    color: #FFFFFF;
     font-family: var(--font-inter);
     overflow-x: hidden;
     margin: 0;
@@ -56,25 +60,30 @@
   .font-inter {
     font-family: var(--font-inter);
   }
-  /* Legacy alias used in older components */
   .container-main {
     width: 100%;
-    max-width: 1360px;
+    max-w: 1440px;
     margin-left: auto;
     margin-right: auto;
-    padding-left: 20px;
-    padding-right: 20px;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
   }
   @media (min-width: 640px) {
     .container-main {
-      padding-left: 32px;
-      padding-right: 32px;
+      padding-left: 2.5rem;
+      padding-right: 2.5rem;
     }
   }
   @media (min-width: 1024px) {
     .container-main {
-      padding-left: 40px;
-      padding-right: 40px;
+      padding-left: 3.5rem;
+      padding-right: 3.5rem;
+    }
+  }
+  @media (min-width: 1280px) {
+    .container-main {
+      padding-left: 4rem;
+      padding-right: 4rem;
     }
   }
 }
