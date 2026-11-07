@@ -16,6 +16,15 @@ const nextConfig: NextConfig = {
     ],
   },
   trailingSlash: false,
+  async redirects() {
+    return [
+      {
+        source: '/testimonials',
+        destination: '/reviews',
+        permanent: true,
+      },
+    ]
+  },
   async rewrites() {
     const apiPort = process.env.API_PORT || '4000'
     return [

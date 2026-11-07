@@ -10,6 +10,8 @@ const DIVISIONS = [
 const STUDIO_LINKS = [
   { label: 'About', href: '/about' },
   { label: 'Selected Work', href: '/work' },
+  { label: 'Services Scope', href: '/services' },
+  { label: 'Reviews & Reputation', href: '/reviews' },
   { label: 'Start a Project', href: '/contact' },
 ]
 

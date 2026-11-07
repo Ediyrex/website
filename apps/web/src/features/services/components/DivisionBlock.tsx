@@ -1,5 +1,5 @@
-import { Check, Wrench } from 'lucide-react'
-import { Badge } from '@/shared/components/ui'
+import Link from 'next/link'
+import { Check, ArrowUpRight } from 'lucide-react'
 import { ServiceDivision } from '../types'
 
 interface DivisionBlockProps {
@@ -8,50 +8,68 @@ interface DivisionBlockProps {
 }
 
 export function DivisionBlock({ division }: DivisionBlockProps) {
+  const divisionRoute =
+    division.id === 'media'
+      ? '/media'
+      : division.id === 'digital'
+      ? '/web'
+      : '/agents-automation'
+
   return (
     <article
       id={division.id}
-      className="scroll-mt-28 py-16 first:pt-8 border-b border-[#1C2028] last:border-b-0"
+      className="scroll-mt-28 py-16 border-b border-neutral-800 last:border-b-0"
     >
       {/* Division Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
         <div className="max-w-2xl">
-          <Badge variant="accent" className="mb-4">
-            Division · {division.title}
-          </Badge>
-          <h2 className="font-heading font-extrabold text-3xl md:text-4xl text-[#F0EDE8]">
+          <div className="inline-flex items-center gap-2 mb-3">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#2C3480]" />
+            <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-neutral-400">
+              DIVISION {division.id.toUpperCase()}
+            </span>
+          </div>
+          <h2 className="font-manrope font-extrabold text-2xl sm:text-3xl lg:text-4xl text-white">
             {division.headline}
           </h2>
-          <p className="mt-4 text-[#9AA0AB] text-base leading-relaxed">
+          <p className="mt-3 text-neutral-400 text-sm md:text-base leading-relaxed">
             {division.lead}
           </p>
         </div>
+
+        <Link
+          href={divisionRoute}
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-md border border-neutral-700 hover:border-white text-white hover:bg-white hover:text-black font-inter font-medium text-xs transition-colors shrink-0"
+        >
+          <span>Explore {division.title} Division</span>
+          <ArrowUpRight size={13} />
+        </Link>
       </div>
 
       {/* Services Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {division.services.map((svc) => (
           <div
             key={svc.id}
-            className="flex flex-col justify-between p-7 rounded-2xl bg-[#12151A] border border-[#252A33] hover:border-[#D6B77A]/40 transition-all duration-300"
+            className="flex flex-col justify-between p-7 rounded-xl bg-[#080808] border border-neutral-800 hover:border-neutral-500 transition-colors duration-200"
           >
             <div>
-              <h3 className="font-heading font-bold text-xl text-[#F0EDE8] mb-3">
+              <h3 className="font-manrope font-bold text-lg text-white mb-2">
                 {svc.title}
               </h3>
-              <p className="text-sm text-[#9AA0AB] leading-relaxed mb-6">
+              <p className="text-xs text-neutral-400 leading-relaxed mb-6">
                 {svc.description}
               </p>
 
               {/* Deliverables */}
-              <div className="pt-4 border-t border-[#1C2028]">
-                <p className="text-xs font-mono uppercase tracking-wider text-[#D6B77A] mb-3">
-                  Key Deliverables
+              <div className="pt-4 border-t border-neutral-800">
+                <p className="text-[10px] font-mono uppercase tracking-wider text-neutral-400 mb-3">
+                  Scope Deliverables
                 </p>
                 <ul className="space-y-2">
                   {svc.deliverables.map((del, i) => (
-                    <li key={i} className="flex items-start gap-2 text-xs text-[#F0EDE8]/80">
-                      <Check size={14} className="text-[#D6B77A] shrink-0 mt-0.5" />
+                    <li key={i} className="flex items-start gap-2 text-xs text-neutral-300">
+                      <Check size={13} className="text-white shrink-0 mt-0.5" />
                       <span>{del}</span>
                     </li>
                   ))}
@@ -59,47 +77,21 @@ export function DivisionBlock({ division }: DivisionBlockProps) {
               </div>
             </div>
 
-            {/* Tooling / Tech stack */}
-            <div className="mt-8 pt-4 border-t border-[#1C2028]">
-              <div className="flex items-center gap-1.5 text-xs text-[#5C6370] mb-2 font-mono">
-                <Wrench size={12} />
-                <span>Primary Tooling</span>
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {svc.tools.map((tool) => (
-                  <span
-                    key={tool}
-                    className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#08090B] text-[#9AA0AB] border border-[#1C2028]"
-                  >
-                    {tool}
-                  </span>
-                ))}
-              </div>
+            <div className="pt-6 border-t border-neutral-800 mt-6 flex items-center justify-between">
+              <span className="font-mono text-[10px] text-neutral-400">
+                {svc.tools.slice(0, 2).join(' · ')}
+              </span>
+              <Link
+                href={divisionRoute}
+                className="font-inter text-xs text-white hover:underline flex items-center gap-1"
+              >
+                <span>Details</span>
+                <ArrowUpRight size={11} />
+              </Link>
             </div>
           </div>
         ))}
       </div>
-
-      {/* Frequently Asked Questions for Division */}
-      <div className="mt-14 p-8 rounded-2xl bg-[#08090B] border border-[#1C2028]">
-        <h4 className="font-heading font-bold text-lg text-[#F0EDE8] mb-6 flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-[#D6B77A]" />
-          Specifics &amp; Technical FAQs · {division.title}
-        </h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {division.faq.map((item, i) => (
-            <div key={i} className="space-y-2">
-              <p className="font-heading font-medium text-sm text-[#F0EDE8]">
-                {item.question}
-              </p>
-              <p className="text-xs text-[#9AA0AB] leading-relaxed">
-                {item.answer}
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
     </article>
   )
 }
-

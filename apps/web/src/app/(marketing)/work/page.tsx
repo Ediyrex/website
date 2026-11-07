@@ -1,17 +1,44 @@
 'use client'
 
 import { useState } from 'react'
-import { SectionHeading } from '@/shared/components/ui'
+import Link from 'next/link'
+import { ArrowUpRight, Film, Code, Bot } from 'lucide-react'
 import { ProjectCard } from '@/features/projects/components'
 import { PROJECTS_DATA } from '@/features/projects/data/projectsData'
 import { ProjectDivision } from '@/features/projects/types'
 
+const DIVISION_PORTFOLIOS = [
+  {
+    title: 'Media & Production',
+    slug: '/media',
+    icon: Film,
+    description: 'Commercials, brand films, documentaries, podcasts, motion design, and high-engagement social media content.',
+    deliverables: ['Commercial Direction', '4K/6K Cinema Shoot', 'Sound Design', 'Motion Graphics'],
+    highlight: '4.8M+ Organic Impressions',
+  },
+  {
+    title: 'Web & Digital Products',
+    slug: '/web',
+    icon: Code,
+    description: 'High-performance Next.js web applications, SaaS dashboards, e-commerce platforms, and scalable digital design systems.',
+    deliverables: ['Full-Stack Development', 'UI/UX Architecture', 'Design Systems', 'API Engineering'],
+    highlight: '< 250ms Global Query Speed',
+  },
+  {
+    title: 'AI & Automation Systems',
+    slug: '/agents-automation',
+    icon: Bot,
+    description: 'Autonomous multi-step AI agents, conversational voice systems, n8n workflow pipelines, and enterprise RAG solutions.',
+    deliverables: ['Custom AI Agents', 'Voice Bots', 'n8n Automations', 'Knowledge Pipelines'],
+    highlight: '74% Manual Work Reduction',
+  },
+]
+
 const FILTER_TABS: { label: string; value: 'all' | ProjectDivision }[] = [
   { label: 'All Projects', value: 'all' },
   { label: 'Media Production', value: 'media' },
-  { label: 'Digital Products', value: 'digital' },
+  { label: 'Web & Digital', value: 'digital' },
   { label: 'AI & Automation', value: 'ai' },
-  { label: 'Cross-Disciplinary', value: 'hybrid' },
 ]
 
 export default function WorkPage() {
@@ -20,47 +47,115 @@ export default function WorkPage() {
   const filteredProjects =
     activeFilter === 'all'
       ? PROJECTS_DATA
-      : PROJECTS_DATA.filter((p) => p.division === activeFilter)
+      : PROJECTS_DATA.filter((p) => p.division === activeFilter || (p.division === 'hybrid' && activeFilter === 'digital'))
 
   return (
-    <div className="pt-28 pb-20">
+    <div className="bg-[#000000] pt-28 pb-24 text-white">
       {/* Top Banner */}
-      <section className="section-gap pt-8 pb-14 border-b border-[#1C2028]">
-        <div className="container-main">
-          <SectionHeading
-            label="Selected Archive"
-            title="Evidence of High-Standard Delivery"
-            titleHighlight="High-Standard Delivery"
-            description="Explore our cross-disciplinary case studies across luxury media, reactive web software, and autonomous enterprise artificial intelligence."
-            align="left"
-          />
+      <section className="pt-8 pb-16 border-b border-neutral-800">
+        <div className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-16">
+          <div className="inline-flex items-center gap-2 mb-4">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#2C3480]" />
+            <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-neutral-400">
+              PORTFOLIO &amp; CASE ARCHIVE
+            </span>
+          </div>
 
-          {/* Filter Pills */}
-          <div className="mt-8 flex flex-wrap gap-2.5">
-            {FILTER_TABS.map((tab) => {
-              const isActive = activeFilter === tab.value
+          <h1
+            className="font-manrope font-extrabold uppercase text-3xl sm:text-5xl lg:text-6xl tracking-tight text-white max-w-4xl"
+            style={{ lineHeight: 1.05 }}
+          >
+            OUR WORK ACROSS
+            <br />
+            THREE INTEGRATED DISCIPLINES.
+          </h1>
+
+          <p className="font-inter text-neutral-400 text-base max-w-2xl mt-5 leading-relaxed">
+            Select a specific discipline below to explore dedicated capabilities, or browse our comprehensive case study archive.
+          </p>
+
+          {/* Division Gateway Cards: On clicking takes to the particular division */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+            {DIVISION_PORTFOLIOS.map((item) => {
+              const Icon = item.icon
               return (
-                <button
-                  key={tab.value}
-                  onClick={() => setActiveFilter(tab.value)}
-                  className={`px-4 py-2 rounded-lg text-xs font-mono uppercase tracking-wider transition-all duration-200 cursor-pointer ${
-                    isActive
-                      ? 'bg-[#D6B77A] text-[#08090B] font-semibold shadow-[0_0_16px_rgba(214,183,122,0.25)]'
-                      : 'bg-[#12151A] text-[#9AA0AB] border border-[#252A33] hover:text-[#F0EDE8] hover:border-[#D6B77A]/40'
-                  }`}
+                <Link
+                  key={item.title}
+                  href={item.slug}
+                  className="group flex flex-col justify-between rounded-xl bg-[#080808] border border-neutral-800 p-7 hover:border-neutral-500 transition-colors duration-200"
                 >
-                  {tab.label}
-                </button>
+                  <div>
+                    <div className="flex items-center justify-between pb-4 mb-4 border-b border-neutral-800">
+                      <div className="w-9 h-9 rounded-lg border border-neutral-800 flex items-center justify-center text-neutral-300 group-hover:text-white group-hover:border-neutral-600 transition-colors">
+                        <Icon size={17} />
+                      </div>
+                      <div className="flex items-center gap-1 font-mono text-xs text-neutral-400 group-hover:text-white transition-colors">
+                        <span>Explore</span>
+                        <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                      </div>
+                    </div>
+
+                    <h2 className="font-manrope font-bold text-lg text-white mb-2">
+                      {item.title}
+                    </h2>
+                    <p className="font-inter text-xs text-neutral-400 leading-relaxed mb-6">
+                      {item.description}
+                    </p>
+                  </div>
+
+                  <div className="pt-4 border-t border-neutral-800">
+                    <p className="font-mono text-[11px] text-neutral-300 font-medium mb-3">
+                      Impact: {item.highlight}
+                    </p>
+                    <div className="flex flex-wrap gap-1">
+                      {item.deliverables.map((del) => (
+                        <span
+                          key={del}
+                          className="font-mono text-[10px] px-2 py-0.5 rounded bg-[#000000] border border-neutral-800 text-neutral-400"
+                        >
+                          {del}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </Link>
               )
             })}
+          </div>
+
+          {/* Filter Tabs for Individual Projects */}
+          <div className="mt-16 flex flex-wrap items-center justify-between gap-4 pt-10 border-t border-neutral-800">
+            <h2 className="font-manrope font-bold text-xl text-white">
+              Featured Case Studies
+            </h2>
+
+            <div className="flex flex-wrap gap-2">
+              {FILTER_TABS.map((tab) => {
+                const isActive = activeFilter === tab.value
+                return (
+                  <button
+                    key={tab.value}
+                    type="button"
+                    onClick={() => setActiveFilter(tab.value)}
+                    className={`px-4 py-2 rounded-md text-xs font-mono uppercase tracking-wider transition-colors cursor-pointer ${
+                      isActive
+                        ? 'bg-white text-black font-semibold'
+                        : 'bg-[#080808] text-neutral-400 border border-neutral-800 hover:text-white hover:border-neutral-600'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                )
+              })}
+            </div>
           </div>
         </div>
       </section>
 
       {/* Projects Grid */}
-      <section className="container-main mt-14">
+      <section className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-16 pt-14">
         {filteredProjects.length === 0 ? (
-          <div className="py-20 text-center text-[#5C6370] font-mono text-sm">
+          <div className="py-20 text-center text-neutral-500 font-mono text-sm">
             No case studies found under this category filter.
           </div>
         ) : (
@@ -74,4 +169,3 @@ export default function WorkPage() {
     </div>
   )
 }
-
