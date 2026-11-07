@@ -5,7 +5,7 @@ import { ArrowUpRight } from 'lucide-react'
 const CARDS = [
   {
     num: '01',
-    href: '/services#media',
+    href: '/media',
     img: '/images/card-media.png',
     imgAlt: 'Cinematic camera in warm orange light',
     title: 'MEDIA',
@@ -14,7 +14,7 @@ const CARDS = [
   },
   {
     num: '02',
-    href: '/services#web',
+    href: '/web',
     img: '/images/card-web.png',
     imgAlt: 'Dark laptop displaying a modern web interface',
     title: 'WEB',
@@ -23,7 +23,7 @@ const CARDS = [
   },
   {
     num: '03',
-    href: '/services#agents',
+    href: '/agents-automation',
     img: '/images/card-agents.png',
     imgAlt: 'Illuminated AI keycap with star glyph',
     title: 'AGENTS &\nAUTOMATION',

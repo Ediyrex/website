@@ -6,10 +6,11 @@ import { ArrowUpRight } from 'lucide-react'
 
 const NAV_ITEMS = [
   { label: 'Home', href: '/' },
-  { label: 'Media', href: '/services#media' },
-  { label: 'Web', href: '/services#web' },
-  { label: 'Agents & Automation', href: '/services#agents' },
-  { label: 'About', href: '/studio' },
+  { label: 'Media', href: '/media' },
+  { label: 'Web', href: '/web' },
+  { label: 'Agents & Automation', href: '/agents-automation' },
+  { label: 'Work', href: '/work' },
+  { label: 'About', href: '/about' },
 ]
 
 export function Header() {
@@ -29,15 +30,18 @@ export function Header() {
         </Link>
 
         {/* Center/right navigation */}
-        <nav className="hidden md:flex items-center gap-8">
+        <nav className="hidden md:flex items-center gap-7 lg:gap-8">
           {NAV_ITEMS.map((item) => {
-            const isHome = item.href === '/' && pathname === '/'
+            const isActive =
+              item.href === '/'
+                ? pathname === '/'
+                : pathname === item.href || pathname?.startsWith(item.href + '/')
             return (
               <Link
                 key={item.label}
                 href={item.href}
                 className={`font-inter font-medium text-[11.5px] tracking-wide transition-colors duration-200 relative py-1 ${
-                  isHome
+                  isActive
                     ? 'text-[#F5F3EE] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[1px] after:bg-[#F5F3EE]'
                     : 'text-[#777D87] hover:text-[#F5F3EE]'
                 }`}
@@ -52,7 +56,7 @@ export function Header() {
         <div className="flex items-center">
           <Link
             href="/contact"
-            className="inline-flex items-center justify-center gap-1.5 w-[122px] h-[34px] rounded-[11px] border border-[#3A414B] hover:border-[#F5F3EE] bg-transparent text-[#F5F3EE] font-inter font-semibold text-[11.5px] transition-all duration-200 hover:bg-white/5"
+            className="inline-flex items-center justify-center gap-1.5 w-[124px] h-[35px] rounded-[11px] border border-[#3A414B] hover:border-[#F5F3EE] bg-transparent text-[#F5F3EE] font-inter font-semibold text-[11.5px] transition-all duration-200 hover:bg-white/5"
           >
             <span>Start a Project</span>
             <ArrowUpRight size={13} className="text-[#D0CFCC] stroke-[2.2]" />

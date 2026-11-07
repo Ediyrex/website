@@ -27,19 +27,27 @@ export default function ServicesPage() {
 
           {/* Anchor Navigation Pills */}
           <div className="mt-8 flex flex-wrap gap-3">
-            {SERVICES_DATA.map((div) => (
-              <a
-                key={div.id}
-                href={`#${div.id}`}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#12151A] border border-[#252A33] text-xs font-mono uppercase tracking-wider text-[#9AA0AB] hover:text-[#D6B77A] hover:border-[#D6B77A]/50 transition-colors duration-200"
-              >
-                <span
-                  className="w-2 h-2 rounded-full"
-                  style={{ backgroundColor: div.accentColor }}
-                />
-                <span>{div.title}</span>
-              </a>
-            ))}
+            <Link
+              href="/media"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#12151A] border border-[#252A33] text-xs font-mono uppercase tracking-wider text-[#9AA0AB] hover:text-[#E58A76] hover:border-[#E58A76]/50 transition-colors duration-200"
+            >
+              <span className="w-2 h-2 rounded-full bg-[#E58A76]" />
+              <span>Media Production ↗</span>
+            </Link>
+            <Link
+              href="/web"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#12151A] border border-[#252A33] text-xs font-mono uppercase tracking-wider text-[#9AA0AB] hover:text-[#7BA9F5] hover:border-[#7BA9F5]/50 transition-colors duration-200"
+            >
+              <span className="w-2 h-2 rounded-full bg-[#7BA9F5]" />
+              <span>Web &amp; Digital ↗</span>
+            </Link>
+            <Link
+              href="/agents-automation"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#12151A] border border-[#252A33] text-xs font-mono uppercase tracking-wider text-[#9AA0AB] hover:text-[#B5A0F5] hover:border-[#B5A0F5]/50 transition-colors duration-200"
+            >
+              <span className="w-2 h-2 rounded-full bg-[#B5A0F5]" />
+              <span>Agents &amp; Automation ↗</span>
+            </Link>
           </div>
         </div>
       </section>
