@@ -58,17 +58,7 @@ export function DivisionsSection() {
                 <br />
                 CREATE
                 <br />
-                <em
-                  className="not-italic"
-                  style={{
-                    fontFamily: 'Georgia, "Times New Roman", serif',
-                    fontStyle: 'italic',
-                    fontWeight: 400,
-                    letterSpacing: '-0.01em',
-                    textTransform: 'lowercase',
-                    color: '#FFFFFF',
-                  }}
-                >
+                <em className="font-serif italic font-normal tracking-[-0.01em] lowercase text-white">
                   impact.
                 </em>
               </h2>

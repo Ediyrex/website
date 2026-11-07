@@ -14,14 +14,11 @@ export function EditorialCtaSection() {
               <span>START A CONVERSATION</span>
             </p>
             <h2
+              className="font-serif italic font-normal text-white"
               style={{
-                fontFamily: 'Georgia, "Times New Roman", serif',
-                fontStyle: 'italic',
-                fontWeight: 400,
                 fontSize: 'clamp(44px, 6.5vw, 84px)',
                 lineHeight: 0.95,
-                letterSpacing: '-0.02em',
-                color: '#FFFFFF',
+                letterSpacing: '-0.025em',
               }}
             >
               Let&apos;s build

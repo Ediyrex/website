@@ -17,14 +17,11 @@ export function ContactBriefSection() {
             </div>
 
             <h2
+              className="font-serif italic font-normal text-white"
               style={{
-                fontFamily: 'Georgia, "Times New Roman", serif',
-                fontStyle: 'italic',
-                fontWeight: 400,
-                fontSize: 'clamp(38px, 5.5vw, 68px)',
-                lineHeight: 0.98,
-                letterSpacing: '-0.02em',
-                color: '#FFFFFF',
+                fontSize: 'clamp(40px, 5.5vw, 72px)',
+                lineHeight: 0.96,
+                letterSpacing: '-0.025em',
               }}
             >
               Let&apos;s build
@@ -61,3 +58,4 @@ export function ContactBriefSection() {
     </section>
   )
 }
+

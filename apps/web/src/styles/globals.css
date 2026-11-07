@@ -2,7 +2,7 @@
 
 :root {
   --background: #000000;
-  --background-elevated: #0A0A0A;
+  --background-elevated: #080808;
   --surface: #0A0A0A;
   --surface-hover: #141414;
   --text-primary: #FFFFFF;
@@ -18,6 +18,9 @@
   --font-manrope: var(--font-manrope), 'Manrope', sans-serif;
   --font-inter: var(--font-inter), 'Inter', sans-serif;
   --font-sans: var(--font-inter), 'Inter', sans-serif;
+  --font-mono: var(--font-mono), 'IBM Plex Mono', monospace;
+  --font-serif: var(--font-serif), 'Newsreader', serif;
+  --font-heading: var(--font-manrope), 'Manrope', sans-serif;
 
   --color-background: #000000;
   --color-border: rgba(255, 255, 255, 0.1);
@@ -53,14 +56,37 @@
     background-color: #2C3480;
     color: #FFFFFF;
   }
+
+  /* Micro-typographic refinements */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-manrope);
+    letter-spacing: -0.03em;
+  }
+
+  p, li, span, a, button, input, textarea {
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
+  code, kbd, samp, pre {
+    font-family: var(--font-mono);
+  }
 }
 
 @layer utilities {
-  .font-manrope {
+  .font-manrope,
+  .font-heading {
     font-family: var(--font-manrope);
   }
-  .font-inter {
+  .font-inter,
+  .font-sans {
     font-family: var(--font-inter);
+  }
+  .font-mono {
+    font-family: var(--font-mono);
+    letter-spacing: -0.01em;
+  }
+  .font-serif {
+    font-family: var(--font-serif);
   }
 }
 
