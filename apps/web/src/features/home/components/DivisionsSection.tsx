@@ -1,58 +1,59 @@
 import Link from 'next/link'
-import { ArrowUpRight, Camera, Layout, Bot, Image as ImageIcon } from 'lucide-react'
+import { ArrowUpRight, Camera, Layout, Bot } from 'lucide-react'
 
 const CARDS = [
   {
     num: '01',
     href: '/media',
     icon: Camera,
-    placeholderLabel: 'MEDIA VISUAL PLACEHOLDER',
-    title: 'MEDIA',
-    desc: 'Production, editing and content that tells your story and gets results.',
-    tags: ['Shoot', 'Video Editing', 'Motion Graphics', 'Podcast', 'Graphic Design', 'Content Creation'],
+    category: 'MEDIA & PRODUCTION',
+    title: 'Visual Storytelling\n& Commercial Media',
+    desc: 'Cinematic brand films, high-impact commercials, photography, podcasts, and social-first content designed to captivate audiences and build brand equity.',
+    tags: ['Brand Films', 'Commercials', 'Video Editing', 'Motion Graphics', 'Photography', 'Social Content'],
   },
   {
     num: '02',
     href: '/web',
     icon: Layout,
-    placeholderLabel: 'WEB VISUAL PLACEHOLDER',
-    title: 'WEB',
-    desc: 'Modern, fast and scalable web experiences for brands and businesses.',
-    tags: ['Web Development', 'Web Apps', 'UI/UX', 'E-commerce', 'Extensions', 'Dashboards'],
+    category: 'WEB & DIGITAL PRODUCTS',
+    title: 'High-Performance Web\n& SaaS Applications',
+    desc: 'Modern, resilient digital platforms engineered with Next.js, React, and TypeScript. From high-converting marketing sites to complex enterprise dashboards.',
+    tags: ['Web Development', 'SaaS Products', 'UI/UX Design', 'Full-Stack Apps', 'Design Systems', 'Dashboards'],
   },
   {
     num: '03',
     href: '/agents-automation',
     icon: Bot,
-    placeholderLabel: 'AGENTS VISUAL PLACEHOLDER',
-    title: 'AGENTS &\nAUTOMATION',
-    desc: 'AI agents and automation systems that save time, reduce work and scale ops.',
-    tags: ['AI Chatbots', 'Voice Agents', 'Custom Agents', 'n8n Workflows', 'Business Automation', 'RAG'],
+    category: 'AGENTS & INTELLIGENCE',
+    title: 'Autonomous AI Agents\n& Workflow Systems',
+    desc: 'Intelligent AI agents, conversational voice systems, and enterprise workflow automations built to eliminate manual friction and scale studio throughput.',
+    tags: ['Custom AI Agents', 'Voice Agents', 'n8n Workflows', 'RAG Systems', 'Process Automation', 'API Integrations'],
   },
 ]
 
 export function DivisionsSection() {
   return (
-    <section className="bg-[#000000] pt-16 pb-12">
+    <section className="bg-[#000000] py-20 relative">
       <div className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-16">
 
         {/* Section header */}
-        <div className="relative mb-12">
-          {/* Top-right decorative bracket in Cobalt Blue */}
+        <div className="relative mb-14">
+          {/* Top-right decorative bracket in restrained border */}
           <div
             aria-hidden="true"
             className="absolute -top-1 -right-1 pointer-events-none hidden md:block"
-            style={{ width: 16, height: 16, borderTop: '1.5px solid #2C3480', borderRight: '1.5px solid #2C3480' }}
+            style={{ width: 16, height: 16, borderTop: '1px solid rgba(255, 255, 255, 0.15)', borderRight: '1px solid rgba(255, 255, 255, 0.15)' }}
           />
 
           <div className="flex flex-col md:flex-row md:items-end gap-8 md:gap-0 md:justify-between">
             {/* Left headline */}
             <div>
               <p
-                className="font-inter font-medium uppercase text-[#7E8597] mb-3"
+                className="font-inter font-medium uppercase text-zinc-500 mb-3 flex items-center gap-2"
                 style={{ fontSize: 10, letterSpacing: '0.2em' }}
               >
-                OUR CAPABILITIES
+                <span className="w-1.5 h-1.5 rounded-full bg-[#2C3480]" />
+                <span>OUR CORE DISCIPLINES</span>
               </p>
               <h2
                 className="font-manrope font-extrabold uppercase text-[#FFFFFF]"
@@ -82,97 +83,88 @@ export function DivisionsSection() {
 
             {/* Right paragraph */}
             <p
-              className="font-inter font-normal text-[#D1D5DB] leading-relaxed md:self-center"
-              style={{ fontSize: 13.5, maxWidth: 350 }}
+              className="font-inter font-normal text-zinc-400 leading-relaxed md:self-center"
+              style={{ fontSize: 14, maxWidth: 380 }}
             >
-              From cinematic content to scalable web products and AI agents that actually work — Ediyrex brings creativity and technology together to move your business forward.
+              From cinematic visual storytelling to scalable full-stack web platforms and autonomous AI agents — Ediyrex unifies creativity and modern engineering into a single studio partner.
             </p>
           </div>
         </div>
 
         {/* Three service cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {CARDS.map((card) => {
             const Icon = card.icon
             return (
-              <div
+              <Link
                 key={card.num}
-                className="group flex flex-col rounded-xl bg-[#07090E] border border-[#161A24] hover:border-[#2C3480] hover:shadow-[0_0_28px_rgba(44,52,128,0.2)] transition-all duration-300 p-5"
+                href={card.href}
+                className="group flex flex-col justify-between rounded-2xl bg-[#07080B] border border-white/[0.08] hover:border-[#2C3480]/80 hover:shadow-[0_0_36px_rgba(44,52,128,0.20)] transition-all duration-300 p-7 lg:p-8 relative overflow-hidden"
               >
-                {/* Visual Placeholder Canvas (No image files) */}
+                {/* Ambient hover glow */}
                 <div
-                  className="relative w-full rounded-lg bg-[#0C0F17] border border-[#1C2230] mb-5 overflow-hidden flex flex-col items-center justify-center p-6 text-center"
-                  style={{ aspectRatio: '16/10' }}
-                >
-                  {/* Number label */}
-                  <span
-                    className="absolute top-3 left-3 z-10 font-mono text-[10px] font-bold text-[#FFFFFF]"
-                  >
-                    {card.num}
-                  </span>
-                  {/* Arrow link */}
-                  <Link
-                    href={card.href}
-                    className="absolute top-2.5 right-2.5 z-10 p-1 text-[#7E8597] group-hover:text-[#FFFFFF] transition-colors"
-                  >
-                    <ArrowUpRight size={14} />
-                  </Link>
+                  aria-hidden="true"
+                  className="absolute -right-20 -top-20 w-48 h-48 rounded-full bg-[#2C3480] opacity-0 group-hover:opacity-15 blur-[60px] transition-opacity duration-500 pointer-events-none"
+                />
 
-                  {/* Centered placeholder emblem */}
-                  <div className="w-9 h-9 rounded-lg bg-[#07090E] border border-[#161A24] flex items-center justify-center text-[#2C3480] mb-2 group-hover:scale-105 transition-transform">
-                    <Icon size={18} />
+                {/* Card Top: Index, Category Icon, Arrow */}
+                <div>
+                  <div className="flex items-center justify-between pb-6 mb-6 border-b border-white/[0.06]">
+                    <div className="flex items-center gap-3">
+                      <span className="font-mono text-xs font-bold text-zinc-500 group-hover:text-white transition-colors">
+                        {card.num}
+                      </span>
+                      <span className="text-[10px] font-mono uppercase tracking-[1.5px] text-zinc-400">
+                        {card.category}
+                      </span>
+                    </div>
+
+                    <div className="w-8 h-8 rounded-lg bg-white/[0.03] border border-white/[0.08] flex items-center justify-center text-zinc-400 group-hover:text-white group-hover:border-white/20 transition-all">
+                      <ArrowUpRight size={15} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                    </div>
                   </div>
-                  <p className="font-mono text-[9.5px] uppercase tracking-[1.5px] text-[#7E8597]">
-                    {card.placeholderLabel}
+
+                  {/* Icon Emblem */}
+                  <div className="w-11 h-11 rounded-xl bg-white/[0.02] border border-white/[0.08] flex items-center justify-center text-zinc-300 mb-5 group-hover:border-[#2C3480]/60 group-hover:text-white transition-all">
+                    <Icon size={20} strokeWidth={1.75} />
+                  </div>
+
+                  {/* Title */}
+                  <h3
+                    className="font-manrope font-bold text-xl lg:text-[22px] text-[#FFFFFF] mb-3 leading-snug tracking-tight"
+                  >
+                    {card.title.split('\n').map((line, i) => (
+                      <span key={i} className="block">
+                        {line}
+                      </span>
+                    ))}
+                  </h3>
+
+                  {/* Description */}
+                  <p className="font-inter text-[13.5px] text-zinc-400 leading-relaxed mb-6">
+                    {card.desc}
                   </p>
-                  <span className="text-[9px] font-mono text-[#4E5569] mt-0.5">
-                    Awaiting asset
-                  </span>
                 </div>
 
-                {/* Title */}
-                <h3
-                  className="font-manrope font-extrabold uppercase text-[#FFFFFF] mb-1.5 leading-tight"
-                  style={{ fontSize: 20, letterSpacing: '0.02em' }}
-                >
-                  {card.title.split('\n').map((line, i) => (
-                    <span key={i}>
-                      {i > 0 && <br />}
-                      {line}
-                    </span>
-                  ))}
-                </h3>
+                {/* Card Bottom: Tags & Direct Link */}
+                <div className="pt-4 border-t border-white/[0.05]">
+                  <div className="flex flex-wrap gap-1.5 mb-5">
+                    {card.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="text-[10.5px] font-inter px-2.5 py-1 rounded-md bg-white/[0.02] border border-white/[0.07] text-zinc-400 group-hover:border-white/[0.12] group-hover:text-zinc-300 transition-colors"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
 
-                {/* Description */}
-                <p
-                  className="font-inter font-normal text-[#D1D5DB] mb-5 leading-relaxed flex-1"
-                  style={{ fontSize: 12.5 }}
-                >
-                  {card.desc}
-                </p>
-
-                {/* Tags */}
-                <div
-                  className="flex flex-wrap gap-1.5 pt-3.5"
-                  style={{ borderTop: '1px solid #141724' }}
-                >
-                  {card.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="font-inter font-medium text-[#D1D5DB]"
-                      style={{
-                        fontSize: 10,
-                        padding: '2px 10px',
-                        borderRadius: 999,
-                        border: '1px solid #1C2230',
-                        backgroundColor: '#07090E',
-                      }}
-                    >
-                      {tag}
-                    </span>
-                  ))}
+                  <div className="flex items-center gap-1.5 font-inter text-[11.5px] font-medium text-zinc-400 group-hover:text-white transition-colors">
+                    <span>Explore Discipline</span>
+                    <ArrowUpRight size={12} />
+                  </div>
                 </div>
-              </div>
+              </Link>
             )
           })}
         </div>
