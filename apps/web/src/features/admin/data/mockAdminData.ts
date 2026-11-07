@@ -116,53 +116,7 @@ export const ADMIN_PROJECTS: AdminProjectItem[] = [
   },
 ]
 
-export const MEDIA_ASSETS: MediaAssetItem[] = [
-  {
-    id: 'MED-01',
-    name: 'hero-camera-master.webp',
-    path: '/images/hero-camera-master.webp',
-    format: 'WebP',
-    dimensions: '2560 × 1440',
-    size: '264 KB',
-    uploadedAt: '2026-11-02',
-  },
-  {
-    id: 'MED-02',
-    name: 'card-media.png',
-    path: '/images/card-media.png',
-    format: 'PNG',
-    dimensions: '600 × 375',
-    size: '38 KB',
-    uploadedAt: '2026-11-01',
-  },
-  {
-    id: 'MED-03',
-    name: 'card-web.png',
-    path: '/images/card-web.png',
-    format: 'PNG',
-    dimensions: '600 × 375',
-    size: '32 KB',
-    uploadedAt: '2026-11-01',
-  },
-  {
-    id: 'MED-04',
-    name: 'card-agents.png',
-    path: '/images/card-agents.png',
-    format: 'PNG',
-    dimensions: '600 × 375',
-    size: '29 KB',
-    uploadedAt: '2026-11-01',
-  },
-  {
-    id: 'MED-05',
-    name: 'banner-mountains.png',
-    path: '/images/banner-mountains.png',
-    format: 'PNG',
-    dimensions: '1200 × 500',
-    size: '60 KB',
-    uploadedAt: '2026-11-01',
-  },
-]
+export const MEDIA_ASSETS: MediaAssetItem[] = []
 
 export const ACTIVITY_LOGS: ActivityLogItem[] = [
   {
