@@ -16,6 +16,15 @@ const nextConfig: NextConfig = {
     ],
   },
   trailingSlash: false,
+  async rewrites() {
+    const apiPort = process.env.API_PORT || '4000'
+    return [
+      {
+        source: '/api/v1/:path*',
+        destination: `http://localhost:${apiPort}/api/v1/:path*`,
+      },
+    ]
+  },
 }
 
 export default nextConfig

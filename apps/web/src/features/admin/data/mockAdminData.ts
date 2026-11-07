@@ -194,3 +194,4 @@ export const ACTIVITY_LOGS: ActivityLogItem[] = [
     timestamp: '3 days ago',
   },
 ]
+
