@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowUpRight, Play } from 'lucide-react'
+import { ArrowUpRight, Play, Image as ImageIcon } from 'lucide-react'
 
 export function HeroSection() {
   return (
@@ -7,42 +7,21 @@ export function HeroSection() {
       className="relative overflow-hidden bg-[#000000] min-h-[calc(100vh-86px)] min-h-[calc(100dvh-86px)] flex flex-col justify-center"
       style={{ paddingTop: '72px' }}
     >
-      {/* ── Background artwork layer: Full-bleed edge to edge ── */}
+      {/* ── Background atmospheric Cobalt glow (Pure CSS, no raster images) ── */}
       <div
         aria-hidden="true"
         className="absolute inset-0 z-0 pointer-events-none select-none overflow-hidden"
       >
-        <picture className="w-full h-full block">
-          <source srcSet="/images/hero-camera-master.webp" type="image/webp" />
-          <img
-            src="/images/hero-camera-master.jpg"
-            alt="Cinematic production camera and software interface"
-            className="w-full h-full object-cover object-[76%_center] md:object-[80%_center] lg:object-[82%_center] 2xl:object-[85%_center]"
-            style={{
-              imageRendering: 'auto',
-            }}
-          />
-        </picture>
-
-        {/* Subtle atmospheric Cobalt Blue glow behind camera & windows */}
+        {/* Cobalt Blue Deep atmospheric ambient glow */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              'radial-gradient(circle at 82% 40%, rgba(44, 52, 128, 0.22) 0%, rgba(44, 52, 128, 0.05) 45%, transparent 70%)',
+              'radial-gradient(circle at 78% 45%, rgba(44, 52, 128, 0.20) 0%, rgba(44, 52, 128, 0.04) 50%, transparent 75%)',
           }}
         />
 
-        {/* Left shade gradient guaranteeing headline legibility against pure #000000 */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              'linear-gradient(to right, #000000 0%, #000000 28%, rgba(0,0,0,0.88) 46%, rgba(0,0,0,0.25) 66%, transparent 85%)',
-          }}
-        />
-
-        {/* Soft bottom edge blend to the tools strip below */}
+        {/* Soft bottom edge blend */}
         <div
           className="absolute inset-x-0 bottom-0 h-16 pointer-events-none"
           style={{
@@ -52,7 +31,7 @@ export function HeroSection() {
       </div>
 
       {/* ── Main Hero Content Container ── */}
-      <div className="relative z-10 w-full max-w-[1440px] 2xl:max-w-[1560px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-16 py-10 lg:py-16 my-auto flex-1 flex flex-col justify-center">
+      <div className="relative z-10 w-full max-w-[1440px] 2xl:max-w-[1560px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-16 py-12 lg:py-16 my-auto flex-1 flex flex-col justify-center">
         {/* Open corner brackets framed in Cobalt Blue */}
         <div
           aria-hidden="true"
@@ -75,9 +54,9 @@ export function HeroSection() {
           }}
         />
 
-        <div className="grid grid-cols-12 items-center">
+        <div className="grid grid-cols-12 items-center gap-10">
           {/* Left Column: Eyebrow, Stacked Headline, Description, CTAs */}
-          <div className="col-span-12 lg:col-span-7 xl:col-span-6 flex flex-col items-start py-6">
+          <div className="col-span-12 lg:col-span-6 flex flex-col items-start py-6">
             {/* Eyebrow */}
             <p
               className="font-inter font-medium uppercase text-[#FFFFFF]/85 mb-[18px]"
@@ -137,10 +116,33 @@ export function HeroSection() {
             </div>
           </div>
 
-          {/* Right Column: Vertical label MEDIA / WEB / AGENTS */}
-          <div className="hidden lg:flex lg:col-span-5 xl:col-span-6 relative min-h-[380px] xl:min-h-[440px] items-end justify-end pointer-events-none">
+          {/* Right Column: Hero Visual Artwork Placeholder Frame */}
+          <div className="hidden lg:flex lg:col-span-6 relative w-full items-center justify-end">
+            <div className="w-full aspect-[16/10] max-w-[580px] rounded-2xl border border-[#161A24] bg-[#07090E]/60 flex flex-col items-center justify-center p-8 relative overflow-hidden group hover:border-[#2C3480]/50 transition-all duration-300">
+              {/* Corner crosshairs */}
+              <div className="absolute top-3 left-3 text-[#2C3480] text-[10px] font-mono">+</div>
+              <div className="absolute top-3 right-3 text-[#2C3480] text-[10px] font-mono">+</div>
+              <div className="absolute bottom-3 left-3 text-[#2C3480] text-[10px] font-mono">+</div>
+              <div className="absolute bottom-3 right-3 text-[#2C3480] text-[10px] font-mono">+</div>
+
+              {/* Placeholder Content */}
+              <div className="w-12 h-12 rounded-xl bg-[#0C0F17] border border-[#1C2230] flex items-center justify-center text-[#2C3480] mb-3 group-hover:scale-105 transition-transform">
+                <ImageIcon size={22} />
+              </div>
+              <p className="font-mono text-[11px] uppercase tracking-[2px] text-[#FFFFFF] font-medium">
+                HERO ARTWORK PLACEHOLDER
+              </p>
+              <p className="font-inter text-[12px] text-[#7E8597] mt-1 text-center max-w-xs">
+                Awaiting final visual asset upload
+              </p>
+              <div className="mt-4 px-3 py-1 rounded-full bg-[#0C0F17] border border-[#161A24] text-[10px] font-mono text-[#7E8597]">
+                16:9 &bull; Cinematic Artwork Slot
+              </div>
+            </div>
+
+            {/* Vertical label: MEDIA / WEB / AGENTS */}
             <div
-              className="absolute right-0 bottom-8 z-20 flex flex-col items-center select-none"
+              className="absolute -right-8 bottom-4 z-20 flex flex-col items-center select-none"
               style={{ gap: 3 }}
             >
               {[

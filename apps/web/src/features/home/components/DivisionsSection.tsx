@@ -1,13 +1,12 @@
-import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowUpRight } from 'lucide-react'
+import { ArrowUpRight, Camera, Layout, Bot, Image as ImageIcon } from 'lucide-react'
 
 const CARDS = [
   {
     num: '01',
     href: '/media',
-    img: '/images/card-media.png',
-    imgAlt: 'Cinematic camera in warm orange light',
+    icon: Camera,
+    placeholderLabel: 'MEDIA VISUAL PLACEHOLDER',
     title: 'MEDIA',
     desc: 'Production, editing and content that tells your story and gets results.',
     tags: ['Shoot', 'Video Editing', 'Motion Graphics', 'Podcast', 'Graphic Design', 'Content Creation'],
@@ -15,8 +14,8 @@ const CARDS = [
   {
     num: '02',
     href: '/web',
-    img: '/images/card-web.png',
-    imgAlt: 'Dark laptop displaying a modern web interface',
+    icon: Layout,
+    placeholderLabel: 'WEB VISUAL PLACEHOLDER',
     title: 'WEB',
     desc: 'Modern, fast and scalable web experiences for brands and businesses.',
     tags: ['Web Development', 'Web Apps', 'UI/UX', 'E-commerce', 'Extensions', 'Dashboards'],
@@ -24,8 +23,8 @@ const CARDS = [
   {
     num: '03',
     href: '/agents-automation',
-    img: '/images/card-agents.png',
-    imgAlt: 'Illuminated AI keycap with star glyph',
+    icon: Bot,
+    placeholderLabel: 'AGENTS VISUAL PLACEHOLDER',
     title: 'AGENTS &\nAUTOMATION',
     desc: 'AI agents and automation systems that save time, reduce work and scale ops.',
     tags: ['AI Chatbots', 'Voice Agents', 'Custom Agents', 'n8n Workflows', 'Business Automation', 'RAG'],
@@ -93,83 +92,89 @@ export function DivisionsSection() {
 
         {/* Three service cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {CARDS.map((card) => (
-            <div
-              key={card.num}
-              className="group flex flex-col rounded-xl bg-[#07090E] border border-[#161A24] hover:border-[#2C3480] hover:shadow-[0_0_28px_rgba(44,52,128,0.2)] transition-all duration-300 p-5"
-            >
-              {/* Card image */}
+          {CARDS.map((card) => {
+            const Icon = card.icon
+            return (
               <div
-                className="relative w-full rounded-lg bg-[#0C0F17] border border-[#1C2230] mb-5 overflow-hidden"
-                style={{ aspectRatio: '16/10' }}
+                key={card.num}
+                className="group flex flex-col rounded-xl bg-[#07090E] border border-[#161A24] hover:border-[#2C3480] hover:shadow-[0_0_28px_rgba(44,52,128,0.2)] transition-all duration-300 p-5"
               >
-                <Image
-                  src={card.img}
-                  alt={card.imgAlt}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                />
-                {/* Number label */}
-                <span
-                  className="absolute top-3 left-3 z-10 font-inter font-bold text-[#FFFFFF] drop-shadow"
-                  style={{ fontSize: 10 }}
+                {/* Visual Placeholder Canvas (No image files) */}
+                <div
+                  className="relative w-full rounded-lg bg-[#0C0F17] border border-[#1C2230] mb-5 overflow-hidden flex flex-col items-center justify-center p-6 text-center"
+                  style={{ aspectRatio: '16/10' }}
                 >
-                  {card.num}
-                </span>
-                {/* Arrow link */}
-                <Link
-                  href={card.href}
-                  className="absolute top-2.5 right-2.5 z-10 p-1 text-[#7E8597] group-hover:text-[#FFFFFF] transition-colors"
-                >
-                  <ArrowUpRight size={14} />
-                </Link>
-              </div>
-
-              {/* Title */}
-              <h3
-                className="font-manrope font-extrabold uppercase text-[#FFFFFF] mb-1.5 leading-tight"
-                style={{ fontSize: 20, letterSpacing: '0.02em' }}
-              >
-                {card.title.split('\n').map((line, i) => (
-                  <span key={i}>
-                    {i > 0 && <br />}
-                    {line}
-                  </span>
-                ))}
-              </h3>
-
-              {/* Description */}
-              <p
-                className="font-inter font-normal text-[#D1D5DB] mb-5 leading-relaxed flex-1"
-                style={{ fontSize: 12.5 }}
-              >
-                {card.desc}
-              </p>
-
-              {/* Tags */}
-              <div
-                className="flex flex-wrap gap-1.5 pt-3.5"
-                style={{ borderTop: '1px solid #141724' }}
-              >
-                {card.tags.map((tag) => (
+                  {/* Number label */}
                   <span
-                    key={tag}
-                    className="font-inter font-medium text-[#D1D5DB]"
-                    style={{
-                      fontSize: 10,
-                      padding: '2px 10px',
-                      borderRadius: 999,
-                      border: '1px solid #1C2230',
-                      backgroundColor: '#07090E',
-                    }}
+                    className="absolute top-3 left-3 z-10 font-mono text-[10px] font-bold text-[#FFFFFF]"
                   >
-                    {tag}
+                    {card.num}
                   </span>
-                ))}
+                  {/* Arrow link */}
+                  <Link
+                    href={card.href}
+                    className="absolute top-2.5 right-2.5 z-10 p-1 text-[#7E8597] group-hover:text-[#FFFFFF] transition-colors"
+                  >
+                    <ArrowUpRight size={14} />
+                  </Link>
+
+                  {/* Centered placeholder emblem */}
+                  <div className="w-9 h-9 rounded-lg bg-[#07090E] border border-[#161A24] flex items-center justify-center text-[#2C3480] mb-2 group-hover:scale-105 transition-transform">
+                    <Icon size={18} />
+                  </div>
+                  <p className="font-mono text-[9.5px] uppercase tracking-[1.5px] text-[#7E8597]">
+                    {card.placeholderLabel}
+                  </p>
+                  <span className="text-[9px] font-mono text-[#4E5569] mt-0.5">
+                    Awaiting asset
+                  </span>
+                </div>
+
+                {/* Title */}
+                <h3
+                  className="font-manrope font-extrabold uppercase text-[#FFFFFF] mb-1.5 leading-tight"
+                  style={{ fontSize: 20, letterSpacing: '0.02em' }}
+                >
+                  {card.title.split('\n').map((line, i) => (
+                    <span key={i}>
+                      {i > 0 && <br />}
+                      {line}
+                    </span>
+                  ))}
+                </h3>
+
+                {/* Description */}
+                <p
+                  className="font-inter font-normal text-[#D1D5DB] mb-5 leading-relaxed flex-1"
+                  style={{ fontSize: 12.5 }}
+                >
+                  {card.desc}
+                </p>
+
+                {/* Tags */}
+                <div
+                  className="flex flex-wrap gap-1.5 pt-3.5"
+                  style={{ borderTop: '1px solid #141724' }}
+                >
+                  {card.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="font-inter font-medium text-[#D1D5DB]"
+                      style={{
+                        fontSize: 10,
+                        padding: '2px 10px',
+                        borderRadius: 999,
+                        border: '1px solid #1C2230',
+                        backgroundColor: '#07090E',
+                      }}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </div>
     </section>

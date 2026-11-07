@@ -1,12 +1,11 @@
-import Image from 'next/image'
-import { Zap, Layers, TrendingUp } from 'lucide-react'
+import { Zap, Layers, TrendingUp, Image as ImageIcon } from 'lucide-react'
 
 export function PhilosophyBanner() {
   return (
     <section className="bg-[#000000] py-10">
       <div className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-16">
         <div
-          className="relative rounded-2xl overflow-hidden group hover:border-[#2C3480]/60 transition-all duration-300"
+          className="relative rounded-2xl overflow-hidden group hover:border-[#2C3480]/60 transition-all duration-300 flex flex-col md:flex-row items-center justify-between"
           style={{
             background: '#07090E',
             border: '1px solid #161A24',
@@ -25,7 +24,7 @@ export function PhilosophyBanner() {
           {/* Left content */}
           <div
             className="relative z-10 flex flex-col justify-center"
-            style={{ padding: '36px 44px', maxWidth: 520 }}
+            style={{ padding: '36px 44px', maxWidth: 540 }}
           >
             <p
               className="font-inter font-medium uppercase text-[#7E8597] mb-2"
@@ -59,20 +58,19 @@ export function PhilosophyBanner() {
             </div>
           </div>
 
-          {/* Right mountain image — absolutely positioned */}
-          <div className="absolute inset-y-0 right-0 w-[48%] md:w-[45%] hidden md:block">
-            <div
-              aria-hidden="true"
-              className="absolute inset-y-0 left-0 w-32 z-10 pointer-events-none"
-              style={{ background: 'linear-gradient(to right, #07090E, transparent)' }}
-            />
-            <Image
-              src="/images/banner-mountains.png"
-              alt="Dramatic monochrome mountain peak"
-              fill
-              className="object-cover object-center"
-              sizes="45vw"
-            />
+          {/* Right Placeholder Visual Slot (No image files) */}
+          <div className="hidden md:flex w-[40%] self-stretch items-center justify-center p-8 border-l border-[#161A24] bg-[#0C0F17]/50 relative">
+            <div className="text-center space-y-2">
+              <div className="w-10 h-10 rounded-xl bg-[#07090E] border border-[#161A24] flex items-center justify-center text-[#2C3480] mx-auto">
+                <ImageIcon size={18} />
+              </div>
+              <p className="font-mono text-[10px] uppercase tracking-[1.5px] text-[#7E8597]">
+                BANNER VISUAL PLACEHOLDER
+              </p>
+              <span className="text-[9px] font-mono text-[#4E5569] block">
+                Awaiting landscape / studio asset
+              </span>
+            </div>
           </div>
         </div>
       </div>
