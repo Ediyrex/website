@@ -28,3 +28,4 @@ export function sendError(
   }
   return res.status(statusCode).json(payload)
 }
+

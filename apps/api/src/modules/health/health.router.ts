@@ -11,3 +11,4 @@ healthRouter.get('/health', (_req, res) => {
     uptime: process.uptime(),
   })
 })
+

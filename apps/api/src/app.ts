@@ -55,3 +55,4 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error('[API Unhandled Error]:', err)
   sendError(res, 'Internal server error', 500)
 })
+

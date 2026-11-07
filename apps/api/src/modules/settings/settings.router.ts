@@ -36,3 +36,4 @@ settingsRouter.patch('/admin/settings', (req, res) => {
   }
   sendSuccess(res, currentSettings)
 })
+

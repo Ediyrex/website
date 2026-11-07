@@ -39,3 +39,4 @@ authRouter.get('/auth/me', (_req, res) => {
 authRouter.post('/auth/logout', (_req, res) => {
   sendSuccess(res, { loggedOut: true })
 })
+

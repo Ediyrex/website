@@ -84,3 +84,4 @@ projectsRouter.get('/projects/:slug', (req, res) => {
 projectsRouter.get('/admin/projects', (_req, res) => {
   sendSuccess(res, PROJECTS_SEED)
 })
+

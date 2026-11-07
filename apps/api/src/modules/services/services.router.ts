@@ -33,3 +33,4 @@ servicesRouter.get('/services/divisions', (_req, res) => {
 servicesRouter.get('/services', (_req, res) => {
   sendSuccess(res, SERVICE_DIVISIONS)
 })
+
