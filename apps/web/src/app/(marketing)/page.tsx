@@ -2,9 +2,11 @@ import type { Metadata } from 'next'
 import {
   HeroSection,
   SocialProofBar,
-  DivisionsSection,
-  PhilosophyBanner,
-  EditorialCtaSection,
+  AboutBriefSection,
+  ServicesBriefSection,
+  RecentWorkBriefSection,
+  ReviewsBriefSection,
+  ContactBriefSection,
 } from '@/features/home/components'
 
 export const metadata: Metadata = {
@@ -18,9 +20,11 @@ export default function HomePage() {
     <>
       <HeroSection />
       <SocialProofBar />
-      <DivisionsSection />
-      <PhilosophyBanner />
-      <EditorialCtaSection />
+      <AboutBriefSection />
+      <ServicesBriefSection />
+      <RecentWorkBriefSection />
+      <ReviewsBriefSection />
+      <ContactBriefSection />
     </>
   )
 }
