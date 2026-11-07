@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Manrope, Inter } from 'next/font/google'
 import '@/styles/globals.css'
-import { Header } from '@/shared/components/layout'
+import { Header, Footer } from '@/shared/components/layout'
 
 const manrope = Manrope({
   subsets: ['latin'],
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#08090B',
+  themeColor: '#000000',
   colorScheme: 'dark',
   width: 'device-width',
   initialScale: 1,
@@ -36,11 +36,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="en"
       className={`scroll-smooth ${manrope.variable} ${inter.variable}`}
     >
-      <body className="antialiased bg-[#08090B] text-[#F5F3EE] font-sans selection:bg-[#E87520]/30 selection:text-white min-h-screen">
+      <body className="antialiased bg-[#000000] text-[#FFFFFF] font-sans selection:bg-[#2C3480] selection:text-[#FFFFFF] min-h-screen flex flex-col">
         <Header />
-        <main>
+        <main className="flex-1">
           {children}
         </main>
+        <Footer />
       </body>
     </html>
   )

@@ -17,7 +17,7 @@ export function Header() {
   const pathname = usePathname()
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-[#000000]/85 backdrop-blur-md border-b border-white/[0.08]">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-[#000000]/90 backdrop-blur-md border-b border-neutral-800">
       <div className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-16 flex items-center justify-between h-[72px]">
         {/* Left wordmark: EDIYREX® */}
         <Link href="/" className="flex items-center group">
@@ -43,7 +43,7 @@ export function Header() {
                 className={`font-inter font-medium text-[12px] tracking-wide transition-colors duration-200 relative py-1 ${
                   isActive
                     ? 'text-[#FFFFFF] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[1.5px] after:bg-[#2C3480]'
-                    : 'text-zinc-400 hover:text-[#FFFFFF]'
+                    : 'text-neutral-400 hover:text-[#FFFFFF]'
                 }`}
               >
                 {item.label}
@@ -56,10 +56,10 @@ export function Header() {
         <div className="flex items-center">
           <Link
             href="/contact"
-            className="inline-flex items-center justify-center gap-1.5 px-4 h-[35px] rounded-[10px] border border-white/[0.12] hover:border-[#2C3480] bg-white/[0.03] hover:bg-[#2C3480]/15 text-[#FFFFFF] font-inter font-medium text-[11.5px] transition-all duration-200 group"
+            className="inline-flex items-center justify-center gap-1.5 px-4 h-[36px] rounded-md border border-neutral-700 hover:border-white text-[#FFFFFF] hover:bg-white hover:text-black font-inter font-medium text-[11.5px] transition-colors duration-200 group"
           >
             <span>Start a Project</span>
-            <ArrowUpRight size={13} className="text-zinc-400 group-hover:text-white transition-colors" />
+            <ArrowUpRight size={13} className="text-neutral-400 group-hover:text-black transition-colors" />
           </Link>
         </div>
       </div>
