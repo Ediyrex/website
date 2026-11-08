@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { ArrowUpRight, Code2, Layout, Database, ShieldCheck, Gauge, Layers, Cpu } from 'lucide-react'
+import { ArrowUpRight, Code2, Layout, Database, ShieldCheck, Gauge, Layers } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'Web & Digital Engineering — EDIYREX®',
@@ -55,34 +55,37 @@ const TECH_STACK = [
 
 export default function WebPage() {
   return (
-    <div className="bg-[#08090B] min-h-screen text-[#F5F3EE] pt-[72px]">
+    <div className="bg-[#0B0C10] min-h-screen text-[#EAEAEA] pt-[82px]">
       {/* ── Hero Section ── */}
-      <section className="relative overflow-hidden py-20 lg:py-28 border-b border-[#292929]/70">
+      <section className="relative overflow-hidden py-20 lg:py-28 border-b border-white/[0.08]">
         <div className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-16">
           <div className="max-w-3xl">
-            <p className="font-inter font-medium text-[10.5px] tracking-[2px] uppercase text-[#7BA9F5] mb-4">
-              DIVISION 02 — WEB & DIGITAL
-            </p>
-            <h1 className="font-manrope font-extrabold text-[42px] sm:text-[56px] lg:text-[68px] leading-[0.96] tracking-[-2.5px] uppercase mb-6">
+            <div className="inline-flex items-center gap-2 mb-4">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#00E5FF] shadow-[0_0_8px_#00E5FF]" />
+              <p className="font-mono text-[10.5px] tracking-[2px] uppercase text-[#00E5FF]">
+                DIVISION 02 // WEB &amp; DIGITAL
+              </p>
+            </div>
+            <h1 className="font-manrope font-semibold text-[42px] sm:text-[56px] lg:text-[68px] leading-[0.98] tracking-[-0.035em] text-[#00E5FF] mb-6 drop-shadow-[0_0_35px_rgba(0,229,255,0.15)]">
               SCALABLE DIGITAL EXPERIENCES.
               <br />
-              <span className="text-[#7BA9F5]">ENGINEERED</span> FOR IMPACT.
+              <span className="text-[#EAEAEA]">ENGINEERED FOR IMPACT.</span>
             </h1>
-            <p className="font-inter text-[#B2B4BA] text-[15px] sm:text-[16px] leading-relaxed max-w-2xl mb-8">
+            <p className="font-inter text-[#999999] text-[15px] sm:text-[16px] leading-relaxed max-w-2xl mb-8">
               We design and build modern digital products, responsive web applications, and high-performance online experiences. 
               Built with clean TypeScript architecture, accessible semantic code, and uncompromising aesthetic execution.
             </p>
             <div className="flex flex-wrap items-center gap-4">
               <Link
                 href="/contact?division=web"
-                className="inline-flex items-center justify-center gap-2 px-6 h-[42px] rounded-[10px] bg-[#F5F3EE] hover:bg-white text-[#17130B] font-inter font-semibold text-[12px] transition-colors"
+                className="inline-flex items-center justify-center gap-2 px-6 h-[44px] rounded-md bg-[#39FF14] hover:bg-[#32e012] text-[#0B0C10] font-mono font-semibold text-[12px] uppercase tracking-wider transition-all shadow-[0_0_20px_rgba(57,255,20,0.25)] group"
               >
                 <span>Start a Web Project</span>
-                <ArrowUpRight size={14} strokeWidth={2.5} />
+                <ArrowUpRight size={14} className="text-[#0B0C10] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
               </Link>
               <Link
-                href="/work?division=web"
-                className="inline-flex items-center gap-2 px-5 h-[42px] rounded-[10px] border border-[#3A414B] hover:border-[#F5F3EE] text-[#F5F3EE] font-inter font-medium text-[12px] transition-colors"
+                href="/work?division=digital"
+                className="inline-flex items-center gap-2 px-5 h-[44px] rounded-md border border-white/[0.15] hover:border-[#00E5FF] text-[#EAEAEA] hover:text-[#00E5FF] font-mono text-[12px] uppercase tracking-wider transition-colors"
               >
                 <span>View Digital Work</span>
               </Link>
@@ -92,18 +95,18 @@ export default function WebPage() {
       </section>
 
       {/* ── Capabilities Grid ── */}
-      <section className="py-20 border-b border-[#292929]/60">
+      <section className="py-20 border-b border-white/[0.08]">
         <div className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-16">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-14 gap-6">
             <div>
-              <p className="font-inter font-medium text-[10px] tracking-[2px] uppercase text-[#777D87] mb-2">
+              <p className="font-mono text-[10px] tracking-[2px] uppercase text-[#00E5FF] mb-2">
                 CORE CAPABILITIES
               </p>
-              <h2 className="font-manrope font-extrabold text-[32px] sm:text-[42px] leading-tight uppercase">
-                WEB DEVELOPMENT & PRODUCT DESIGN
+              <h2 className="font-manrope font-semibold text-[32px] sm:text-[42px] leading-tight text-[#00E5FF]">
+                WEB DEVELOPMENT &amp; PRODUCT DESIGN
               </h2>
             </div>
-            <p className="font-inter text-[#B2B4BA] text-[13.5px] max-w-md leading-relaxed">
+            <p className="font-inter text-[#999999] text-[13.5px] max-w-md leading-relaxed">
               Every project is engineered for long-term scalability, strict type safety, and blazing fast performance.
             </p>
           </div>
@@ -114,24 +117,24 @@ export default function WebPage() {
               return (
                 <div
                   key={idx}
-                  className="rounded-xl bg-[#0D0F12] border border-[#252A32] hover:border-[#7BA9F5]/50 transition-all duration-300 p-6 flex flex-col justify-between group"
+                  className="rounded-xl bg-[#12141A] border border-white/[0.08] hover:border-[#00E5FF]/40 transition-all duration-300 p-6 flex flex-col justify-between group"
                 >
                   <div>
-                    <div className="w-10 h-10 rounded-lg bg-[#141820] border border-[#252A32] flex items-center justify-center text-[#7BA9F5] mb-5 group-hover:scale-105 transition-transform">
+                    <div className="w-10 h-10 rounded-lg bg-[#0B0C10] border border-white/[0.08] flex items-center justify-center text-[#00E5FF] mb-5 group-hover:scale-105 transition-transform">
                       <Icon size={18} />
                     </div>
-                    <h3 className="font-manrope font-bold text-[18px] uppercase text-[#F5F3EE] mb-2">
+                    <h3 className="font-manrope font-semibold text-[18px] text-[#EAEAEA] group-hover:text-[#00E5FF] transition-colors mb-2">
                       {srv.title}
                     </h3>
-                    <p className="font-inter text-[#B2B4BA] text-[13px] leading-relaxed mb-6">
+                    <p className="font-inter text-[#999999] text-[13px] leading-relaxed mb-6">
                       {srv.desc}
                     </p>
                   </div>
-                  <div className="flex flex-wrap gap-1.5 pt-4 border-t border-[#1C2028]">
+                  <div className="flex flex-wrap gap-1.5 pt-4 border-t border-white/[0.06]">
                     {srv.tags.map((tag) => (
                       <span
                         key={tag}
-                        className="text-[10px] font-inter text-[#8C92A4] px-2.5 py-0.5 rounded-full border border-[#252A32]"
+                        className="text-[10px] font-mono text-[#00E5FF] opacity-80 px-2.5 py-0.5 rounded-full border border-[#00E5FF]/20 bg-[#00E5FF]/5"
                       >
                         {tag}
                       </span>
@@ -145,13 +148,13 @@ export default function WebPage() {
       </section>
 
       {/* ── Technology Architecture ── */}
-      <section className="py-20 border-b border-[#292929]/60">
+      <section className="py-20 border-b border-white/[0.08]">
         <div className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-16">
           <div className="mb-14">
-            <p className="font-inter font-medium text-[10px] tracking-[2px] uppercase text-[#777D87] mb-2">
+            <p className="font-mono text-[10px] tracking-[2px] uppercase text-[#00E5FF] mb-2">
               FOUNDATIONS
             </p>
-            <h2 className="font-manrope font-extrabold text-[32px] sm:text-[42px] leading-tight uppercase">
+            <h2 className="font-manrope font-semibold text-[32px] sm:text-[42px] leading-tight text-[#00E5FF]">
               OUR TECHNOLOGY STACK
             </h2>
           </div>
@@ -160,15 +163,15 @@ export default function WebPage() {
             {TECH_STACK.map((col) => (
               <div
                 key={col.category}
-                className="rounded-xl bg-[#0D0F12] border border-[#252A32] p-6"
+                className="rounded-xl bg-[#12141A] border border-white/[0.08] p-6 hover:border-[#00E5FF]/40 transition-colors"
               >
-                <h3 className="font-manrope font-bold text-[15px] uppercase text-[#7BA9F5] mb-4">
+                <h3 className="font-mono font-semibold text-[14px] uppercase text-[#00E5FF] mb-4">
                   {col.category}
                 </h3>
                 <ul className="space-y-2.5">
                   {col.items.map((item) => (
-                    <li key={item} className="flex items-center gap-2 text-[13px] text-[#D0CFCC] font-inter">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#3A414B]" />
+                    <li key={item} className="flex items-center gap-2 text-[13px] text-[#999999] font-inter">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#00E5FF] opacity-60" />
                       <span>{item}</span>
                     </li>
                   ))}
@@ -180,24 +183,23 @@ export default function WebPage() {
       </section>
 
       {/* ── Closing Callout ── */}
-      <section className="py-20 bg-[#0A0C0F]">
+      <section className="py-20 bg-[#0B0C10]">
         <div className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-16 text-center">
-          <h2 className="font-manrope font-extrabold text-[32px] sm:text-[46px] uppercase text-[#F5F3EE] mb-4">
+          <h2 className="font-manrope font-semibold text-[32px] sm:text-[46px] text-[#00E5FF] mb-4">
             READY TO BUILD YOUR DIGITAL PRODUCT?
           </h2>
-          <p className="font-inter text-[#B2B4BA] text-[14px] max-w-lg mx-auto mb-8">
+          <p className="font-inter text-[#999999] text-[14px] max-w-lg mx-auto mb-8">
             Whether you need a bespoke marketing website or a full-stack SaaS platform, let us architect the right solution.
           </p>
           <Link
             href="/contact?division=web"
-            className="inline-flex items-center gap-2 px-7 h-[44px] rounded-[10px] bg-[#F5F3EE] hover:bg-white text-[#17130B] font-inter font-semibold text-[12px] uppercase tracking-wide transition-colors"
+            className="inline-flex items-center gap-2 px-7 h-[44px] rounded-md bg-[#39FF14] hover:bg-[#32e012] text-[#0B0C10] font-mono font-semibold text-[12px] uppercase tracking-wide transition-all shadow-[0_0_20px_rgba(57,255,20,0.25)] group"
           >
             <span>Start a Project</span>
-            <ArrowUpRight size={14} strokeWidth={2.5} />
+            <ArrowUpRight size={14} className="text-[#0B0C10] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
           </Link>
         </div>
       </section>
     </div>
   )
 }
-

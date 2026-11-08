@@ -26,7 +26,7 @@ export function ServiceIndex() {
   return (
     <div className="w-full mt-16 md:mt-20 pt-8 border-t border-white/[0.10]">
       {/* Editorial Table of Contents Header */}
-      <div className="flex items-center justify-between pb-4 text-[#666666] font-mono text-[10px] uppercase tracking-[0.2em]">
+      <div className="flex items-center justify-between pb-4 text-[#00E5FF] font-mono text-[10px] uppercase tracking-[0.2em] opacity-80">
         <span>SERVICE INDEX // 01 &mdash; 03</span>
         <span>DISCIPLINES</span>
       </div>
@@ -39,18 +39,18 @@ export function ServiceIndex() {
             href={service.href}
             className="group relative flex flex-col md:flex-row md:items-center justify-between py-5 md:py-6 transition-all duration-200"
           >
-            {/* Subtle left accent highlight on hover */}
+            {/* Subtle left accent highlight on hover (Electric Cyan) */}
             <span
-              className="absolute left-0 top-0 bottom-0 w-[2px] bg-[#2C3480] opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+              className="absolute left-0 top-0 bottom-0 w-[2px] bg-[#00E5FF] shadow-[0_0_8px_#00E5FF] opacity-0 group-hover:opacity-100 transition-opacity duration-200"
               aria-hidden="true"
             />
 
-            {/* Left: Number + Title */}
+            {/* Left: Number (Cyan Mono) + Title (Header) */}
             <div className="flex items-baseline gap-6 md:gap-10 pl-2 group-hover:pl-4 transition-all duration-200">
-              <span className="font-mono text-xs md:text-[13px] text-[#666666] group-hover:text-[#EAEAEA] transition-colors">
+              <span className="font-mono text-xs md:text-[13px] text-[#00E5FF] font-semibold">
                 {service.num}
               </span>
-              <h3 className="font-manrope font-medium text-base md:text-lg text-[#EAEAEA] group-hover:text-white transition-colors tracking-tight">
+              <h3 className="font-manrope font-medium text-base md:text-lg text-[#EAEAEA] group-hover:text-[#00E5FF] transition-colors tracking-tight">
                 {service.title}
               </h3>
             </div>
@@ -60,7 +60,7 @@ export function ServiceIndex() {
               <p className="font-inter text-xs md:text-[13px] text-[#999999] group-hover:text-[#CCCCCC] transition-colors max-w-sm">
                 {service.desc}
               </p>
-              <div className="w-8 h-8 rounded-full flex items-center justify-center text-[#666666] group-hover:text-white group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-all duration-200 shrink-0">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center text-[#666666] group-hover:text-[#39FF14] group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-all duration-200 shrink-0">
                 <ArrowUpRight size={15} />
               </div>
             </div>
@@ -70,3 +70,4 @@ export function ServiceIndex() {
     </div>
   )
 }
+

@@ -51,7 +51,6 @@ export default function WorkPage() {
       .then((res) => res.json())
       .then((json) => {
         if (json.success && json.data && json.data.length > 0) {
-          // Merge API data with case study details
           const merged = json.data.map((apiProj: any) => {
             const seedMatch = PROJECTS_DATA.find((s) => s.slug === apiProj.slug)
             if (seedMatch) return { ...seedMatch, ...apiProj }
@@ -94,19 +93,19 @@ export default function WorkPage() {
       : projects.filter((p) => p.division === activeFilter || (p.division === 'hybrid' && activeFilter === 'digital'))
 
   return (
-    <div className="bg-[#000000] pt-28 pb-24 text-white">
+    <div className="bg-[#0B0C10] pt-28 pb-24 text-[#EAEAEA]">
       {/* Top Banner */}
-      <section className="pt-8 pb-16 border-b border-neutral-800">
+      <section className="pt-8 pb-16 border-b border-white/[0.08]">
         <div className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-16">
           <div className="inline-flex items-center gap-2 mb-4">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#2C3480]" />
-            <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-neutral-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#00E5FF] shadow-[0_0_8px_#00E5FF]" />
+            <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-[#00E5FF]">
               PORTFOLIO &amp; CASE ARCHIVE
             </span>
           </div>
 
           <h1
-            className="font-manrope font-extrabold uppercase text-3xl sm:text-5xl lg:text-6xl tracking-tight text-white max-w-4xl"
+            className="font-manrope font-semibold text-3xl sm:text-5xl lg:text-6xl tracking-[-0.035em] text-[#00E5FF] max-w-4xl drop-shadow-[0_0_35px_rgba(0,229,255,0.15)]"
             style={{ lineHeight: 1.05 }}
           >
             OUR WORK ACROSS
@@ -114,11 +113,11 @@ export default function WorkPage() {
             THREE INTEGRATED DISCIPLINES.
           </h1>
 
-          <p className="font-inter text-neutral-400 text-base max-w-2xl mt-5 leading-relaxed">
+          <p className="font-inter text-[#999999] text-base max-w-2xl mt-5 leading-relaxed">
             Select a specific discipline below to explore dedicated capabilities, or browse our comprehensive case study archive synced directly with our studio CMS.
           </p>
 
-          {/* Division Gateway Cards: On clicking takes to the particular division */}
+          {/* Division Gateway Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
             {DIVISION_PORTFOLIOS.map((item) => {
               const Icon = item.icon
@@ -126,36 +125,36 @@ export default function WorkPage() {
                 <Link
                   key={item.title}
                   href={item.slug}
-                  className="group flex flex-col justify-between rounded-xl bg-[#080808] border border-neutral-800 p-7 hover:border-neutral-500 transition-colors duration-200"
+                  className="group flex flex-col justify-between rounded-xl bg-[#12141A] border border-white/[0.08] p-7 hover:border-[#00E5FF]/40 transition-colors duration-200"
                 >
                   <div>
-                    <div className="flex items-center justify-between pb-4 mb-4 border-b border-neutral-800">
-                      <div className="w-9 h-9 rounded-lg border border-neutral-800 flex items-center justify-center text-neutral-300 group-hover:text-white group-hover:border-neutral-600 transition-colors">
+                    <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/[0.06]">
+                      <div className="w-9 h-9 rounded-lg border border-white/[0.08] bg-[#0B0C10] flex items-center justify-center text-[#00E5FF] group-hover:scale-105 transition-transform">
                         <Icon size={17} />
                       </div>
-                      <div className="flex items-center gap-1 font-mono text-xs text-neutral-400 group-hover:text-white transition-colors">
+                      <div className="flex items-center gap-1 font-mono text-xs text-[#999999] group-hover:text-[#39FF14] transition-colors">
                         <span>Explore</span>
                         <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                       </div>
                     </div>
 
-                    <h2 className="font-manrope font-bold text-lg text-white mb-2">
+                    <h2 className="font-manrope font-semibold text-lg text-[#EAEAEA] group-hover:text-[#00E5FF] transition-colors mb-2">
                       {item.title}
                     </h2>
-                    <p className="font-inter text-xs text-neutral-400 leading-relaxed mb-6">
+                    <p className="font-inter text-xs text-[#999999] leading-relaxed mb-6">
                       {item.description}
                     </p>
                   </div>
 
-                  <div className="pt-4 border-t border-neutral-800">
-                    <p className="font-mono text-[11px] text-neutral-300 font-medium mb-3">
+                  <div className="pt-4 border-t border-white/[0.06]">
+                    <p className="font-mono text-[11px] text-[#00E5FF] font-medium mb-3">
                       Impact: {item.highlight}
                     </p>
                     <div className="flex flex-wrap gap-1">
                       {item.deliverables.map((del) => (
                         <span
                           key={del}
-                          className="font-mono text-[10px] px-2 py-0.5 rounded bg-[#000000] border border-neutral-800 text-neutral-400"
+                          className="font-mono text-[10px] px-2 py-0.5 rounded bg-[#0B0C10] border border-[#00E5FF]/20 text-[#00E5FF] opacity-80"
                         >
                           {del}
                         </span>
@@ -167,9 +166,9 @@ export default function WorkPage() {
             })}
           </div>
 
-          {/* Filter Tabs for Individual Projects */}
-          <div className="mt-16 flex flex-wrap items-center justify-between gap-4 pt-10 border-t border-neutral-800">
-            <h2 className="font-manrope font-bold text-xl text-white">
+          {/* Filter Tabs for Individual Projects (Neon Lime for active filter) */}
+          <div className="mt-16 flex flex-wrap items-center justify-between gap-4 pt-10 border-t border-white/[0.08]">
+            <h2 className="font-manrope font-semibold text-xl text-[#00E5FF]">
               Featured Case Studies
             </h2>
 
@@ -181,10 +180,10 @@ export default function WorkPage() {
                     key={tab.value}
                     type="button"
                     onClick={() => setActiveFilter(tab.value)}
-                    className={`px-4 py-2 rounded-md text-xs font-mono uppercase tracking-wider transition-colors cursor-pointer ${
+                    className={`px-4 py-2 rounded-md text-xs font-mono uppercase tracking-wider transition-all duration-200 cursor-pointer ${
                       isActive
-                        ? 'bg-white text-black font-semibold'
-                        : 'bg-[#080808] text-neutral-400 border border-neutral-800 hover:text-white hover:border-neutral-600'
+                        ? 'bg-[#39FF14] text-[#0B0C10] font-bold shadow-[0_0_15px_rgba(57,255,20,0.3)]'
+                        : 'bg-[#12141A] text-[#999999] border border-white/[0.08] hover:text-[#00E5FF] hover:border-[#00E5FF]/40'
                     }`}
                   >
                     {tab.label}
@@ -199,7 +198,7 @@ export default function WorkPage() {
       {/* Projects Grid */}
       <section className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-16 pt-14">
         {filteredProjects.length === 0 ? (
-          <div className="py-20 text-center text-neutral-500 font-mono text-sm">
+          <div className="py-20 text-center text-[#666666] font-mono text-sm">
             No case studies found under this category filter.
           </div>
         ) : (

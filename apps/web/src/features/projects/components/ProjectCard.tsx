@@ -17,24 +17,24 @@ export function ProjectCard({ project }: ProjectCardProps) {
       : '/services'
 
   return (
-    <article className="group flex flex-col justify-between rounded-xl bg-[#080808] border border-neutral-800 overflow-hidden hover:border-neutral-500 transition-colors duration-200">
+    <article className="group flex flex-col justify-between rounded-xl bg-[#12141A] border border-white/[0.08] overflow-hidden hover:border-[#00E5FF]/40 transition-colors duration-200">
       {/* Header Bar */}
-      <div className="p-6 md:p-8 border-b border-neutral-800 flex items-center justify-between">
+      <div className="p-6 md:p-8 border-b border-white/[0.06] flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link
             href={divisionRoute}
-            className="font-mono text-[10px] uppercase tracking-wider px-2.5 py-1 rounded bg-[#000000] border border-neutral-800 text-neutral-400 hover:text-white hover:border-neutral-600 transition-colors"
+            className="font-mono text-[10px] uppercase tracking-wider px-2.5 py-1 rounded bg-[#0B0C10] border border-[#00E5FF]/20 text-[#00E5FF] hover:border-[#00E5FF] transition-colors"
           >
             {project.divisionLabel} ↗
           </Link>
-          <span className="font-mono text-xs text-neutral-500">
+          <span className="font-mono text-xs text-[#666666]">
             {project.year}
           </span>
         </div>
 
         <Link
           href={`/work/${project.slug}`}
-          className="w-8 h-8 rounded-md border border-neutral-800 flex items-center justify-center text-neutral-400 group-hover:text-white group-hover:border-white transition-colors"
+          className="w-8 h-8 rounded-md border border-white/[0.10] flex items-center justify-center text-[#999999] group-hover:text-[#39FF14] group-hover:border-[#39FF14]/40 transition-colors"
           aria-label={`View ${project.title}`}
         >
           <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
@@ -44,26 +44,26 @@ export function ProjectCard({ project }: ProjectCardProps) {
       {/* Main Content */}
       <div className="p-6 md:p-8 flex-1 flex flex-col justify-between">
         <div>
-          <p className="font-mono text-[11px] uppercase tracking-wider text-neutral-400 mb-2">
-            Client: <span className="text-white">{project.client}</span>
+          <p className="font-mono text-[11px] uppercase tracking-wider text-[#666666] mb-2">
+            Client: <span className="text-[#EAEAEA]">{project.client}</span>
           </p>
           <Link href={`/work/${project.slug}`}>
-            <h3 className="font-manrope font-bold text-xl md:text-2xl text-white hover:text-neutral-300 transition-colors leading-tight mb-3">
+            <h3 className="font-manrope font-semibold text-xl md:text-2xl text-[#EAEAEA] group-hover:text-[#00E5FF] transition-colors leading-tight mb-3">
               {project.title}
             </h3>
           </Link>
-          <p className="font-inter text-sm text-neutral-400 leading-relaxed mb-6">
+          <p className="font-inter text-sm text-[#999999] leading-relaxed mb-6">
             {project.overview}
           </p>
 
           {/* Results strip */}
-          <div className="grid grid-cols-2 gap-4 py-4 border-y border-neutral-800/80 mb-6">
+          <div className="grid grid-cols-2 gap-4 py-4 border-y border-white/[0.06] mb-6">
             {project.results.slice(0, 2).map((res, i) => (
               <div key={i}>
-                <p className="font-mono text-lg font-bold text-white">
+                <p className="font-mono text-lg font-semibold text-[#00E5FF]">
                   {res.metric}
                 </p>
-                <p className="font-inter text-xs text-neutral-400 mt-0.5">
+                <p className="font-inter text-xs text-[#666666] mt-0.5">
                   {res.label}
                 </p>
               </div>
@@ -77,28 +77,25 @@ export function ProjectCard({ project }: ProjectCardProps) {
             {project.technologies.slice(0, 4).map((tech) => (
               <span
                 key={tech}
-                className="font-mono text-[10.5px] px-2 py-0.5 rounded bg-[#000000] border border-neutral-800 text-neutral-400"
+                className="font-mono text-[10.5px] px-2 py-0.5 rounded bg-[#0B0C10] border border-[#00E5FF]/20 text-[#00E5FF] opacity-80"
               >
                 {tech}
               </span>
             ))}
           </div>
 
-          <div className="flex items-center justify-between pt-4 border-t border-neutral-800 text-xs">
+          <div className="pt-4 border-t border-white/[0.06] flex items-center justify-between">
             <Link
               href={`/work/${project.slug}`}
-              className="font-inter font-medium text-white hover:underline flex items-center gap-1"
+              className="inline-flex items-center gap-1.5 font-inter font-medium text-xs text-[#EAEAEA] hover:text-[#39FF14] transition-colors group/link"
             >
-              <span>Read Case Study</span>
-              <ArrowUpRight size={12} />
+              <span>Explore Full Case Study</span>
+              <ArrowUpRight size={13} className="group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform" />
             </Link>
 
-            <Link
-              href={divisionRoute}
-              className="font-mono text-neutral-400 hover:text-white transition-colors"
-            >
-              View More in {project.division === 'media' ? 'Media' : project.division === 'digital' ? 'Web' : 'AI'} &rarr;
-            </Link>
+            <span className="font-mono text-[10px] text-[#666666] uppercase">
+              STUDIO CASE ARCHIVE
+            </span>
           </div>
         </div>
       </div>

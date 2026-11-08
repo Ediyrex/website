@@ -8,9 +8,10 @@ export function HeroScrollIndicator() {
       <div className="flex items-center gap-2">
         <span>SCROLL TO EXPLORE</span>
         <div className="w-3 h-3 flex items-center justify-center">
-          <span className="w-1 h-1 rounded-full bg-[#666666] animate-pulse" />
+          <span className="w-1.5 h-1.5 rounded-full bg-[#00E5FF] shadow-[0_0_6px_#00E5FF] animate-pulse" />
         </div>
       </div>
     </div>
   )
 }
+

@@ -30,24 +30,24 @@ const CURATED_REVIEWS = [
 
 export function ReviewsBriefSection() {
   return (
-    <section className="bg-[#080808] py-20 border-t border-white/[0.08]">
+    <section className="bg-[#0B0C10] py-20 border-t border-white/[0.08]">
       <div className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-16">
         
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
           <div>
             <div className="inline-flex items-center gap-2 mb-3">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#2C3480]" />
-              <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-[#999999]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#00E5FF] shadow-[0_0_8px_#00E5FF]" />
+              <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-[#00E5FF]">
                 CLIENT REPUTATION &middot; TESTIMONIALS
               </span>
             </div>
             <div className="flex items-center gap-3">
-              <h2 className="font-manrope font-semibold text-2xl sm:text-4xl text-[#EAEAEA] tracking-tight">
+              <h2 className="font-manrope font-semibold text-2xl sm:text-4xl text-[#00E5FF] tracking-tight drop-shadow-[0_0_30px_rgba(0,229,255,0.12)]">
                 VERIFIED CLIENT IMPACT.
               </h2>
-              <div className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded bg-[#111111] border border-white/[0.08] text-xs font-mono text-[#EAEAEA]">
-                <Star size={11} className="fill-[#EAEAEA] stroke-[#EAEAEA]" />
+              <div className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded bg-[#12141A] border border-[#39FF14]/30 text-xs font-mono text-[#39FF14]">
+                <Star size={11} className="fill-[#39FF14] stroke-[#39FF14]" />
                 <span>4.9 / 5.0</span>
               </div>
             </div>
@@ -55,10 +55,10 @@ export function ReviewsBriefSection() {
 
           <Link
             href="/reviews"
-            className="inline-flex items-center gap-1.5 font-inter font-medium text-xs text-[#EAEAEA] hover:text-white transition-colors uppercase tracking-wider shrink-0 group"
+            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-md bg-[#39FF14] hover:bg-[#32e012] text-[#0B0C10] font-mono font-semibold text-xs uppercase tracking-wider transition-all duration-200 shadow-[0_0_18px_rgba(57,255,20,0.25)] shrink-0 group"
           >
             <span>Read All Client Reviews</span>
-            <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            <ArrowUpRight size={14} className="text-[#0B0C10] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
           </Link>
         </div>
 
@@ -67,13 +67,13 @@ export function ReviewsBriefSection() {
           {CURATED_REVIEWS.map((r, i) => (
             <div
               key={i}
-              className="flex flex-col justify-between rounded-lg bg-[#111111] border border-white/[0.08] p-7 hover:border-white/[0.20] transition-colors duration-200"
+              className="flex flex-col justify-between rounded-lg bg-[#12141A] border border-white/[0.08] p-7 hover:border-[#00E5FF]/40 transition-colors duration-200"
             >
               <div>
                 <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/[0.06]">
-                  <div className="flex items-center gap-1 text-[#EAEAEA]">
+                  <div className="flex items-center gap-1 text-[#39FF14]">
                     {[...Array(5)].map((_, s) => (
-                      <Star key={s} size={11} className="fill-[#EAEAEA] stroke-[#EAEAEA]" />
+                      <Star key={s} size={11} className="fill-[#39FF14] stroke-[#39FF14]" />
                     ))}
                   </div>
                   <Quote size={15} className="text-[#666666]" />
@@ -85,7 +85,7 @@ export function ReviewsBriefSection() {
               </div>
 
               <div className="pt-4 border-t border-white/[0.06]">
-                <p className="font-mono text-[11px] font-semibold text-[#EAEAEA] mb-2">
+                <p className="font-mono text-[11px] font-semibold text-[#00E5FF] mb-2">
                   {r.metric}
                 </p>
                 <div>

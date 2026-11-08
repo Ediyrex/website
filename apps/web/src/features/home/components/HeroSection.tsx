@@ -5,7 +5,7 @@ import { HeroScrollIndicator } from './hero/HeroScrollIndicator'
 
 export function HeroSection() {
   return (
-    <section className="relative bg-[#080808] min-h-[88vh] lg:min-h-[95vh] flex flex-col justify-between pt-24 sm:pt-28 lg:pt-32 pb-6 overflow-hidden">
+    <section className="relative bg-[#0B0C10] min-h-[88vh] lg:min-h-[95vh] flex flex-col justify-between pt-24 sm:pt-28 lg:pt-32 pb-6 overflow-hidden">
       {/* ── Main Hero Content Container ── */}
       <div className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-16 flex-1 flex flex-col justify-between">
         

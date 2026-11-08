@@ -72,34 +72,37 @@ const AGENT_WORKFLOW_STEPS = [
 
 export default function AgentsAutomationPage() {
   return (
-    <div className="bg-[#08090B] min-h-screen text-[#F5F3EE] pt-[72px]">
+    <div className="bg-[#0B0C10] min-h-screen text-[#EAEAEA] pt-[82px]">
       {/* ── Hero Section ── */}
-      <section className="relative overflow-hidden py-20 lg:py-28 border-b border-[#292929]/70">
+      <section className="relative overflow-hidden py-20 lg:py-28 border-b border-white/[0.08]">
         <div className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-16">
           <div className="max-w-3xl">
-            <p className="font-inter font-medium text-[10.5px] tracking-[2px] uppercase text-[#B5A0F5] mb-4">
-              DIVISION 03 — AGENTS & AUTOMATION
-            </p>
-            <h1 className="font-manrope font-extrabold text-[42px] sm:text-[56px] lg:text-[68px] leading-[0.96] tracking-[-2.5px] uppercase mb-6">
+            <div className="inline-flex items-center gap-2 mb-4">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#00E5FF] shadow-[0_0_8px_#00E5FF]" />
+              <p className="font-mono text-[10.5px] tracking-[2px] uppercase text-[#00E5FF]">
+                DIVISION 03 // AGENTS &amp; AUTOMATION
+              </p>
+            </div>
+            <h1 className="font-manrope font-semibold text-[42px] sm:text-[56px] lg:text-[68px] leading-[0.98] tracking-[-0.035em] text-[#00E5FF] mb-6 drop-shadow-[0_0_35px_rgba(0,229,255,0.15)]">
               INTELLIGENT AGENTS.
               <br />
-              <span className="text-[#B5A0F5]">AUTONOMOUS</span> WORKFLOWS.
+              <span className="text-[#EAEAEA]">AUTONOMOUS WORKFLOWS.</span>
             </h1>
-            <p className="font-inter text-[#B2B4BA] text-[15px] sm:text-[16px] leading-relaxed max-w-2xl mb-8">
+            <p className="font-inter text-[#999999] text-[15px] sm:text-[16px] leading-relaxed max-w-2xl mb-8">
               We design and implement custom AI agents, automated workflow pipelines, and private knowledge systems. 
               Practical technology engineered to eliminate repetitive manual work, streamline lead qualification, and scale your business operations safely.
             </p>
             <div className="flex flex-wrap items-center gap-4">
               <Link
                 href="/contact?division=agents"
-                className="inline-flex items-center justify-center gap-2 px-6 h-[42px] rounded-[10px] bg-[#F5F3EE] hover:bg-white text-[#17130B] font-inter font-semibold text-[12px] transition-colors"
+                className="inline-flex items-center justify-center gap-2 px-6 h-[44px] rounded-md bg-[#39FF14] hover:bg-[#32e012] text-[#0B0C10] font-mono font-semibold text-[12px] uppercase tracking-wider transition-all shadow-[0_0_20px_rgba(57,255,20,0.25)] group"
               >
                 <span>Automate Your Operations</span>
-                <ArrowUpRight size={14} strokeWidth={2.5} />
+                <ArrowUpRight size={14} className="text-[#0B0C10] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
               </Link>
               <Link
                 href="/work?division=ai"
-                className="inline-flex items-center gap-2 px-5 h-[42px] rounded-[10px] border border-[#3A414B] hover:border-[#F5F3EE] text-[#F5F3EE] font-inter font-medium text-[12px] transition-colors"
+                className="inline-flex items-center gap-2 px-5 h-[44px] rounded-md border border-white/[0.15] hover:border-[#00E5FF] text-[#EAEAEA] hover:text-[#00E5FF] font-mono text-[12px] uppercase tracking-wider transition-colors"
               >
                 <span>View Automation Systems</span>
               </Link>
@@ -109,18 +112,18 @@ export default function AgentsAutomationPage() {
       </section>
 
       {/* ── Capabilities Grid ── */}
-      <section className="py-20 border-b border-[#292929]/60">
+      <section className="py-20 border-b border-white/[0.08]">
         <div className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-16">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-14 gap-6">
             <div>
-              <p className="font-inter font-medium text-[10px] tracking-[2px] uppercase text-[#777D87] mb-2">
+              <p className="font-mono text-[10px] tracking-[2px] uppercase text-[#00E5FF] mb-2">
                 REAL-WORLD IMPLEMENTATION
               </p>
-              <h2 className="font-manrope font-extrabold text-[32px] sm:text-[42px] leading-tight uppercase">
-                AI & AUTOMATION SOLUTIONS
+              <h2 className="font-manrope font-semibold text-[32px] sm:text-[42px] leading-tight text-[#00E5FF]">
+                AI &amp; AUTOMATION SOLUTIONS
               </h2>
             </div>
-            <p className="font-inter text-[#B2B4BA] text-[13.5px] max-w-md leading-relaxed">
+            <p className="font-inter text-[#999999] text-[13.5px] max-w-md leading-relaxed">
               We do not sell vague AI hype. We build deterministic, monitored software systems that run in production with predictable outcomes.
             </p>
           </div>
@@ -131,24 +134,24 @@ export default function AgentsAutomationPage() {
               return (
                 <div
                   key={idx}
-                  className="rounded-xl bg-[#0D0F12] border border-[#252A32] hover:border-[#B5A0F5]/50 transition-all duration-300 p-6 flex flex-col justify-between group"
+                  className="rounded-xl bg-[#12141A] border border-white/[0.08] hover:border-[#00E5FF]/40 transition-all duration-300 p-6 flex flex-col justify-between group"
                 >
                   <div>
-                    <div className="w-10 h-10 rounded-lg bg-[#141820] border border-[#252A32] flex items-center justify-center text-[#B5A0F5] mb-5 group-hover:scale-105 transition-transform">
+                    <div className="w-10 h-10 rounded-lg bg-[#0B0C10] border border-white/[0.08] flex items-center justify-center text-[#00E5FF] mb-5 group-hover:scale-105 transition-transform">
                       <Icon size={18} />
                     </div>
-                    <h3 className="font-manrope font-bold text-[18px] uppercase text-[#F5F3EE] mb-2">
+                    <h3 className="font-manrope font-semibold text-[18px] text-[#EAEAEA] group-hover:text-[#00E5FF] transition-colors mb-2">
                       {srv.title}
                     </h3>
-                    <p className="font-inter text-[#B2B4BA] text-[13px] leading-relaxed mb-6">
+                    <p className="font-inter text-[#999999] text-[13px] leading-relaxed mb-6">
                       {srv.desc}
                     </p>
                   </div>
-                  <div className="flex flex-wrap gap-1.5 pt-4 border-t border-[#1C2028]">
+                  <div className="flex flex-wrap gap-1.5 pt-4 border-t border-white/[0.06]">
                     {srv.tags.map((tag) => (
                       <span
                         key={tag}
-                        className="text-[10px] font-inter text-[#8C92A4] px-2.5 py-0.5 rounded-full border border-[#252A32]"
+                        className="text-[10px] font-mono text-[#00E5FF] opacity-80 px-2.5 py-0.5 rounded-full border border-[#00E5FF]/20 bg-[#00E5FF]/5"
                       >
                         {tag}
                       </span>
@@ -162,13 +165,13 @@ export default function AgentsAutomationPage() {
       </section>
 
       {/* ── Implementation Process ── */}
-      <section className="py-20 border-b border-[#292929]/60">
+      <section className="py-20 border-b border-white/[0.08]">
         <div className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-16">
           <div className="mb-14">
-            <p className="font-inter font-medium text-[10px] tracking-[2px] uppercase text-[#777D87] mb-2">
+            <p className="font-mono text-[10px] tracking-[2px] uppercase text-[#00E5FF] mb-2">
               DISCIPLINE
             </p>
-            <h2 className="font-manrope font-extrabold text-[32px] sm:text-[42px] leading-tight uppercase">
+            <h2 className="font-manrope font-semibold text-[32px] sm:text-[42px] leading-tight text-[#00E5FF]">
               HOW WE SHIP AGENTIC SYSTEMS
             </h2>
           </div>
@@ -177,15 +180,15 @@ export default function AgentsAutomationPage() {
             {AGENT_WORKFLOW_STEPS.map((proc) => (
               <div
                 key={proc.step}
-                className="rounded-xl bg-[#0D0F12] border border-[#252A32] p-6 relative"
+                className="rounded-xl bg-[#12141A] border border-white/[0.08] p-6 relative hover:border-[#00E5FF]/40 transition-colors"
               >
-                <span className="font-mono text-[#B5A0F5] text-[13px] font-bold block mb-4">
+                <span className="font-mono text-[#00E5FF] text-[13px] font-bold block mb-4">
                   {proc.step}
                 </span>
-                <h3 className="font-manrope font-bold text-[16px] text-[#F5F3EE] mb-2 uppercase">
+                <h3 className="font-manrope font-semibold text-[16px] text-[#EAEAEA] mb-2">
                   {proc.name}
                 </h3>
-                <p className="font-inter text-[#B2B4BA] text-[12.5px] leading-relaxed">
+                <p className="font-inter text-[#999999] text-[12.5px] leading-relaxed">
                   {proc.desc}
                 </p>
               </div>
@@ -195,24 +198,23 @@ export default function AgentsAutomationPage() {
       </section>
 
       {/* ── Closing Callout ── */}
-      <section className="py-20 bg-[#0A0C0F]">
+      <section className="py-20 bg-[#0B0C10]">
         <div className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-16 text-center">
-          <h2 className="font-manrope font-extrabold text-[32px] sm:text-[46px] uppercase text-[#F5F3EE] mb-4">
+          <h2 className="font-manrope font-semibold text-[32px] sm:text-[46px] text-[#00E5FF] mb-4">
             WHAT WORK SHOULD WE AUTOMATE FIRST?
           </h2>
-          <p className="font-inter text-[#B2B4BA] text-[14px] max-w-lg mx-auto mb-8">
+          <p className="font-inter text-[#999999] text-[14px] max-w-lg mx-auto mb-8">
             Tell us about your team’s repetitive bottlenecks. We will evaluate feasibility and construct an autonomous proof of concept.
           </p>
           <Link
             href="/contact?division=agents"
-            className="inline-flex items-center gap-2 px-7 h-[44px] rounded-[10px] bg-[#F5F3EE] hover:bg-white text-[#17130B] font-inter font-semibold text-[12px] uppercase tracking-wide transition-colors"
+            className="inline-flex items-center gap-2 px-7 h-[44px] rounded-md bg-[#39FF14] hover:bg-[#32e012] text-[#0B0C10] font-mono font-semibold text-[12px] uppercase tracking-wide transition-all shadow-[0_0_20px_rgba(57,255,20,0.25)] group"
           >
             <span>Start an Automation Project</span>
-            <ArrowUpRight size={14} strokeWidth={2.5} />
+            <ArrowUpRight size={14} className="text-[#0B0C10] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
           </Link>
         </div>
       </section>
     </div>
   )
 }
-

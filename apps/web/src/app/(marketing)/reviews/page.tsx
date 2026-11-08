@@ -89,19 +89,19 @@ export default function ReviewsPage() {
       : TESTIMONIALS.filter((t) => t.division === activeTab)
 
   return (
-    <div className="bg-[#000000] pt-28 pb-24 text-white">
+    <div className="bg-[#0B0C10] pt-28 pb-24 text-[#EAEAEA]">
       {/* Top Header */}
-      <section className="pt-8 pb-16 border-b border-neutral-800">
+      <section className="pt-8 pb-16 border-b border-white/[0.08]">
         <div className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-16">
           <div className="inline-flex items-center gap-2 mb-4">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#2C3480]" />
-            <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-neutral-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#00E5FF] shadow-[0_0_8px_#00E5FF]" />
+            <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-[#00E5FF]">
               CLIENT TESTIMONIALS &amp; REPUTATION
             </span>
           </div>
 
           <h1
-            className="font-manrope font-extrabold uppercase text-3xl sm:text-5xl lg:text-6xl tracking-tight text-white max-w-4xl"
+            className="font-manrope font-semibold text-3xl sm:text-5xl lg:text-6xl tracking-[-0.035em] text-[#00E5FF] max-w-4xl drop-shadow-[0_0_35px_rgba(0,229,255,0.15)]"
             style={{ lineHeight: 1.05 }}
           >
             VERIFIED OUTCOMES ACROSS
@@ -109,39 +109,39 @@ export default function ReviewsPage() {
             FILM, CODE &amp; INTELLIGENCE.
           </h1>
 
-          <p className="font-inter text-neutral-400 text-base max-w-2xl mt-5 leading-relaxed">
+          <p className="font-inter text-[#999999] text-base max-w-2xl mt-5 leading-relaxed">
             Direct feedback from founders, CMOs, and product leaders who rely on Ediyrex Studio as their integrated creative and technology partner.
           </p>
 
           {/* Key Metrics Strip */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-12 mt-12 border-t border-neutral-800">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-12 mt-12 border-t border-white/[0.08]">
             <div>
-              <p className="font-manrope font-extrabold text-3xl lg:text-4xl text-white">4.9 / 5.0</p>
-              <div className="flex items-center gap-1 my-1 text-white">
+              <p className="font-mono font-semibold text-3xl lg:text-4xl text-[#00E5FF]">4.9 / 5.0</p>
+              <div className="flex items-center gap-1 my-1 text-[#39FF14]">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} size={13} className="fill-white stroke-white" />
+                  <Star key={i} size={13} className="fill-[#39FF14] stroke-[#39FF14]" />
                 ))}
               </div>
-              <p className="font-mono text-xs text-neutral-400">Average Client Rating</p>
+              <p className="font-mono text-xs text-[#666666]">Average Client Rating</p>
             </div>
 
             <div>
-              <p className="font-manrope font-extrabold text-3xl lg:text-4xl text-white">99.2%</p>
-              <p className="font-mono text-xs text-neutral-400 mt-2">Client Recommendation Rate</p>
+              <p className="font-mono font-semibold text-3xl lg:text-4xl text-[#00E5FF]">99.2%</p>
+              <p className="font-mono text-xs text-[#666666] mt-2">Client Recommendation Rate</p>
             </div>
 
             <div>
-              <p className="font-manrope font-extrabold text-3xl lg:text-4xl text-white">3.4x</p>
-              <p className="font-mono text-xs text-neutral-400 mt-2">Average ROI on Engagements</p>
+              <p className="font-mono font-semibold text-3xl lg:text-4xl text-[#00E5FF]">3.4x</p>
+              <p className="font-mono text-xs text-[#666666] mt-2">Average ROI on Engagements</p>
             </div>
 
             <div>
-              <p className="font-manrope font-extrabold text-3xl lg:text-4xl text-white">34+</p>
-              <p className="font-mono text-xs text-neutral-400 mt-2">High-Standard Projects Shipped</p>
+              <p className="font-mono font-semibold text-3xl lg:text-4xl text-[#00E5FF]">34+</p>
+              <p className="font-mono text-xs text-[#666666] mt-2">High-Standard Projects Shipped</p>
             </div>
           </div>
 
-          {/* Filter Pills */}
+          {/* Filter Pills (Neon Lime active) */}
           <div className="mt-12 flex flex-wrap gap-2">
             {TABS.map((tab) => {
               const isActive = activeTab === tab.value
@@ -150,10 +150,10 @@ export default function ReviewsPage() {
                   key={tab.value}
                   type="button"
                   onClick={() => setActiveTab(tab.value)}
-                  className={`px-4 py-2 rounded-md text-xs font-mono uppercase tracking-wider transition-colors cursor-pointer ${
+                  className={`px-4 py-2 rounded-md text-xs font-mono uppercase tracking-wider transition-all duration-200 cursor-pointer ${
                     isActive
-                      ? 'bg-white text-black font-semibold'
-                      : 'bg-[#080808] text-neutral-400 border border-neutral-800 hover:text-white hover:border-neutral-600'
+                      ? 'bg-[#39FF14] text-[#0B0C10] font-bold shadow-[0_0_15px_rgba(57,255,20,0.3)]'
+                      : 'bg-[#12141A] text-[#999999] border border-white/[0.08] hover:text-[#00E5FF] hover:border-[#00E5FF]/40'
                   }`}
                 >
                   {tab.label}
@@ -170,31 +170,31 @@ export default function ReviewsPage() {
           {filtered.map((t) => (
             <div
               key={t.id}
-              className="flex flex-col justify-between rounded-xl bg-[#080808] border border-neutral-800 p-8 hover:border-neutral-600 transition-colors duration-200"
+              className="flex flex-col justify-between rounded-xl bg-[#12141A] border border-white/[0.08] p-8 hover:border-[#00E5FF]/40 transition-colors duration-200"
             >
               <div>
-                <div className="flex items-center justify-between pb-4 mb-4 border-b border-neutral-800">
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-neutral-400">
+                <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/[0.06]">
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-[#00E5FF]">
                     {t.divisionLabel}
                   </span>
-                  <Quote size={16} className="text-neutral-600" />
+                  <Quote size={16} className="text-[#666666]" />
                 </div>
 
-                <p className="font-inter text-sm text-neutral-200 leading-relaxed mb-6">
+                <p className="font-inter text-sm text-[#999999] leading-relaxed mb-6">
                   &ldquo;{t.quote}&rdquo;
                 </p>
               </div>
 
-              <div className="pt-4 border-t border-neutral-800">
-                <p className="font-mono text-xs font-semibold text-white">
+              <div className="pt-4 border-t border-white/[0.06]">
+                <p className="font-mono text-xs font-semibold text-[#00E5FF]">
                   {t.metric}
                 </p>
                 <div className="mt-3">
-                  <p className="font-manrope font-bold text-sm text-white">
+                  <p className="font-manrope font-semibold text-sm text-[#EAEAEA]">
                     {t.author}
                   </p>
-                  <p className="text-xs text-neutral-400">
-                    {t.title}, <span className="text-neutral-300">{t.company}</span>
+                  <p className="text-xs text-[#666666]">
+                    {t.title}, <span className="text-[#999999]">{t.company}</span>
                   </p>
                 </div>
               </div>
@@ -205,26 +205,25 @@ export default function ReviewsPage() {
 
       {/* Bottom Conversion Prompt */}
       <section className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-16 mt-24">
-        <div className="p-10 md:p-14 rounded-2xl bg-[#080808] border border-neutral-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+        <div className="p-10 md:p-14 rounded-xl bg-[#12141A] border border-white/[0.08] flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
           <div>
-            <h3 className="font-manrope font-extrabold text-2xl md:text-3xl text-white">
+            <h3 className="font-manrope font-semibold text-2xl md:text-3xl text-[#00E5FF]">
               Ready to achieve measurable results?
             </h3>
-            <p className="text-neutral-400 text-sm mt-2 max-w-lg">
+            <p className="text-[#999999] text-sm mt-2 max-w-lg">
               Partner with Ediyrex Studio for your next commercial film, web software platform, or autonomous AI deployment.
             </p>
           </div>
 
           <Link
             href="/contact"
-            className="inline-flex items-center gap-2 rounded-md bg-white hover:bg-neutral-200 text-black font-inter font-semibold text-xs px-6 py-3 transition-colors shrink-0 uppercase tracking-wider"
+            className="inline-flex items-center gap-2 rounded-md bg-[#39FF14] hover:bg-[#32e012] text-[#0B0C10] font-mono font-semibold text-xs px-6 py-3 transition-all shrink-0 uppercase tracking-wider shadow-[0_0_20px_rgba(57,255,20,0.25)] group"
           >
             <span>Start a Project</span>
-            <ArrowUpRight size={14} strokeWidth={2.5} />
+            <ArrowUpRight size={14} className="text-[#0B0C10] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
           </Link>
         </div>
       </section>
     </div>
   )
 }
-

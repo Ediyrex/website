@@ -8,10 +8,10 @@ export function HeroVisual() {
     >
       {/* Ambient background soft depth */}
       <div
-        className="absolute inset-0 rounded-full opacity-30 blur-[90px] pointer-events-none"
+        className="absolute inset-0 rounded-full opacity-35 blur-[90px] pointer-events-none"
         style={{
           background:
-            'radial-gradient(circle at 55% 45%, rgba(44, 52, 128, 0.25) 0%, rgba(20, 24, 60, 0.15) 40%, transparent 70%)',
+            'radial-gradient(circle at 55% 45%, rgba(0, 229, 255, 0.22) 0%, rgba(0, 150, 200, 0.08) 40%, transparent 70%)',
         }}
       />
 
@@ -31,15 +31,15 @@ export function HeroVisual() {
           </linearGradient>
 
           <linearGradient id="metal-accent" x1="100%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#EAEAEA" stopOpacity="0.5" />
-            <stop offset="60%" stopColor="#3B4499" stopOpacity="0.3" />
-            <stop offset="100%" stopColor="#080808" stopOpacity="0" />
+            <stop offset="0%" stopColor="#00E5FF" stopOpacity="0.6" />
+            <stop offset="60%" stopColor="#00A3B5" stopOpacity="0.25" />
+            <stop offset="100%" stopColor="#0B0C10" stopOpacity="0" />
           </linearGradient>
 
           <radialGradient id="center-core" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#1E234D" stopOpacity="0.4" />
-            <stop offset="60%" stopColor="#0E1020" stopOpacity="0.1" />
-            <stop offset="100%" stopColor="#080808" stopOpacity="0" />
+            <stop offset="0%" stopColor="#00E5FF" stopOpacity="0.25" />
+            <stop offset="60%" stopColor="#003344" stopOpacity="0.08" />
+            <stop offset="100%" stopColor="#0B0C10" stopOpacity="0" />
           </radialGradient>
         </defs>
 
@@ -117,29 +117,31 @@ export function HeroVisual() {
         />
 
         {/* Focal Geometric Node Points */}
-        <circle cx="250" cy="250" r="3" fill="#EAEAEA" />
-        <circle cx="380" cy="210" r="2" fill="#999999" />
+        <circle cx="250" cy="250" r="3.5" fill="#00E5FF" />
+        <circle cx="380" cy="210" r="2" fill="#00E5FF" />
         <circle cx="140" cy="310" r="2" fill="#999999" />
-        <circle cx="310" cy="140" r="1.5" fill="rgba(255, 255, 255, 0.6)" />
+        <circle cx="310" cy="140" r="1.5" fill="rgba(0, 229, 255, 0.7)" />
 
-        {/* Technical Coordinate Indicators */}
+        {/* Technical Coordinate Indicators (Electric Cyan code/mono) */}
         <text
           x="70"
           y="242"
-          fill="#666666"
+          fill="#00E5FF"
           fontFamily="monospace"
           fontSize="8"
           letterSpacing="1.5"
+          opacity="0.8"
         >
           SEC.01 // ORIGIN
         </text>
         <text
           x="350"
           y="410"
-          fill="#666666"
+          fill="#00E5FF"
           fontFamily="monospace"
           fontSize="8"
           letterSpacing="1.5"
+          opacity="0.8"
         >
           R.210 // 32°N
         </text>
@@ -147,3 +149,4 @@ export function HeroVisual() {
     </div>
   )
 }
+

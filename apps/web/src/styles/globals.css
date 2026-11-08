@@ -1,17 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  --background: #080808;
-  --background-elevated: #111111;
-  --surface: #111111;
-  --surface-hover: #181818;
+  --background: #0B0C10;
+  --background-elevated: #12141A;
+  --surface: #12141A;
+  --surface-hover: #1A1D26;
   --text-primary: #EAEAEA;
   --text-secondary: #999999;
   --text-muted: #666666;
   --border: rgba(255, 255, 255, 0.10);
   --border-subtle: rgba(255, 255, 255, 0.06);
-  --border-strong: rgba(255, 255, 255, 0.20);
-  --cobalt: #2C3480;
+  --border-strong: rgba(0, 229, 255, 0.30);
+  --cyan: #00E5FF;
+  --lime: #39FF14;
 }
 
 @theme {
@@ -22,13 +23,14 @@
   --font-serif: var(--font-serif), 'Newsreader', serif;
   --font-heading: var(--font-manrope), 'Manrope', sans-serif;
 
-  --color-background: #080808;
-  --color-surface: #111111;
+  --color-background: #0B0C10;
+  --color-surface: #12141A;
   --color-border: rgba(255, 255, 255, 0.10);
   --color-text-primary: #EAEAEA;
   --color-text-secondary: #999999;
   --color-text-muted: #666666;
-  --color-cobalt: #2C3480;
+  --color-cyan: #00E5FF;
+  --color-lime: #39FF14;
 }
 
 @layer base {
@@ -42,11 +44,11 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    background-color: #080808;
+    background-color: #0B0C10;
   }
 
   body {
-    background-color: #080808;
+    background-color: #0B0C10;
     color: #EAEAEA;
     font-family: var(--font-inter);
     overflow-x: hidden;
@@ -54,8 +56,8 @@
   }
 
   ::selection {
-    background-color: #2C3480;
-    color: #FFFFFF;
+    background-color: #00E5FF;
+    color: #0B0C10;
   }
 
   /* Micro-typographic refinements */

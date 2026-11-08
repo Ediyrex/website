@@ -24,17 +24,17 @@ export function Footer() {
   const year = new Date().getFullYear()
 
   return (
-    <footer className="bg-[#080808] border-t border-white/[0.08] pt-16 pb-12 text-[#999999]">
+    <footer className="bg-[#0B0C10] border-t border-white/[0.08] pt-16 pb-12 text-[#999999]">
       <div className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-12 pb-14 border-b border-white/[0.08]">
           
           {/* Brand info (5 cols) */}
           <div className="lg:col-span-5 flex flex-col items-start gap-4">
             <Link href="/" className="flex items-center group">
-              <span className="font-manrope font-extrabold text-[21px] tracking-[-0.03em] text-[#EAEAEA] group-hover:text-white transition-colors">
+              <span className="font-manrope font-extrabold text-[21px] tracking-[-0.03em] text-[#00E5FF] group-hover:brightness-110 transition-colors">
                 EDIYREX
               </span>
-              <span className="font-manrope font-extrabold text-[11px] text-[#EAEAEA] ml-0.5 -translate-y-1">
+              <span className="font-manrope font-extrabold text-[11px] text-[#00E5FF] ml-0.5 -translate-y-1">
                 ®
               </span>
             </Link>
@@ -45,7 +45,7 @@ export function Footer() {
 
             <a
               href="mailto:hello@ediyrex.com"
-              className="font-inter text-[13px] text-[#EAEAEA] hover:underline transition-colors"
+              className="font-inter text-[13px] text-[#00E5FF] hover:underline transition-colors"
             >
               hello@ediyrex.com
             </a>
@@ -53,14 +53,14 @@ export function Footer() {
 
           {/* Divisions (3 cols) */}
           <div className="lg:col-span-3 flex flex-col gap-3 font-inter">
-            <p className="text-[10px] font-mono uppercase tracking-[2px] text-[#666666] mb-1">
+            <p className="text-[10px] font-mono uppercase tracking-[2px] text-[#00E5FF] mb-1">
               DIVISIONS
             </p>
             {DIVISIONS.map((div) => (
               <Link
                 key={div.href}
                 href={div.href}
-                className="text-[13px] text-[#999999] hover:text-[#EAEAEA] transition-colors py-0.5"
+                className="text-[13px] text-[#999999] hover:text-[#39FF14] transition-colors py-0.5"
               >
                 {div.label}
               </Link>
@@ -69,14 +69,14 @@ export function Footer() {
 
           {/* Studio (2 cols) */}
           <div className="lg:col-span-2 flex flex-col gap-3 font-inter">
-            <p className="text-[10px] font-mono uppercase tracking-[2px] text-[#666666] mb-1">
+            <p className="text-[10px] font-mono uppercase tracking-[2px] text-[#00E5FF] mb-1">
               STUDIO
             </p>
             {STUDIO_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-[13px] text-[#999999] hover:text-[#EAEAEA] transition-colors py-0.5"
+                className="text-[13px] text-[#999999] hover:text-[#39FF14] transition-colors py-0.5"
               >
                 {link.label}
               </Link>
@@ -85,14 +85,14 @@ export function Footer() {
 
           {/* Connect (2 cols) */}
           <div className="lg:col-span-2 flex flex-col gap-3 font-inter">
-            <p className="text-[10px] font-mono uppercase tracking-[2px] text-[#666666] mb-1">
+            <p className="text-[10px] font-mono uppercase tracking-[2px] text-[#00E5FF] mb-1">
               CONNECT
             </p>
             <a
               href="https://linkedin.com/company/ediyrex"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-[13px] text-[#999999] hover:text-[#EAEAEA] transition-colors py-0.5 group"
+              className="inline-flex items-center gap-1 text-[13px] text-[#999999] hover:text-[#39FF14] transition-colors py-0.5 group"
             >
               <span>LinkedIn</span>
               <ArrowUpRight size={12} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
@@ -101,7 +101,7 @@ export function Footer() {
               href="https://instagram.com/ediyrex"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-[13px] text-[#999999] hover:text-[#EAEAEA] transition-colors py-0.5 group"
+              className="inline-flex items-center gap-1 text-[13px] text-[#999999] hover:text-[#39FF14] transition-colors py-0.5 group"
             >
               <span>Instagram</span>
               <ArrowUpRight size={12} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
@@ -110,7 +110,7 @@ export function Footer() {
               href="https://x.com/ediyrex"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-[13px] text-[#999999] hover:text-[#EAEAEA] transition-colors py-0.5 group"
+              className="inline-flex items-center gap-1 text-[13px] text-[#999999] hover:text-[#39FF14] transition-colors py-0.5 group"
             >
               <span>X / Twitter</span>
               <ArrowUpRight size={12} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
@@ -129,7 +129,7 @@ export function Footer() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="hover:text-[#EAEAEA] transition-colors"
+                className="hover:text-[#00E5FF] transition-colors"
               >
                 {link.label}
               </Link>
