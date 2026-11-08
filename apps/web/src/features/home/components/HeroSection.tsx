@@ -9,28 +9,6 @@ export function HeroSection() {
     >
       {/* ── Main Hero Content Container ── */}
       <div className="relative z-10 w-full max-w-[1440px] 2xl:max-w-[1560px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-16 py-12 lg:py-20 my-auto flex-1 flex flex-col justify-center">
-        {/* Architectural corner brackets */}
-        <div
-          aria-hidden="true"
-          className="absolute top-4 left-6 sm:left-10 lg:left-14 xl:px-16 pointer-events-none"
-          style={{
-            width: 14,
-            height: 14,
-            borderTop: '1px solid rgba(255, 255, 255, 0.25)',
-            borderLeft: '1px solid rgba(255, 255, 255, 0.25)',
-          }}
-        />
-        <div
-          aria-hidden="true"
-          className="absolute top-4 right-6 sm:right-10 lg:right-14 xl:px-16 pointer-events-none"
-          style={{
-            width: 14,
-            height: 14,
-            borderTop: '1px solid rgba(255, 255, 255, 0.25)',
-            borderRight: '1px solid rgba(255, 255, 255, 0.25)',
-          }}
-        />
-
         <div className="grid grid-cols-12 items-center gap-10 lg:gap-14">
           {/* Left Column: Eyebrow, Stacked Headline, Description, CTAs */}
           <div className="col-span-12 lg:col-span-7 flex flex-col items-start py-6">

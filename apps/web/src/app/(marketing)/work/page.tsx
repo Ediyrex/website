@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ArrowUpRight, Film, Code, Bot } from 'lucide-react'
 import { ProjectCard } from '@/features/projects/components'
 import { PROJECTS_DATA } from '@/features/projects/data/projectsData'
-import { ProjectDivision } from '@/features/projects/types'
+import { ProjectDivision, CaseStudy } from '@/features/projects/types'
 
 const DIVISION_PORTFOLIOS = [
   {
@@ -43,11 +43,55 @@ const FILTER_TABS: { label: string; value: 'all' | ProjectDivision }[] = [
 
 export default function WorkPage() {
   const [activeFilter, setActiveFilter] = useState<'all' | ProjectDivision>('all')
+  const [projects, setProjects] = useState<CaseStudy[]>(PROJECTS_DATA)
+
+  useEffect(() => {
+    // Dynamic real-time fetch from CMS backend
+    fetch('/api/v1/projects')
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success && json.data && json.data.length > 0) {
+          // Merge API data with case study details
+          const merged = json.data.map((apiProj: any) => {
+            const seedMatch = PROJECTS_DATA.find((s) => s.slug === apiProj.slug)
+            if (seedMatch) return { ...seedMatch, ...apiProj }
+            return {
+              slug: apiProj.slug || apiProj.id,
+              title: apiProj.title,
+              client: apiProj.client,
+              year: apiProj.year,
+              division: apiProj.division,
+              divisionLabel:
+                apiProj.division === 'media'
+                  ? 'Media & Production'
+                  : apiProj.division === 'digital'
+                  ? 'Web & Digital'
+                  : 'AI & Automation',
+              heroTagline: apiProj.heroTagline || '',
+              overview: apiProj.overview || '',
+              challenge: 'Delivered under high-velocity studio execution standards.',
+              solution: 'Custom architecture tailored for high performance and brand prestige.',
+              results: [
+                { metric: '100%', label: 'Delivery On Schedule' },
+                { metric: 'Production Ready', label: 'Verified QA' },
+              ],
+              technologies: apiProj.technologies || ['Full-Stack', 'Modern Cloud'],
+              deliverables: ['Production System', 'Codebase Artifacts'],
+              gallery: [],
+            }
+          })
+          setProjects(merged)
+        }
+      })
+      .catch(() => {
+        // Fallback to static seed
+      })
+  }, [])
 
   const filteredProjects =
     activeFilter === 'all'
-      ? PROJECTS_DATA
-      : PROJECTS_DATA.filter((p) => p.division === activeFilter || (p.division === 'hybrid' && activeFilter === 'digital'))
+      ? projects
+      : projects.filter((p) => p.division === activeFilter || (p.division === 'hybrid' && activeFilter === 'digital'))
 
   return (
     <div className="bg-[#000000] pt-28 pb-24 text-white">
@@ -71,7 +115,7 @@ export default function WorkPage() {
           </h1>
 
           <p className="font-inter text-neutral-400 text-base max-w-2xl mt-5 leading-relaxed">
-            Select a specific discipline below to explore dedicated capabilities, or browse our comprehensive case study archive.
+            Select a specific discipline below to explore dedicated capabilities, or browse our comprehensive case study archive synced directly with our studio CMS.
           </p>
 
           {/* Division Gateway Cards: On clicking takes to the particular division */}

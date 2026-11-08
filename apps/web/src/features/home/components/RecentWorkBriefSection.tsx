@@ -1,9 +1,26 @@
+'use client'
+
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ArrowUpRight } from 'lucide-react'
 import { PROJECTS_DATA } from '@/features/projects/data/projectsData'
 
 export function RecentWorkBriefSection() {
-  const recentProjects = PROJECTS_DATA.slice(0, 3)
+  const [projects, setProjects] = useState(PROJECTS_DATA.slice(0, 3))
+
+  useEffect(() => {
+    // Dynamic real-time fetch from CMS
+    fetch('/api/v1/projects/featured')
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success && json.data && json.data.length > 0) {
+          setProjects(json.data.slice(0, 3))
+        }
+      })
+      .catch(() => {
+        // Fallback to static seed
+      })
+  }, [])
 
   return (
     <section className="bg-[#000000] py-20 border-t border-neutral-800">
@@ -34,13 +51,16 @@ export function RecentWorkBriefSection() {
 
         {/* 3 Portfolio Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {recentProjects.map((p) => {
+          {projects.map((p) => {
             const divisionRoute =
               p.division === 'media'
                 ? '/media'
                 : p.division === 'digital'
                 ? '/web'
                 : '/agents-automation'
+
+            const metric = p.results?.[0]?.metric || 'Enterprise Grade'
+            const metricLabel = p.results?.[0]?.label || 'Production Deployed'
 
             return (
               <div
@@ -53,7 +73,7 @@ export function RecentWorkBriefSection() {
                       href={divisionRoute}
                       className="font-mono text-[10px] uppercase tracking-wider text-neutral-400 hover:text-white transition-colors"
                     >
-                      {p.divisionLabel} ↗
+                      {p.division} ↗
                     </Link>
                     <span className="font-mono text-xs text-neutral-400">
                       {p.year}
@@ -77,10 +97,10 @@ export function RecentWorkBriefSection() {
                   {/* Primary result metric */}
                   <div className="py-3 px-4 rounded-lg bg-[#000000] border border-neutral-800 mb-6">
                     <p className="font-mono text-base font-bold text-white">
-                      {p.results[0]?.metric}
+                      {metric}
                     </p>
                     <p className="font-inter text-[11px] text-neutral-400">
-                      {p.results[0]?.label}
+                      {metricLabel}
                     </p>
                   </div>
                 </div>
@@ -102,4 +122,3 @@ export function RecentWorkBriefSection() {
     </section>
   )
 }
-
