@@ -39,7 +39,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#000000',
+  themeColor: '#080808',
   colorScheme: 'dark',
   width: 'device-width',
   initialScale: 1,
@@ -51,7 +51,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="en"
       className={`scroll-smooth ${manrope.variable} ${inter.variable} ${ibmPlexMono.variable} ${newsreader.variable}`}
     >
-      <body className="antialiased bg-[#000000] text-[#FFFFFF] font-sans selection:bg-[#2C3480] selection:text-[#FFFFFF] min-h-screen flex flex-col">
+      <body className="antialiased bg-[#080808] text-[#EAEAEA] font-sans selection:bg-[#2C3480] selection:text-[#FFFFFF] min-h-screen flex flex-col">
         <Header />
         <main className="flex-1">
           {children}

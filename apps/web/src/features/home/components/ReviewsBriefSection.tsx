@@ -30,7 +30,7 @@ const CURATED_REVIEWS = [
 
 export function ReviewsBriefSection() {
   return (
-    <section className="bg-[#000000] py-20 border-t border-neutral-800">
+    <section className="bg-[#080808] py-20 border-t border-white/[0.08]">
       <div className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-16">
         
         {/* Section Header */}
@@ -38,16 +38,16 @@ export function ReviewsBriefSection() {
           <div>
             <div className="inline-flex items-center gap-2 mb-3">
               <span className="w-1.5 h-1.5 rounded-full bg-[#2C3480]" />
-              <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-neutral-400">
+              <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-[#999999]">
                 CLIENT REPUTATION &middot; TESTIMONIALS
               </span>
             </div>
             <div className="flex items-center gap-3">
-              <h2 className="font-manrope font-extrabold uppercase text-2xl sm:text-4xl text-white tracking-tight">
+              <h2 className="font-manrope font-semibold text-2xl sm:text-4xl text-[#EAEAEA] tracking-tight">
                 VERIFIED CLIENT IMPACT.
               </h2>
-              <div className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded bg-[#080808] border border-neutral-800 text-xs font-mono text-white">
-                <Star size={11} className="fill-white stroke-white" />
+              <div className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded bg-[#111111] border border-white/[0.08] text-xs font-mono text-[#EAEAEA]">
+                <Star size={11} className="fill-[#EAEAEA] stroke-[#EAEAEA]" />
                 <span>4.9 / 5.0</span>
               </div>
             </div>
@@ -55,10 +55,10 @@ export function ReviewsBriefSection() {
 
           <Link
             href="/reviews"
-            className="inline-flex items-center gap-1.5 font-inter font-medium text-xs text-white hover:text-neutral-300 transition-colors uppercase tracking-wider shrink-0"
+            className="inline-flex items-center gap-1.5 font-inter font-medium text-xs text-[#EAEAEA] hover:text-white transition-colors uppercase tracking-wider shrink-0 group"
           >
             <span>Read All Client Reviews</span>
-            <ArrowUpRight size={14} />
+            <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
           </Link>
         </div>
 
@@ -67,33 +67,33 @@ export function ReviewsBriefSection() {
           {CURATED_REVIEWS.map((r, i) => (
             <div
               key={i}
-              className="flex flex-col justify-between rounded-xl bg-[#080808] border border-neutral-800 p-7 hover:border-neutral-500 transition-colors duration-200"
+              className="flex flex-col justify-between rounded-lg bg-[#111111] border border-white/[0.08] p-7 hover:border-white/[0.20] transition-colors duration-200"
             >
               <div>
-                <div className="flex items-center justify-between pb-4 mb-4 border-b border-neutral-800">
-                  <div className="flex items-center gap-1 text-white">
+                <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/[0.06]">
+                  <div className="flex items-center gap-1 text-[#EAEAEA]">
                     {[...Array(5)].map((_, s) => (
-                      <Star key={s} size={11} className="fill-white stroke-white" />
+                      <Star key={s} size={11} className="fill-[#EAEAEA] stroke-[#EAEAEA]" />
                     ))}
                   </div>
-                  <Quote size={15} className="text-neutral-600" />
+                  <Quote size={15} className="text-[#666666]" />
                 </div>
 
-                <p className="font-inter text-xs md:text-[13px] text-neutral-300 leading-relaxed mb-6">
+                <p className="font-inter text-xs md:text-[13px] text-[#999999] leading-relaxed mb-6">
                   &ldquo;{r.quote}&rdquo;
                 </p>
               </div>
 
-              <div className="pt-4 border-t border-neutral-800">
-                <p className="font-mono text-[11px] font-semibold text-white mb-2">
+              <div className="pt-4 border-t border-white/[0.06]">
+                <p className="font-mono text-[11px] font-semibold text-[#EAEAEA] mb-2">
                   {r.metric}
                 </p>
                 <div>
-                  <p className="font-manrope font-bold text-xs text-white">
+                  <p className="font-manrope font-semibold text-xs text-[#EAEAEA]">
                     {r.author}
                   </p>
-                  <p className="text-[11px] text-neutral-400">
-                    {r.title}, <span className="text-neutral-300">{r.company}</span>
+                  <p className="text-[11px] text-[#666666]">
+                    {r.title}, <span className="text-[#999999]">{r.company}</span>
                   </p>
                 </div>
               </div>

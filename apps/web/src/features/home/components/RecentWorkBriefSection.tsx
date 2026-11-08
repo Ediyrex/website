@@ -23,7 +23,7 @@ export function RecentWorkBriefSection() {
   }, [])
 
   return (
-    <section className="bg-[#000000] py-20 border-t border-neutral-800">
+    <section className="bg-[#080808] py-20 border-t border-white/[0.08]">
       <div className="w-full max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-16">
         
         {/* Section Header */}
@@ -31,21 +31,21 @@ export function RecentWorkBriefSection() {
           <div>
             <div className="inline-flex items-center gap-2 mb-3">
               <span className="w-1.5 h-1.5 rounded-full bg-[#2C3480]" />
-              <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-neutral-400">
+              <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-[#999999]">
                 PORTFOLIO PREVIEW &middot; SELECTED WORK
               </span>
             </div>
-            <h2 className="font-manrope font-extrabold uppercase text-2xl sm:text-4xl text-white tracking-tight">
+            <h2 className="font-manrope font-semibold text-2xl sm:text-4xl text-[#EAEAEA] tracking-tight">
               EVIDENCE OF HIGH-STANDARD DELIVERY.
             </h2>
           </div>
 
           <Link
             href="/work"
-            className="inline-flex items-center gap-1.5 font-inter font-medium text-xs text-white hover:text-neutral-300 transition-colors uppercase tracking-wider shrink-0"
+            className="inline-flex items-center gap-1.5 font-inter font-medium text-xs text-[#EAEAEA] hover:text-white transition-colors uppercase tracking-wider shrink-0 group"
           >
             <span>View All Projects</span>
-            <ArrowUpRight size={14} />
+            <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
           </Link>
         </div>
 
@@ -65,53 +65,53 @@ export function RecentWorkBriefSection() {
             return (
               <div
                 key={p.slug}
-                className="group flex flex-col justify-between rounded-xl bg-[#080808] border border-neutral-800 p-7 hover:border-neutral-500 transition-colors duration-200"
+                className="group flex flex-col justify-between rounded-lg bg-[#111111] border border-white/[0.08] p-7 hover:border-white/[0.20] transition-colors duration-200"
               >
                 <div>
-                  <div className="flex items-center justify-between pb-4 mb-4 border-b border-neutral-800">
+                  <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/[0.06]">
                     <Link
                       href={divisionRoute}
-                      className="font-mono text-[10px] uppercase tracking-wider text-neutral-400 hover:text-white transition-colors"
+                      className="font-mono text-[10px] uppercase tracking-wider text-[#666666] hover:text-[#EAEAEA] transition-colors"
                     >
                       {p.division} ↗
                     </Link>
-                    <span className="font-mono text-xs text-neutral-400">
+                    <span className="font-mono text-xs text-[#666666]">
                       {p.year}
                     </span>
                   </div>
 
-                  <p className="font-mono text-[11px] text-neutral-400 uppercase tracking-wider mb-1">
+                  <p className="font-mono text-[11px] text-[#666666] uppercase tracking-wider mb-1">
                     Client: {p.client}
                   </p>
 
                   <Link href={`/work/${p.slug}`}>
-                    <h3 className="font-manrope font-bold text-lg text-white group-hover:text-neutral-300 transition-colors mb-3 leading-snug">
+                    <h3 className="font-manrope font-semibold text-lg text-[#EAEAEA] group-hover:text-white transition-colors mb-3 leading-snug">
                       {p.title}
                     </h3>
                   </Link>
 
-                  <p className="font-inter text-xs text-neutral-400 leading-relaxed mb-6 line-clamp-3">
+                  <p className="font-inter text-xs text-[#999999] leading-relaxed mb-6 line-clamp-3">
                     {p.overview}
                   </p>
 
                   {/* Primary result metric */}
-                  <div className="py-3 px-4 rounded-lg bg-[#000000] border border-neutral-800 mb-6">
-                    <p className="font-mono text-base font-bold text-white">
+                  <div className="py-3 px-4 rounded bg-[#080808] border border-white/[0.06] mb-6">
+                    <p className="font-mono text-base font-semibold text-[#EAEAEA]">
                       {metric}
                     </p>
-                    <p className="font-inter text-[11px] text-neutral-400">
+                    <p className="font-inter text-[11px] text-[#666666]">
                       {metricLabel}
                     </p>
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-neutral-800 flex items-center justify-between">
+                <div className="pt-4 border-t border-white/[0.06] flex items-center justify-between">
                   <Link
                     href={`/work/${p.slug}`}
-                    className="font-inter text-xs font-medium text-white hover:underline flex items-center gap-1"
+                    className="font-inter text-xs font-medium text-[#EAEAEA] hover:text-white flex items-center gap-1 group/link transition-colors"
                   >
                     <span>Read Case Study</span>
-                    <ArrowUpRight size={12} />
+                    <ArrowUpRight size={12} className="group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform" />
                   </Link>
                 </div>
               </div>
