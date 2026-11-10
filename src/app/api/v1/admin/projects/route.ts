@@ -47,6 +47,7 @@ export async function GET(request: NextRequest) {
     const { page, limit } = parsedQuery.data;
     const offset = (page - 1) * limit;
     const statusParam = searchParams.get("status")?.trim();
+    const categoryParam = searchParams.get("category")?.trim();
     const qParam = searchParams.get("q")?.trim();
 
     const conditions = [];
@@ -61,6 +62,9 @@ export async function GET(request: NextRequest) {
         )
       );
     }
+    if (categoryParam) {
+      conditions.push(eq(projects.industry, categoryParam));
+    }
     if (qParam) {
       const searchCond = or(
         ilike(projects.title, `%${qParam}%`),
@@ -73,42 +77,67 @@ export async function GET(request: NextRequest) {
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-    const rows = await db
-      .select({
-        id: projects.id,
-        title: projects.title,
-        slug: projects.slug,
-        summary: projects.summary,
-        projectType: projects.projectType,
-        industry: projects.industry,
-        clientName: projects.clientName,
-        clientIsPublic: projects.clientIsPublic,
-        projectDate: projects.projectDate,
-        coverAssetId: projects.coverAssetId,
-        coverAssetUrl: mediaAssets.secureUrl,
-        status: projects.status,
-        isFeatured: projects.isFeatured,
-        displayOrder: projects.displayOrder,
-        publishedAt: projects.publishedAt,
-        updatedAt: projects.updatedAt,
-      })
-      .from(projects)
-      .leftJoin(mediaAssets, eq(projects.coverAssetId, mediaAssets.id))
-      .where(whereClause)
-      .orderBy(asc(projects.displayOrder), desc(projects.updatedAt))
-      .limit(limit)
-      .offset(offset);
+    const [rows, [{ total }], [globalStats], distinctCategories] =
+      await Promise.all([
+        db
+          .select({
+            id: projects.id,
+            title: projects.title,
+            slug: projects.slug,
+            summary: projects.summary,
+            projectType: projects.projectType,
+            industry: projects.industry,
+            clientName: projects.clientName,
+            clientIsPublic: projects.clientIsPublic,
+            projectDate: projects.projectDate,
+            coverAssetId: projects.coverAssetId,
+            coverAssetUrl: mediaAssets.secureUrl,
+            status: projects.status,
+            isFeatured: projects.isFeatured,
+            displayOrder: projects.displayOrder,
+            publishedAt: projects.publishedAt,
+            createdAt: projects.createdAt,
+            updatedAt: projects.updatedAt,
+          })
+          .from(projects)
+          .leftJoin(mediaAssets, eq(projects.coverAssetId, mediaAssets.id))
+          .where(whereClause)
+          .orderBy(asc(projects.displayOrder), desc(projects.updatedAt))
+          .limit(limit)
+          .offset(offset),
+        db
+          .select({ total: sql<number>`count(*)::int` })
+          .from(projects)
+          .where(whereClause),
+        db
+          .select({
+            totalAll: sql<number>`count(*)::int`,
+            publishedCount: sql<number>`count(*) filter (where ${projects.status} = 'published')::int`,
+            draftCount: sql<number>`count(*) filter (where ${projects.status} = 'draft')::int`,
+          })
+          .from(projects),
+        db
+          .selectDistinct({ industry: projects.industry })
+          .from(projects),
+      ]);
 
-    const [{ total }] = await db
-      .select({ total: sql<number>`count(*)::int` })
-      .from(projects)
-      .where(whereClause);
+    const categories = distinctCategories
+      .map((c) => c.industry)
+      .filter((val): val is string => Boolean(val && val.trim()))
+      .sort();
 
     return apiOk(rows, {
       page,
       limit,
       total,
-      totalPages: Math.ceil(total / limit),
+      totalPages: Math.max(1, Math.ceil(total / limit)),
+      stats: {
+        totalAll: globalStats?.totalAll ?? 0,
+        publishedCount: globalStats?.publishedCount ?? 0,
+        draftCount: globalStats?.draftCount ?? 0,
+        categoriesCount: categories.length,
+        categories,
+      },
     });
   } catch (err) {
     return handleApiError(err, "GET /api/v1/admin/projects");

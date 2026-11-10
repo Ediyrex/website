@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Plus,
@@ -12,8 +13,19 @@ import {
   Image as ImageIcon,
   Images,
   Loader2,
+  FolderKanban,
+  CheckCircle2,
+  Layers,
+  LayoutGrid,
+  List,
+  MoreHorizontal,
+  ExternalLink,
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
+import { cn } from "@/lib/utils";
 import { useAdminUser } from "./AdminContext";
 import { MediaPickerModal, type MediaAssetItem } from "./MediaPickerModal";
 
@@ -32,6 +44,17 @@ interface ProjectListRow {
   status: "draft" | "published" | "archived";
   isFeatured: boolean;
   displayOrder: number;
+  publishedAt?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+interface PortfolioStats {
+  totalAll: number;
+  publishedCount: number;
+  draftCount: number;
+  categoriesCount: number;
+  categories: string[];
 }
 
 interface ServiceOption {
@@ -88,10 +111,24 @@ export function AdminProjectsClient() {
   const { canEdit } = useAdminUser();
 
   const [projectsList, setProjectsList] = useState<ProjectListRow[]>([]);
+  const [stats, setStats] = useState<PortfolioStats>({
+    totalAll: 0,
+    publishedCount: 0,
+    draftCount: 0,
+    categoriesCount: 0,
+    categories: [],
+  });
   const [serviceOptions, setServiceOptions] = useState<ServiceOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
   const [query, setQuery] = useState("");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [pageNum, setPageNum] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(6);
+  const [totalFiltered, setTotalFiltered] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -106,8 +143,12 @@ export function AdminProjectsClient() {
   >(null);
 
   const fetchProjectsData = useCallback(async () => {
-    const params = new URLSearchParams({ limit: "50" });
+    const params = new URLSearchParams({
+      page: String(pageNum),
+      limit: String(rowsPerPage),
+    });
     if (statusFilter) params.set("status", statusFilter);
+    if (categoryFilter) params.set("category", categoryFilter);
     if (query.trim()) params.set("q", query.trim());
 
     const [projRes, svcRes] = await Promise.all([
@@ -128,8 +169,11 @@ export function AdminProjectsClient() {
     return {
       projects: (projJson.data || []) as ProjectListRow[],
       services: (svcJson.data || []) as ServiceOption[],
+      total: (projJson.meta?.total ?? 0) as number,
+      totalPages: (projJson.meta?.totalPages ?? 1) as number,
+      stats: projJson.meta?.stats as PortfolioStats | undefined,
     };
-  }, [statusFilter, query, router]);
+  }, [pageNum, rowsPerPage, statusFilter, categoryFilter, query, router]);
 
   const loadProjects = async () => {
     setLoading(true);
@@ -139,6 +183,9 @@ export function AdminProjectsClient() {
       if (result) {
         setProjectsList(result.projects);
         setServiceOptions(result.services);
+        setTotalFiltered(result.total);
+        setTotalPages(result.totalPages);
+        if (result.stats) setStats(result.stats);
       }
     } catch (err) {
       setError(
@@ -156,6 +203,9 @@ export function AdminProjectsClient() {
         if (!ignore && result) {
           setProjectsList(result.projects);
           setServiceOptions(result.services);
+          setTotalFiltered(result.total);
+          setTotalPages(result.totalPages);
+          if (result.stats) setStats(result.stats);
         }
       })
       .catch((err) => {
@@ -404,22 +454,37 @@ export function AdminProjectsClient() {
         setError(json.message || "Unable to delete project.");
         return;
       }
-      setProjectsList((prev) => prev.filter((item) => item.id !== proj.id));
       setSuccess(`Deleted project "${proj.title}".`);
+      await loadProjects();
     } catch {
       setError("Network error deleting project.");
     }
   };
 
+  const startIdx = totalFiltered === 0 ? 0 : (pageNum - 1) * rowsPerPage + 1;
+  const endIdx = Math.min(pageNum * rowsPerPage, totalFiltered);
+
+  const formatCardDate = (proj: ProjectListRow) => {
+    if (proj.projectDate) return proj.projectDate;
+    const raw = proj.publishedAt || proj.updatedAt || proj.createdAt;
+    if (!raw) return "Draft";
+    return new Date(raw).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="font-heading font-bold text-2xl sm:text-3xl text-[#F5F3EE]">
-            Projects &amp; Case Studies
+          <h1 className="font-heading font-bold text-2xl sm:text-[28px] tracking-tight text-[#F5F3EE]">
+            Portfolio
           </h1>
-          <p className="text-sm text-[#B2B4BA]">
-            Create, edit, preview, order, and publish portfolio projects, media galleries, and SEO metadata.
+          <p className="text-sm text-[#8D939E]">
+            Manage your portfolio projects, case studies, and creative work.
           </p>
         </div>
 
@@ -427,37 +492,144 @@ export function AdminProjectsClient() {
           <button
             type="button"
             onClick={openCreateModal}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#D6B77A] text-[#08090B] text-xs font-semibold hover:bg-[#E2C68F] cursor-pointer"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#D6B77A] text-[#08090B] text-xs font-semibold hover:bg-[#E2C68F] transition-colors cursor-pointer shadow-sm"
           >
             <Plus className="w-4 h-4" />
-            <span>New Project</span>
+            <span>Add Portfolio Project</span>
           </button>
         )}
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 min-w-[220px]">
-          <Search className="w-4 h-4 text-[#777D87] absolute left-3 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search project title, slug, industry, or client..."
-            className="w-full h-10 pl-9 pr-3 rounded-lg bg-[#12151A] border border-[#252A32] text-sm text-[#F5F3EE] placeholder-[#777D87] focus:outline-none focus:border-[#D6B77A]"
-          />
+      {/* 4-Card KPI Strip */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="p-5 rounded-xl bg-[#111419] border border-[#1E222A] space-y-2.5">
+          <div className="flex items-center gap-2.5 text-xs text-[#9CA3AF]">
+            <span className="p-2 rounded-lg bg-[#1A160E] border border-[#D6B77A]/30 text-[#D6B77A]">
+              <FolderKanban className="w-4 h-4" />
+            </span>
+            <span>Total Projects</span>
+          </div>
+          <div className="font-heading font-bold text-3xl text-[#F5F3EE]">
+            {loading ? "—" : stats.totalAll}
+          </div>
         </div>
 
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="h-10 px-3 rounded-lg bg-[#12151A] border border-[#252A32] text-xs font-mono text-[#F5F3EE]"
-        >
-          <option value="">All statuses</option>
-          <option value="published">Published</option>
-          <option value="draft">Draft</option>
-          <option value="archived">Archived</option>
-        </select>
+        <div className="p-5 rounded-xl bg-[#111419] border border-[#1E222A] space-y-2.5">
+          <div className="flex items-center gap-2.5 text-xs text-[#9CA3AF]">
+            <span className="p-2 rounded-lg bg-[#112419] border border-[#54C99A]/30 text-[#54C99A]">
+              <CheckCircle2 className="w-4 h-4" />
+            </span>
+            <span>Published</span>
+          </div>
+          <div className="font-heading font-bold text-3xl text-[#F5F3EE]">
+            {loading ? "—" : stats.publishedCount}
+          </div>
+        </div>
+
+        <div className="p-5 rounded-xl bg-[#111419] border border-[#1E222A] space-y-2.5">
+          <div className="flex items-center gap-2.5 text-xs text-[#9CA3AF]">
+            <span className="p-2 rounded-lg bg-[#1D1629] border border-[#B5A0F5]/30 text-[#B5A0F5]">
+              <Edit3 className="w-4 h-4" />
+            </span>
+            <span>Drafts</span>
+          </div>
+          <div className="font-heading font-bold text-3xl text-[#F5F3EE]">
+            {loading ? "—" : stats.draftCount}
+          </div>
+        </div>
+
+        <div className="p-5 rounded-xl bg-[#111419] border border-[#1E222A] space-y-2.5">
+          <div className="flex items-center gap-2.5 text-xs text-[#9CA3AF]">
+            <span className="p-2 rounded-lg bg-[#1A160E] border border-[#D6B77A]/30 text-[#D6B77A]">
+              <Layers className="w-4 h-4" />
+            </span>
+            <span>Categories</span>
+          </div>
+          <div className="font-heading font-bold text-3xl text-[#F5F3EE]">
+            {loading ? "—" : stats.categoriesCount}
+          </div>
+        </div>
+      </div>
+
+      {/* Filters & View Mode Toolbar */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-3 flex-1 min-w-[260px]">
+          <div className="relative flex-1 max-w-sm min-w-[200px]">
+            <Search className="w-4 h-4 text-[#777D87] absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setPageNum(1);
+              }}
+              placeholder="Search projects..."
+              className="w-full h-10 pl-9 pr-3 rounded-lg bg-[#111419] border border-[#1E222A] text-sm text-[#F5F3EE] placeholder-[#6D7480] focus:outline-none focus:border-[#D6B77A]"
+            />
+          </div>
+
+          <select
+            value={categoryFilter}
+            onChange={(e) => {
+              setCategoryFilter(e.target.value);
+              setPageNum(1);
+            }}
+            aria-label="Filter projects by category"
+            className="h-10 px-3 rounded-lg bg-[#111419] border border-[#1E222A] text-xs text-[#F5F3EE] focus:outline-none focus:border-[#D6B77A]"
+          >
+            <option value="">All Categories</option>
+            {stats.categories.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setPageNum(1);
+            }}
+            aria-label="Filter projects by status"
+            className="h-10 px-3 rounded-lg bg-[#111419] border border-[#1E222A] text-xs text-[#F5F3EE] focus:outline-none focus:border-[#D6B77A]"
+          >
+            <option value="">All Status</option>
+            <option value="published">Published</option>
+            <option value="draft">Draft</option>
+            <option value="archived">Archived</option>
+          </select>
+        </div>
+
+        {/* Grid / List Toggle */}
+        <div className="inline-flex items-center p-1 rounded-lg bg-[#111419] border border-[#1E222A]">
+          <button
+            type="button"
+            onClick={() => setViewMode("grid")}
+            aria-label="Grid view"
+            className={cn(
+              "p-2 rounded-md transition-colors cursor-pointer",
+              viewMode === "grid"
+                ? "bg-[#D6B77A] text-[#08090B]"
+                : "text-[#8D939E] hover:text-white"
+            )}
+          >
+            <LayoutGrid className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode("list")}
+            aria-label="List view"
+            className={cn(
+              "p-2 rounded-md transition-colors cursor-pointer",
+              viewMode === "list"
+                ? "bg-[#D6B77A] text-[#08090B]"
+                : "text-[#8D939E] hover:text-white"
+            )}
+          >
+            <List className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -471,84 +643,89 @@ export function AdminProjectsClient() {
         </div>
       )}
 
-      {/* Projects Table */}
-      <div className="rounded-xl bg-[#12151A] border border-[#252A32] overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-[#252A32] text-[11px] font-mono uppercase tracking-wider text-[#777D87] bg-[#0D0F12]">
-                <th className="py-3 px-4">Project</th>
-                <th className="py-3 px-4">Type</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4">Featured</th>
-                <th className="py-3 px-4">Order</th>
-                <th className="py-3 px-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#252A32] text-sm">
-              {loading ? (
-                <tr>
-                  <td colSpan={6} className="p-8 text-center text-xs font-mono text-[#777D87]">
-                    Loading projects...
-                  </td>
-                </tr>
-              ) : projectsList.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="p-8 text-center text-xs text-[#777D87]">
-                    No projects found.
-                  </td>
-                </tr>
-              ) : (
-                projectsList.map((proj) => (
-                  <tr key={proj.id} className="hover:bg-[#161A20]">
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-3">
-                        {proj.coverAssetUrl ? (
-                          /* eslint-disable-next-line @next/next/no-img-element */
-                          <img
-                            src={proj.coverAssetUrl}
-                            alt={proj.title}
-                            className="w-12 h-9 rounded-lg object-cover border border-[#252A32] shrink-0"
-                          />
-                        ) : (
-                          <div className="w-12 h-9 rounded-lg bg-[#0D0F12] border border-[#252A32] flex items-center justify-center text-[#777D87] shrink-0">
-                            <ImageIcon className="w-4 h-4" />
-                          </div>
+      {/* Grid View (Default matching mockup) */}
+      {viewMode === "grid" ? (
+        loading ? (
+          <div className="py-14 text-center text-xs font-mono text-[#777D87]">
+            Loading portfolio projects...
+          </div>
+        ) : projectsList.length === 0 ? (
+          <div className="p-12 rounded-2xl bg-[#111419] border border-[#1E222A] text-center space-y-2">
+            <p className="text-sm text-[#F5F3EE]">No portfolio projects found.</p>
+            <p className="text-xs text-[#777D87]">
+              Adjust your search/filters or click Add Portfolio Project to create one.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+            {projectsList.map((proj) => (
+              <article
+                key={proj.id}
+                className="group rounded-2xl bg-[#111419] border border-[#1E222A] hover:border-[#D6B77A]/40 transition-colors overflow-hidden flex flex-col justify-between relative"
+              >
+                {/* Visual Top Card Frame */}
+                <div className="aspect-[16/9] bg-[#0B0D10] relative overflow-hidden border-b border-[#1E222A]">
+                  {proj.coverAssetUrl ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={proj.coverAssetUrl}
+                      alt={proj.title}
+                      className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-[#231D13] via-[#13161D] to-[#0B0D10] flex items-center justify-center">
+                      <FolderKanban className="w-9 h-9 text-[#D6B77A]/40" />
+                    </div>
+                  )}
+
+                  {/* Top Left Status Pill */}
+                  <div className="absolute top-3 left-3 z-10">
+                    <span
+                      className={cn(
+                        "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border backdrop-blur-sm",
+                        proj.status === "published"
+                          ? "bg-[#0D2117]/85 text-[#7CD69F] border-[#54C99A]/40"
+                          : proj.status === "draft"
+                            ? "bg-[#241D11]/85 text-[#D6B77A] border-[#D6B77A]/40"
+                            : "bg-[#15181F]/85 text-[#9CA3AF] border-[#252A32]"
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "w-1.5 h-1.5 rounded-full",
+                          proj.status === "published"
+                            ? "bg-[#7CD69F]"
+                            : proj.status === "draft"
+                              ? "bg-[#D6B77A]"
+                              : "bg-[#9CA3AF]"
                         )}
-                        <div>
-                          <div className="font-medium text-[#F5F3EE]">{proj.title}</div>
-                          <div className="text-xs font-mono text-[#777D87]">
-                            /{proj.slug}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <Badge
-                        variant={proj.projectType === "concept" ? "concept" : "default"}
-                      >
-                        {proj.projectType}
-                      </Badge>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <Badge
-                        variant={proj.status === "published" ? "accent" : "default"}
-                      >
-                        {proj.status}
-                      </Badge>
-                    </td>
-                    <td className="py-3.5 px-4 text-xs text-[#B2B4BA]">
-                      {proj.isFeatured ? "Featured" : "Standard"}
-                    </td>
-                    <td className="py-3.5 px-4 font-mono text-xs text-[#777D87]">
-                      #{proj.displayOrder}
-                    </td>
-                    <td className="py-3.5 px-4 text-right">
-                      <div className="inline-flex items-center gap-1.5">
+                      />
+                      <span className="capitalize">{proj.status}</span>
+                    </span>
+                  </div>
+
+                  {/* Top Right Menu Trigger */}
+                  <div className="absolute top-3 right-3 z-20">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setOpenMenuId(openMenuId === proj.id ? null : proj.id)
+                      }
+                      aria-label={`Actions for ${proj.title}`}
+                      className="w-8 h-8 rounded-lg bg-[#0B0D10]/80 border border-[#252A32] text-[#B2B4BA] hover:text-white flex items-center justify-center backdrop-blur-sm cursor-pointer"
+                    >
+                      <MoreHorizontal className="w-4 h-4" />
+                    </button>
+
+                    {openMenuId === proj.id && (
+                      <div className="absolute right-0 top-10 w-44 py-1.5 rounded-xl bg-[#14181F] border border-[#252A32] shadow-2xl text-xs z-30">
                         <button
                           type="button"
-                          onClick={() => openEditModal(proj.id, true)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#0D0F12] border border-[#252A32] text-xs text-[#B2B4BA] hover:text-white cursor-pointer"
+                          onClick={() => {
+                            setOpenMenuId(null);
+                            openEditModal(proj.id, true);
+                          }}
+                          className="w-full px-3.5 py-2 text-left text-[#F5F3EE] hover:bg-[#1C212B] flex items-center gap-2 cursor-pointer"
                         >
                           <Eye className="w-3.5 h-3.5" />
                           <span>Preview</span>
@@ -557,29 +734,242 @@ export function AdminProjectsClient() {
                           <>
                             <button
                               type="button"
-                              onClick={() => openEditModal(proj.id, false)}
-                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#191D23] border border-[#252A32] text-xs text-[#F5F3EE] hover:border-[#D6B77A] cursor-pointer"
+                              onClick={() => {
+                                setOpenMenuId(null);
+                                openEditModal(proj.id, false);
+                              }}
+                              className="w-full px-3.5 py-2 text-left text-[#D6B77A] hover:bg-[#1C212B] flex items-center gap-2 cursor-pointer"
                             >
                               <Edit3 className="w-3.5 h-3.5" />
-                              <span>Edit</span>
+                              <span>Edit Project</span>
                             </button>
                             <button
                               type="button"
-                              onClick={() => handleDeleteProject(proj)}
-                              aria-label={`Delete ${proj.title}`}
-                              className="p-1.5 rounded-lg text-[#777D87] hover:text-[#F28B82] hover:bg-[#2A1414] cursor-pointer"
+                              onClick={() => {
+                                setOpenMenuId(null);
+                                handleDeleteProject(proj);
+                              }}
+                              className="w-full px-3.5 py-2 text-left text-[#F28B82] hover:bg-[#2A1414] flex items-center gap-2 cursor-pointer"
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <Trash2 className="w-3.5 h-3.5" />
+                              <span>Delete Project</span>
                             </button>
                           </>
                         )}
                       </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Card Content Body */}
+                <div className="p-4 flex-1 flex flex-col justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="flex items-start justify-between gap-2">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          canEdit
+                            ? openEditModal(proj.id, false)
+                            : openEditModal(proj.id, true)
+                        }
+                        className="text-left font-heading font-semibold text-[15px] text-[#F5F3EE] hover:text-[#D6B77A] transition-colors line-clamp-1 cursor-pointer"
+                      >
+                        {proj.title}
+                      </button>
+                      <Link
+                        href={`/work/${proj.slug}`}
+                        target="_blank"
+                        aria-label={`Open public page for ${proj.title}`}
+                        className="text-[#777D87] hover:text-[#F5F3EE] shrink-0 mt-0.5"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                      </Link>
+                    </div>
+                    <div className="text-xs text-[#777D87] truncate">
+                      {proj.industry || "Studio Showcase"} ·{" "}
+                      <span className="capitalize">{proj.projectType}</span>
+                    </div>
+                  </div>
+
+                  {/* Card Footer */}
+                  <div className="pt-3 border-t border-[#1E222A] flex items-center justify-between text-[11px] text-[#8D939E]">
+                    <span className="inline-flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5 text-[#6D7480]" />
+                      <span>{formatCardDate(proj)}</span>
+                    </span>
+                    <span className="font-mono text-[#777D87]">
+                      {proj.isFeatured ? "★ Featured" : `#${proj.displayOrder}`}
+                    </span>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        )
+      ) : (
+        /* List View Table */
+        <div className="rounded-xl bg-[#111419] border border-[#1E222A] overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-[#1E222A] text-[11px] font-mono uppercase tracking-wider text-[#6D7480] bg-[#0B0D10]">
+                  <th className="py-3 px-4">Project</th>
+                  <th className="py-3 px-4">Category</th>
+                  <th className="py-3 px-4">Status</th>
+                  <th className="py-3 px-4">Featured</th>
+                  <th className="py-3 px-4">Order</th>
+                  <th className="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#1E222A] text-sm">
+                {loading ? (
+                  <tr>
+                    <td
+                      colSpan={6}
+                      className="p-8 text-center text-xs font-mono text-[#777D87]"
+                    >
+                      Loading projects...
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : projectsList.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={6}
+                      className="p-8 text-center text-xs text-[#777D87]"
+                    >
+                      No projects found.
+                    </td>
+                  </tr>
+                ) : (
+                  projectsList.map((proj) => (
+                    <tr key={proj.id} className="hover:bg-[#151920]">
+                      <td className="py-3.5 px-4">
+                        <div className="flex items-center gap-3">
+                          {proj.coverAssetUrl ? (
+                            /* eslint-disable-next-line @next/next/no-img-element */
+                            <img
+                              src={proj.coverAssetUrl}
+                              alt={proj.title}
+                              className="w-12 h-9 rounded-lg object-cover border border-[#252A32] shrink-0"
+                            />
+                          ) : (
+                            <div className="w-12 h-9 rounded-lg bg-[#0D0F12] border border-[#252A32] flex items-center justify-center text-[#777D87] shrink-0">
+                              <ImageIcon className="w-4 h-4" />
+                            </div>
+                          )}
+                          <div>
+                            <div className="font-medium text-[#F5F3EE]">
+                              {proj.title}
+                            </div>
+                            <div className="text-xs font-mono text-[#777D87]">
+                              /{proj.slug}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-3.5 px-4 text-xs text-[#B2B4BA]">
+                        {proj.industry || proj.projectType}
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <Badge
+                          variant={
+                            proj.status === "published" ? "accent" : "default"
+                          }
+                        >
+                          {proj.status}
+                        </Badge>
+                      </td>
+                      <td className="py-3.5 px-4 text-xs text-[#B2B4BA]">
+                        {proj.isFeatured ? "Featured" : "Standard"}
+                      </td>
+                      <td className="py-3.5 px-4 font-mono text-xs text-[#777D87]">
+                        #{proj.displayOrder}
+                      </td>
+                      <td className="py-3.5 px-4 text-right">
+                        <div className="inline-flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => openEditModal(proj.id, true)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#0D0F12] border border-[#252A32] text-xs text-[#B2B4BA] hover:text-white cursor-pointer"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                            <span>Preview</span>
+                          </button>
+                          {canEdit && (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => openEditModal(proj.id, false)}
+                                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#191D23] border border-[#252A32] text-xs text-[#F5F3EE] hover:border-[#D6B77A] cursor-pointer"
+                              >
+                                <Edit3 className="w-3.5 h-3.5" />
+                                <span>Edit</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteProject(proj)}
+                                aria-label={`Delete ${proj.title}`}
+                                className="p-1.5 rounded-lg text-[#777D87] hover:text-[#F28B82] hover:bg-[#2A1414] cursor-pointer"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Pagination Footer */}
+      <div className="px-4 py-3 rounded-xl bg-[#111419] border border-[#1E222A] flex flex-wrap items-center justify-between gap-4 text-xs text-[#8D939E]">
+        <div>
+          Showing {startIdx}–{endIdx} of {totalFiltered} projects
+        </div>
+
+        <div className="flex items-center gap-4">
+          <label className="inline-flex items-center gap-2">
+            <span>Rows per page</span>
+            <select
+              value={rowsPerPage}
+              onChange={(e) => {
+                setRowsPerPage(Number(e.target.value));
+                setPageNum(1);
+              }}
+              className="h-8 px-2 rounded bg-[#0B0D10] border border-[#1E222A] text-xs text-[#F5F3EE]"
+            >
+              <option value={6}>6</option>
+              <option value={12}>12</option>
+              <option value={24}>24</option>
+            </select>
+          </label>
+
+          <div className="inline-flex items-center gap-1">
+            <button
+              type="button"
+              disabled={pageNum <= 1}
+              onClick={() => setPageNum((p) => Math.max(1, p - 1))}
+              className="w-8 h-8 rounded-md bg-[#0B0D10] border border-[#1E222A] flex items-center justify-center disabled:opacity-40 cursor-pointer"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </button>
+            <span className="w-8 h-8 rounded-md bg-[#D6B77A] text-[#08090B] font-semibold flex items-center justify-center">
+              {pageNum}
+            </span>
+            <button
+              type="button"
+              disabled={pageNum >= totalPages}
+              onClick={() => setPageNum((p) => Math.min(totalPages, p + 1))}
+              className="w-8 h-8 rounded-md bg-[#0B0D10] border border-[#1E222A] flex items-center justify-center disabled:opacity-40 cursor-pointer"
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
       </div>
 
