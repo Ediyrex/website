@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { unstable_rethrow } from "next/navigation";
-import { and, asc, desc, eq, gte, ilike, inArray, isNotNull, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gte, ilike, inArray, isNotNull, lt, or, sql } from "drizzle-orm";
 import type { NextRequest } from "next/server";
 import {
   crmClients,
@@ -292,7 +292,7 @@ export async function GET(request: NextRequest) {
       .where(
         and(
           eq(crmFollowups.completed, false),
-          sql`${crmFollowups.dueAt} < ${now}`
+          lt(crmFollowups.dueAt, now)
         )
       );
 

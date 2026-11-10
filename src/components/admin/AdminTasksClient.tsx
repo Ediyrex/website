@@ -1,526 +1,544 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import {
-  Briefcase,
-  Check,
-  FolderKanban,
-  Loader2,
-  Plus,
-  Trash2,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAdminUser } from "./AdminContext";
-
-interface TaskRow {
-  id: string;
-  pmsProjectId: string | null;
-  title: string;
-  category: string;
-  dueDateLabel: string;
-  completed: boolean;
-  createdAt: string;
-}
-
-interface PmsProjectRow {
-  id: string;
-  title: string;
-  clientId: string | null;
-  clientName: string | null;
-  clientCompany: string | null;
-  sourceEnquiryId: string | null;
-  sourceReferenceCode: string | null;
-  serviceInterest: string;
-  status: "planning" | "in_progress" | "review" | "completed" | "on_hold";
-  dueDateLabel: string;
-  summary: string;
-  totalTasks: number;
-  completedTasks: number;
-  createdAt: string;
-}
+import { PmsDashboardView } from "./pms/PmsDashboardView";
+import { PmsProjectWorkspace } from "./pms/PmsProjectWorkspace";
+import { PmsSecondarySidebar } from "./pms/PmsSecondarySidebar";
+import { PmsTaskDrawer } from "./pms/PmsTaskDrawer";
+import {
+  NewProjectModal,
+  NewTaskModal,
+  PmsInboxView,
+  PmsMyTasksView,
+  PmsWorkloadView,
+  type InboxNotificationRow,
+  type MyTaskRow,
+  type WorkloadMemberRow,
+} from "./pms/PmsViews";
+import type {
+  PmsMainView,
+  PmsProjectSummary,
+  PmsProjectTab,
+  PmsTemplateSummary,
+  PmsWorkspacePayload,
+  StudioUserSummary,
+  TaskWorkflowStatus,
+} from "./pms/pms-types";
 
 export function AdminTasksClient() {
   const router = useRouter();
-  const { canEdit } = useAdminUser();
+  const searchParams = useSearchParams();
+  const { user, canEdit } = useAdminUser();
+  const isAdmin = user.roles.includes("admin");
 
-  const [projects, setProjects] = useState<PmsProjectRow[]>([]);
-  const [tasks, setTasks] = useState<TaskRow[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [creating, setCreating] = useState(false);
-  const [creatingProject, setCreatingProject] = useState(false);
+  const projectParam = searchParams.get("project");
+  const viewParam = searchParams.get("view");
+  const tabParam = (searchParams.get("tab") || "overview") as PmsProjectTab;
+  const taskParam = searchParams.get("task");
 
-  const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("CMS · Portfolio");
-  const [dueDateLabel, setDueDateLabel] = useState("Today");
-  const [selectedProjectId, setSelectedProjectId] = useState<string>("");
+  const activeView: PmsMainView = projectParam
+    ? "project"
+    : viewParam === "my-tasks" ||
+      viewParam === "inbox" ||
+      viewParam === "all" ||
+      viewParam === "starred" ||
+      viewParam === "workload"
+    ? viewParam
+    : "overview";
 
-  const [newProjectTitle, setNewProjectTitle] = useState("");
-  const [newProjectService, setNewProjectService] = useState("Studio Delivery");
-  const [newProjectDue, setNewProjectDue] = useState("This month");
-  const [showNewProject, setShowNewProject] = useState(false);
+  const updateRoute = useCallback(
+    (updates: Record<string, string | null>) => {
+      const params = new URLSearchParams(searchParams.toString());
+      for (const [k, v] of Object.entries(updates)) {
+        if (v === null) params.delete(k);
+        else params.set(k, v);
+      }
+      const qs = params.toString();
+      router.replace(qs ? `/admin/tasks?${qs}` : "/admin/tasks");
+    },
+    [router, searchParams]
+  );
 
-  const [error, setError] = useState("");
+  // Dashboard / list state
+  const [projects, setProjects] = useState<PmsProjectSummary[]>([]);
+  const [sidebarProjects, setSidebarProjects] = useState<
+    Array<{ id: string; title: string; status: string; isStarred: boolean }>
+  >([]);
+  const [kpis, setKpis] = useState({
+    total: 0,
+    inProgress: 0,
+    completed: 0,
+    onHold: 0,
+  });
+  const [upcomingDeadlines, setUpcomingDeadlines] = useState<
+    Array<{
+      id: string;
+      projectId: string;
+      projectTitle: string;
+      title: string;
+      priority: string;
+      dueDate: string | null;
+    }>
+  >([]);
+  const [templates, setTemplates] = useState<PmsTemplateSummary[]>([]);
+  const [studioUsers, setStudioUsers] = useState<StudioUserSummary[]>([]);
+  const [clientsList, setClientsList] = useState<
+    Array<{
+      id: string;
+      name: string;
+      companyName: string | null;
+      serviceInterest: string;
+    }>
+  >([]);
+  const [myPendingCount, setMyPendingCount] = useState(0);
+  const [unreadInboxCount, setUnreadInboxCount] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [loadingProjects, setLoadingProjects] = useState(true);
 
-  const loadWorkspace = useCallback(async () => {
-    const [tasksRes, projectsRes] = await Promise.all([
-      fetch("/api/v1/admin/tasks"),
-      fetch("/api/v1/admin/pms/projects"),
-    ]);
-    if (tasksRes.status === 401 || projectsRes.status === 401) {
-      router.push("/admin/login");
-      return null;
+  // Project workspace state
+  const [workspace, setWorkspace] = useState<PmsWorkspacePayload | null>(null);
+  const [loadingWorkspace, setLoadingWorkspace] = useState(false);
+
+  // My Tasks state
+  const [myTasksTab, setMyTasksTab] = useState<
+    "all" | "today" | "upcoming" | "overdue" | "completed"
+  >("all");
+  const [myTasks, setMyTasks] = useState<MyTaskRow[]>([]);
+  const [myTasksCounts, setMyTasksCounts] = useState({
+    all: 0,
+    today: 0,
+    upcoming: 0,
+    overdue: 0,
+    completed: 0,
+  });
+  const [loadingMyTasks, setLoadingMyTasks] = useState(false);
+
+  // Inbox state
+  const [inboxTab, setInboxTab] = useState<"all" | "tasks" | "mentions">("all");
+  const [notifications, setNotifications] = useState<InboxNotificationRow[]>(
+    []
+  );
+  const [inboxUnreadCounts, setInboxUnreadCounts] = useState({
+    all: 0,
+    tasks: 0,
+    mentions: 0,
+  });
+  const [loadingInbox, setLoadingInbox] = useState(false);
+
+  // Workload state
+  const [workloadMembers, setWorkloadMembers] = useState<WorkloadMemberRow[]>(
+    []
+  );
+  const [loadingWorkload, setLoadingWorkload] = useState(false);
+
+  // Modals & Drawers
+  const [newProjectModal, setNewProjectModal] = useState<{
+    open: boolean;
+    templateKey?: string;
+  }>({ open: false });
+  const [newTaskModal, setNewTaskModal] = useState<{
+    open: boolean;
+    initialStatus: TaskWorkflowStatus;
+  }>({ open: false, initialStatus: "todo" });
+  const [errorBanner, setErrorBanner] = useState("");
+
+  const loadProjectsOverview = useCallback(async () => {
+    setLoadingProjects(true);
+    try {
+      const params = new URLSearchParams({ status: statusFilter });
+      if (activeView === "starred") params.set("filter", "starred");
+      if (searchQuery.trim()) params.set("q", searchQuery.trim());
+
+      const res = await fetch(`/api/v1/admin/pms/projects?${params.toString()}`);
+      if (res.status === 401) {
+        router.push("/admin/login");
+        return;
+      }
+      const json = await res.json();
+      if (!res.ok) {
+        setErrorBanner(json.message || "Unable to fetch PMS projects.");
+        return;
+      }
+      const d = json.data;
+      setProjects(d.projects || []);
+      setSidebarProjects(d.allProjectsSidebar || []);
+      setKpis(d.kpis || { total: 0, inProgress: 0, completed: 0, onHold: 0 });
+      setUpcomingDeadlines(d.upcomingDeadlines || []);
+      setTemplates(d.templates || []);
+      setStudioUsers(d.studioUsers || []);
+      setClientsList(d.clientsList || []);
+      setMyPendingCount(d.myPendingTasksCount ?? 0);
+      setUnreadInboxCount(d.unreadNotificationsCount ?? 0);
+    } catch {
+      setErrorBanner("Network error loading PMS projects.");
+    } finally {
+      setLoadingProjects(false);
     }
-    const [tasksJson, projectsJson] = await Promise.all([
-      tasksRes.json(),
-      projectsRes.json(),
-    ]);
-    if (!tasksRes.ok) {
-      throw new Error(tasksJson.message || "Unable to fetch tasks.");
+  }, [activeView, router, searchQuery, statusFilter]);
+
+  const loadProjectWorkspace = useCallback(
+    async (projectId: string) => {
+      setLoadingWorkspace(true);
+      setErrorBanner("");
+      try {
+        const res = await fetch(`/api/v1/admin/pms/projects/${projectId}`);
+        if (res.status === 401) {
+          router.push("/admin/login");
+          return;
+        }
+        const json = await res.json();
+        if (!res.ok) {
+          setErrorBanner(json.message || "Unable to open project workspace.");
+          setWorkspace(null);
+          return;
+        }
+        setWorkspace(json.data);
+      } catch {
+        setErrorBanner("Network error loading project workspace.");
+      } finally {
+        setLoadingWorkspace(false);
+      }
+    },
+    [router]
+  );
+
+  const loadMyTasks = useCallback(async () => {
+    setLoadingMyTasks(true);
+    try {
+      const res = await fetch(`/api/v1/admin/pms/my-tasks?tab=${myTasksTab}`);
+      const json = await res.json();
+      if (res.ok && json.data) {
+        setMyTasks(json.data.tasks || []);
+        setMyTasksCounts(
+          json.data.counts || {
+            all: 0,
+            today: 0,
+            upcoming: 0,
+            overdue: 0,
+            completed: 0,
+          }
+        );
+      }
+    } finally {
+      setLoadingMyTasks(false);
     }
-    return {
-      tasks: (tasksJson.data || []) as TaskRow[],
-      projects: (projectsJson.data || []) as PmsProjectRow[],
-    };
-  }, [router]);
+  }, [myTasksTab]);
+
+  const loadInbox = useCallback(async () => {
+    setLoadingInbox(true);
+    try {
+      const res = await fetch(`/api/v1/admin/pms/inbox?tab=${inboxTab}`);
+      const json = await res.json();
+      if (res.ok && json.data) {
+        setNotifications(json.data.notifications || []);
+        setInboxUnreadCounts(
+          json.data.unreadCounts || { all: 0, tasks: 0, mentions: 0 }
+        );
+        setUnreadInboxCount(json.data.unreadCounts?.all ?? 0);
+      }
+    } finally {
+      setLoadingInbox(false);
+    }
+  }, [inboxTab]);
+
+  const loadWorkload = useCallback(async () => {
+    setLoadingWorkload(true);
+    try {
+      const res = await fetch("/api/v1/admin/pms/workload");
+      const json = await res.json();
+      if (res.ok && json.data) {
+        setWorkloadMembers(json.data.members || []);
+      }
+    } finally {
+      setLoadingWorkload(false);
+    }
+  }, []);
 
   useEffect(() => {
-    let ignore = false;
-    loadWorkspace()
-      .then((res) => {
-        if (!ignore && res) {
-          setTasks(res.tasks);
-          setProjects(res.projects);
-        }
-      })
-      .catch((err) => {
-        if (!ignore) {
-          setError(
-            err instanceof Error
-              ? err.message
-              : "Network error loading PMS workspace."
-          );
-        }
-      })
-      .finally(() => {
-        if (!ignore) setLoading(false);
-      });
-    return () => {
-      ignore = true;
-    };
-  }, [loadWorkspace]);
+    const t = setTimeout(() => {
+      loadProjectsOverview();
+    }, 100);
+    return () => clearTimeout(t);
+  }, [loadProjectsOverview]);
 
-  const handleCreateTask = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title.trim()) return;
-    setCreating(true);
-    setError("");
-    try {
-      const res = await fetch("/api/v1/admin/tasks", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: title.trim(),
-          category: category.trim(),
-          dueDateLabel: dueDateLabel.trim(),
-          pmsProjectId: selectedProjectId || null,
-        }),
-      });
-      const json = await res.json();
-      if (!res.ok) {
-        setError(json.message || "Unable to create task.");
-        return;
-      }
-      setTasks((prev) => [json.data, ...prev]);
-      setTitle("");
-    } catch {
-      setError("Network error creating task.");
-    } finally {
-      setCreating(false);
-    }
+  useEffect(() => {
+    if (activeView !== "project" || !projectParam) return;
+    const t = setTimeout(() => {
+      loadProjectWorkspace(projectParam);
+    }, 0);
+    return () => clearTimeout(t);
+  }, [activeView, loadProjectWorkspace, projectParam]);
+
+  useEffect(() => {
+    if (activeView !== "my-tasks") return;
+    const t = setTimeout(() => {
+      loadMyTasks();
+    }, 0);
+    return () => clearTimeout(t);
+  }, [activeView, loadMyTasks]);
+
+  useEffect(() => {
+    if (activeView !== "inbox") return;
+    const t = setTimeout(() => {
+      loadInbox();
+    }, 0);
+    return () => clearTimeout(t);
+  }, [activeView, loadInbox]);
+
+  useEffect(() => {
+    if (activeView !== "workload") return;
+    const t = setTimeout(() => {
+      loadWorkload();
+    }, 0);
+    return () => clearTimeout(t);
+  }, [activeView, loadWorkload]);
+
+  const refreshActive = useCallback(async () => {
+    await loadProjectsOverview();
+    if (projectParam) await loadProjectWorkspace(projectParam);
+    if (activeView === "my-tasks") await loadMyTasks();
+    if (activeView === "inbox") await loadInbox();
+    if (activeView === "workload") await loadWorkload();
+  }, [
+    activeView,
+    loadInbox,
+    loadMyTasks,
+    loadProjectWorkspace,
+    loadProjectsOverview,
+    loadWorkload,
+    projectParam,
+  ]);
+
+  const handleToggleStar = async (id: string) => {
+    await fetch(`/api/v1/admin/pms/projects/${id}/star`, { method: "POST" });
+    await refreshActive();
   };
 
-  const handleCreateProject = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newProjectTitle.trim()) return;
-    setCreatingProject(true);
-    setError("");
-    try {
-      const res = await fetch("/api/v1/admin/pms/projects", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: newProjectTitle.trim(),
-          serviceInterest: newProjectService.trim(),
-          dueDateLabel: newProjectDue.trim(),
-          status: "planning",
-        }),
-      });
-      const json = await res.json();
-      if (!res.ok) {
-        setError(json.message || "Unable to create PMS project.");
-        return;
-      }
-      setNewProjectTitle("");
-      setShowNewProject(false);
-      const refreshed = await loadWorkspace();
-      if (refreshed) {
-        setTasks(refreshed.tasks);
-        setProjects(refreshed.projects);
-      }
-    } catch {
-      setError("Network error creating project.");
-    } finally {
-      setCreatingProject(false);
-    }
-  };
-
-  const updateProjectStatus = async (
-    projectId: string,
-    status: PmsProjectRow["status"]
-  ) => {
-    setProjects((prev) =>
-      prev.map((p) => (p.id === projectId ? { ...p, status } : p))
-    );
-    await fetch(`/api/v1/admin/pms/projects/${projectId}`, {
+  const handleProjectStatusChange = async (id: string, nextStatus: string) => {
+    await fetch(`/api/v1/admin/pms/projects/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status }),
-    }).catch(() => {});
+      body: JSON.stringify({ status: nextStatus }),
+    });
+    await refreshActive();
   };
 
-  const deleteProject = async (projectId: string) => {
-    const res = await fetch(`/api/v1/admin/pms/projects/${projectId}`, {
+  const handleDuplicateProject = async (id: string) => {
+    const res = await fetch(`/api/v1/admin/pms/projects/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "duplicate" }),
+    });
+    if (res.ok) await refreshActive();
+  };
+
+  const handleDeleteProject = async (id: string) => {
+    const res = await fetch(`/api/v1/admin/pms/projects/${id}`, {
       method: "DELETE",
     });
     if (res.ok) {
-      setProjects((prev) => prev.filter((p) => p.id !== projectId));
+      if (projectParam === id) {
+        updateRoute({ project: null, tab: null, view: "overview" });
+      }
+      await loadProjectsOverview();
     }
   };
-
-  const toggleTask = async (task: TaskRow) => {
-    if (!canEdit) return;
-    const next = !task.completed;
-    setTasks((prev) =>
-      prev.map((t) => (t.id === task.id ? { ...t, completed: next } : t))
-    );
-    await fetch(`/api/v1/admin/tasks/${task.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ completed: next }),
-    }).catch(() => {});
-  };
-
-  const deleteTask = async (id: string) => {
-    const res = await fetch(`/api/v1/admin/tasks/${id}`, { method: "DELETE" });
-    if (res.ok) {
-      setTasks((prev) => prev.filter((t) => t.id !== id));
-    }
-  };
-
-  const projectNameById = new Map(projects.map((p) => [p.id, p.title]));
 
   return (
-    <div className="space-y-8 max-w-5xl">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="font-heading font-bold text-2xl sm:text-3xl text-[#F5F3EE]">
-            Projects &amp; Tasks
-          </h1>
-          <p className="text-sm text-[#8D939E]">
-            Internal studio delivery projects from CRM conversions and
-            operational studio deliverables.
-          </p>
-        </div>
+    <div className="flex flex-col lg:flex-row gap-5 items-start">
+      <PmsSecondarySidebar
+        activeView={activeView}
+        activeProjectId={projectParam}
+        onSelectView={(v) =>
+          updateRoute({ view: v, project: null, tab: null, task: null })
+        }
+        onSelectProject={(id) =>
+          updateRoute({ project: id, view: null, tab: "tasks", task: null })
+        }
+        onNewProject={() => setNewProjectModal({ open: true })}
+        canCreateProject={canEdit}
+        myPendingCount={myPendingCount}
+        unreadInboxCount={unreadInboxCount}
+        projects={sidebarProjects}
+      />
 
-        {canEdit && (
-          <button
-            type="button"
-            onClick={() => setShowNewProject((v) => !v)}
-            className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-lg bg-[#D6B77A] text-[#08090B] text-xs font-semibold hover:bg-[#E2C68F] cursor-pointer"
-          >
-            <Briefcase className="w-3.5 h-3.5" />
-            <span>New PMS Project</span>
-          </button>
-        )}
-      </div>
-
-      {error && (
-        <div className="p-3.5 rounded-xl bg-[#2A1414] border border-[#F28B82]/40 text-xs text-[#F28B82]">
-          {error}
-        </div>
-      )}
-
-      {showNewProject && canEdit && (
-        <form
-          onSubmit={handleCreateProject}
-          className="p-4 rounded-xl bg-[#111419] border border-[#252A32] grid grid-cols-1 sm:grid-cols-12 gap-3"
-        >
-          <input
-            type="text"
-            required
-            value={newProjectTitle}
-            onChange={(e) => setNewProjectTitle(e.target.value)}
-            placeholder="Internal project title (e.g. Acme Corp — Brand Identity)..."
-            className="sm:col-span-6 h-10 px-3 rounded-lg bg-[#0D0F12] border border-[#252A32] text-sm text-[#F5F3EE]"
-          />
-          <input
-            type="text"
-            required
-            value={newProjectService}
-            onChange={(e) => setNewProjectService(e.target.value)}
-            placeholder="Service Division"
-            className="sm:col-span-3 h-10 px-3 rounded-lg bg-[#0D0F12] border border-[#252A32] text-xs text-[#F5F3EE]"
-          />
-          <input
-            type="text"
-            required
-            value={newProjectDue}
-            onChange={(e) => setNewProjectDue(e.target.value)}
-            placeholder="Target Window"
-            className="sm:col-span-1 h-10 px-2.5 rounded-lg bg-[#0D0F12] border border-[#252A32] text-xs text-[#F5F3EE]"
-          />
-          <button
-            type="submit"
-            disabled={creatingProject}
-            className="sm:col-span-2 inline-flex items-center justify-center gap-1.5 h-10 px-4 rounded-lg bg-[#D6B77A] text-[#08090B] text-xs font-semibold hover:bg-[#E2C68F] cursor-pointer"
-          >
-            {creatingProject ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <Plus className="w-3.5 h-3.5" />
-            )}
-            <span>Create</span>
-          </button>
-        </form>
-      )}
-
-      {/* Client & Studio PMS Projects Section */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-[0.14em] text-[#8D939E]">
-          <FolderKanban className="w-4 h-4 text-[#D6B77A]" />
-          <span>Internal Client Projects ({projects.length})</span>
-        </div>
-
-        {loading ? (
-          <div className="p-6 rounded-xl bg-[#111419] border border-[#1E222A] text-xs font-mono text-[#777D87]">
-            Loading PMS projects...
-          </div>
-        ) : projects.length === 0 ? (
-          <div className="p-6 rounded-xl bg-[#111419] border border-[#1E222A] text-xs text-[#777D87]">
-            No internal PMS projects yet. Convert a CRM inquiry or click New PMS
-            Project above.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {projects.map((project) => (
-              <div
-                key={project.id}
-                className="p-4 rounded-xl bg-[#111419] border border-[#1E222A] space-y-3"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <h2 className="font-heading font-semibold text-base text-[#F5F3EE] truncate">
-                      {project.title}
-                    </h2>
-                    <div className="text-xs text-[#8D939E] mt-0.5">
-                      {project.clientName
-                        ? `${project.clientName}${
-                            project.clientCompany
-                              ? ` · ${project.clientCompany}`
-                              : ""
-                          }`
-                        : project.serviceInterest}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    <select
-                      disabled={!canEdit}
-                      value={project.status}
-                      onChange={(e) =>
-                        updateProjectStatus(
-                          project.id,
-                          e.target.value as PmsProjectRow["status"]
-                        )
-                      }
-                      aria-label={`Status for ${project.title}`}
-                      className="h-8 px-2.5 rounded-lg bg-[#0D0F12] border border-[#252A32] text-xs text-[#D6B77A]"
-                    >
-                      <option value="planning">Planning</option>
-                      <option value="in_progress">In Progress</option>
-                      <option value="review">Review</option>
-                      <option value="completed">Completed</option>
-                      <option value="on_hold">On Hold</option>
-                    </select>
-                    {canEdit && (
-                      <button
-                        type="button"
-                        onClick={() => deleteProject(project.id)}
-                        className="p-1.5 text-[#777D87] hover:text-[#F28B82] cursor-pointer"
-                        aria-label={`Delete project ${project.title}`}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {project.summary && (
-                  <p className="text-xs text-[#777D87] line-clamp-2">
-                    {project.summary}
-                  </p>
-                )}
-
-                <div className="pt-2 border-t border-[#1E222A] flex items-center justify-between text-[11px] font-mono text-[#777D87]">
-                  <span>{project.serviceInterest}</span>
-                  <span>
-                    Due: {project.dueDateLabel} · {project.completedTasks}/
-                    {project.totalTasks} tasks
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Studio Tasks Checklist */}
-      <div className="space-y-3">
-        <div className="text-xs font-mono uppercase tracking-[0.14em] text-[#8D939E]">
-          Studio Deliverables &amp; Tasks ({tasks.length})
-        </div>
-
-        {canEdit && (
-          <form
-            onSubmit={handleCreateTask}
-            className="p-4 rounded-xl bg-[#111419] border border-[#1E222A] grid grid-cols-1 sm:grid-cols-12 gap-3"
-          >
-            <input
-              type="text"
-              required
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="New studio task (e.g. Deliver final brand guidelines)..."
-              className="sm:col-span-4 h-10 px-3 rounded-lg bg-[#0D0F12] border border-[#252A32] text-sm text-[#F5F3EE]"
-            />
-            <select
-              value={selectedProjectId}
-              onChange={(e) => setSelectedProjectId(e.target.value)}
-              aria-label="Link task to PMS project"
-              className="sm:col-span-3 h-10 px-3 rounded-lg bg-[#0D0F12] border border-[#252A32] text-xs text-[#E4E0D8]"
-            >
-              <option value="">General Studio Task</option>
-              {projects.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.title}
-                </option>
-              ))}
-            </select>
-            <input
-              type="text"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              placeholder="Category"
-              className="sm:col-span-2 h-10 px-3 rounded-lg bg-[#0D0F12] border border-[#252A32] text-xs text-[#F5F3EE]"
-            />
-            <input
-              type="text"
-              value={dueDateLabel}
-              onChange={(e) => setDueDateLabel(e.target.value)}
-              placeholder="Due"
-              className="sm:col-span-1 h-10 px-2.5 rounded-lg bg-[#0D0F12] border border-[#252A32] text-xs text-[#F5F3EE]"
-            />
+      <div className="flex-1 min-w-0 w-full space-y-4">
+        {errorBanner && (
+          <div className="p-3.5 rounded-xl bg-[#2A1517] border border-[#E47777]/40 text-xs text-[#E47777] flex items-center justify-between">
+            <span>{errorBanner}</span>
             <button
-              type="submit"
-              disabled={creating}
-              className="sm:col-span-2 inline-flex items-center justify-center gap-1.5 h-10 px-4 rounded-lg bg-[#D6B77A] text-[#08090B] text-xs font-semibold hover:bg-[#E2C68F] cursor-pointer"
+              type="button"
+              onClick={() => setErrorBanner("")}
+              className="underline cursor-pointer"
             >
-              {creating ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              ) : (
-                <Plus className="w-3.5 h-3.5" />
-              )}
-              <span>Add</span>
+              Dismiss
             </button>
-          </form>
+          </div>
         )}
 
-        <div className="rounded-xl bg-[#111419] border border-[#1E222A] divide-y divide-[#1E222A]">
-          {loading ? (
-            <div className="p-8 text-center text-xs font-mono text-[#777D87]">
-              Loading studio tasks...
+        {activeView === "project" && projectParam ? (
+          loadingWorkspace && !workspace ? (
+            <div className="p-12 rounded-xl bg-[#111419] border border-[#252A31] text-center text-xs font-mono text-[#A1A6AE]">
+              Opening project workspace...
             </div>
-          ) : tasks.length === 0 ? (
-            <div className="p-8 text-center text-xs text-[#777D87]">
-              No studio tasks yet. Add one above to track progress on your
-              Overview dashboard.
-            </div>
-          ) : (
-            tasks.map((task) => (
-              <div
-                key={task.id}
-                className="px-5 py-3.5 flex items-center justify-between gap-4 hover:bg-[#161920]"
-              >
-                <button
-                  type="button"
-                  disabled={!canEdit}
-                  onClick={() => toggleTask(task)}
-                  className="flex items-start gap-3 text-left flex-1 min-w-0 cursor-pointer disabled:cursor-default"
-                >
-                  <span
-                    className={cn(
-                      "mt-0.5 w-4 h-4 rounded border flex items-center justify-center shrink-0",
-                      task.completed
-                        ? "bg-[#D6B77A] border-[#D6B77A] text-[#08090B]"
-                        : "bg-[#0D0F12] border-[#323946]"
-                    )}
-                  >
-                    {task.completed && <Check className="w-3 h-3" />}
-                  </span>
-                  <div className="min-w-0">
-                    <div
-                      className={cn(
-                        "text-sm font-medium",
-                        task.completed
-                          ? "line-through text-[#6D7480]"
-                          : "text-[#F5F3EE]"
-                      )}
-                    >
-                      {task.title}
-                    </div>
-                    <div className="text-xs text-[#777D87] flex flex-wrap items-center gap-2">
-                      <span>{task.category}</span>
-                      {task.pmsProjectId &&
-                        projectNameById.get(task.pmsProjectId) && (
-                          <span className="text-[#D6B77A]">
-                            · {projectNameById.get(task.pmsProjectId)}
-                          </span>
-                        )}
-                    </div>
-                  </div>
-                </button>
-
-                <div className="flex items-center gap-3 shrink-0">
-                  <span className="text-xs font-mono text-[#D6B77A]">
-                    {task.completed ? "Completed" : task.dueDateLabel}
-                  </span>
-                  {canEdit && (
-                    <button
-                      type="button"
-                      onClick={() => deleteTask(task.id)}
-                      className="p-1.5 text-[#777D87] hover:text-[#F28B82] cursor-pointer"
-                      aria-label={`Delete task ${task.title}`}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))
-          )}
-        </div>
+          ) : workspace ? (
+            <PmsProjectWorkspace
+              workspace={workspace}
+              activeTab={tabParam}
+              onTabChange={(nextTab) => updateRoute({ tab: nextTab })}
+              onBackToProjects={() =>
+                updateRoute({ project: null, tab: null, view: "overview" })
+              }
+              onRefresh={refreshActive}
+              onOpenTask={(tid) => updateRoute({ task: tid })}
+              onNewTask={(initialStatus) =>
+                setNewTaskModal({ open: true, initialStatus })
+              }
+              onToggleStar={() => handleToggleStar(workspace.project.id)}
+            />
+          ) : null
+        ) : activeView === "my-tasks" ? (
+          <PmsMyTasksView
+            tasks={myTasks}
+            counts={myTasksCounts}
+            tab={myTasksTab}
+            onTabChange={setMyTasksTab}
+            loading={loadingMyTasks}
+            canEdit={canEdit}
+            onOpenTask={(tid) => updateRoute({ task: tid })}
+            onToggleStatus={async (task) => {
+              await fetch(`/api/v1/admin/pms/tasks/${task.id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  workflowStatus: task.completed ? "in_progress" : "done",
+                }),
+              });
+              await refreshActive();
+            }}
+          />
+        ) : activeView === "inbox" ? (
+          <PmsInboxView
+            notifications={notifications}
+            unreadCounts={inboxUnreadCounts}
+            tab={inboxTab}
+            onTabChange={setInboxTab}
+            loading={loadingInbox}
+            onMarkRead={async (notificationId, isRead) => {
+              await fetch("/api/v1/admin/pms/inbox", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ notificationId, isRead }),
+              });
+              await loadInbox();
+            }}
+            onMarkAllRead={async () => {
+              await fetch("/api/v1/admin/pms/inbox", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ markAllRead: true }),
+              });
+              await loadInbox();
+            }}
+            onNavigateTarget={(pid, tid) => {
+              if (pid) {
+                updateRoute({
+                  project: pid,
+                  view: null,
+                  tab: "tasks",
+                  task: tid,
+                });
+              } else if (tid) {
+                updateRoute({ task: tid });
+              }
+            }}
+          />
+        ) : activeView === "workload" ? (
+          <PmsWorkloadView
+            members={workloadMembers}
+            loading={loadingWorkload}
+          />
+        ) : (
+          <PmsDashboardView
+            title={
+              activeView === "starred"
+                ? "Starred Projects"
+                : activeView === "all"
+                ? "All Studio Projects"
+                : "Projects & Tasks — Overview"
+            }
+            projects={projects}
+            kpis={kpis}
+            upcomingDeadlines={upcomingDeadlines}
+            templates={templates}
+            searchQuery={searchQuery}
+            onSearchQueryChange={setSearchQuery}
+            statusFilter={statusFilter}
+            onStatusFilterChange={setStatusFilter}
+            loading={loadingProjects}
+            canEdit={canEdit}
+            isAdmin={isAdmin}
+            onOpenProject={(id) =>
+              updateRoute({ project: id, view: null, tab: "tasks" })
+            }
+            onToggleStar={handleToggleStar}
+            onStatusChange={handleProjectStatusChange}
+            onDuplicateProject={handleDuplicateProject}
+            onDeleteProject={handleDeleteProject}
+            onNewProject={(templateKey) =>
+              setNewProjectModal({ open: true, templateKey })
+            }
+            onOpenTask={(pid, tid) =>
+              updateRoute({ project: pid, view: null, tab: "tasks", task: tid })
+            }
+          />
+        )}
       </div>
+
+      {/* Task Detail Drawer */}
+      <PmsTaskDrawer
+        taskId={taskParam}
+        canEditTasks={
+          workspace ? workspace.permissions.canEditTasks : canEdit
+        }
+        canApproveReviews={
+          workspace ? workspace.permissions.canApproveReviews : isAdmin
+        }
+        studioUsers={workspace?.studioUsers || studioUsers}
+        onClose={() => updateRoute({ task: null })}
+        onChanged={refreshActive}
+      />
+
+      {/* New Project Modal */}
+      {newProjectModal.open && (
+        <NewProjectModal
+          templates={templates}
+          clients={clientsList}
+          studioUsers={studioUsers}
+          initialTemplateKey={newProjectModal.templateKey}
+          onClose={() => setNewProjectModal({ open: false })}
+          onCreated={async (createdId) => {
+            await loadProjectsOverview();
+            updateRoute({ project: createdId, view: null, tab: "tasks" });
+          }}
+        />
+      )}
+
+      {/* New Task Modal */}
+      {newTaskModal.open && projectParam && (
+        <NewTaskModal
+          projectId={projectParam}
+          initialStatus={newTaskModal.initialStatus}
+          studioUsers={workspace?.studioUsers || studioUsers}
+          onClose={() =>
+            setNewTaskModal({ open: false, initialStatus: "todo" })
+          }
+          onCreated={refreshActive}
+        />
+      )}
     </div>
   );
 }

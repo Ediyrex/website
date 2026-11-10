@@ -6,6 +6,7 @@ export * from "./media";
 export * from "./catalog";
 export * from "./enquiries";
 export * from "./content";
+export * from "./pms";
 
 import { users, roles, userRoles, sessions } from "./auth";
 import {
