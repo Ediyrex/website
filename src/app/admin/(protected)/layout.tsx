@@ -3,15 +3,21 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { getAuthenticatedSession } from "@/lib/server/session";
-import { AdminDashboardClient } from "@/components/admin/AdminDashboardClient";
+import { AdminProvider } from "@/components/admin/AdminContext";
+import { AdminShell } from "@/components/admin/AdminShell";
 
 export const metadata: Metadata = {
-  title: "Admin Dashboard",
-  description: "Ediyrex Studio administrative portal for managing enquiries, services, and projects.",
+  title: "Ediyrex CMS",
+  description:
+    "Ediyrex Studio content management portal for projects, services, inquiries, media, and website settings.",
   robots: { index: false, follow: false },
 };
 
-async function AdminGate() {
+async function ProtectedAdminGate({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   await connection();
   const session = await getAuthenticatedSession();
   if (!session) {
@@ -19,18 +25,24 @@ async function AdminGate() {
   }
 
   return (
-    <AdminDashboardClient
+    <AdminProvider
       user={{
         id: session.userId,
         email: session.email,
         displayName: session.displayName,
         roles: session.roles,
       }}
-    />
+    >
+      <AdminShell>{children}</AdminShell>
+    </AdminProvider>
   );
 }
 
-export default function AdminDashboardPage() {
+export default function ProtectedAdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <Suspense
       fallback={
@@ -39,7 +51,7 @@ export default function AdminDashboardPage() {
         </div>
       }
     >
-      <AdminGate />
+      <ProtectedAdminGate>{children}</ProtectedAdminGate>
     </Suspense>
   );
 }

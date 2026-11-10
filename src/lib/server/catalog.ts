@@ -1,4 +1,4 @@
-import { asc, desc, eq, and } from "drizzle-orm";
+import { asc, desc, eq, and, inArray } from "drizzle-orm";
 import {
   getDb,
   serviceDivisions,
@@ -110,26 +110,37 @@ export async function getPublishedProjects(options?: {
     .select()
     .from(projects)
     .where(and(...conditions))
-    .orderBy(asc(projects.displayOrder), desc(projects.publishedAt));
+    .orderBy(asc(projects.displayOrder), desc(projects.publishedAt))
+    .limit(100);
 
   if (projectRows.length === 0) {
     return [];
   }
 
-  const caseStudyRows = await db
-    .select()
-    .from(caseStudies)
-    .where(eq(caseStudies.status, "published"));
+  const projectIds = projectRows.map((p) => p.id);
 
-  const linkedServicesRows = await db
-    .select({
-      projectId: projectServices.projectId,
-      serviceTitle: services.title,
-      divisionSlug: serviceDivisions.slug,
-    })
-    .from(projectServices)
-    .innerJoin(services, eq(projectServices.serviceId, services.id))
-    .innerJoin(serviceDivisions, eq(services.divisionId, serviceDivisions.id));
+  // Batch fetch child records using IN clause (prevents N+1 queries)
+  const [caseStudyRows, linkedServicesRows] = await Promise.all([
+    db
+      .select()
+      .from(caseStudies)
+      .where(
+        and(
+          inArray(caseStudies.projectId, projectIds),
+          eq(caseStudies.status, "published")
+        )
+      ),
+    db
+      .select({
+        projectId: projectServices.projectId,
+        serviceTitle: services.title,
+        divisionSlug: serviceDivisions.slug,
+      })
+      .from(projectServices)
+      .innerJoin(services, eq(projectServices.serviceId, services.id))
+      .innerJoin(serviceDivisions, eq(services.divisionId, serviceDivisions.id))
+      .where(inArray(projectServices.projectId, projectIds)),
+  ]);
 
   const caseStudyByProjectId = new Map(
     caseStudyRows.map((cs) => [cs.projectId, cs])
@@ -156,7 +167,6 @@ export async function getPublishedProjects(options?: {
       divisions: [],
     };
     const category = inferProjectCategory(linked.divisions, row.projectType);
-
     const staticFallback = PROJECTS_DATA.find((p) => p.slug === row.slug);
 
     return {
@@ -166,7 +176,9 @@ export async function getPublishedProjects(options?: {
       summary: row.summary,
       category,
       servicesDemonstrated: linked.titles,
-      coverImage: staticFallback?.coverImage || "/images/projects/concept-digital-strata.svg",
+      coverImage:
+        staticFallback?.coverImage ||
+        "/images/projects/concept-digital-strata.svg",
       coverAlt: staticFallback?.coverAlt || row.title,
       description: row.description,
       challenge: cs?.challenge,
@@ -193,8 +205,70 @@ export async function getPublishedProjects(options?: {
 export async function getPublishedProjectBySlug(
   slug: string
 ): Promise<ProjectItem | null> {
-  const all = await getPublishedProjects();
-  return all.find((p) => p.slug === slug) ?? null;
+  const db = getDb();
+  if (!db) {
+    return PROJECTS_DATA.find((p) => p.slug === slug && p.isPublished) ?? null;
+  }
+
+  const [row] = await db
+    .select()
+    .from(projects)
+    .where(and(eq(projects.slug, slug), eq(projects.status, "published")))
+    .limit(1);
+
+  if (!row) {
+    return null;
+  }
+
+  const [csRows, linkedRows] = await Promise.all([
+    db
+      .select()
+      .from(caseStudies)
+      .where(
+        and(
+          eq(caseStudies.projectId, row.id),
+          eq(caseStudies.status, "published")
+        )
+      )
+      .limit(1),
+    db
+      .select({
+        serviceTitle: services.title,
+        divisionSlug: serviceDivisions.slug,
+      })
+      .from(projectServices)
+      .innerJoin(services, eq(projectServices.serviceId, services.id))
+      .innerJoin(serviceDivisions, eq(services.divisionId, serviceDivisions.id))
+      .where(eq(projectServices.projectId, row.id)),
+  ]);
+
+  const cs = csRows[0];
+  const titles = linkedRows.map((l) => l.serviceTitle);
+  const divisions = linkedRows.map((l) => l.divisionSlug);
+  const category = inferProjectCategory(divisions, row.projectType);
+  const staticFallback = PROJECTS_DATA.find((p) => p.slug === row.slug);
+
+  return {
+    id: row.id,
+    slug: row.slug,
+    title: row.title,
+    summary: row.summary,
+    category,
+    servicesDemonstrated: titles,
+    coverImage:
+      staticFallback?.coverImage ||
+      "/images/projects/concept-digital-strata.svg",
+    coverAlt: staticFallback?.coverAlt || row.title,
+    description: row.description,
+    challenge: cs?.challenge,
+    approach: cs?.approach,
+    outcomes: cs?.verifiedOutcomes ?? [],
+    isConcept: row.projectType !== "client",
+    featured: row.isFeatured,
+    isPublished: true,
+    createdAt: (row.publishedAt ?? row.createdAt).toISOString(),
+    updatedAt: row.updatedAt.toISOString(),
+  };
 }
 
 export async function getPublishedStudioProducts(): Promise<HybridProduct[]> {
@@ -221,7 +295,8 @@ export async function getPublishedStudioProducts(): Promise<HybridProduct[]> {
       eq(studioProducts.divisionId, serviceDivisions.id)
     )
     .where(eq(studioProducts.status, "published"))
-    .orderBy(asc(studioProducts.displayOrder));
+    .orderBy(asc(studioProducts.displayOrder))
+    .limit(50);
 
   return rows.map((row) => ({
     id: row.id,
@@ -235,4 +310,3 @@ export async function getPublishedStudioProducts(): Promise<HybridProduct[]> {
     demoUrl: row.demoUrl ?? undefined,
   }));
 }
-

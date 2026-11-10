@@ -10,6 +10,7 @@ import {
 } from "@/lib/server/session";
 import { checkRateLimit } from "@/lib/server/rate-limit";
 import { recordAuditLog } from "@/lib/server/audit";
+import { handleApiError } from "@/lib/server/errors";
 import {
   apiBadRequest,
   apiOk,
@@ -112,8 +113,7 @@ export async function POST(request: NextRequest) {
       expiresAt: expiresAt.toISOString(),
     });
   } catch (err) {
-    logger.error({ err }, "Unhandled error during POST /api/v1/auth/login");
-    return apiServerError("Authentication error.");
+    return handleApiError(err, "POST /api/v1/auth/login");
   }
 }
 

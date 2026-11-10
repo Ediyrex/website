@@ -21,3 +21,4 @@ export function getAllowedOrigins(): string[] {
     .map((origin) => origin.trim().replace(/\/$/, ""))
     .filter(Boolean);
 }
+

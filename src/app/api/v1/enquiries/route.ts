@@ -11,9 +11,9 @@ import {
 } from "@/db";
 import { mapBudgetTierToNumeric } from "@/lib/server/budget";
 import { checkRateLimit } from "@/lib/server/rate-limit";
+import { handleApiError } from "@/lib/server/errors";
 import {
   apiBadRequest,
-  apiServerError,
   apiTooManyRequests,
 } from "@/lib/server/api-response";
 import { logger } from "@/lib/server/logger";
@@ -217,9 +217,6 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (err) {
-    logger.error({ err }, "Unhandled error in POST /api/v1/enquiries");
-    return apiServerError(
-      "Unable to process enquiry at this time. Please email hello@ediyrex.com directly."
-    );
+    return handleApiError(err, "POST /api/v1/enquiries");
   }
 }

@@ -15,6 +15,20 @@
       "when": 1794294353571,
       "tag": "0001_updated_at_triggers",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794300712547,
+      "tag": "0002_cms_seo_and_service_media",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794303455941,
+      "tag": "0003_studio_tasks",
+      "breakpoints": true
     }
   ]
 }

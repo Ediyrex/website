@@ -1,12 +1,19 @@
-import { unstable_rethrow } from "next/navigation";
 import type { NextRequest } from "next/server";
+import { z } from "zod";
 import { getPublishedProjectBySlug } from "@/lib/server/catalog";
 import {
+  apiBadRequest,
   apiNotFound,
   apiOk,
-  apiServerError,
 } from "@/lib/server/api-response";
-import { logger } from "@/lib/server/logger";
+import { handleApiError } from "@/lib/server/errors";
+
+const slugSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(160)
+  .regex(/^[a-z0-9-]+$/i, "Invalid project slug.");
 
 export async function GET(
   _req: NextRequest,
@@ -14,7 +21,12 @@ export async function GET(
 ) {
   try {
     const { slug } = await context.params;
-    const project = await getPublishedProjectBySlug(slug);
+    const parsedSlug = slugSchema.safeParse(slug);
+    if (!parsedSlug.success) {
+      return apiBadRequest("Invalid project slug.");
+    }
+
+    const project = await getPublishedProjectBySlug(parsedSlug.data);
 
     if (!project) {
       return apiNotFound("Requested project case study was not found.");
@@ -22,8 +34,6 @@ export async function GET(
 
     return apiOk(project);
   } catch (err) {
-    unstable_rethrow(err);
-    logger.error({ err }, "Failed to load project by slug");
-    return apiServerError("Unable to load project details.");
+    return handleApiError(err, "GET /api/v1/projects/[slug]");
   }
 }

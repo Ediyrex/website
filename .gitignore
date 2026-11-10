@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local database backups
+/backups/
+*.dump
+
+# local CMS fallback uploads
+/public/uploads/cms/*
+!/public/uploads/cms/.gitkeep

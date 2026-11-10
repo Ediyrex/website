@@ -54,11 +54,20 @@ export const services = pgTable(
     description: text("description").notNull(),
     deliverables: jsonb("deliverables").$type<string[]>().notNull().default([]),
     iconName: varchar("icon_name", { length: 64 }),
+    coverAssetId: uuid("cover_asset_id").references(() => mediaAssets.id, {
+      onDelete: "set null",
+    }),
     isFeatured: boolean("is_featured").notNull().default(false),
     displayOrder: integer("display_order").notNull().default(0),
     status: publicationStatusEnum("status").notNull().default("draft"),
     seoTitle: varchar("seo_title", { length: 160 }),
     seoDescription: varchar("seo_description", { length: 320 }),
+    ogTitle: varchar("og_title", { length: 160 }),
+    ogDescription: varchar("og_description", { length: 320 }),
+    ogImageAssetId: uuid("og_image_asset_id").references(() => mediaAssets.id, {
+      onDelete: "set null",
+    }),
+    noIndex: boolean("no_index").notNull().default(false),
     publishedAt: timestamp("published_at", {
       withTimezone: true,
       mode: "date",
@@ -96,6 +105,8 @@ export const projects = pgTable(
     coverAssetId: uuid("cover_asset_id").references(() => mediaAssets.id, {
       onDelete: "restrict",
     }),
+    projectDate: varchar("project_date", { length: 40 }),
+    techStack: jsonb("tech_stack").$type<string[]>().notNull().default([]),
     liveUrl: text("live_url"),
     repositoryUrl: text("repository_url"),
     isFeatured: boolean("is_featured").notNull().default(false),
@@ -103,6 +114,12 @@ export const projects = pgTable(
     status: publicationStatusEnum("status").notNull().default("draft"),
     seoTitle: varchar("seo_title", { length: 160 }),
     seoDescription: varchar("seo_description", { length: 320 }),
+    ogTitle: varchar("og_title", { length: 160 }),
+    ogDescription: varchar("og_description", { length: 320 }),
+    ogImageAssetId: uuid("og_image_asset_id").references(() => mediaAssets.id, {
+      onDelete: "set null",
+    }),
+    noIndex: boolean("no_index").notNull().default(false),
     publishedAt: timestamp("published_at", {
       withTimezone: true,
       mode: "date",

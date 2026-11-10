@@ -1,23 +1,37 @@
-import { unstable_rethrow } from "next/navigation";
 import { getPublishedProjects } from "@/lib/server/catalog";
-import { apiOk, apiServerError } from "@/lib/server/api-response";
-import { logger } from "@/lib/server/logger";
+import { apiBadRequest, apiOk } from "@/lib/server/api-response";
+import { handleApiError } from "@/lib/server/errors";
+import { projectsQuerySchema } from "@/lib/validations/query";
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const category = searchParams.get("category") || undefined;
-    const featuredOnly = searchParams.get("featured") === "true";
+    const parsed = projectsQuerySchema.safeParse(
+      Object.fromEntries(searchParams.entries())
+    );
 
+    if (!parsed.success) {
+      return apiBadRequest(
+        "Invalid projects query parameters.",
+        parsed.error.flatten().fieldErrors
+      );
+    }
+
+    const { category, featured, page, limit } = parsed.data;
+    const featuredOnly = featured === "true";
     const projects = await getPublishedProjects({ category, featuredOnly });
+    const total = projects.length;
+    const offset = (page - 1) * limit;
+    const items = projects.slice(offset, offset + limit);
 
-    return apiOk(projects, {
-      total: projects.length,
+    return apiOk(items, {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
       category: category || "all",
     });
   } catch (err) {
-    unstable_rethrow(err);
-    logger.error({ err }, "Failed to load published projects");
-    return apiServerError("Unable to load projects.");
+    return handleApiError(err, "GET /api/v1/projects");
   }
 }

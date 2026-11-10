@@ -1,37 +1,50 @@
 import { z } from "zod";
+import { sanitizePlainText } from "@/lib/server/sanitize";
 
 export const enquirySchema = z.object({
   name: z
     .string()
-    .trim()
-    .min(2, "Name must be at least 2 characters")
-    .max(100, "Name is too long"),
+    .transform(sanitizePlainText)
+    .pipe(
+      z
+        .string()
+        .min(2, "Name must be at least 2 characters")
+        .max(100, "Name is too long")
+    ),
   email: z.string().trim().email("Please provide a valid email address"),
-  company: z.string().trim().max(100).optional().or(z.literal("")),
-  phone: z.string().trim().max(30).optional().or(z.literal("")),
+  company: z
+    .string()
+    .transform(sanitizePlainText)
+    .pipe(z.string().max(100))
+    .optional()
+    .or(z.literal("")),
+  phone: z
+    .string()
+    .transform(sanitizePlainText)
+    .pipe(z.string().max(30))
+    .optional()
+    .or(z.literal("")),
   projectType: z
     .string()
-    .min(1, "Please select a primary service or project type"),
+    .transform(sanitizePlainText)
+    .pipe(z.string().min(1, "Please select a primary service or project type").max(140)),
   goals: z
     .string()
-    .trim()
-    .min(
-      10,
-      "Please briefly describe your goals and requirements (at least 10 characters)"
-    )
-    .max(2000, "Description too long"),
+    .transform(sanitizePlainText)
+    .pipe(
+      z
+        .string()
+        .min(
+          10,
+          "Please briefly describe your goals and requirements (at least 10 characters)"
+        )
+        .max(2000, "Description too long")
+    ),
   budgetCurrency: z.enum(["USD", "INR"], {
     message: "Please select a currency",
   }),
   budgetRange: z.enum(
-    [
-      "tier_1",
-      "tier_2",
-      "tier_3",
-      "tier_4",
-      "tier_5",
-      "not_sure",
-    ],
+    ["tier_1", "tier_2", "tier_3", "tier_4", "tier_5", "not_sure"],
     {
       message: "Please select an indicative budget range",
     }

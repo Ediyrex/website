@@ -41,3 +41,4 @@ export function handleApiError(err: unknown, context: string): NextResponse {
     { status: 500 }
   );
 }
+

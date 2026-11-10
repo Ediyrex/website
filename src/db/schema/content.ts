@@ -243,3 +243,30 @@ export const studioProducts = pgTable(
   ]
 );
 
+export const studioTasks = pgTable(
+  "studio_tasks",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    title: varchar("title", { length: 200 }).notNull(),
+    category: varchar("category", { length: 100 })
+      .notNull()
+      .default("CMS · General"),
+    dueDateLabel: varchar("due_date_label", { length: 40 })
+      .notNull()
+      .default("This week"),
+    completed: boolean("completed").notNull().default(false),
+    assigneeUserId: uuid("assignee_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("idx_studio_tasks_completed").on(table.completed, table.createdAt),
+  ]
+);
+
