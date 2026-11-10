@@ -48,11 +48,10 @@ function AnimatedCounter({
   active: boolean;
   reducedMotion: boolean;
 }) {
-  const [value, setValue] = useState(reducedMotion ? target : 0);
+  const [value, setValue] = useState(0);
 
   useEffect(() => {
     if (reducedMotion || !active) {
-      if (reducedMotion) setValue(target);
       return;
     }
 
@@ -74,9 +73,11 @@ function AnimatedCounter({
     return () => cancelAnimationFrame(rafId);
   }, [target, active, reducedMotion]);
 
+  const displayed = reducedMotion ? target : value;
+
   return (
     <span className="font-heading font-bold text-3xl sm:text-4xl text-[#F5F3EE] tabular-nums">
-      {value}
+      {displayed}
       <span className="text-[#D6B77A]">{suffix}</span>
     </span>
   );
