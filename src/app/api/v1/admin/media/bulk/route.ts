@@ -1,7 +1,8 @@
-import { inArray, sql } from "drizzle-orm";
+import { inArray, or, sql } from "drizzle-orm";
 import type { NextRequest } from "next/server";
 import {
   blogPosts,
+  cmsPages,
   getDb,
   mediaAssets,
   projectMedia,
@@ -63,7 +64,7 @@ export async function POST(request: NextRequest) {
         metadata: { count: ids.length, folder },
       });
 
-      return apiOk({ updated: ids.length, folder });
+      return apiOk({ affected: ids.length, updated: ids.length, folder });
     }
 
     if (action === "add_tag") {
@@ -88,15 +89,15 @@ export async function POST(request: NextRequest) {
         }
       });
 
-      return apiOk({ updated: existing.length, tag });
+      return apiOk({ affected: existing.length, updated: existing.length, tag });
     }
 
-    // Bulk delete (verify none are referenced as required assets)
-    const [[pRefs], [gRefs], [sRefs], [bRefs]] = await Promise.all([
+    // Bulk delete (verify none are referenced by any CMS pages, projects, services, or blog posts)
+    const [[pRefs], [gRefs], [sRefs], [bRefs], [pgRefs]] = await Promise.all([
       db
         .select({ count: sql<number>`count(*)::int` })
         .from(projects)
-        .where(inArray(projects.coverAssetId, ids)),
+        .where(or(inArray(projects.coverAssetId, ids), inArray(projects.ogImageAssetId, ids))),
       db
         .select({ count: sql<number>`count(*)::int` })
         .from(projectMedia)
@@ -104,23 +105,28 @@ export async function POST(request: NextRequest) {
       db
         .select({ count: sql<number>`count(*)::int` })
         .from(services)
-        .where(inArray(services.coverAssetId, ids)),
+        .where(or(inArray(services.coverAssetId, ids), inArray(services.ogImageAssetId, ids))),
       db
         .select({ count: sql<number>`count(*)::int` })
         .from(blogPosts)
-        .where(inArray(blogPosts.coverAssetId, ids)),
+        .where(or(inArray(blogPosts.coverAssetId, ids), inArray(blogPosts.ogImageAssetId, ids))),
+      db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(cmsPages)
+        .where(or(inArray(cmsPages.thumbnailAssetId, ids), inArray(cmsPages.ogImageAssetId, ids))),
     ]);
 
     const refTotal =
       (pRefs?.count ?? 0) +
       (gRefs?.count ?? 0) +
       (sRefs?.count ?? 0) +
-      (bRefs?.count ?? 0);
+      (bRefs?.count ?? 0) +
+      (pgRefs?.count ?? 0);
 
     if (refTotal > 0) {
       return apiError(
         "Conflict",
-        "One or more selected assets are currently attached to projects, services, or blog posts.",
+        "One or more selected assets are referenced by pages, projects, services, or blog posts. Detach them first.",
         409
       );
     }
@@ -135,7 +141,7 @@ export async function POST(request: NextRequest) {
       metadata: { count: ids.length },
     });
 
-    return apiOk({ deleted: ids.length });
+    return apiOk({ affected: ids.length, deleted: ids.length });
   } catch (err) {
     return handleApiError(err, "POST /api/v1/admin/media/bulk");
   }

@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
+  AlertTriangle,
   Check,
   CheckSquare,
   Cloud,
@@ -44,6 +45,67 @@ const DEFAULT_FOLDERS = [
   "Temp / Drafts",
   "Archive",
 ];
+
+const ALLOWED_UPLOAD_MIME_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/avif",
+  "image/gif",
+  "video/mp4",
+  "video/webm",
+  "application/pdf",
+]);
+const MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024;
+
+interface UploadQueueItem {
+  localId: string;
+  name: string;
+  size: number;
+  previewUrl: string | null;
+  progress: number;
+  status: "uploading" | "done" | "error";
+  error?: string;
+}
+
+function extractMediaDimensions(
+  file: File
+): Promise<{ width: number | null; height: number | null }> {
+  return new Promise((resolve) => {
+    if (file.type.startsWith("image/")) {
+      const url = URL.createObjectURL(file);
+      const img = new window.Image();
+      img.onload = () => {
+        const result = { width: img.naturalWidth || null, height: img.naturalHeight || null };
+        URL.revokeObjectURL(url);
+        resolve(result);
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        resolve({ width: null, height: null });
+      };
+      img.src = url;
+      return;
+    }
+    if (file.type.startsWith("video/")) {
+      const url = URL.createObjectURL(file);
+      const video = document.createElement("video");
+      video.preload = "metadata";
+      video.onloadedmetadata = () => {
+        const result = { width: video.videoWidth || null, height: video.videoHeight || null };
+        URL.revokeObjectURL(url);
+        resolve(result);
+      };
+      video.onerror = () => {
+        URL.revokeObjectURL(url);
+        resolve({ width: null, height: null });
+      };
+      video.src = url;
+      return;
+    }
+    resolve({ width: null, height: null });
+  });
+}
 
 interface MediaStats {
   totalAll: number;
@@ -124,11 +186,16 @@ export function AdminMediaClient() {
   const [uploading, setUploading] = useState(false);
 
   const [activeFolder, setActiveFolder] = useState("");
+  const [activeTag, setActiveTag] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [sortBy, setSortBy] = useState<"newest" | "oldest" | "largest">("newest");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [query, setQuery] = useState("");
   const [customFolders, setCustomFolders] = useState<string[]>([]);
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const [uploadQueue, setUploadQueue] = useState<UploadQueueItem[]>([]);
+  const [deleteTarget, setDeleteTarget] = useState<DetailedMediaAsset | null>(null);
+  const [deletingAsset, setDeletingAsset] = useState(false);
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [inspectedId, setInspectedId] = useState<string | null>(null);
@@ -166,6 +233,7 @@ export function AdminMediaClient() {
     if (query.trim()) params.set("q", query.trim());
     if (typeFilter) params.set("type", typeFilter);
     if (activeFolder) params.set("folder", activeFolder);
+    if (activeTag) params.set("tag", activeTag);
 
     const res = await fetch(`/api/v1/admin/media?${params.toString()}`);
     if (res.status === 401) {
@@ -188,7 +256,7 @@ export function AdminMediaClient() {
         folderCounts: [],
       }) as MediaStats,
     };
-  }, [activeFolder, query, router, sortBy, typeFilter]);
+  }, [activeFolder, activeTag, query, router, sortBy, typeFilter]);
 
   const reloadMedia = async () => {
     setLoading(true);
@@ -303,36 +371,126 @@ export function AdminMediaClient() {
     );
   };
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
+  const uploadFileWithProgress = (
+    formData: FormData,
+    localId: string
+  ): Promise<{ id?: string }> => {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", "/api/v1/admin/media/upload");
+      xhr.upload.onprogress = (evt) => {
+        if (evt.lengthComputable) {
+          const pct = Math.min(99, Math.round((evt.loaded / evt.total) * 100));
+          setUploadQueue((prev) =>
+            prev.map((q) => (q.localId === localId ? { ...q, progress: pct } : q))
+          );
+        }
+      };
+      xhr.onload = () => {
+        try {
+          const parsed = JSON.parse(xhr.responseText || "{}");
+          if (xhr.status >= 200 && xhr.status < 300) {
+            setUploadQueue((prev) =>
+              prev.map((q) =>
+                q.localId === localId ? { ...q, progress: 100, status: "done" } : q
+              )
+            );
+            resolve(parsed.data || {});
+          } else {
+            reject(new Error(parsed.message || `Upload failed (${xhr.status}).`));
+          }
+        } catch {
+          reject(new Error("Invalid server response during upload."));
+        }
+      };
+      xhr.onerror = () => reject(new Error("Network error during upload."));
+      xhr.send(formData);
+    });
+  };
+
+  const processUploadFiles = async (fileList: FileList | File[]) => {
+    const incoming = Array.from(fileList);
+    if (incoming.length === 0 || !canEdit) return;
 
     setUploading(true);
     setError("");
     setSuccess("");
     const targetFolder = activeFolder || "Website";
+
+    const prepared = incoming.map((file) => {
+      const localId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      const previewUrl = file.type.startsWith("image/")
+        ? URL.createObjectURL(file)
+        : null;
+      return { file, localId, previewUrl };
+    });
+
+    setUploadQueue(
+      prepared.map(({ file, localId, previewUrl }) => ({
+        localId,
+        name: file.name,
+        size: file.size,
+        previewUrl,
+        progress: 0,
+        status: "uploading",
+      }))
+    );
+
     let uploadedCount = 0;
     let lastUploadedId: string | null = null;
 
-    try {
-      for (const file of Array.from(files)) {
+    for (const { file, localId, previewUrl } of prepared) {
+      if (!ALLOWED_UPLOAD_MIME_TYPES.has(file.type.toLowerCase())) {
+        setUploadQueue((prev) =>
+          prev.map((q) =>
+            q.localId === localId
+              ? { ...q, status: "error", error: "Unsupported format" }
+              : q
+          )
+        );
+        continue;
+      }
+      if (file.size <= 0 || file.size > MAX_UPLOAD_SIZE_BYTES) {
+        setUploadQueue((prev) =>
+          prev.map((q) =>
+            q.localId === localId
+              ? { ...q, status: "error", error: "Exceeds 10 MB limit" }
+              : q
+          )
+        );
+        continue;
+      }
+
+      try {
+        const dims = await extractMediaDimensions(file);
         const formData = new FormData();
         formData.append("file", file);
         formData.append("altText", file.name.replace(/\.[^.]+$/, ""));
         formData.append("folder", targetFolder);
+        if (dims.width) formData.append("width", String(dims.width));
+        if (dims.height) formData.append("height", String(dims.height));
 
-        const res = await fetch("/api/v1/admin/media/upload", {
-          method: "POST",
-          body: formData,
-        });
-        const json = await res.json();
-        if (!res.ok) {
-          throw new Error(json.message || `Upload failed for ${file.name}.`);
-        }
+        const uploaded = await uploadFileWithProgress(formData, localId);
         uploadedCount += 1;
-        lastUploadedId = json.data?.id ?? lastUploadedId;
+        lastUploadedId = uploaded.id ?? lastUploadedId;
+      } catch (err) {
+        setUploadQueue((prev) =>
+          prev.map((q) =>
+            q.localId === localId
+              ? {
+                  ...q,
+                  status: "error",
+                  error: err instanceof Error ? err.message : "Upload failed",
+                }
+              : q
+          )
+        );
+      } finally {
+        if (previewUrl) URL.revokeObjectURL(previewUrl);
       }
+    }
 
+    if (uploadedCount > 0) {
       setSuccess(
         `Uploaded ${uploadedCount} ${uploadedCount === 1 ? "asset" : "assets"} to ${targetFolder}.`
       );
@@ -341,11 +499,22 @@ export function AdminMediaClient() {
         setDetailLoading(true);
         setInspectedId(lastUploadedId);
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Upload failed.");
-    } finally {
-      setUploading(false);
-      e.target.value = "";
+    }
+    setUploading(false);
+  };
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    await processUploadFiles(files);
+    e.target.value = "";
+  };
+
+  const handleDropFiles = async (e: React.DragEvent<HTMLElement>) => {
+    e.preventDefault();
+    setIsDraggingOver(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      await processUploadFiles(e.dataTransfer.files);
     }
   };
 
@@ -439,28 +608,48 @@ export function AdminMediaClient() {
     setNewTagInput("");
   };
 
-  const handleDeleteAsset = async (asset: MediaAssetItem) => {
+  const requestDeleteAsset = async (asset: DetailedMediaAsset) => {
     if (!canEdit) return;
+    try {
+      const res = await fetch(`/api/v1/admin/media/${asset.id}`);
+      const json = await res.json();
+      if (res.ok && json.data) {
+        setDeleteTarget(json.data as DetailedMediaAsset);
+      } else {
+        setDeleteTarget(asset);
+      }
+    } catch {
+      setDeleteTarget(asset);
+    }
+  };
+
+  const confirmDeleteAsset = async () => {
+    if (!deleteTarget || !canEdit) return;
+    setDeletingAsset(true);
     setError("");
     setSuccess("");
     try {
-      const res = await fetch(`/api/v1/admin/media/${asset.id}`, {
+      const res = await fetch(`/api/v1/admin/media/${deleteTarget.id}`, {
         method: "DELETE",
       });
       const json = await res.json();
       if (!res.ok) {
         setError(json.message || "Unable to delete asset.");
+        setDeleteTarget(null);
         return;
       }
       setSuccess("Asset deleted.");
-      setSelectedIds((prev) => prev.filter((id) => id !== asset.id));
-      if (inspectedId === asset.id) {
+      setSelectedIds((prev) => prev.filter((id) => id !== deleteTarget.id));
+      if (inspectedId === deleteTarget.id) {
         setInspectedId(null);
         setInspectedDetail(null);
       }
+      setDeleteTarget(null);
       await reloadMedia();
     } catch {
       setError("Network error deleting asset.");
+    } finally {
+      setDeletingAsset(false);
     }
   };
 
@@ -488,6 +677,11 @@ export function AdminMediaClient() {
         setError(json.message || "Bulk action failed.");
         return;
       }
+      const affectedCount =
+        json.data?.affected ??
+        json.data?.updated ??
+        json.data?.deleted ??
+        selectedIds.length;
       setBulkMoveOpen(false);
       setBulkTagOpen(false);
       setBulkTagValue("");
@@ -497,11 +691,11 @@ export function AdminMediaClient() {
           setInspectedId(null);
           setInspectedDetail(null);
         }
-        setSuccess(`Deleted ${json.data?.affected ?? 0} assets.`);
+        setSuccess(`Deleted ${affectedCount} assets.`);
       } else if (action === "move_folder") {
-        setSuccess(`Moved ${json.data?.affected ?? 0} assets to "${extra?.folder}".`);
+        setSuccess(`Moved ${affectedCount} assets to "${extra?.folder}".`);
       } else if (action === "add_tag") {
-        setSuccess(`Tagged ${json.data?.affected ?? 0} assets with "${extra?.tag}".`);
+        setSuccess(`Tagged ${affectedCount} assets with "${extra?.tag}".`);
       }
       await reloadMedia();
     } catch {
@@ -775,8 +969,102 @@ export function AdminMediaClient() {
           </div>
         </aside>
 
-        {/* Center Gallery + Toolbar + Bulk Bar */}
-        <section className="lg:col-span-6 xl:col-span-7 rounded-2xl bg-[#12151A] border border-[#252A32] overflow-hidden flex flex-col">
+        {/* Center Gallery + Drag & Drop + Toolbar + Bulk Bar */}
+        <section
+          onDragOver={(e) => {
+            if (!canEdit) return;
+            e.preventDefault();
+            setIsDraggingOver(true);
+          }}
+          onDragLeave={(e) => {
+            if (e.currentTarget.contains(e.relatedTarget as Node)) return;
+            setIsDraggingOver(false);
+          }}
+          onDrop={handleDropFiles}
+          className={cn(
+            "lg:col-span-6 xl:col-span-7 rounded-2xl bg-[#12151A] border overflow-hidden flex flex-col relative transition-colors",
+            isDraggingOver
+              ? "border-[#D6B77A] ring-2 ring-[#D6B77A]/30"
+              : "border-[#252A32]"
+          )}
+        >
+          {isDraggingOver && (
+            <div className="absolute inset-0 z-30 bg-[#08090B]/85 backdrop-blur-xs flex flex-col items-center justify-center gap-2 pointer-events-none border-2 border-dashed border-[#D6B77A] m-2 rounded-xl">
+              <Upload className="w-8 h-8 text-[#D6B77A]" />
+              <p className="text-sm font-semibold text-[#F5F3EE]">
+                Drop files to upload to {activeFolder || "Website"}
+              </p>
+              <p className="text-xs text-[#8F96A3]">
+                Images, MP4/WebM videos &amp; PDFs up to 10 MB
+              </p>
+            </div>
+          )}
+
+          {/* Upload Queue & Progress Strip */}
+          {uploadQueue.length > 0 && (
+            <div className="px-3.5 py-2.5 border-b border-[#252A32] bg-[#0D0F12] space-y-2">
+              <div className="flex items-center justify-between text-[11px]">
+                <span className="font-medium text-[#D6B77A]">
+                  Upload Queue ({uploadQueue.length})
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setUploadQueue([])}
+                  className="text-[#8F96A3] hover:text-[#F5F3EE] cursor-pointer"
+                >
+                  Clear
+                </button>
+              </div>
+              <div className="space-y-1.5 max-h-32 overflow-y-auto">
+                {uploadQueue.map((item) => (
+                  <div
+                    key={item.localId}
+                    className="flex items-center gap-2.5 text-xs bg-[#12151A] border border-[#252A32] rounded-lg px-2.5 py-1.5"
+                  >
+                    {item.previewUrl ? (
+                      <img
+                        src={item.previewUrl}
+                        alt={item.name}
+                        className="w-7 h-5 rounded object-cover shrink-0"
+                      />
+                    ) : (
+                      <FileText className="w-4 h-4 text-[#8F96A3] shrink-0" />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="truncate text-[11px] text-[#F5F3EE]">
+                          {item.name}
+                        </span>
+                        <span className="text-[10px] text-[#777D87] shrink-0">
+                          {item.status === "error"
+                            ? item.error
+                            : item.status === "done"
+                              ? "Uploaded"
+                              : `${item.progress}%`}
+                        </span>
+                      </div>
+                      <div className="w-full h-1 rounded-full bg-[#191D23] mt-1 overflow-hidden">
+                        <div
+                          className={cn(
+                            "h-full transition-all",
+                            item.status === "error"
+                              ? "bg-[#F07878]"
+                              : item.status === "done"
+                                ? "bg-[#73C794]"
+                                : "bg-[#D6B77A]"
+                          )}
+                          style={{
+                            width: `${item.status === "error" ? 100 : item.progress}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Toolbar */}
           <div className="p-3.5 border-b border-[#252A32] flex flex-wrap items-center gap-2.5 bg-[#0D0F12]/60">
             <div className="relative flex-1 min-w-[180px]">
@@ -785,10 +1073,21 @@ export function AdminMediaClient() {
                 type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder={`Search in ${activeFolder || "All Media"}...`}
+                placeholder={`Search filename, tags in ${activeFolder || "All Media"}...`}
                 className="w-full h-9 rounded-lg bg-[#12151A] border border-[#252A32] pl-8 pr-3 text-xs text-[#F5F3EE] placeholder:text-[#666C75] focus:outline-none focus:border-[#D6B77A]"
               />
             </div>
+            {activeTag && (
+              <button
+                type="button"
+                onClick={() => setActiveTag("")}
+                className="inline-flex items-center gap-1 h-9 px-2.5 rounded-lg bg-[#D6B77A]/15 border border-[#D6B77A]/40 text-xs text-[#D6B77A] cursor-pointer"
+              >
+                <Tag className="w-3 h-3" />
+                <span>#{activeTag}</span>
+                <X className="w-3 h-3" />
+              </button>
+            )}
 
             <select
               value={typeFilter}
@@ -1173,7 +1472,7 @@ export function AdminMediaClient() {
                 {canEdit && (
                   <button
                     type="button"
-                    onClick={() => handleDeleteAsset(inspectedDetail)}
+                    onClick={() => requestDeleteAsset(inspectedDetail)}
                     title="Delete asset"
                     className="h-9 rounded-lg bg-[#F07878]/10 border border-[#F07878]/30 hover:bg-[#F07878]/20 flex items-center justify-center text-[#F07878] cursor-pointer"
                   >
@@ -1232,7 +1531,14 @@ export function AdminMediaClient() {
                         key={tag}
                         className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#191D23] border border-[#252A32] text-[11px] text-[#B2B4BA]"
                       >
-                        <span>{tag}</span>
+                        <button
+                          type="button"
+                          onClick={() => setActiveTag(tag)}
+                          title={`Filter by #${tag}`}
+                          className="hover:text-[#D6B77A] cursor-pointer"
+                        >
+                          #{tag}
+                        </button>
                         {canEdit && (
                           <button
                             type="button"
@@ -1536,6 +1842,84 @@ export function AdminMediaClient() {
                 Apply Tag
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Referenced Usage Delete Confirmation / Warning Modal */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="w-full max-w-md rounded-2xl bg-[#12151A] border border-[#252A32] p-6 space-y-4 shadow-2xl">
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl bg-[#F07878]/15 border border-[#F07878]/30 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-4 h-4 text-[#F07878]" />
+              </div>
+              <div className="space-y-1">
+                <h2 className="font-heading text-base font-semibold text-[#F5F3EE]">
+                  {deleteTarget.usage && deleteTarget.usage.length > 0
+                    ? "Asset In Use — Deletion Blocked"
+                    : "Confirm Asset Deletion"}
+                </h2>
+                <p className="text-xs text-[#8F96A3]">
+                  {getFileDisplayName(deleteTarget)}
+                </p>
+              </div>
+            </div>
+
+            {deleteTarget.usage && deleteTarget.usage.length > 0 ? (
+              <div className="space-y-3">
+                <p className="text-xs text-[#F07878] leading-relaxed">
+                  This asset is currently referenced by {deleteTarget.usage.length}{" "}
+                  {deleteTarget.usage.length === 1 ? "entry" : "entries"} on your website. Detach it from those entries before deleting:
+                </p>
+                <div className="rounded-xl bg-[#0D0F12] border border-[#252A32] p-3 space-y-1.5 max-h-40 overflow-y-auto">
+                  {deleteTarget.usage.map((u) => (
+                    <Link
+                      key={`${u.kind}-${u.id}`}
+                      href={getUsageHref(u.kind)}
+                      className="flex items-center justify-between text-xs text-[#B2B4BA] hover:text-[#D6B77A]"
+                    >
+                      <span className="truncate">{u.title}</span>
+                      <span className="text-[10px] font-mono text-[#777D87] shrink-0">
+                        {u.kind}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+                <div className="flex justify-end pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setDeleteTarget(null)}
+                    className="px-4 py-2 rounded-lg bg-[#D6B77A] text-xs font-semibold text-[#17130B] cursor-pointer"
+                  >
+                    Understood
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <p className="text-xs text-[#B2B4BA] leading-relaxed">
+                  No pages, portfolio projects, services, or blog posts reference this asset. Deleting it removes it permanently from your Media Library.
+                </p>
+                <div className="flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setDeleteTarget(null)}
+                    className="px-3.5 py-2 rounded-lg text-xs text-[#B2B4BA] hover:text-[#F5F3EE] cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    disabled={deletingAsset}
+                    onClick={confirmDeleteAsset}
+                    className="px-4 py-2 rounded-lg bg-[#F07878] text-[#08090B] text-xs font-semibold cursor-pointer disabled:opacity-50"
+                  >
+                    {deletingAsset ? "Deleting..." : "Delete Asset"}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

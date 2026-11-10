@@ -25,6 +25,7 @@ import {
   Code2,
   ChevronLeft,
   ChevronRight,
+  Eye,
 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { cn } from "@/lib/utils";
@@ -47,7 +48,11 @@ interface ServiceRow {
   title: string;
   slug: string;
   summary: string;
+  categoryLabel?: string | null;
   deliverables?: string[];
+  features?: string[];
+  showPricing?: boolean;
+  startingPrice?: string | null;
   iconName?: string | null;
   divisionSlug: string;
   divisionName: string;
@@ -96,7 +101,11 @@ interface ServiceFormState {
   slug: string;
   summary: string;
   description: string;
+  categoryLabel: string;
   deliverables: string[];
+  features: string[];
+  showPricing: boolean;
+  startingPrice: string;
   iconName: string;
   coverAssetId: string | null;
   coverAssetUrl: string | null;
@@ -150,7 +159,9 @@ export function AdminServicesClient() {
   const [editorOpen, setEditorOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deliverableDraft, setDeliverableDraft] = useState("");
+  const [featureDraft, setFeatureDraft] = useState("");
   const [form, setForm] = useState<ServiceFormState | null>(null);
+  const [previewService, setPreviewService] = useState<ServiceFormState | null>(null);
   const [pickerTarget, setPickerTarget] = useState<"cover" | "og" | null>(null);
 
   const [divModalOpen, setDivModalOpen] = useState(false);
@@ -248,7 +259,11 @@ export function AdminServicesClient() {
       slug: "",
       summary: "",
       description: "",
+      categoryLabel: "",
       deliverables: [],
+      features: [],
+      showPricing: false,
+      startingPrice: "",
       iconName: "Layers",
       coverAssetId: null,
       coverAssetUrl: null,
@@ -281,7 +296,11 @@ export function AdminServicesClient() {
       slug: d.slug,
       summary: d.summary,
       description: d.description,
+      categoryLabel: d.categoryLabel || "",
       deliverables: Array.isArray(d.deliverables) ? d.deliverables : [],
+      features: Array.isArray(d.features) ? d.features : [],
+      showPricing: Boolean(d.showPricing),
+      startingPrice: d.startingPrice || "",
       iconName: d.iconName || "",
       coverAssetId: d.coverAssetId || null,
       coverAssetUrl: d.coverAsset?.secureUrl || null,
@@ -365,7 +384,11 @@ export function AdminServicesClient() {
       slug: form.slug,
       summary: form.summary,
       description: form.description,
+      categoryLabel: form.categoryLabel.trim() || null,
       deliverables: form.deliverables,
+      features: form.features,
+      showPricing: form.showPricing,
+      startingPrice: form.startingPrice.trim() || null,
       iconName: form.iconName || null,
       coverAssetId: form.coverAssetId,
       isFeatured: form.isFeatured,
@@ -464,6 +487,13 @@ export function AdminServicesClient() {
     if (!trimmed || !form) return;
     setForm({ ...form, deliverables: [...form.deliverables, trimmed] });
     setDeliverableDraft("");
+  };
+
+  const addFeature = () => {
+    const trimmed = featureDraft.trim();
+    if (!trimmed || !form) return;
+    setForm({ ...form, features: [...form.features, trimmed] });
+    setFeatureDraft("");
   };
 
   const startIdx = totalFiltered === 0 ? 0 : (pageNum - 1) * rowsPerPage + 1;
@@ -820,14 +850,31 @@ export function AdminServicesClient() {
                           >
                             {svc.title}
                           </button>
-                          <Link
-                            href={`/services/${svc.divisionSlug}`}
-                            target="_blank"
-                            aria-label={`View ${svc.divisionName} services page`}
-                            className="text-[#777D87] hover:text-[#F5F3EE] shrink-0 mt-0.5"
-                          >
-                            <ExternalLink className="w-3.5 h-3.5" />
-                          </Link>
+                          <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                try {
+                                  const mapped = await fetchServiceFormById(svc.id);
+                                  setPreviewService(mapped);
+                                } catch {
+                                  setError("Unable to load service preview.");
+                                }
+                              }}
+                              aria-label={`Preview ${svc.title}`}
+                              className="text-[#777D87] hover:text-[#D6B77A] cursor-pointer"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                            </button>
+                            <Link
+                              href={`/services/${svc.divisionSlug}`}
+                              target="_blank"
+                              aria-label={`View ${svc.divisionName} services page`}
+                              className="text-[#777D87] hover:text-[#F5F3EE]"
+                            >
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </Link>
+                          </div>
                         </div>
                         <p className="text-xs text-[#8D939E] line-clamp-2 leading-relaxed">
                           {svc.summary}
@@ -846,10 +893,17 @@ export function AdminServicesClient() {
                         >
                           {svc.divisionName}
                         </span>
+                        {svc.categoryLabel && (
+                          <span className="px-2 py-0.5 rounded-md bg-[#181C23] border border-[#252A32] text-[#B2B4BA] truncate">
+                            {svc.categoryLabel}
+                          </span>
+                        )}
                         <span className="font-mono text-[#777D87] truncate">
-                          {delivCount > 0
-                            ? `${delivCount} deliverables`
-                            : `/${svc.slug}`}
+                          {svc.showPricing && svc.startingPrice
+                            ? svc.startingPrice
+                            : delivCount > 0
+                              ? `${delivCount} deliverables`
+                              : `/${svc.slug}`}
                         </span>
                       </div>
                       <span className="font-mono text-[#6D7480] shrink-0">
@@ -1107,6 +1161,21 @@ export function AdminServicesClient() {
                     <option value="archived">Archived</option>
                   </select>
                 </div>
+
+                <div className="space-y-1.5 sm:col-span-2">
+                  <label className="text-xs font-mono text-[#B2B4BA]">
+                    Category Label (optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={form.categoryLabel}
+                    onChange={(e) =>
+                      setForm({ ...form, categoryLabel: e.target.value })
+                    }
+                    placeholder="e.g., Video Editing, Performance Ads, Browser Extensions, Automation"
+                    className="w-full h-10 px-3 rounded-lg bg-[#0D0F12] border border-[#252A32] text-sm text-[#F5F3EE]"
+                  />
+                </div>
               </div>
 
               <div className="space-y-1.5">
@@ -1140,7 +1209,7 @@ export function AdminServicesClient() {
               {/* Deliverables */}
               <div className="space-y-2">
                 <label className="text-xs font-mono text-[#B2B4BA]">
-                  Service Features / Deliverables
+                  Deliverables
                 </label>
                 <div className="flex gap-2">
                   <input
@@ -1188,6 +1257,81 @@ export function AdminServicesClient() {
                     </span>
                   ))}
                 </div>
+              </div>
+
+              {/* Key Features */}
+              <div className="space-y-2">
+                <label className="text-xs font-mono text-[#B2B4BA]">
+                  Key Features
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={featureDraft}
+                    onChange={(e) => setFeatureDraft(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        addFeature();
+                      }
+                    }}
+                    placeholder="e.g., Dedicated creative director & 48h revision SLA"
+                    className="flex-1 h-9 px-3 rounded-lg bg-[#0D0F12] border border-[#252A32] text-xs text-[#F5F3EE]"
+                  />
+                  <button
+                    type="button"
+                    onClick={addFeature}
+                    className="px-3.5 h-9 rounded-lg bg-[#191D23] border border-[#3A414B] text-xs text-[#F5F3EE] cursor-pointer"
+                  >
+                    Add
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {form.features.map((item, idx) => (
+                    <span
+                      key={`${item}-${idx}`}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#0D0F12] border border-[#252A32] text-xs text-[#D6B77A]"
+                    >
+                      <span>{item}</span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setForm({
+                            ...form,
+                            features: form.features.filter((_, i) => i !== idx),
+                          })
+                        }
+                        className="text-[#777D87] hover:text-[#F28B82] cursor-pointer"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Pricing Visibility */}
+              <div className="p-4 rounded-xl bg-[#0D0F12] border border-[#252A32] grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+                <label className="inline-flex items-center gap-2 text-xs text-[#F5F3EE] cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={form.showPricing}
+                    onChange={(e) =>
+                      setForm({ ...form, showPricing: e.target.checked })
+                    }
+                  />
+                  <span>Show indicative pricing visibility</span>
+                </label>
+                <input
+                  type="text"
+                  disabled={!form.showPricing}
+                  value={form.startingPrice}
+                  onChange={(e) =>
+                    setForm({ ...form, startingPrice: e.target.value })
+                  }
+                  placeholder="e.g., Custom Retainer / From $1,500"
+                  className="h-9 px-3 rounded-lg bg-[#12151A] border border-[#252A32] text-xs text-[#F5F3EE] disabled:opacity-40"
+                />
               </div>
 
               {/* Media & Display Order */}
@@ -1393,6 +1537,91 @@ export function AdminServicesClient() {
               </button>
             </div>
           </form>
+        </div>
+      )}
+
+      {/* Service Preview Modal */}
+      {previewService && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="w-full max-w-2xl max-h-[88vh] flex flex-col rounded-2xl bg-[#12151A] border border-[#252A32] overflow-hidden shadow-2xl">
+            <div className="px-6 py-4 border-b border-[#252A32] flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-mono uppercase text-[#D6B77A]">
+                  Service Preview
+                </span>
+                <span className="text-xs text-[#777D87] font-mono">
+                  /{previewService.slug}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPreviewService(null)}
+                className="text-[#777D87] hover:text-white cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto space-y-5">
+              {previewService.coverAssetUrl && (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={previewService.coverAssetUrl}
+                  alt={previewService.title}
+                  className="w-full aspect-[16/9] object-cover rounded-xl border border-[#252A32]"
+                />
+              )}
+              <div className="space-y-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  {previewService.categoryLabel && (
+                    <span className="px-2 py-0.5 rounded bg-[#191D23] border border-[#252A32] text-[11px] text-[#B2B4BA]">
+                      {previewService.categoryLabel}
+                    </span>
+                  )}
+                  {previewService.showPricing && previewService.startingPrice && (
+                    <span className="px-2.5 py-0.5 rounded bg-[#1A160E] border border-[#D6B77A]/30 text-[11px] font-mono text-[#D6B77A]">
+                      {previewService.startingPrice}
+                    </span>
+                  )}
+                </div>
+                <h2 className="font-heading text-2xl font-bold text-[#F5F3EE]">
+                  {previewService.title}
+                </h2>
+                <p className="text-sm text-[#B2B4BA] leading-relaxed">
+                  {previewService.description}
+                </p>
+              </div>
+              {previewService.deliverables.length > 0 && (
+                <div className="space-y-1.5">
+                  <h3 className="text-xs font-mono uppercase text-[#777D87]">
+                    Deliverables
+                  </h3>
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs text-[#E5E2DC]">
+                    {previewService.deliverables.map((d) => (
+                      <li key={d} className="flex items-center gap-2">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#7CD69F] shrink-0" />
+                        <span>{d}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {previewService.features.length > 0 && (
+                <div className="space-y-1.5">
+                  <h3 className="text-xs font-mono uppercase text-[#777D87]">
+                    Key Features
+                  </h3>
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs text-[#D6B77A]">
+                    {previewService.features.map((f) => (
+                      <li key={f} className="flex items-center gap-2">
+                        <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                        <span>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
 

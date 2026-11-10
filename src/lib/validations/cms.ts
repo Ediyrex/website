@@ -99,7 +99,11 @@ export const serviceUpsertSchema = z.object({
     .regex(slugPattern, "Slug must contain lowercase letters, numbers, and hyphens only."),
   summary: safeText(320, 10),
   description: safeText(20000, 10),
+  categoryLabel: optionalSafeText(80),
   deliverables: z.array(safeText(200, 1)).max(20).default([]),
+  features: z.array(safeText(200, 1)).max(20).default([]),
+  showPricing: z.boolean().default(false),
+  startingPrice: optionalSafeText(80),
   iconName: optionalSafeText(64),
   coverAssetId: z.string().uuid().optional().nullable(),
   isFeatured: z.boolean().default(false),
@@ -243,6 +247,7 @@ export const blogCategoryCreateSchema = z.object({
 
 export const blogPostUpsertSchema = z.object({
   title: safeText(200, 3),
+  subtitle: optionalSafeText(280),
   slug: z
     .string()
     .trim()
@@ -253,11 +258,17 @@ export const blogPostUpsertSchema = z.object({
       slugPattern,
       "Slug must contain lowercase letters, numbers, and hyphens only."
     ),
+  contentType: z.enum(["post", "insight", "announcement"]).default("post"),
   excerpt: safeText(400, 10),
   bodyMarkdown: safeText(40000, 10),
+  tags: z.array(safeText(40, 1)).max(20).default([]),
+  authorUserId: z.string().uuid().optional().nullable(),
+  authorBio: optionalSafeText(240),
+  isFeatured: z.boolean().default(false),
   coverAssetId: z.string().uuid().optional().nullable(),
   categoryIds: z.array(z.string().uuid()).max(10).default([]),
   status: z.enum(["draft", "published", "archived"]).default("draft"),
+  scheduledFor: z.string().datetime({ offset: true }).optional().nullable(),
   seoTitle: optionalSafeText(160),
   seoDescription: optionalSafeText(320),
   canonicalUrl: safeHttpOrRelativeUrlSchema,
@@ -267,6 +278,7 @@ export const studioTaskCreateSchema = z.object({
   title: safeText(200, 2),
   category: safeText(100, 2).default("CMS · General"),
   dueDateLabel: safeText(40, 1).default("This week"),
+  pmsProjectId: z.string().uuid().optional().nullable(),
 });
 
 export const studioTaskUpdateSchema = z.object({
@@ -407,4 +419,101 @@ export const seoTechConfigSchema = z.object({
     })
     .optional(),
 });
+
+export const crmInquiryCreateSchema = z.object({
+  contactName: safeText(120, 2),
+  email: z.string().trim().email("Valid email address is required.").max(255),
+  companyName: optionalSafeText(140),
+  phone: optionalSafeText(40),
+  projectType: safeText(140, 2),
+  goalsAndRequirements: safeText(4000, 3).default("Created in CRM by studio team."),
+  expectedTimeline: safeText(64, 2).default("Flexible"),
+  source: safeText(64, 2).default("manual_entry"),
+  status: z
+    .enum([
+      "new",
+      "reviewing",
+      "qualified",
+      "proposal_sent",
+      "won",
+      "lost",
+      "archived",
+    ])
+    .default("new"),
+  wantsDiscoveryCall: z.boolean().default(false),
+});
+
+export const crmClientUpsertSchema = z.object({
+  name: safeText(140, 2),
+  email: z.string().trim().email("Valid email address is required.").max(255),
+  companyName: optionalSafeText(140),
+  phone: optionalSafeText(40),
+  serviceInterest: safeText(160, 2).default("General Consultation"),
+  source: safeText(64, 2).default("direct"),
+  status: z.enum(["active", "archived"]).default("active"),
+  notes: safeText(4000, 0).default(""),
+});
+
+export const crmConvertToClientSchema = z.object({
+  name: safeText(140, 2).optional(),
+  companyName: optionalSafeText(140),
+  phone: optionalSafeText(40),
+  serviceInterest: safeText(160, 2).optional(),
+  notes: safeText(4000, 0).default(""),
+  createPmsProject: z.boolean().default(false),
+  pmsProjectTitle: safeText(200, 2).optional(),
+});
+
+export const crmFollowupCreateSchema = z
+  .object({
+    enquiryId: z.string().uuid().optional().nullable(),
+    clientId: z.string().uuid().optional().nullable(),
+    title: safeText(200, 2),
+    notes: safeText(2000, 0).default(""),
+    channel: z
+      .enum(["email", "call", "meeting", "whatsapp", "other"])
+      .default("email"),
+    dueAt: z
+      .string()
+      .trim()
+      .refine((v) => !Number.isNaN(Date.parse(v)), "Valid follow-up due date is required."),
+  })
+  .refine(
+    (d) => Boolean(d.enquiryId || d.clientId),
+    "Follow-up must be linked to a lead or a client."
+  );
+
+export const crmFollowupUpdateSchema = z.object({
+  title: safeText(200, 2).optional(),
+  notes: safeText(2000, 0).optional(),
+  channel: z.enum(["email", "call", "meeting", "whatsapp", "other"]).optional(),
+  dueAt: z
+    .string()
+    .trim()
+    .refine((v) => !Number.isNaN(Date.parse(v)), "Valid follow-up due date is required.")
+    .optional(),
+  completed: z.boolean().optional(),
+});
+
+export const pmsProjectCreateSchema = z.object({
+  title: safeText(200, 2),
+  clientId: z.string().uuid().optional().nullable(),
+  sourceEnquiryId: z.string().uuid().optional().nullable(),
+  serviceInterest: safeText(140, 2).default("Studio Delivery"),
+  status: z
+    .enum(["planning", "in_progress", "review", "completed", "on_hold"])
+    .default("planning"),
+  dueDateLabel: safeText(64, 1).default("This month"),
+  summary: safeText(4000, 0).default(""),
+});
+
+export const pmsProjectUpdateSchema = z.object({
+  title: safeText(200, 2).optional(),
+  status: z
+    .enum(["planning", "in_progress", "review", "completed", "on_hold"])
+    .optional(),
+  dueDateLabel: safeText(64, 1).optional(),
+  summary: safeText(4000, 0).optional(),
+});
+
 

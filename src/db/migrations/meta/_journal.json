@@ -50,6 +50,27 @@
       "when": 1794313619203,
       "tag": "0006_seo_management_complete",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794314813273,
+      "tag": "0007_blog_editorial_publishing",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1794315298092,
+      "tag": "0008_service_features_and_pricing",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1794316245401,
+      "tag": "0009_crm_clients_followups_pms",
+      "breakpoints": true
     }
   ]
 }

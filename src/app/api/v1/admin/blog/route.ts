@@ -5,6 +5,7 @@ import {
   eq,
   ilike,
   inArray,
+  isNotNull,
   or,
   sql,
 } from "drizzle-orm";
@@ -30,6 +31,7 @@ import { blogPostUpsertSchema } from "@/lib/validations/cms";
 import { paginationSchema } from "@/lib/validations/query";
 
 const VALID_POST_STATUSES = ["draft", "published", "archived"] as const;
+const VALID_CONTENT_TYPES = ["post", "insight", "announcement"] as const;
 
 export async function GET(request: NextRequest) {
   try {
@@ -56,8 +58,11 @@ export async function GET(request: NextRequest) {
     const { page, limit } = parsedPage.data;
     const offset = (page - 1) * limit;
     const statusParam = searchParams.get("status")?.trim();
+    const typeParam = searchParams.get("type")?.trim();
+    const scheduledParam = searchParams.get("scheduled")?.trim();
     const categorySlugParam = searchParams.get("category")?.trim();
     const authorIdParam = searchParams.get("author")?.trim();
+    const tagParam = searchParams.get("tag")?.trim().toLowerCase();
     const qParam = searchParams.get("q")?.trim();
 
     const conditions = [];
@@ -69,11 +74,25 @@ export async function GET(request: NextRequest) {
         eq(blogPosts.status, statusParam as (typeof VALID_POST_STATUSES)[number])
       );
     }
-
+    if (
+      typeParam &&
+      (VALID_CONTENT_TYPES as readonly string[]).includes(typeParam)
+    ) {
+      conditions.push(eq(blogPosts.contentType, typeParam));
+    }
+    if (scheduledParam === "1") {
+      conditions.push(
+        and(eq(blogPosts.status, "draft"), isNotNull(blogPosts.scheduledFor))
+      );
+    }
     if (authorIdParam) {
       conditions.push(eq(blogPosts.authorUserId, authorIdParam));
     }
-
+    if (tagParam) {
+      conditions.push(
+        sql`${blogPosts.tags} @> ${JSON.stringify([tagParam])}::jsonb`
+      );
+    }
     if (categorySlugParam) {
       const catPostRows = await db
         .select({ blogPostId: blogPostCategories.blogPostId })
@@ -91,12 +110,13 @@ export async function GET(request: NextRequest) {
         conditions.push(inArray(blogPosts.id, matchedPostIds));
       }
     }
-
     if (qParam) {
       const searchCond = or(
         ilike(blogPosts.title, `%${qParam}%`),
+        ilike(blogPosts.subtitle, `%${qParam}%`),
         ilike(blogPosts.slug, `%${qParam}%`),
-        ilike(blogPosts.excerpt, `%${qParam}%`)
+        ilike(blogPosts.excerpt, `%${qParam}%`),
+        sql`${blogPosts.tags}::text ilike ${`%${qParam}%`}`
       );
       if (searchCond) conditions.push(searchCond);
     }
@@ -111,24 +131,31 @@ export async function GET(request: NextRequest) {
       [{ total }],
       [globalStats],
       categoriesList,
-      recentPublished,
+      topInsights,
       recentDrafts,
       authorsList,
+      allTagRows,
     ] = await Promise.all([
       db
         .select({
           id: blogPosts.id,
           title: blogPosts.title,
+          subtitle: blogPosts.subtitle,
           slug: blogPosts.slug,
+          contentType: blogPosts.contentType,
           excerpt: blogPosts.excerpt,
+          tags: blogPosts.tags,
+          isFeatured: blogPosts.isFeatured,
           coverAssetId: blogPosts.coverAssetId,
           coverAssetUrl: mediaAssets.secureUrl,
           authorUserId: blogPosts.authorUserId,
           authorName: users.displayName,
+          authorBio: blogPosts.authorBio,
           status: blogPosts.status,
           seoTitle: blogPosts.seoTitle,
           seoDescription: blogPosts.seoDescription,
           canonicalUrl: blogPosts.canonicalUrl,
+          scheduledFor: blogPosts.scheduledFor,
           publishedAt: blogPosts.publishedAt,
           updatedAt: blogPosts.updatedAt,
         })
@@ -148,6 +175,9 @@ export async function GET(request: NextRequest) {
           totalAll: sql<number>`count(*)::int`,
           publishedCount: sql<number>`count(*) filter (where ${blogPosts.status} = 'published')::int`,
           draftCount: sql<number>`count(*) filter (where ${blogPosts.status} = 'draft')::int`,
+          scheduledCount: sql<number>`count(*) filter (where ${blogPosts.status} = 'draft' and ${blogPosts.scheduledFor} is not null)::int`,
+          insightsCount: sql<number>`count(*) filter (where ${blogPosts.contentType} = 'insight')::int`,
+          announcementsCount: sql<number>`count(*) filter (where ${blogPosts.contentType} = 'announcement')::int`,
           archivedCount: sql<number>`count(*) filter (where ${blogPosts.status} = 'archived')::int`,
           publishedLast30Count: sql<number>`count(*) filter (where ${blogPosts.status} = 'published' and ${blogPosts.publishedAt} >= ${thirtyDaysAgoIso}::timestamptz)::int`,
         })
@@ -157,6 +187,7 @@ export async function GET(request: NextRequest) {
           id: blogCategories.id,
           name: blogCategories.name,
           slug: blogCategories.slug,
+          description: blogCategories.description,
           count: sql<number>`count(${blogPostCategories.blogPostId})::int`,
         })
         .from(blogCategories)
@@ -164,41 +195,59 @@ export async function GET(request: NextRequest) {
           blogPostCategories,
           eq(blogCategories.id, blogPostCategories.categoryId)
         )
-        .groupBy(blogCategories.id, blogCategories.name, blogCategories.slug)
+        .groupBy(
+          blogCategories.id,
+          blogCategories.name,
+          blogCategories.slug,
+          blogCategories.description
+        )
         .orderBy(asc(blogCategories.name)),
       db
         .select({
           id: blogPosts.id,
           title: blogPosts.title,
           slug: blogPosts.slug,
+          contentType: blogPosts.contentType,
+          isFeatured: blogPosts.isFeatured,
           publishedAt: blogPosts.publishedAt,
           updatedAt: blogPosts.updatedAt,
         })
         .from(blogPosts)
         .where(eq(blogPosts.status, "published"))
-        .orderBy(desc(blogPosts.publishedAt), desc(blogPosts.updatedAt))
-        .limit(3),
+        .orderBy(
+          desc(blogPosts.isFeatured),
+          desc(blogPosts.publishedAt),
+          desc(blogPosts.updatedAt)
+        )
+        .limit(4),
       db
         .select({
           id: blogPosts.id,
           title: blogPosts.title,
           slug: blogPosts.slug,
           coverAssetUrl: mediaAssets.secureUrl,
+          scheduledFor: blogPosts.scheduledFor,
           updatedAt: blogPosts.updatedAt,
         })
         .from(blogPosts)
         .leftJoin(mediaAssets, eq(blogPosts.coverAssetId, mediaAssets.id))
         .where(eq(blogPosts.status, "draft"))
         .orderBy(desc(blogPosts.updatedAt))
-        .limit(3),
+        .limit(4),
       db
-        .selectDistinct({
+        .select({
           id: users.id,
           displayName: users.displayName,
         })
-        .from(blogPosts)
-        .innerJoin(users, eq(blogPosts.authorUserId, users.id)),
+        .from(users)
+        .where(eq(users.status, "active"))
+        .orderBy(asc(users.displayName)),
+      db.select({ tags: blogPosts.tags }).from(blogPosts),
     ]);
+
+    const uniqueTags = Array.from(
+      new Set(allTagRows.flatMap((r) => (Array.isArray(r.tags) ? r.tags : [])))
+    ).sort((a, b) => a.localeCompare(b));
 
     const postIds = rows.map((r) => r.id);
     const categoriesByPost = new Map<
@@ -242,11 +291,15 @@ export async function GET(request: NextRequest) {
         totalAll: globalStats?.totalAll ?? 0,
         publishedCount: globalStats?.publishedCount ?? 0,
         draftCount: globalStats?.draftCount ?? 0,
+        scheduledCount: globalStats?.scheduledCount ?? 0,
+        insightsCount: globalStats?.insightsCount ?? 0,
+        announcementsCount: globalStats?.announcementsCount ?? 0,
         archivedCount: globalStats?.archivedCount ?? 0,
         publishedLast30Count: globalStats?.publishedLast30Count ?? 0,
         categories: categoriesList,
         authors: authorsList,
-        recentPublished,
+        allTags: uniqueTags,
+        topInsights,
         recentDrafts,
       },
     });
@@ -296,18 +349,28 @@ export async function POST(request: NextRequest) {
     }
 
     const publishedAt = data.status === "published" ? new Date() : null;
+    const scheduledFor =
+      data.status === "draft" && data.scheduledFor
+        ? new Date(data.scheduledFor)
+        : null;
 
     const created = await db.transaction(async (tx) => {
       const [row] = await tx
         .insert(blogPosts)
         .values({
-          authorUserId: auth.session.userId,
+          authorUserId: data.authorUserId || auth.session.userId,
+          authorBio: data.authorBio || null,
           title: data.title,
+          subtitle: data.subtitle || null,
           slug: data.slug,
+          contentType: data.contentType,
           excerpt: data.excerpt,
           bodyMarkdown: data.bodyMarkdown,
+          tags: data.tags,
+          isFeatured: data.isFeatured,
           coverAssetId: data.coverAssetId || null,
           status: data.status,
+          scheduledFor,
           seoTitle: data.seoTitle || null,
           seoDescription: data.seoDescription || null,
           canonicalUrl: data.canonicalUrl || null,
@@ -336,7 +399,11 @@ export async function POST(request: NextRequest) {
       action: "blog.created",
       entityType: "blog_post",
       entityId: created.id,
-      metadata: { slug: created.slug, status: created.status },
+      metadata: {
+        slug: created.slug,
+        status: created.status,
+        contentType: created.contentType,
+      },
     });
 
     return apiOk(created, undefined, 201);

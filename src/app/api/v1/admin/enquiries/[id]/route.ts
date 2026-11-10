@@ -1,11 +1,15 @@
 import type { NextRequest } from "next/server";
-import { desc, eq } from "drizzle-orm";
+import { asc, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import {
+  crmClients,
+  crmFollowups,
   enquiries,
   enquiryNotes,
   enquiryStatusHistory,
   getDb,
+  pmsProjects,
+  users,
 } from "@/db";
 import { requireAdminRole } from "@/lib/server/session";
 import { recordAuditLog } from "@/lib/server/audit";
@@ -81,6 +85,7 @@ export async function GET(
         source: enquiries.source,
         wantsDiscoveryCall: enquiries.wantsDiscoveryCall,
         assignedAdminUserId: enquiries.assignedAdminUserId,
+        convertedClientId: enquiries.convertedClientId,
         submittedAt: enquiries.submittedAt,
         updatedAt: enquiries.updatedAt,
       })
@@ -102,34 +107,57 @@ export async function GET(
       return apiForbidden("You do not have permission to access this enquiry.");
     }
 
-    const [history, notes] = await Promise.all([
-      db
-        .select({
-          id: enquiryStatusHistory.id,
-          previousStatus: enquiryStatusHistory.previousStatus,
-          newStatus: enquiryStatusHistory.newStatus,
-          reason: enquiryStatusHistory.reason,
-          createdAt: enquiryStatusHistory.createdAt,
-        })
-        .from(enquiryStatusHistory)
-        .where(eq(enquiryStatusHistory.enquiryId, id))
-        .orderBy(desc(enquiryStatusHistory.createdAt)),
-      db
-        .select({
-          id: enquiryNotes.id,
-          note: enquiryNotes.body,
-          authorId: enquiryNotes.authorUserId,
-          createdAt: enquiryNotes.createdAt,
-        })
-        .from(enquiryNotes)
-        .where(eq(enquiryNotes.enquiryId, id))
-        .orderBy(desc(enquiryNotes.createdAt)),
-    ]);
+    const [history, notes, followups, linkedClientRows, linkedProjects] =
+      await Promise.all([
+        db
+          .select({
+            id: enquiryStatusHistory.id,
+            previousStatus: enquiryStatusHistory.previousStatus,
+            newStatus: enquiryStatusHistory.newStatus,
+            reason: enquiryStatusHistory.reason,
+            createdAt: enquiryStatusHistory.createdAt,
+          })
+          .from(enquiryStatusHistory)
+          .where(eq(enquiryStatusHistory.enquiryId, id))
+          .orderBy(desc(enquiryStatusHistory.createdAt)),
+        db
+          .select({
+            id: enquiryNotes.id,
+            note: enquiryNotes.body,
+            authorId: enquiryNotes.authorUserId,
+            authorName: users.displayName,
+            createdAt: enquiryNotes.createdAt,
+          })
+          .from(enquiryNotes)
+          .leftJoin(users, eq(enquiryNotes.authorUserId, users.id))
+          .where(eq(enquiryNotes.enquiryId, id))
+          .orderBy(desc(enquiryNotes.createdAt)),
+        db
+          .select()
+          .from(crmFollowups)
+          .where(eq(crmFollowups.enquiryId, id))
+          .orderBy(crmFollowups.completed, asc(crmFollowups.dueAt)),
+        existing.convertedClientId
+          ? db
+              .select()
+              .from(crmClients)
+              .where(eq(crmClients.id, existing.convertedClientId))
+              .limit(1)
+          : Promise.resolve([]),
+        db
+          .select()
+          .from(pmsProjects)
+          .where(eq(pmsProjects.sourceEnquiryId, id))
+          .orderBy(desc(pmsProjects.createdAt)),
+      ]);
 
     return apiOk({
       ...existing,
       history,
       notes,
+      followups,
+      client: linkedClientRows[0] || null,
+      pmsProjects: linkedProjects,
     });
   } catch (err) {
     return handleApiError(err, "GET /api/v1/admin/enquiries/[id]");

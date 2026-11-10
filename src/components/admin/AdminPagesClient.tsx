@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Plus,
   Search,
@@ -106,6 +106,7 @@ function slugifyPath(val: string): string {
 
 export function AdminPagesClient() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { canEdit, isAdmin } = useAdminUser();
 
   const [pages, setPages] = useState<CmsPageRow[]>([]);
@@ -201,6 +202,80 @@ export function AdminPagesClient() {
     };
   }, [fetchPages]);
 
+  const fetchPageById = useCallback(async (id: string): Promise<PageFormState> => {
+    const res = await fetch(`/api/v1/admin/pages/${id}`);
+    const json = await res.json();
+    if (!res.ok) {
+      throw new Error(json.message || "Unable to load page details.");
+    }
+    const d = json.data;
+    return {
+      id: d.id,
+      title: d.title,
+      subtitle: d.subtitle || "",
+      slug: d.slug,
+      pageType: d.pageType || "static",
+      thumbnailAssetId: d.thumbnailAssetId || null,
+      thumbnailUrl: d.thumbnailAsset?.secureUrl || null,
+      bodyMarkdown: d.bodyMarkdown || "",
+      status: d.status || "draft",
+      seoTitle: d.seoTitle || "",
+      seoDescription: d.seoDescription || "",
+      canonicalUrl: d.canonicalUrl || "",
+      noIndex: Boolean(d.noIndex),
+      displayOrder: d.displayOrder ?? 0,
+    };
+  }, []);
+
+  useEffect(() => {
+    const editId = searchParams.get("edit");
+    const createFlag = searchParams.get("create");
+    let ignore = false;
+
+    if (editId) {
+      fetchPageById(editId)
+        .then((mapped) => {
+          if (!ignore) {
+            setForm(mapped);
+            setEditorOpen(true);
+            setOpenMenuId(null);
+          }
+        })
+        .catch((err) => {
+          if (!ignore) {
+            setError(
+              err instanceof Error ? err.message : "Network error loading page."
+            );
+          }
+        });
+    } else if (createFlag === "1" && !editorOpen) {
+      Promise.resolve().then(() => {
+        if (!ignore) {
+          setForm({
+            title: "",
+            subtitle: "",
+            slug: "",
+            pageType: "static",
+            thumbnailAssetId: null,
+            thumbnailUrl: null,
+            bodyMarkdown: "",
+            status: "draft",
+            seoTitle: "",
+            seoDescription: "",
+            canonicalUrl: "",
+            noIndex: false,
+            displayOrder: 1,
+          });
+          setEditorOpen(true);
+        }
+      });
+    }
+
+    return () => {
+      ignore = true;
+    };
+  }, [searchParams, editorOpen, fetchPageById]);
+
   const openCreateModal = () => {
     setForm({
       title: "",
@@ -223,29 +298,8 @@ export function AdminPagesClient() {
   const openEditModal = async (id: string) => {
     setError("");
     try {
-      const res = await fetch(`/api/v1/admin/pages/${id}`);
-      const json = await res.json();
-      if (!res.ok) {
-        setError(json.message || "Unable to load page details.");
-        return;
-      }
-      const d = json.data;
-      setForm({
-        id: d.id,
-        title: d.title,
-        subtitle: d.subtitle || "",
-        slug: d.slug,
-        pageType: d.pageType || "static",
-        thumbnailAssetId: d.thumbnailAssetId || null,
-        thumbnailUrl: d.thumbnailAsset?.secureUrl || null,
-        bodyMarkdown: d.bodyMarkdown || "",
-        status: d.status || "draft",
-        seoTitle: d.seoTitle || "",
-        seoDescription: d.seoDescription || "",
-        canonicalUrl: d.canonicalUrl || "",
-        noIndex: Boolean(d.noIndex),
-        displayOrder: d.displayOrder ?? 0,
-      });
+      const mapped = await fetchPageById(id);
+      setForm(mapped);
       setEditorOpen(true);
       setOpenMenuId(null);
     } catch {

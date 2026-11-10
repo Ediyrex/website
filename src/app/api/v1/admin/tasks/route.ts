@@ -61,6 +61,7 @@ export async function POST(request: NextRequest) {
     const [created] = await db
       .insert(studioTasks)
       .values({
+        pmsProjectId: parsed.data.pmsProjectId || null,
         title: parsed.data.title,
         category: parsed.data.category,
         dueDateLabel: parsed.data.dueDateLabel,

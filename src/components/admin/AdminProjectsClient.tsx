@@ -661,7 +661,12 @@ export function AdminProjectsClient() {
             {projectsList.map((proj) => (
               <article
                 key={proj.id}
-                className="group rounded-2xl bg-[#111419] border border-[#1E222A] hover:border-[#D6B77A]/40 transition-colors overflow-hidden flex flex-col justify-between relative"
+                onClick={() =>
+                  canEdit
+                    ? openEditModal(proj.id, false)
+                    : openEditModal(proj.id, true)
+                }
+                className="group rounded-2xl bg-[#111419] border border-[#1E222A] hover:border-[#D6B77A]/40 transition-colors overflow-hidden flex flex-col justify-between relative cursor-pointer"
               >
                 {/* Visual Top Card Frame */}
                 <div className="aspect-[16/9] bg-[#0B0D10] relative overflow-hidden border-b border-[#1E222A]">
@@ -705,7 +710,10 @@ export function AdminProjectsClient() {
                   </div>
 
                   {/* Top Right Menu Trigger */}
-                  <div className="absolute top-3 right-3 z-20">
+                  <div
+                    className="absolute top-3 right-3 z-20"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <button
                       type="button"
                       onClick={() =>
@@ -779,6 +787,7 @@ export function AdminProjectsClient() {
                       <Link
                         href={`/work/${proj.slug}`}
                         target="_blank"
+                        onClick={(e) => e.stopPropagation()}
                         aria-label={`Open public page for ${proj.title}`}
                         className="text-[#777D87] hover:text-[#F5F3EE] shrink-0 mt-0.5"
                       >

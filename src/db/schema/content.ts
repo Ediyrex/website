@@ -18,7 +18,7 @@ import { publicationStatusEnum, navigationLocationEnum } from "./enums";
 import { users } from "./auth";
 import { mediaAssets } from "./media";
 import { serviceDivisions } from "./catalog";
-import { enquiries } from "./enquiries";
+import { crmClients, enquiries } from "./enquiries";
 
 export const testimonials = pgTable(
   "testimonials",
@@ -76,14 +76,25 @@ export const blogPosts = pgTable(
     authorUserId: uuid("author_user_id").references(() => users.id, {
       onDelete: "set null",
     }),
+    authorBio: varchar("author_bio", { length: 240 }),
     title: varchar("title", { length: 200 }).notNull(),
+    subtitle: varchar("subtitle", { length: 280 }),
     slug: varchar("slug", { length: 200 }).notNull().unique(),
+    contentType: varchar("content_type", { length: 32 })
+      .notNull()
+      .default("post"),
     excerpt: varchar("excerpt", { length: 400 }).notNull(),
     bodyMarkdown: text("body_markdown").notNull(),
+    tags: jsonb("tags").$type<string[]>().notNull().default([]),
+    isFeatured: boolean("is_featured").notNull().default(false),
     coverAssetId: uuid("cover_asset_id").references(() => mediaAssets.id, {
       onDelete: "restrict",
     }),
     status: publicationStatusEnum("status").notNull().default("draft"),
+    scheduledFor: timestamp("scheduled_for", {
+      withTimezone: true,
+      mode: "date",
+    }),
     seoTitle: varchar("seo_title", { length: 160 }),
     seoDescription: varchar("seo_description", { length: 320 }),
     ogTitle: varchar("og_title", { length: 160 }),
@@ -256,10 +267,51 @@ export const studioProducts = pgTable(
   ]
 );
 
+export const pmsProjects = pgTable(
+  "pms_projects",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    title: varchar("title", { length: 200 }).notNull(),
+    clientId: uuid("client_id").references(() => crmClients.id, {
+      onDelete: "set null",
+    }),
+    sourceEnquiryId: uuid("source_enquiry_id").references(() => enquiries.id, {
+      onDelete: "set null",
+    }),
+    serviceInterest: varchar("service_interest", { length: 140 })
+      .notNull()
+      .default("Studio Delivery"),
+    status: varchar("status", { length: 32 }).notNull().default("planning"),
+    dueDateLabel: varchar("due_date_label", { length: 64 })
+      .notNull()
+      .default("TBD"),
+    summary: text("summary").notNull().default(""),
+    leadUserId: uuid("lead_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    check(
+      "chk_pms_projects_status",
+      sql`${table.status} IN ('planning', 'in_progress', 'review', 'completed', 'on_hold')`
+    ),
+    index("idx_pms_projects_status").on(table.status, table.createdAt),
+  ]
+);
+
 export const studioTasks = pgTable(
   "studio_tasks",
   {
     id: uuid("id").defaultRandom().primaryKey(),
+    pmsProjectId: uuid("pms_project_id").references(() => pmsProjects.id, {
+      onDelete: "set null",
+    }),
     title: varchar("title", { length: 200 }).notNull(),
     category: varchar("category", { length: 100 })
       .notNull()

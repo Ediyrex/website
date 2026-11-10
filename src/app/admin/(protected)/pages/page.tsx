@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import type { Metadata } from "next";
 import { AdminPagesClient } from "@/components/admin/AdminPagesClient";
 
@@ -8,6 +8,10 @@ export const metadata: Metadata = {
 };
 
 export default function AdminPagesPage() {
-  return <AdminPagesClient />;
+  return (
+    <Suspense>
+      <AdminPagesClient />
+    </Suspense>
+  );
 }
 

@@ -30,6 +30,7 @@ const MIME_TO_EXTENSION: Record<string, string> = {
   "image/gif": "gif",
   "video/mp4": "mp4",
   "video/webm": "webm",
+  "application/pdf": "pdf",
 };
 
 export async function POST(request: NextRequest) {
@@ -54,7 +55,7 @@ export async function POST(request: NextRequest) {
       !(ALLOWED_MEDIA_MIME_TYPES as readonly string[]).includes(mimeType)
     ) {
       return apiBadRequest(
-        `Unsupported file type (${mimeType || "unknown"}). Allowed: JPEG, PNG, WebP, AVIF, GIF, MP4, WebM.`
+        `Unsupported file type (${mimeType || "unknown"}). Allowed: JPEG, PNG, WebP, AVIF, GIF, MP4, WebM, PDF.`
       );
     }
 
@@ -68,6 +69,17 @@ export async function POST(request: NextRequest) {
     const captionRaw = formData.get("caption");
     const folderRaw = formData.get("folder");
     const tagsRaw = formData.get("tags");
+    const widthRaw = formData.get("width");
+    const heightRaw = formData.get("height");
+
+    const parsedWidth =
+      typeof widthRaw === "string" && /^\d+$/.test(widthRaw)
+        ? Math.min(20000, Math.max(1, Number(widthRaw)))
+        : null;
+    const parsedHeight =
+      typeof heightRaw === "string" && /^\d+$/.test(heightRaw)
+        ? Math.min(20000, Math.max(1, Number(heightRaw)))
+        : null;
 
     const altText =
       typeof altRaw === "string" ? sanitizePlainText(altRaw).slice(0, 300) : "";
@@ -130,13 +142,16 @@ export async function POST(request: NextRequest) {
         resourceType: uploaded.resourceType,
         mimeType: uploaded.mimeType,
         fileSizeBytes: uploaded.fileSizeBytes,
-        width: uploaded.width,
-        height: uploaded.height,
+        width: uploaded.width ?? parsedWidth,
+        height: uploaded.height ?? parsedHeight,
         altText: altText || sanitizePlainText(fileEntry.name).slice(0, 120),
         caption,
         folder,
         tags,
-        providerMetadata: uploaded.providerMetadata,
+        providerMetadata: {
+          ...uploaded.providerMetadata,
+          originalName: sanitizePlainText(fileEntry.name).slice(0, 180),
+        },
         uploadedByUserId: auth.session.userId,
       };
     } else {
@@ -148,17 +163,23 @@ export async function POST(request: NextRequest) {
       await writeFile(path.join(uploadDir, safeFileName), buffer);
 
       const publicPath = `/uploads/cms/${safeFileName}`;
+      const mappedType: "image" | "video" | "document" =
+        mimeType === "application/pdf"
+          ? "document"
+          : mimeType.startsWith("video/")
+            ? "video"
+            : "image";
       insertPayload = {
         storageProvider: "local",
         providerAssetId: fileId,
         providerPublicId: safeFileName,
         assetUrl: publicPath,
         secureUrl: publicPath,
-        resourceType: mimeType.startsWith("video/") ? "video" : "image",
+        resourceType: mappedType,
         mimeType,
         fileSizeBytes: buffer.byteLength,
-        width: null,
-        height: null,
+        width: parsedWidth,
+        height: parsedHeight,
         altText: altText || sanitizePlainText(fileEntry.name).slice(0, 120),
         caption,
         folder,

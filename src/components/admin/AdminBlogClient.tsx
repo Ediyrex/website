@@ -1,27 +1,41 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
-  Plus,
-  Search,
-  Edit3,
-  Trash2,
-  X,
-  Image as ImageIcon,
-  Loader2,
-  FileText,
-  Eye,
+  Bold,
   Calendar,
-  FolderPlus,
+  Check,
   CheckCircle2,
-  LayoutGrid,
-  List,
-  MoreHorizontal,
-  TrendingUp,
   ChevronLeft,
   ChevronRight,
+  Clock,
+  Code,
+  Edit3,
   ExternalLink,
+  Eye,
+  FileText,
+  FolderPlus,
+  Heading2,
+  Heading3,
+  Image as ImageIcon,
+  Italic,
+  LayoutGrid,
+  Link2,
+  List,
+  ListOrdered,
+  Loader2,
+  Megaphone,
+  MoreHorizontal,
+  Plus,
+  Quote,
+  Search,
+  Sparkles,
+  Tag,
+  Trash2,
+  TrendingUp,
+  User,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAdminUser } from "./AdminContext";
@@ -31,6 +45,7 @@ interface BlogCategoryStat {
   id: string;
   name: string;
   slug: string;
+  description?: string | null;
   count: number;
 }
 
@@ -42,14 +57,20 @@ interface BlogAuthorOption {
 interface BlogPostRow {
   id: string;
   title: string;
+  subtitle: string | null;
   slug: string;
+  contentType: "post" | "insight" | "announcement";
   excerpt: string;
+  tags: string[];
+  isFeatured: boolean;
   coverAssetId: string | null;
   coverAssetUrl: string | null;
   authorUserId: string | null;
   authorName: string | null;
+  authorBio: string | null;
   categories: { id: string; name: string; slug: string }[];
   status: "draft" | "published" | "archived";
+  scheduledFor: string | null;
   publishedAt: string | null;
   updatedAt: string;
 }
@@ -58,14 +79,20 @@ interface BlogStats {
   totalAll: number;
   publishedCount: number;
   draftCount: number;
+  scheduledCount: number;
+  insightsCount: number;
+  announcementsCount: number;
   archivedCount: number;
   publishedLast30Count: number;
   categories: BlogCategoryStat[];
   authors: BlogAuthorOption[];
-  recentPublished: {
+  allTags: string[];
+  topInsights: {
     id: string;
     title: string;
     slug: string;
+    contentType: string;
+    isFeatured: boolean;
     publishedAt: string | null;
     updatedAt: string;
   }[];
@@ -74,6 +101,7 @@ interface BlogStats {
     title: string;
     slug: string;
     coverAssetUrl: string | null;
+    scheduledFor: string | null;
     updatedAt: string;
   }[];
 }
@@ -81,20 +109,35 @@ interface BlogStats {
 interface BlogFormState {
   id?: string;
   title: string;
+  subtitle: string;
   slug: string;
+  contentType: "post" | "insight" | "announcement";
   excerpt: string;
   bodyMarkdown: string;
+  tags: string[];
+  authorUserId: string | null;
+  authorBio: string;
+  isFeatured: boolean;
   coverAssetId: string | null;
   coverAssetUrl: string | null;
   categoryIds: string[];
   status: "draft" | "published" | "archived";
+  scheduledFor: string;
   seoTitle: string;
   seoDescription: string;
   canonicalUrl: string;
 }
 
+type BlogTab =
+  | "all"
+  | "published"
+  | "draft"
+  | "scheduled"
+  | "insight"
+  | "announcement";
+
 const CATEGORY_DOT_COLORS = [
-  "bg-[#7CD69F]",
+  "bg-[#73C794]",
   "bg-[#D6B77A]",
   "bg-[#7BA9F5]",
   "bg-[#E5E2DC]",
@@ -119,26 +162,108 @@ function formatDate(iso: string | null): string {
   });
 }
 
+function toLocalDateTimeInput(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function MarkdownPreviewRenderer({ markdown }: { markdown: string }) {
+  const lines = markdown.split("\n");
+  return (
+    <div className="space-y-3 text-sm text-[#D6D8DE] leading-relaxed">
+      {lines.map((raw, idx) => {
+        const line = raw.trimEnd();
+        if (!line) return <div key={idx} className="h-2" />;
+        if (line.startsWith("### ")) {
+          return (
+            <h3
+              key={idx}
+              className="font-heading text-lg font-semibold text-[#F5F3EE] pt-2"
+            >
+              {line.slice(4)}
+            </h3>
+          );
+        }
+        if (line.startsWith("## ")) {
+          return (
+            <h2
+              key={idx}
+              className="font-heading text-xl font-bold text-[#F5F3EE] pt-3"
+            >
+              {line.slice(3)}
+            </h2>
+          );
+        }
+        if (line.startsWith("> ")) {
+          return (
+            <blockquote
+              key={idx}
+              className="border-l-2 border-[#D6B77A] pl-4 py-1 italic text-[#B2B4BA] bg-[#0D0F12]/60 rounded-r-lg"
+            >
+              {line.slice(2)}
+            </blockquote>
+          );
+        }
+        if (line.startsWith("- ") || line.startsWith("* ")) {
+          return (
+            <div key={idx} className="flex items-start gap-2 pl-2">
+              <span className="text-[#D6B77A] mt-0.5">•</span>
+              <span>{line.slice(2)}</span>
+            </div>
+          );
+        }
+        const imgMatch = line.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+        if (imgMatch) {
+          return (
+            <div key={idx} className="my-3">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={imgMatch[2]}
+                alt={imgMatch[1] || "Inserted editorial visual"}
+                className="w-full max-h-72 object-cover rounded-xl border border-[#252A32]"
+              />
+              {imgMatch[1] && (
+                <p className="text-[11px] text-[#777D87] mt-1">{imgMatch[1]}</p>
+              )}
+            </div>
+          );
+        }
+        return <p key={idx}>{line}</p>;
+      })}
+    </div>
+  );
+}
+
 export function AdminBlogClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { canEdit } = useAdminUser();
+  const bodyTextareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const [posts, setPosts] = useState<BlogPostRow[]>([]);
   const [stats, setStats] = useState<BlogStats>({
     totalAll: 0,
     publishedCount: 0,
     draftCount: 0,
+    scheduledCount: 0,
+    insightsCount: 0,
+    announcementsCount: 0,
     archivedCount: 0,
     publishedLast30Count: 0,
     categories: [],
     authors: [],
-    recentPublished: [],
+    allTags: [],
+    topInsights: [],
     recentDrafts: [],
   });
+
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState("");
+  const [activeTab, setActiveTab] = useState<BlogTab>("all");
   const [categoryFilter, setCategoryFilter] = useState("");
+  const [tagFilter, setTagFilter] = useState("");
   const [authorFilter, setAuthorFilter] = useState("");
   const [query, setQuery] = useState("");
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
@@ -151,24 +276,40 @@ export function AdminBlogClient() {
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  // Dedicated Editorial Writer
   const [editorOpen, setEditorOpen] = useState(false);
-  const [previewPost, setPreviewPost] = useState<BlogFormState | null>(null);
+  const [editorMode, setEditorMode] = useState<"write" | "split" | "preview">("split");
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<BlogFormState | null>(null);
-  const [pickerOpen, setPickerOpen] = useState(false);
+  const [tagDraft, setTagDraft] = useState("");
+  const [pickerTarget, setPickerTarget] = useState<"cover" | "inline" | null>(null);
 
+  // Preview modal
+  const [previewPost, setPreviewPost] = useState<BlogFormState | null>(null);
+
+  // Category Management modal (create + edit + delete)
   const [catModalOpen, setCatModalOpen] = useState(false);
   const [newCatName, setNewCatName] = useState("");
   const [newCatSlug, setNewCatSlug] = useState("");
   const [newCatDesc, setNewCatDesc] = useState("");
+  const [editingCatId, setEditingCatId] = useState<string | null>(null);
+  const [savingCat, setSavingCat] = useState(false);
 
-  const fetchPosts = useCallback(async () => {
+  const fetchBlogData = useCallback(async () => {
     const params = new URLSearchParams({
       page: String(pageNum),
       limit: String(rowsPerPage),
     });
-    if (statusFilter) params.set("status", statusFilter);
+    if (activeTab === "published" || activeTab === "draft") {
+      params.set("status", activeTab);
+    } else if (activeTab === "scheduled") {
+      params.set("scheduled", "1");
+    } else if (activeTab === "insight" || activeTab === "announcement") {
+      params.set("type", activeTab);
+    }
     if (categoryFilter) params.set("category", categoryFilter);
+    if (tagFilter) params.set("tag", tagFilter);
     if (authorFilter) params.set("author", authorFilter);
     if (query.trim()) params.set("q", query.trim());
 
@@ -178,25 +319,39 @@ export function AdminBlogClient() {
       return null;
     }
     const json = await res.json();
-    if (!res.ok) throw new Error(json.message || "Unable to fetch blog posts.");
-    return json;
-  }, [pageNum, rowsPerPage, statusFilter, categoryFilter, authorFilter, query, router]);
+    if (!res.ok) {
+      throw new Error(json.message || "Unable to fetch blog posts.");
+    }
+    return {
+      items: (json.data || []) as BlogPostRow[],
+      total: (json.meta?.total ?? 0) as number,
+      totalPages: (json.meta?.totalPages ?? 1) as number,
+      stats: (json.meta?.stats || null) as BlogStats | null,
+    };
+  }, [
+    activeTab,
+    authorFilter,
+    categoryFilter,
+    pageNum,
+    query,
+    router,
+    rowsPerPage,
+    tagFilter,
+  ]);
 
-  const reload = async () => {
+  const loadData = async () => {
     setLoading(true);
     setError("");
     try {
-      const json = await fetchPosts();
-      if (json) {
-        setPosts(json.data || []);
-        setTotalFiltered(json.meta?.total ?? 0);
-        setTotalPages(json.meta?.totalPages ?? 1);
-        if (json.meta?.stats) setStats(json.meta.stats);
+      const result = await fetchBlogData();
+      if (result) {
+        setPosts(result.items);
+        setTotalFiltered(result.total);
+        setTotalPages(result.totalPages);
+        if (result.stats) setStats(result.stats);
       }
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Network error loading blog."
-      );
+      setError(err instanceof Error ? err.message : "Network error loading blog CMS.");
     } finally {
       setLoading(false);
     }
@@ -204,20 +359,18 @@ export function AdminBlogClient() {
 
   useEffect(() => {
     let ignore = false;
-    fetchPosts()
-      .then((json) => {
-        if (!ignore && json) {
-          setPosts(json.data || []);
-          setTotalFiltered(json.meta?.total ?? 0);
-          setTotalPages(json.meta?.totalPages ?? 1);
-          if (json.meta?.stats) setStats(json.meta.stats);
+    fetchBlogData()
+      .then((result) => {
+        if (!ignore && result) {
+          setPosts(result.items);
+          setTotalFiltered(result.total);
+          setTotalPages(result.totalPages);
+          if (result.stats) setStats(result.stats);
         }
       })
       .catch((err) => {
         if (!ignore) {
-          setError(
-            err instanceof Error ? err.message : "Network error loading blog."
-          );
+          setError(err instanceof Error ? err.message : "Network error loading blog CMS.");
         }
       })
       .finally(() => {
@@ -226,43 +379,61 @@ export function AdminBlogClient() {
     return () => {
       ignore = true;
     };
-  }, [fetchPosts]);
+  }, [fetchBlogData]);
 
   const openCreateModal = useCallback(() => {
     setForm({
       title: "",
+      subtitle: "",
       slug: "",
+      contentType: "post",
       excerpt: "",
       bodyMarkdown: "",
+      tags: [],
+      authorUserId: stats.authors[0]?.id ?? null,
+      authorBio: "",
+      isFeatured: false,
       coverAssetId: null,
       coverAssetUrl: null,
       categoryIds: [],
       status: "draft",
+      scheduledFor: "",
       seoTitle: "",
       seoDescription: "",
       canonicalUrl: "",
     });
+    setTagDraft("");
+    setEditorMode("split");
     setEditorOpen(true);
-  }, []);
+  }, [stats.authors]);
 
   const fetchPostById = useCallback(async (id: string): Promise<BlogFormState> => {
     const res = await fetch(`/api/v1/admin/blog/${id}`);
     const json = await res.json();
-    if (!res.ok) throw new Error(json.message || "Unable to load article.");
-    const d = json.data;
+    if (!res.ok) {
+      throw new Error(json.message || "Unable to fetch blog post.");
+    }
+    const p = json.data;
     return {
-      id: d.id,
-      title: d.title,
-      slug: d.slug,
-      excerpt: d.excerpt,
-      bodyMarkdown: d.bodyMarkdown,
-      coverAssetId: d.coverAssetId || null,
-      coverAssetUrl: d.coverAsset?.secureUrl || null,
-      categoryIds: Array.isArray(d.categoryIds) ? d.categoryIds : [],
-      status: d.status || "draft",
-      seoTitle: d.seoTitle || "",
-      seoDescription: d.seoDescription || "",
-      canonicalUrl: d.canonicalUrl || "",
+      id: p.id,
+      title: p.title,
+      subtitle: p.subtitle || "",
+      slug: p.slug,
+      contentType: p.contentType || "post",
+      excerpt: p.excerpt,
+      bodyMarkdown: p.bodyMarkdown || "",
+      tags: Array.isArray(p.tags) ? p.tags : [],
+      authorUserId: p.authorUserId ?? null,
+      authorBio: p.authorBio || "",
+      isFeatured: Boolean(p.isFeatured),
+      coverAssetId: p.coverAssetId,
+      coverAssetUrl: p.coverAsset?.secureUrl ?? null,
+      categoryIds: Array.isArray(p.categoryIds) ? p.categoryIds : [],
+      status: p.status,
+      scheduledFor: toLocalDateTimeInput(p.scheduledFor),
+      seoTitle: p.seoTitle || "",
+      seoDescription: p.seoDescription || "",
+      canonicalUrl: p.canonicalUrl || "",
     };
   }, []);
 
@@ -276,17 +447,16 @@ export function AdminBlogClient() {
         .then((mapped) => {
           if (!ignore) {
             setForm(mapped);
+            setEditorMode("split");
             setEditorOpen(true);
           }
         })
         .catch((err) => {
           if (!ignore) {
-            setError(
-              err instanceof Error ? err.message : "Unable to load article."
-            );
+            setError(err instanceof Error ? err.message : "Network error opening post.");
           }
         });
-    } else if (createFlag === "1" && !editorOpen && !form) {
+    } else if (createFlag === "1" && !editorOpen) {
       Promise.resolve().then(() => {
         if (!ignore) openCreateModal();
       });
@@ -295,14 +465,71 @@ export function AdminBlogClient() {
     return () => {
       ignore = true;
     };
-  }, [searchParams, editorOpen, form, openCreateModal, fetchPostById]);
+  }, [searchParams, editorOpen, openCreateModal, fetchPostById]);
 
-  const handleSave = async (e: React.FormEvent) => {
+  const insertFormatting = (before: string, after = "", fallbackText = "text") => {
+    if (!form) return;
+    const el = bodyTextareaRef.current;
+    if (!el) {
+      setForm({
+        ...form,
+        bodyMarkdown: `${form.bodyMarkdown}\n${before}${fallbackText}${after}`,
+      });
+      return;
+    }
+    const start = el.selectionStart ?? form.bodyMarkdown.length;
+    const end = el.selectionEnd ?? form.bodyMarkdown.length;
+    const selected = form.bodyMarkdown.slice(start, end) || fallbackText;
+    const nextBody =
+      form.bodyMarkdown.slice(0, start) +
+      before +
+      selected +
+      after +
+      form.bodyMarkdown.slice(end);
+
+    setForm({ ...form, bodyMarkdown: nextBody });
+    setTimeout(() => {
+      el.focus();
+      const cursorPos = start + before.length + selected.length;
+      el.setSelectionRange(cursorPos, cursorPos);
+    }, 0);
+  };
+
+  const handleSave = async (
+    e: React.FormEvent,
+    overrideStatus?: "draft" | "published" | "archived"
+  ) => {
     e.preventDefault();
     if (!form) return;
     setSaving(true);
     setError("");
     setSuccess("");
+
+    const finalStatus = overrideStatus ?? form.status;
+    const scheduledIso =
+      finalStatus === "draft" && form.scheduledFor
+        ? new Date(form.scheduledFor).toISOString()
+        : null;
+
+    const payload = {
+      title: form.title,
+      subtitle: form.subtitle || null,
+      slug: form.slug,
+      contentType: form.contentType,
+      excerpt: form.excerpt,
+      bodyMarkdown: form.bodyMarkdown,
+      tags: form.tags,
+      authorUserId: form.authorUserId,
+      authorBio: form.authorBio || null,
+      isFeatured: form.isFeatured,
+      coverAssetId: form.coverAssetId,
+      categoryIds: form.categoryIds,
+      status: finalStatus,
+      scheduledFor: scheduledIso,
+      seoTitle: form.seoTitle || null,
+      seoDescription: form.seoDescription || null,
+      canonicalUrl: form.canonicalUrl || null,
+    };
 
     try {
       const endpoint = form.id
@@ -313,28 +540,23 @@ export function AdminBlogClient() {
       const res = await fetch(endpoint, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: form.title,
-          slug: form.slug,
-          excerpt: form.excerpt,
-          bodyMarkdown: form.bodyMarkdown,
-          coverAssetId: form.coverAssetId,
-          categoryIds: form.categoryIds,
-          status: form.status,
-          seoTitle: form.seoTitle || null,
-          seoDescription: form.seoDescription || null,
-          canonicalUrl: form.canonicalUrl || null,
-        }),
+        body: JSON.stringify(payload),
       });
       const json = await res.json();
       if (!res.ok) {
-        setError(json.message || "Unable to save article.");
+        setError(json.message || "Unable to save blog post.");
         return;
       }
 
       setEditorOpen(false);
-      setSuccess(form.id ? "Article updated." : "Article created.");
-      await reload();
+      setSuccess(
+        finalStatus === "published"
+          ? "Article published."
+          : scheduledIso
+            ? "Article scheduled for publication."
+            : "Draft saved."
+      );
+      await loadData();
     } catch {
       setError("Network error saving article.");
     } finally {
@@ -342,78 +564,79 @@ export function AdminBlogClient() {
     }
   };
 
-  const handleDelete = async (row: BlogPostRow) => {
-    if (!window.confirm(`Delete article "${row.title}"?`)) return;
+  const handleDelete = async (post: BlogPostRow) => {
+    if (!window.confirm(`Delete article "${post.title}"?`)) return;
     setError("");
-    setOpenMenuId(null);
+    setSuccess("");
     try {
-      const res = await fetch(`/api/v1/admin/blog/${row.id}`, {
+      const res = await fetch(`/api/v1/admin/blog/${post.id}`, {
         method: "DELETE",
       });
-      const json = await res.json();
       if (!res.ok) {
-        setError(json.message || "Unable to delete article.");
+        setError("Failed to delete article.");
         return;
       }
-      setSuccess(`Deleted "${row.title}".`);
-      await reload();
+      setOpenMenuId(null);
+      setSuccess(`Deleted "${post.title}".`);
+      await loadData();
     } catch {
       setError("Network error deleting article.");
     }
   };
 
-  const handleCreateCategory = async (e: React.FormEvent) => {
+  const handleSaveCategory = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!newCatName.trim()) return;
+    setSavingCat(true);
     setError("");
     try {
-      const res = await fetch("/api/v1/admin/blog/categories", {
-        method: "POST",
+      const endpoint = editingCatId
+        ? `/api/v1/admin/blog/categories/${editingCatId}`
+        : "/api/v1/admin/blog/categories";
+      const method = editingCatId ? "PATCH" : "POST";
+      const res = await fetch(endpoint, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: newCatName,
-          slug: newCatSlug,
-          description: newCatDesc || null,
+          name: newCatName.trim(),
+          slug: (newCatSlug.trim() || slugify(newCatName)).toLowerCase(),
+          description: newCatDesc.trim() || null,
         }),
       });
       const json = await res.json();
       if (!res.ok) {
-        setError(json.message || "Unable to create category.");
+        setError(json.message || "Unable to save category.");
         return;
       }
       setNewCatName("");
       setNewCatSlug("");
       setNewCatDesc("");
-      setSuccess("Created blog category.");
-      await reload();
+      setEditingCatId(null);
+      setSuccess(editingCatId ? "Category updated." : "Category created.");
+      await loadData();
     } catch {
-      setError("Network error creating category.");
+      setError("Network error saving category.");
+    } finally {
+      setSavingCat(false);
     }
   };
 
-  const handleDeleteCategory = async (catId: string, catName: string) => {
-    if (!window.confirm(`Delete category "${catName}"?`)) return;
+  const handleDeleteCategory = async (cat: BlogCategoryStat) => {
+    if (!window.confirm(`Delete category "${cat.name}"?`)) return;
     setError("");
-    const res = await fetch(`/api/v1/admin/blog/categories/${catId}`, {
-      method: "DELETE",
-    });
-    if (res.ok) {
-      setSuccess(`Deleted category "${catName}".`);
-      await reload();
+    try {
+      const res = await fetch(`/api/v1/admin/blog/categories/${cat.id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        setError("Unable to delete category.");
+        return;
+      }
+      if (categoryFilter === cat.slug) setCategoryFilter("");
+      await loadData();
+    } catch {
+      setError("Network error deleting category.");
     }
-  };
-
-  const toggleSelectAll = () => {
-    if (selectedIds.length === posts.length) {
-      setSelectedIds([]);
-    } else {
-      setSelectedIds(posts.map((p) => p.id));
-    }
-  };
-
-  const toggleRow = (id: string) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
   };
 
   const startIdx = totalFiltered === 0 ? 0 : (pageNum - 1) * rowsPerPage + 1;
@@ -428,33 +651,35 @@ export function AdminBlogClient() {
             Blog &amp; Insights
           </h1>
           <p className="text-sm text-[#8D939E]">
-            Create, manage, and publish blog posts, insights, and studio updates.
+            Create, schedule, and publish blog articles, insights, and studio announcements.
           </p>
         </div>
 
-        {canEdit && (
-          <div className="flex flex-wrap gap-2.5">
-            <button
-              type="button"
-              onClick={() => setCatModalOpen(true)}
-              className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-lg bg-[#111419] border border-[#1E222A] text-xs text-[#F5F3EE] hover:border-[#D6B77A]/50 cursor-pointer"
-            >
-              <FolderPlus className="w-4 h-4 text-[#D6B77A]" />
-              <span>Manage Categories</span>
-            </button>
-            <button
-              type="button"
-              onClick={openCreateModal}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#D6B77A] text-[#08090B] text-xs font-semibold hover:bg-[#E2C68F] transition-colors cursor-pointer shadow-sm"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Write New Post</span>
-            </button>
-          </div>
-        )}
+        <div className="flex flex-wrap gap-2.5">
+          {canEdit && (
+            <>
+              <button
+                type="button"
+                onClick={() => setCatModalOpen(true)}
+                className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-lg bg-[#111419] border border-[#1E222A] text-xs text-[#F5F3EE] hover:border-[#D6B77A]/50 cursor-pointer"
+              >
+                <FolderPlus className="w-4 h-4 text-[#D6B77A]" />
+                <span>Manage Categories</span>
+              </button>
+              <button
+                type="button"
+                onClick={openCreateModal}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#D6B77A] text-[#08090B] text-xs font-semibold hover:bg-[#E2C68F] transition-colors cursor-pointer"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Write New Post</span>
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
-      {/* Top 4 KPI Cards */}
+      {/* 4 Honest Editorial KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="p-5 rounded-xl bg-[#111419] border border-[#1E222A] space-y-2">
           <div className="flex items-center gap-2.5 text-xs text-[#9CA3AF]">
@@ -466,36 +691,38 @@ export function AdminBlogClient() {
           <div className="font-heading font-bold text-3xl text-[#F5F3EE]">
             {loading ? "—" : stats.totalAll}
           </div>
-          <div className="text-[11px] text-[#777D87]">
+          <div className="text-xs text-[#777D87]">
             {stats.publishedCount} published · {stats.draftCount} drafts
           </div>
         </div>
 
         <div className="p-5 rounded-xl bg-[#111419] border border-[#1E222A] space-y-2">
           <div className="flex items-center gap-2.5 text-xs text-[#9CA3AF]">
-            <span className="p-2 rounded-lg bg-[#112419] border border-[#54C99A]/30 text-[#54C99A]">
-              <CheckCircle2 className="w-4 h-4" />
+            <span className="p-2 rounded-lg bg-[#112419] border border-[#73C794]/30 text-[#73C794]">
+              <Sparkles className="w-4 h-4" />
             </span>
-            <span>Published</span>
+            <span>Insights &amp; News</span>
           </div>
           <div className="font-heading font-bold text-3xl text-[#F5F3EE]">
-            {loading ? "—" : stats.publishedCount}
+            {loading ? "—" : stats.insightsCount + stats.announcementsCount}
           </div>
-          <div className="text-[11px] text-[#777D87]">Live studio articles</div>
+          <div className="text-xs text-[#777D87]">
+            {stats.insightsCount} insights · {stats.announcementsCount} announcements
+          </div>
         </div>
 
         <div className="p-5 rounded-xl bg-[#111419] border border-[#1E222A] space-y-2">
           <div className="flex items-center gap-2.5 text-xs text-[#9CA3AF]">
             <span className="p-2 rounded-lg bg-[#1D1629] border border-[#B5A0F5]/30 text-[#B5A0F5]">
-              <Edit3 className="w-4 h-4" />
+              <Clock className="w-4 h-4" />
             </span>
-            <span>Drafts &amp; Review</span>
+            <span>Scheduled &amp; Drafts</span>
           </div>
           <div className="font-heading font-bold text-3xl text-[#F5F3EE]">
             {loading ? "—" : stats.draftCount}
           </div>
-          <div className="text-[11px] text-[#777D87]">
-            {stats.archivedCount} archived
+          <div className="text-xs text-[#777D87]">
+            {stats.scheduledCount} scheduled · {stats.archivedCount} archived
           </div>
         </div>
 
@@ -509,68 +736,86 @@ export function AdminBlogClient() {
           <div className="font-heading font-bold text-3xl text-[#F5F3EE]">
             {loading ? "—" : stats.publishedLast30Count}
           </div>
-          <div className="text-[11px] text-[#777D87]">Rolling 30-day window</div>
+          <div className="text-xs text-[#777D87]">Rolling 30-day window</div>
         </div>
       </div>
 
-      {/* Status Tabs */}
-      <div className="flex items-center gap-6 border-b border-[#1E222A] overflow-x-auto">
-        {[
-          { key: "", label: "All Posts", count: stats.totalAll },
-          { key: "published", label: "Published", count: stats.publishedCount },
-          { key: "draft", label: "Drafts", count: stats.draftCount },
-          { key: "archived", label: "Archived", count: stats.archivedCount },
-        ].map((tab) => (
-          <button
-            key={tab.label}
-            type="button"
-            onClick={() => {
-              setStatusFilter(tab.key);
-              setPageNum(1);
-            }}
-            className={cn(
-              "pb-3 text-xs font-medium inline-flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap cursor-pointer",
-              statusFilter === tab.key && categoryFilter === ""
-                ? "border-[#D6B77A] text-[#F5F3EE]"
-                : "border-transparent text-[#8D939E] hover:text-white"
-            )}
-          >
-            <span>{tab.label}</span>
-            <span className="px-2 py-0.5 rounded-full bg-[#181C23] border border-[#252A32] text-[10px] font-mono text-[#B2B4BA]">
-              {tab.count}
-            </span>
-          </button>
-        ))}
+      {/* Content Tabs: All Posts | Published | Drafts | Scheduled | Insights | Announcements */}
+      <div className="border-b border-[#1E222A] flex items-center gap-5 overflow-x-auto">
+        {(
+          [
+            { key: "all", label: "All Posts", count: stats.totalAll },
+            { key: "published", label: "Published", count: stats.publishedCount },
+            { key: "draft", label: "Drafts", count: stats.draftCount },
+            { key: "scheduled", label: "Scheduled", count: stats.scheduledCount },
+            { key: "insight", label: "Insights", count: stats.insightsCount },
+            {
+              key: "announcement",
+              label: "Announcements",
+              count: stats.announcementsCount,
+            },
+          ] as const
+        ).map((tab) => {
+          const active = activeTab === tab.key;
+          return (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => {
+                setActiveTab(tab.key);
+                setPageNum(1);
+              }}
+              className={cn(
+                "pb-3 text-xs sm:text-sm font-medium inline-flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap cursor-pointer",
+                active
+                  ? "border-[#D6B77A] text-[#F5F3EE]"
+                  : "border-transparent text-[#8D939E] hover:text-[#F5F3EE]"
+              )}
+            >
+              <span>{tab.label}</span>
+              <span
+                className={cn(
+                  "px-2 py-0.5 rounded-full text-[11px] font-mono",
+                  active
+                    ? "bg-[#221E15] text-[#D6B77A]"
+                    : "bg-[#151820] text-[#777D87]"
+                )}
+              >
+                {tab.count}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {error && (
-        <div className="p-3.5 rounded-xl bg-[#2A1414] border border-[#F28B82]/40 text-xs text-[#F28B82]">
+        <div className="p-3 rounded-lg bg-[#F07878]/10 border border-[#F07878]/30 text-xs text-[#F07878]">
           {error}
         </div>
       )}
       {success && (
-        <div className="p-3.5 rounded-xl bg-[#13261C] border border-[#7CD69F]/40 text-xs text-[#7CD69F]">
+        <div className="p-3 rounded-lg bg-[#73C794]/10 border border-[#73C794]/30 text-xs text-[#73C794]">
           {success}
         </div>
       )}
 
-      {/* Main 12-Col Split Layout */}
+      {/* Main 12-Col Grid */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
-        {/* Left 8 Columns: Filter + Table/Grid */}
         <div className="xl:col-span-8 space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex flex-wrap items-center gap-2.5 flex-1 min-w-[240px]">
-              <div className="relative flex-1 max-w-xs min-w-[180px]">
+          {/* Toolbar */}
+          <div className="flex flex-wrap items-center gap-2.5 justify-between">
+            <div className="flex flex-wrap items-center gap-2.5 flex-1">
+              <div className="relative flex-1 min-w-[180px] max-w-xs">
                 <Search className="w-4 h-4 text-[#777D87] absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
-                  type="text"
+                  type="search"
                   value={query}
                   onChange={(e) => {
                     setQuery(e.target.value);
                     setPageNum(1);
                   }}
-                  placeholder="Search blog posts..."
-                  className="w-full h-10 pl-9 pr-3 rounded-lg bg-[#111419] border border-[#1E222A] text-sm text-[#F5F3EE] placeholder-[#6D7480] focus:outline-none focus:border-[#D6B77A]"
+                  placeholder="Search articles, subtitles, tags..."
+                  className="w-full h-9 pl-9 pr-3 rounded-lg bg-[#111419] border border-[#1E222A] text-xs text-[#F5F3EE] placeholder:text-[#6D7480] focus:outline-none focus:border-[#D6B77A]"
                 />
               </div>
 
@@ -580,13 +825,30 @@ export function AdminBlogClient() {
                   setCategoryFilter(e.target.value);
                   setPageNum(1);
                 }}
-                aria-label="Filter posts by category"
-                className="h-10 px-3 rounded-lg bg-[#111419] border border-[#1E222A] text-xs text-[#F5F3EE]"
+                aria-label="Filter by category"
+                className="h-9 px-3 rounded-lg bg-[#111419] border border-[#1E222A] text-xs text-[#B2B4BA]"
               >
                 <option value="">All Categories</option>
                 {stats.categories.map((cat) => (
                   <option key={cat.id} value={cat.slug}>
-                    {cat.name}
+                    {cat.name} ({cat.count})
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={tagFilter}
+                onChange={(e) => {
+                  setTagFilter(e.target.value);
+                  setPageNum(1);
+                }}
+                aria-label="Filter by tag"
+                className="h-9 px-3 rounded-lg bg-[#111419] border border-[#1E222A] text-xs text-[#B2B4BA]"
+              >
+                <option value="">All Tags</option>
+                {stats.allTags.map((tag) => (
+                  <option key={tag} value={tag}>
+                    #{tag}
                   </option>
                 ))}
               </select>
@@ -597,8 +859,8 @@ export function AdminBlogClient() {
                   setAuthorFilter(e.target.value);
                   setPageNum(1);
                 }}
-                aria-label="Filter posts by author"
-                className="h-10 px-3 rounded-lg bg-[#111419] border border-[#1E222A] text-xs text-[#F5F3EE]"
+                aria-label="Filter by author"
+                className="h-9 px-3 rounded-lg bg-[#111419] border border-[#1E222A] text-xs text-[#B2B4BA]"
               >
                 <option value="">All Authors</option>
                 {stats.authors.map((a) => (
@@ -609,365 +871,381 @@ export function AdminBlogClient() {
               </select>
             </div>
 
-            {/* Grid / List Toggle */}
-            <div className="inline-flex items-center p-1 rounded-lg bg-[#111419] border border-[#1E222A]">
+            <div className="inline-flex items-center p-0.5 rounded-lg bg-[#111419] border border-[#1E222A]">
               <button
                 type="button"
                 onClick={() => setViewMode("grid")}
-                aria-label="Grid view"
                 className={cn(
-                  "p-2 rounded-md transition-colors cursor-pointer",
+                  "p-1.5 rounded-md cursor-pointer",
                   viewMode === "grid"
                     ? "bg-[#D6B77A] text-[#08090B]"
-                    : "text-[#8D939E] hover:text-white"
+                    : "text-[#8D939E] hover:text-[#F5F3EE]"
                 )}
               >
-                <LayoutGrid className="w-4 h-4" />
+                <LayoutGrid className="w-3.5 h-3.5" />
               </button>
               <button
                 type="button"
                 onClick={() => setViewMode("list")}
-                aria-label="List view"
                 className={cn(
-                  "p-2 rounded-md transition-colors cursor-pointer",
+                  "p-1.5 rounded-md cursor-pointer",
                   viewMode === "list"
                     ? "bg-[#D6B77A] text-[#08090B]"
-                    : "text-[#8D939E] hover:text-white"
+                    : "text-[#8D939E] hover:text-[#F5F3EE]"
                 )}
               >
-                <List className="w-4 h-4" />
+                <List className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
 
+          {/* Posts Table / Grid */}
           {viewMode === "list" ? (
             <div className="rounded-xl bg-[#111419] border border-[#1E222A] overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="border-b border-[#1E222A] text-[11px] font-mono uppercase tracking-wider text-[#6D7480] bg-[#0B0D10]">
-                      <th className="py-3 pl-4 pr-2 w-10">
+                    <tr className="border-b border-[#1E222A] text-[10px] font-mono uppercase tracking-wider text-[#777D87] bg-[#0D0F12]">
+                      <th className="py-3 pl-4 pr-2 w-8">
                         <input
                           type="checkbox"
                           checked={
                             posts.length > 0 && selectedIds.length === posts.length
                           }
-                          onChange={toggleSelectAll}
+                          onChange={() =>
+                            setSelectedIds(
+                              selectedIds.length === posts.length
+                                ? []
+                                : posts.map((p) => p.id)
+                            )
+                          }
                           aria-label="Select all posts"
-                          className="rounded border-[#323946] bg-[#0B0D10]"
+                          className="accent-[#D6B77A]"
                         />
                       </th>
-                      <th className="py-3 px-3">Post</th>
-                      <th className="py-3 px-3">Category</th>
+                      <th className="py-3 px-3">Article</th>
+                      <th className="py-3 px-3">Type / Category</th>
+                      <th className="py-3 px-3">Author</th>
                       <th className="py-3 px-3">Status</th>
-                      <th className="py-3 px-3">Published</th>
+                      <th className="py-3 px-3">Date</th>
                       <th className="py-3 px-4 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#1E222A] text-sm">
+                  <tbody className="divide-y divide-[#1E222A] text-xs">
                     {loading ? (
                       <tr>
                         <td
-                          colSpan={6}
-                          className="p-10 text-center text-xs font-mono text-[#777D87]"
+                          colSpan={7}
+                          className="p-10 text-center text-[#777D87]"
                         >
+                          <Loader2 className="w-4 h-4 animate-spin inline mr-2 text-[#D6B77A]" />
                           Loading articles...
                         </td>
                       </tr>
                     ) : posts.length === 0 ? (
                       <tr>
                         <td
-                          colSpan={6}
-                          className="p-10 text-center text-xs text-[#777D87]"
+                          colSpan={7}
+                          className="p-10 text-center text-[#777D87]"
                         >
-                          No blog articles match your filters. Click Write New Post to author one.
+                          No articles match these filters.
                         </td>
                       </tr>
                     ) : (
-                      posts.map((post) => (
-                        <tr key={post.id} className="hover:bg-[#151920]">
-                          <td className="py-3.5 pl-4 pr-2">
-                            <input
-                              type="checkbox"
-                              checked={selectedIds.includes(post.id)}
-                              onChange={() => toggleRow(post.id)}
-                              aria-label={`Select ${post.title}`}
-                              className="rounded border-[#323946] bg-[#0B0D10]"
-                            />
-                          </td>
-                          <td className="py-3.5 px-3">
-                            <div className="flex items-center gap-3">
-                              {post.coverAssetUrl ? (
-                                /* eslint-disable-next-line @next/next/no-img-element */
-                                <img
-                                  src={post.coverAssetUrl}
-                                  alt={post.title}
-                                  className="w-12 h-9 rounded-lg object-cover border border-[#252A32] shrink-0"
-                                />
-                              ) : (
-                                <div className="w-12 h-9 rounded-lg bg-gradient-to-br from-[#231D13] via-[#15181F] to-[#0B0D10] border border-[#252A32] flex items-center justify-center shrink-0">
-                                  <FileText className="w-3.5 h-3.5 text-[#D6B77A]/70" />
-                                </div>
-                              )}
-                              <div className="min-w-0">
-                                <div className="font-semibold text-[#F5F3EE] truncate max-w-[230px]">
-                                  {post.title}
-                                </div>
-                                <div className="text-xs text-[#777D87] truncate max-w-[230px]">
-                                  {post.excerpt}
+                      posts.map((post) => {
+                        const isScheduled =
+                          post.status === "draft" && Boolean(post.scheduledFor);
+                        return (
+                          <tr key={post.id} className="hover:bg-[#151920]">
+                            <td className="py-3.5 pl-4 pr-2">
+                              <input
+                                type="checkbox"
+                                checked={selectedIds.includes(post.id)}
+                                onChange={() =>
+                                  setSelectedIds((prev) =>
+                                    prev.includes(post.id)
+                                      ? prev.filter((i) => i !== post.id)
+                                      : [...prev, post.id]
+                                  )
+                                }
+                                className="accent-[#D6B77A]"
+                              />
+                            </td>
+                            <td className="py-3.5 px-3">
+                              <div className="flex items-center gap-3">
+                                {post.coverAssetUrl ? (
+                                  /* eslint-disable-next-line @next/next/no-img-element */
+                                  <img
+                                    src={post.coverAssetUrl}
+                                    alt={post.title}
+                                    className="w-12 h-9 rounded-lg object-cover border border-[#252A32] shrink-0"
+                                  />
+                                ) : (
+                                  <div className="w-12 h-9 rounded-lg bg-[#0D0F12] border border-[#252A32] flex items-center justify-center shrink-0">
+                                    <FileText className="w-3.5 h-3.5 text-[#D6B77A]/70" />
+                                  </div>
+                                )}
+                                <div className="min-w-0">
+                                  <div className="font-semibold text-[#F5F3EE] truncate max-w-[210px] flex items-center gap-1.5">
+                                    <span>{post.title}</span>
+                                    {post.isFeatured && (
+                                      <Sparkles className="w-3 h-3 text-[#D6B77A] shrink-0" />
+                                    )}
+                                  </div>
+                                  <div className="text-[11px] text-[#777D87] truncate max-w-[210px]">
+                                    {post.subtitle || post.excerpt}
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          </td>
-                          <td className="py-3.5 px-3">
-                            {post.categories.length > 0 ? (
-                              <span className="inline-block px-2.5 py-1 rounded-md bg-[#161920] border border-[#252A32] text-[11px] text-[#B2B4BA] whitespace-nowrap">
-                                {post.categories[0].name}
+                            </td>
+                            <td className="py-3.5 px-3 space-y-1">
+                              <span className="inline-block px-2 py-0.5 rounded bg-[#0D0F12] border border-[#252A32] text-[10px] font-mono uppercase text-[#B2B4BA]">
+                                {post.contentType}
                               </span>
-                            ) : (
-                              <span className="text-xs text-[#6D7480]">—</span>
-                            )}
-                          </td>
-                          <td className="py-3.5 px-3">
-                            <span
-                              className={cn(
-                                "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border whitespace-nowrap",
-                                post.status === "published"
-                                  ? "bg-[#54C99A]/12 text-[#7CD69F] border-[#54C99A]/30"
-                                  : post.status === "draft"
-                                    ? "bg-[#D6B77A]/12 text-[#D6B77A] border-[#D6B77A]/30"
-                                    : "bg-[#181C24] text-[#9CA3AF] border-[#252A32]"
+                              {post.categories[0] && (
+                                <div className="text-[11px] text-[#777D87]">
+                                  {post.categories[0].name}
+                                </div>
                               )}
-                            >
+                            </td>
+                            <td className="py-3.5 px-3 text-[#B2B4BA] whitespace-nowrap">
+                              {post.authorName || "Studio Team"}
+                            </td>
+                            <td className="py-3.5 px-3 whitespace-nowrap">
                               <span
                                 className={cn(
-                                  "w-1.5 h-1.5 rounded-full",
+                                  "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] border",
                                   post.status === "published"
-                                    ? "bg-[#7CD69F]"
-                                    : post.status === "draft"
-                                      ? "bg-[#D6B77A]"
-                                      : "bg-[#9CA3AF]"
+                                    ? "bg-[#73C794]/12 text-[#73C794] border-[#73C794]/30"
+                                    : isScheduled
+                                      ? "bg-[#7BA9F5]/12 text-[#7BA9F5] border-[#7BA9F5]/30"
+                                      : "bg-[#D6B77A]/12 text-[#D6B77A] border-[#D6B77A]/30"
                                 )}
-                              />
-                              <span className="capitalize">{post.status}</span>
-                            </span>
-                          </td>
-                          <td className="py-3.5 px-3 text-xs text-[#8D939E] whitespace-nowrap">
-                            {formatDate(post.publishedAt)}
-                          </td>
-                          <td className="py-3.5 px-4 text-right relative">
-                            <div className="inline-flex items-center gap-1">
-                              {canEdit && (
-                                <button
-                                  type="button"
-                                  onClick={async () => {
-                                    const mapped = await fetchPostById(post.id);
-                                    setForm(mapped);
-                                    setEditorOpen(true);
-                                  }}
-                                  aria-label={`Edit ${post.title}`}
-                                  className="p-1.5 rounded-md text-[#8D939E] hover:text-[#D6B77A] hover:bg-[#191D24] cursor-pointer"
-                                >
-                                  <Edit3 className="w-4 h-4" />
-                                </button>
-                              )}
-                              <button
-                                type="button"
-                                onClick={async () => {
-                                  const mapped = await fetchPostById(post.id);
-                                  setPreviewPost(mapped);
-                                }}
-                                aria-label={`Preview ${post.title}`}
-                                className="p-1.5 rounded-md text-[#8D939E] hover:text-white hover:bg-[#191D24] cursor-pointer"
                               >
-                                <ExternalLink className="w-4 h-4" />
-                              </button>
-                              {canEdit && (
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    setOpenMenuId(
-                                      openMenuId === post.id ? null : post.id
-                                    )
-                                  }
-                                  aria-label={`More options for ${post.title}`}
-                                  className="p-1.5 rounded-md text-[#8D939E] hover:text-white hover:bg-[#191D24] cursor-pointer"
-                                >
-                                  <MoreHorizontal className="w-4 h-4" />
-                                </button>
-                              )}
-                            </div>
-
-                            {openMenuId === post.id && (
-                              <div className="absolute right-4 top-12 z-30 w-40 py-1.5 rounded-xl bg-[#14181F] border border-[#252A32] shadow-2xl text-left text-xs">
+                                <span className="capitalize">
+                                  {isScheduled ? "Scheduled" : post.status}
+                                </span>
+                              </span>
+                            </td>
+                            <td className="py-3.5 px-3 text-[#8D939E] whitespace-nowrap">
+                              {isScheduled
+                                ? formatDate(post.scheduledFor)
+                                : formatDate(post.publishedAt ?? post.updatedAt)}
+                            </td>
+                            <td className="py-3.5 px-4 text-right relative">
+                              <div className="inline-flex items-center gap-1">
+                                {canEdit && (
+                                  <button
+                                    type="button"
+                                    onClick={async () => {
+                                      const mapped = await fetchPostById(post.id);
+                                      setForm(mapped);
+                                      setEditorMode("split");
+                                      setEditorOpen(true);
+                                    }}
+                                    aria-label={`Edit ${post.title}`}
+                                    className="p-1.5 rounded-md text-[#8D939E] hover:text-[#D6B77A] hover:bg-[#191D24] cursor-pointer"
+                                  >
+                                    <Edit3 className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
                                 <button
                                   type="button"
                                   onClick={async () => {
-                                    setOpenMenuId(null);
                                     const mapped = await fetchPostById(post.id);
                                     setPreviewPost(mapped);
                                   }}
-                                  className="w-full px-3.5 py-2 text-[#F5F3EE] hover:bg-[#1C212B] flex items-center gap-2 cursor-pointer"
+                                  aria-label={`Preview ${post.title}`}
+                                  className="p-1.5 rounded-md text-[#8D939E] hover:text-white hover:bg-[#191D24] cursor-pointer"
                                 >
                                   <Eye className="w-3.5 h-3.5" />
-                                  <span>Preview</span>
                                 </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handleDelete(post)}
-                                  className="w-full px-3.5 py-2 text-[#F28B82] hover:bg-[#2A1414] flex items-center gap-2 cursor-pointer"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                  <span>Delete Post</span>
-                                </button>
+                                {canEdit && (
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setOpenMenuId(
+                                        openMenuId === post.id ? null : post.id
+                                      )
+                                    }
+                                    className="p-1.5 rounded-md text-[#8D939E] hover:text-white cursor-pointer"
+                                  >
+                                    <MoreHorizontal className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
                               </div>
-                            )}
-                          </td>
-                        </tr>
-                      ))
+                              {openMenuId === post.id && (
+                                <div className="absolute right-4 top-10 z-20 w-40 rounded-xl bg-[#161A22] border border-[#252A32] shadow-xl py-1 text-left text-xs">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDelete(post)}
+                                    className="w-full px-3 py-2 text-[#F07878] hover:bg-[#1D222B] flex items-center gap-2 cursor-pointer"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                    <span>Delete</span>
+                                  </button>
+                                </div>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })
                     )}
                   </tbody>
                 </table>
               </div>
-
-              {/* Pagination Footer */}
-              <div className="px-4 py-3 border-t border-[#1E222A] bg-[#0B0D10] flex flex-wrap items-center justify-between gap-4 text-xs text-[#8D939E]">
-                <div>
-                  Showing {startIdx}–{endIdx} of {totalFiltered} posts
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <label className="inline-flex items-center gap-2">
-                    <span>Rows per page</span>
-                    <select
-                      value={rowsPerPage}
-                      onChange={(e) => {
-                        setRowsPerPage(Number(e.target.value));
-                        setPageNum(1);
-                      }}
-                      className="h-8 px-2 rounded bg-[#111419] border border-[#1E222A] text-xs text-[#F5F3EE]"
-                    >
-                      <option value={6}>6</option>
-                      <option value={10}>10</option>
-                      <option value={20}>20</option>
-                    </select>
-                  </label>
-
-                  <div className="inline-flex items-center gap-1">
-                    <button
-                      type="button"
-                      disabled={pageNum <= 1}
-                      onClick={() => setPageNum((p) => Math.max(1, p - 1))}
-                      className="w-8 h-8 rounded-md bg-[#111419] border border-[#1E222A] flex items-center justify-center disabled:opacity-40 cursor-pointer"
-                    >
-                      <ChevronLeft className="w-3.5 h-3.5" />
-                    </button>
-                    <span className="w-8 h-8 rounded-md bg-[#D6B77A] text-[#08090B] font-semibold flex items-center justify-center">
-                      {pageNum}
-                    </span>
-                    <button
-                      type="button"
-                      disabled={pageNum >= totalPages}
-                      onClick={() =>
-                        setPageNum((p) => Math.min(totalPages, p + 1))
-                      }
-                      className="w-8 h-8 rounded-md bg-[#111419] border border-[#1E222A] flex items-center justify-center disabled:opacity-40 cursor-pointer"
-                    >
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-              </div>
             </div>
           ) : (
-            /* Grid View */
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {posts.map((post) => (
-                <article
+                <div
                   key={post.id}
-                  className="p-4 rounded-xl bg-[#111419] border border-[#1E222A] hover:border-[#D6B77A]/40 transition-colors space-y-3"
+                  className="rounded-xl bg-[#111419] border border-[#1E222A] overflow-hidden flex flex-col justify-between"
                 >
-                  {post.coverAssetUrl ? (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img
-                      src={post.coverAssetUrl}
-                      alt={post.title}
-                      className="w-full aspect-video rounded-lg object-cover border border-[#252A32]"
-                    />
-                  ) : (
-                    <div className="w-full aspect-video rounded-lg bg-gradient-to-br from-[#231D13] via-[#15181F] to-[#0B0D10] border border-[#252A32] flex items-center justify-center">
-                      <FileText className="w-6 h-6 text-[#D6B77A]/60" />
+                  <div>
+                    <div className="aspect-[16/9] bg-[#0B0D10] relative">
+                      {post.coverAssetUrl ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img
+                          src={post.coverAssetUrl}
+                          alt={post.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <FileText className="w-6 h-6 text-[#D6B77A]/50" />
+                        </div>
+                      )}
+                      <span className="absolute top-3 left-3 px-2 py-0.5 rounded bg-black/75 border border-white/15 text-[10px] font-mono uppercase text-[#D6B77A]">
+                        {post.contentType}
+                      </span>
                     </div>
-                  )}
-                  <div className="space-y-1">
-                    <div className="text-sm font-semibold text-[#F5F3EE]">
-                      {post.title}
-                    </div>
-                    <div className="text-xs text-[#777D87] line-clamp-2">
-                      {post.excerpt}
+                    <div className="p-4 space-y-1.5">
+                      <h3 className="font-heading font-semibold text-sm text-[#F5F3EE]">
+                        {post.title}
+                      </h3>
+                      <p className="text-xs text-[#777D87] line-clamp-2">
+                        {post.subtitle || post.excerpt}
+                      </p>
                     </div>
                   </div>
-                  <div className="pt-2 border-t border-[#1E222A] flex items-center justify-between text-xs">
-                    <span className="capitalize text-[#D6B77A] font-mono">
-                      {post.status}
-                    </span>
-                    {canEdit && (
+                  <div className="px-4 py-3 border-t border-[#1E222A] flex items-center justify-between text-xs text-[#8D939E]">
+                    <span>{formatDate(post.publishedAt ?? post.updatedAt)}</span>
+                    <div className="flex gap-2">
+                      {canEdit && (
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            const mapped = await fetchPostById(post.id);
+                            setForm(mapped);
+                            setEditorMode("split");
+                            setEditorOpen(true);
+                          }}
+                          className="text-[#D6B77A] hover:underline cursor-pointer"
+                        >
+                          Edit
+                        </button>
+                      )}
                       <button
                         type="button"
                         onClick={async () => {
                           const mapped = await fetchPostById(post.id);
-                          setForm(mapped);
-                          setEditorOpen(true);
+                          setPreviewPost(mapped);
                         }}
                         className="text-[#B2B4BA] hover:text-white cursor-pointer"
                       >
-                        Edit
+                        Preview
                       </button>
-                    )}
+                    </div>
                   </div>
-                </article>
+                </div>
               ))}
             </div>
           )}
+
+          {/* Pagination */}
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-1 text-xs text-[#8D939E]">
+            <span>
+              Showing {startIdx}–{endIdx} of {totalFiltered} posts
+            </span>
+            <div className="flex items-center gap-3">
+              <select
+                value={rowsPerPage}
+                onChange={(e) => {
+                  setRowsPerPage(Number(e.target.value));
+                  setPageNum(1);
+                }}
+                className="h-8 px-2 rounded-md bg-[#111419] border border-[#1E222A] text-xs text-[#F5F3EE]"
+              >
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+              </select>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  disabled={pageNum <= 1}
+                  onClick={() => setPageNum((p) => Math.max(1, p - 1))}
+                  className="p-1.5 rounded-md border border-[#1E222A] disabled:opacity-40 cursor-pointer"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                </button>
+                <span className="px-2.5 py-1 rounded bg-[#D6B77A] text-[#17130B] font-semibold">
+                  {pageNum}
+                </span>
+                <span className="px-1 text-[#777D87]">/ {totalPages}</span>
+                <button
+                  type="button"
+                  disabled={pageNum >= totalPages}
+                  onClick={() => setPageNum((p) => Math.min(totalPages, p + 1))}
+                  className="p-1.5 rounded-md border border-[#1E222A] disabled:opacity-40 cursor-pointer"
+                >
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Right 4 Columns: Insights, Categories, Recent Drafts */}
+        {/* Right Editorial Sidebar */}
         <aside className="xl:col-span-4 space-y-5">
-          {/* Card 1: Recent Published Highlights */}
-          <section className="p-5 rounded-xl bg-[#111419] border border-[#1E222A] space-y-4">
+          {/* Top Insights */}
+          <section className="rounded-xl bg-[#111419] border border-[#1E222A] p-5 space-y-3.5">
             <div className="flex items-center justify-between">
               <h2 className="font-heading font-semibold text-sm text-[#F5F3EE]">
-                Recent Published
+                Top Insights
               </h2>
               <TrendingUp className="w-4 h-4 text-[#D6B77A]" />
             </div>
 
-            {stats.recentPublished.length === 0 ? (
+            {stats.topInsights.length === 0 ? (
               <p className="text-xs text-[#777D87]">
-                No published insights yet.
+                Publish or feature articles to highlight Top Insights.
               </p>
             ) : (
               <div className="space-y-3">
-                {stats.recentPublished.map((item) => (
+                {stats.topInsights.map((item) => (
                   <button
                     key={item.id}
                     type="button"
                     onClick={async () => {
                       const mapped = await fetchPostById(item.id);
-                      setPreviewPost(mapped);
+                      setForm(mapped);
+                      setEditorMode("split");
+                      setEditorOpen(true);
                     }}
-                    className="w-full text-left flex items-center justify-between gap-3 p-2 -mx-2 rounded-lg hover:bg-[#161920] transition-colors cursor-pointer"
+                    className="w-full text-left flex items-start justify-between gap-3 group cursor-pointer"
                   >
                     <div className="min-w-0">
-                      <div className="text-xs font-medium text-[#F5F3EE] truncate">
+                      <span className="text-[10px] font-mono uppercase text-[#D6B77A] flex items-center gap-1">
+                        {item.isFeatured && <Sparkles className="w-3 h-3" />}
+                        <span>{item.contentType}</span>
+                      </span>
+                      <div className="text-xs font-medium text-[#F5F3EE] group-hover:text-[#D6B77A] truncate mt-0.5">
                         {item.title}
                       </div>
-                      <div className="text-[11px] font-mono text-[#777D87] truncate">
-                        /{item.slug}
-                      </div>
                     </div>
-                    <span className="text-[11px] text-[#D6B77A] shrink-0">
-                      {formatDate(item.publishedAt || item.updatedAt)}
+                    <span className="text-[11px] text-[#777D87] shrink-0 mt-3">
+                      {formatDate(item.publishedAt ?? item.updatedAt)}
                     </span>
                   </button>
                 ))}
@@ -975,8 +1253,8 @@ export function AdminBlogClient() {
             )}
           </section>
 
-          {/* Card 2: Categories */}
-          <section className="p-5 rounded-xl bg-[#111419] border border-[#1E222A] space-y-4">
+          {/* Categories */}
+          <section className="rounded-xl bg-[#111419] border border-[#1E222A] p-5 space-y-3.5">
             <div className="flex items-center justify-between">
               <h2 className="font-heading font-semibold text-sm text-[#F5F3EE]">
                 Categories ({stats.categories.length})
@@ -987,27 +1265,26 @@ export function AdminBlogClient() {
                   onClick={() => setCatModalOpen(true)}
                   className="text-xs text-[#D6B77A] hover:underline cursor-pointer"
                 >
-                  + Add
+                  + Manage
                 </button>
               )}
             </div>
 
-            <div className="space-y-2.5">
+            <div className="space-y-2">
               {stats.categories.map((cat, idx) => (
                 <button
                   key={cat.id}
                   type="button"
-                  onClick={() => {
-                    setCategoryFilter(
-                      categoryFilter === cat.slug ? "" : cat.slug
-                    );
-                    setPageNum(1);
-                  }}
+                  onClick={() =>
+                    setCategoryFilter((prev) =>
+                      prev === cat.slug ? "" : cat.slug
+                    )
+                  }
                   className={cn(
-                    "w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-colors cursor-pointer",
+                    "w-full flex items-center justify-between text-xs py-1.5 px-2 rounded-lg transition-colors cursor-pointer",
                     categoryFilter === cat.slug
-                      ? "bg-[#D6B77A]/15 text-[#F5E7C8]"
-                      : "text-[#B2B4BA] hover:bg-[#161920] hover:text-white"
+                      ? "bg-[#221E15] text-[#D6B77A]"
+                      : "text-[#B2B4BA] hover:bg-[#161920]"
                   )}
                 >
                   <span className="flex items-center gap-2.5">
@@ -1019,27 +1296,21 @@ export function AdminBlogClient() {
                     />
                     <span>{cat.name}</span>
                   </span>
-                  <span className="px-2 py-0.5 rounded bg-[#181C23] border border-[#252A32] font-mono text-[10px] text-[#9CA3AF]">
-                    {cat.count}
-                  </span>
+                  <span className="text-[#777D87]">{cat.count}</span>
                 </button>
               ))}
             </div>
           </section>
 
-          {/* Card 3: Recent Drafts */}
-          <section className="p-5 rounded-xl bg-[#111419] border border-[#1E222A] space-y-4">
+          {/* Recent Drafts */}
+          <section className="rounded-xl bg-[#111419] border border-[#1E222A] p-5 space-y-3.5">
             <div className="flex items-center justify-between">
               <h2 className="font-heading font-semibold text-sm text-[#F5F3EE]">
                 Recent Drafts
               </h2>
               <button
                 type="button"
-                onClick={() => {
-                  setStatusFilter("draft");
-                  setCategoryFilter("");
-                  setPageNum(1);
-                }}
+                onClick={() => setActiveTab("draft")}
                 className="text-xs text-[#D6B77A] hover:underline cursor-pointer"
               >
                 View all →
@@ -1047,7 +1318,7 @@ export function AdminBlogClient() {
             </div>
 
             {stats.recentDrafts.length === 0 ? (
-              <p className="text-xs text-[#777D87]">No active drafts.</p>
+              <p className="text-xs text-[#777D87]">No unfinished drafts.</p>
             ) : (
               <div className="space-y-3">
                 {stats.recentDrafts.map((draft) => (
@@ -1057,6 +1328,7 @@ export function AdminBlogClient() {
                     onClick={async () => {
                       const mapped = await fetchPostById(draft.id);
                       setForm(mapped);
+                      setEditorMode("split");
                       setEditorOpen(true);
                     }}
                     className="w-full text-left flex items-center justify-between gap-3 p-2 -mx-2 rounded-lg hover:bg-[#161920] transition-colors cursor-pointer"
@@ -1070,7 +1342,7 @@ export function AdminBlogClient() {
                           className="w-11 h-8 rounded object-cover border border-[#252A32] shrink-0"
                         />
                       ) : (
-                        <div className="w-11 h-8 rounded bg-gradient-to-br from-[#231D13] to-[#0B0D10] border border-[#252A32] flex items-center justify-center shrink-0">
+                        <div className="w-11 h-8 rounded bg-[#0D0F12] border border-[#252A32] flex items-center justify-center shrink-0">
                           <Edit3 className="w-3.5 h-3.5 text-[#D6B77A]/70" />
                         </div>
                       )}
@@ -1079,7 +1351,9 @@ export function AdminBlogClient() {
                           {draft.title}
                         </div>
                         <div className="text-[11px] text-[#777D87]">
-                          Edited {formatDate(draft.updatedAt)}
+                          {draft.scheduledFor
+                            ? `Scheduled ${formatDate(draft.scheduledFor)}`
+                            : `Edited ${formatDate(draft.updatedAt)}`}
                         </div>
                       </div>
                     </div>
@@ -1092,32 +1366,85 @@ export function AdminBlogClient() {
         </aside>
       </div>
 
-      {/* Write / Edit Post Modal */}
+      {/* Dedicated Editorial Writing Workspace Modal */}
       {editorOpen && form && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-3xl max-h-[90vh] flex flex-col rounded-2xl bg-[#12151A] border border-[#252A32] overflow-hidden">
-            <div className="px-6 py-4 border-b border-[#252A32] flex items-center justify-between">
-              <h2 className="font-heading font-semibold text-base">
-                {form.id ? "Edit Blog Post" : "Write New Post"}
-              </h2>
-              <button
-                type="button"
-                onClick={() => setEditorOpen(false)}
-                className="text-[#777D87] hover:text-white cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5">
+          <div className="w-full max-w-6xl h-[92vh] flex flex-col rounded-2xl bg-[#12151A] border border-[#252A32] overflow-hidden shadow-2xl">
+            {/* Top Bar */}
+            <div className="px-5 py-3.5 border-b border-[#252A32] flex flex-wrap items-center justify-between gap-3 bg-[#0D0F12]">
+              <div className="flex items-center gap-3">
+                <span className="font-heading font-semibold text-sm text-[#F5F3EE]">
+                  {form.id ? "Editorial Studio · Editing" : "Editorial Studio · New Article"}
+                </span>
+                <div className="inline-flex p-0.5 rounded-lg bg-[#12151A] border border-[#252A32] text-xs">
+                  {(["write", "split", "preview"] as const).map((mode) => (
+                    <button
+                      key={mode}
+                      type="button"
+                      onClick={() => setEditorMode(mode)}
+                      className={cn(
+                        "px-2.5 py-1 rounded-md capitalize cursor-pointer",
+                        editorMode === mode
+                          ? "bg-[#D6B77A] text-[#17130B] font-semibold"
+                          : "text-[#8F96A3] hover:text-[#F5F3EE]"
+                      )}
+                    >
+                      {mode}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  disabled={saving}
+                  onClick={(e) => handleSave(e, "draft")}
+                  className="px-3 py-1.5 rounded-lg bg-[#191D23] border border-[#252A32] hover:border-[#3A414B] text-xs text-[#F5F3EE] cursor-pointer disabled:opacity-50"
+                >
+                  Save Draft
+                </button>
+                <button
+                  type="button"
+                  disabled={saving}
+                  onClick={(e) => handleSave(e, "published")}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#D6B77A] hover:bg-[#E2C58B] text-xs font-semibold text-[#17130B] cursor-pointer disabled:opacity-50"
+                >
+                  {saving ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                  )}
+                  <span>Publish Now</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditorOpen(false)}
+                  className="p-1.5 rounded-lg text-[#777D87] hover:text-white cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
             </div>
 
+            {/* Body Split */}
             <form
-              onSubmit={handleSave}
-              className="flex-1 overflow-y-auto p-6 space-y-4"
+              onSubmit={(e) => handleSave(e)}
+              className="flex-1 overflow-y-auto grid grid-cols-1 lg:grid-cols-12"
             >
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-mono text-[#B2B4BA]">
-                    Title *
-                  </label>
+              {/* Left Writing Column */}
+              <div
+                className={cn(
+                  "p-6 space-y-5 overflow-y-auto",
+                  editorMode === "write"
+                    ? "lg:col-span-8"
+                    : editorMode === "split"
+                      ? "lg:col-span-6 border-r border-[#252A32]"
+                      : "hidden"
+                )}
+              >
+                {/* Title & Subtitle */}
+                <div className="space-y-3">
                   <input
                     type="text"
                     required
@@ -1130,291 +1457,432 @@ export function AdminBlogClient() {
                         slug: form.id ? form.slug : slugify(next),
                       });
                     }}
-                    className="w-full h-10 px-3 rounded-lg bg-[#0D0F12] border border-[#252A32] text-sm text-[#F5F3EE]"
+                    placeholder="Article headline..."
+                    className="w-full bg-transparent text-2xl font-heading font-bold text-[#F5F3EE] placeholder:text-[#555C66] focus:outline-none"
                   />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-mono text-[#B2B4BA]">
-                    URL Slug *
-                  </label>
                   <input
                     type="text"
-                    required
-                    value={form.slug}
-                    onChange={(e) =>
-                      setForm({ ...form, slug: slugify(e.target.value) })
-                    }
-                    className="w-full h-10 px-3 rounded-lg bg-[#0D0F12] border border-[#252A32] text-sm font-mono text-[#F5F3EE]"
+                    value={form.subtitle}
+                    onChange={(e) => setForm({ ...form, subtitle: e.target.value })}
+                    placeholder="Editorial subtitle or deck (optional)..."
+                    className="w-full bg-transparent text-sm text-[#B2B4BA] placeholder:text-[#555C66] focus:outline-none border-b border-[#252A32] pb-3"
                   />
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-mono text-[#B2B4BA]">
-                    Status
-                  </label>
-                  <select
-                    value={form.status}
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        status: e.target.value as BlogFormState["status"],
-                      })
-                    }
-                    className="w-full h-10 px-3 rounded-lg bg-[#0D0F12] border border-[#252A32] text-sm text-[#F5F3EE]"
-                  >
-                    <option value="draft">Draft</option>
-                    <option value="published">Published</option>
-                    <option value="archived">Archived</option>
-                  </select>
-                </div>
-
-                <div className="flex items-center gap-2">
+                {/* Rich-Text / Content Block Toolbar */}
+                <div className="p-1.5 rounded-xl bg-[#0D0F12] border border-[#252A32] flex flex-wrap items-center gap-1">
                   <button
                     type="button"
-                    onClick={() => setPickerOpen(true)}
-                    className="inline-flex items-center gap-1.5 px-3 h-10 rounded-lg bg-[#191D23] border border-[#252A32] text-xs cursor-pointer"
+                    onClick={() => insertFormatting("## ", "", "Section Heading")}
+                    title="Heading 2"
+                    className="p-1.5 rounded-md text-[#B2B4BA] hover:text-[#F5F3EE] hover:bg-[#191D23] cursor-pointer"
+                  >
+                    <Heading2 className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => insertFormatting("### ", "", "Subheading")}
+                    title="Heading 3"
+                    className="p-1.5 rounded-md text-[#B2B4BA] hover:text-[#F5F3EE] hover:bg-[#191D23] cursor-pointer"
+                  >
+                    <Heading3 className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => insertFormatting("**", "**", "bold text")}
+                    title="Bold"
+                    className="p-1.5 rounded-md text-[#B2B4BA] hover:text-[#F5F3EE] hover:bg-[#191D23] cursor-pointer"
+                  >
+                    <Bold className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => insertFormatting("*", "*", "italic text")}
+                    title="Italic"
+                    className="p-1.5 rounded-md text-[#B2B4BA] hover:text-[#F5F3EE] hover:bg-[#191D23] cursor-pointer"
+                  >
+                    <Italic className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => insertFormatting("- ", "", "Bullet point")}
+                    title="Bullet List"
+                    className="p-1.5 rounded-md text-[#B2B4BA] hover:text-[#F5F3EE] hover:bg-[#191D23] cursor-pointer"
+                  >
+                    <List className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => insertFormatting("1. ", "", "Numbered item")}
+                    title="Numbered List"
+                    className="p-1.5 rounded-md text-[#B2B4BA] hover:text-[#F5F3EE] hover:bg-[#191D23] cursor-pointer"
+                  >
+                    <ListOrdered className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => insertFormatting("> ", "", "Editorial quotation")}
+                    title="Quotation"
+                    className="p-1.5 rounded-md text-[#B2B4BA] hover:text-[#F5F3EE] hover:bg-[#191D23] cursor-pointer"
+                  >
+                    <Quote className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => insertFormatting("[", "](https://)", "link label")}
+                    title="Insert Link"
+                    className="p-1.5 rounded-md text-[#B2B4BA] hover:text-[#F5F3EE] hover:bg-[#191D23] cursor-pointer"
+                  >
+                    <Link2 className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => insertFormatting("```\n", "\n```", "code snippet")}
+                    title="Code Block"
+                    className="p-1.5 rounded-md text-[#B2B4BA] hover:text-[#F5F3EE] hover:bg-[#191D23] cursor-pointer"
+                  >
+                    <Code className="w-4 h-4" />
+                  </button>
+                  <span className="h-4 w-px bg-[#252A32] mx-1" />
+                  <button
+                    type="button"
+                    onClick={() => setPickerTarget("inline")}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#191D23] border border-[#252A32] hover:border-[#D6B77A] text-xs text-[#D6B77A] cursor-pointer"
                   >
                     <ImageIcon className="w-3.5 h-3.5" />
-                    <span>
-                      {form.coverAssetUrl ? "Change Cover" : "Select Cover Image"}
-                    </span>
+                    <span>Insert Image</span>
                   </button>
-                  {form.coverAssetId && (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setForm({
-                          ...form,
-                          coverAssetId: null,
-                          coverAssetUrl: null,
-                        })
-                      }
-                      className="text-xs text-[#F28B82] cursor-pointer"
-                    >
-                      Clear
-                    </button>
-                  )}
                 </div>
-              </div>
 
-              {/* Categories Selection */}
-              {stats.categories.length > 0 && (
-                <div className="space-y-1.5">
-                  <label className="text-xs font-mono text-[#B2B4BA]">
-                    Categories
-                  </label>
-                  <div className="flex flex-wrap gap-2 p-3 rounded-lg bg-[#0D0F12] border border-[#252A32]">
-                    {stats.categories.map((cat) => {
-                      const checked = form.categoryIds.includes(cat.id);
-                      return (
-                        <label
-                          key={cat.id}
-                          className={cn(
-                            "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-xs cursor-pointer",
-                            checked
-                              ? "bg-[#D6B77A]/15 border-[#D6B77A]/50 text-[#F5E7C8]"
-                              : "bg-[#12151A] border-[#252A32] text-[#9CA3AF]"
-                          )}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={checked}
-                            onChange={(e) => {
-                              const nextIds = e.target.checked
-                                ? [...form.categoryIds, cat.id]
-                                : form.categoryIds.filter((id) => id !== cat.id);
-                              setForm({ ...form, categoryIds: nextIds });
-                            }}
-                            className="sr-only"
-                          />
-                          <span>{cat.name}</span>
-                        </label>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-mono text-[#B2B4BA]">
-                  Excerpt *
-                </label>
+                {/* Body */}
                 <textarea
-                  rows={2}
-                  required
-                  value={form.excerpt}
-                  onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
-                  className="w-full p-3 rounded-lg bg-[#0D0F12] border border-[#252A32] text-sm text-[#F5F3EE]"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-mono text-[#B2B4BA]">
-                  Body (Markdown) *
-                </label>
-                <textarea
-                  rows={8}
+                  ref={bodyTextareaRef}
+                  rows={16}
                   required
                   value={form.bodyMarkdown}
                   onChange={(e) =>
                     setForm({ ...form, bodyMarkdown: e.target.value })
                   }
-                  className="w-full p-3 rounded-lg bg-[#0D0F12] border border-[#252A32] text-sm font-mono text-[#F5F3EE]"
+                  placeholder="Write your article in Markdown... Use the toolbar above for headings, lists, quotes, links, and inline images."
+                  className="w-full rounded-xl bg-[#0D0F12] border border-[#252A32] p-4 text-sm text-[#F5F3EE] leading-relaxed font-mono focus:outline-none focus:border-[#D6B77A]"
                 />
               </div>
 
-              <div className="p-4 rounded-xl bg-[#0D0F12] border border-[#252A32] space-y-3">
-                <div className="text-xs font-mono uppercase text-[#D6B77A]">
-                  SEO &amp; Canonical
-                </div>
-                <input
-                  type="text"
-                  value={form.seoTitle}
-                  onChange={(e) =>
-                    setForm({ ...form, seoTitle: e.target.value })
-                  }
-                  placeholder="SEO Title"
-                  className="w-full h-9 px-3 rounded-lg bg-[#12151A] border border-[#252A32] text-xs text-[#F5F3EE]"
-                />
-                <input
-                  type="text"
-                  value={form.canonicalUrl}
-                  onChange={(e) =>
-                    setForm({ ...form, canonicalUrl: e.target.value })
-                  }
-                  placeholder="Canonical URL (optional)"
-                  className="w-full h-9 px-3 rounded-lg bg-[#12151A] border border-[#252A32] text-xs text-[#F5F3EE]"
-                />
-                <textarea
-                  rows={2}
-                  value={form.seoDescription}
-                  onChange={(e) =>
-                    setForm({ ...form, seoDescription: e.target.value })
-                  }
-                  placeholder="SEO Meta Description"
-                  className="w-full p-2.5 rounded-lg bg-[#12151A] border border-[#252A32] text-xs text-[#F5F3EE]"
-                />
-              </div>
-
-              <div className="flex justify-end gap-3 pt-2 border-t border-[#252A32]">
-                <button
-                  type="button"
-                  onClick={() => setEditorOpen(false)}
-                  className="px-4 py-2 text-xs text-[#B2B4BA] cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-[#D6B77A] text-[#08090B] text-xs font-semibold cursor-pointer"
-                >
-                  {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                  <span>
-                    {form.id ? "Save Article" : "Save / Publish Post"}
-                  </span>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Manage Categories Modal */}
-      {catModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4">
-          <div className="w-full max-w-md rounded-2xl bg-[#12151A] border border-[#252A32] p-6 space-y-5">
-            <div className="flex items-center justify-between">
-              <h2 className="font-heading font-semibold text-base text-[#F5F3EE]">
-                Manage Blog Categories
-              </h2>
-              <button
-                type="button"
-                onClick={() => setCatModalOpen(false)}
-                className="text-[#777D87] hover:text-white cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleCreateCategory} className="space-y-3">
-              <div className="grid grid-cols-2 gap-2.5">
-                <input
-                  type="text"
-                  required
-                  value={newCatName}
-                  onChange={(e) => {
-                    setNewCatName(e.target.value);
-                    setNewCatSlug(slugify(e.target.value));
-                  }}
-                  placeholder="Category Name"
-                  className="h-9 px-3 rounded-lg bg-[#0D0F12] border border-[#252A32] text-xs text-[#F5F3EE]"
-                />
-                <input
-                  type="text"
-                  required
-                  value={newCatSlug}
-                  onChange={(e) => setNewCatSlug(slugify(e.target.value))}
-                  placeholder="slug"
-                  className="h-9 px-3 rounded-lg bg-[#0D0F12] border border-[#252A32] text-xs font-mono text-[#F5F3EE]"
-                />
-              </div>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={newCatDesc}
-                  onChange={(e) => setNewCatDesc(e.target.value)}
-                  placeholder="Optional description"
-                  className="flex-1 h-9 px-3 rounded-lg bg-[#0D0F12] border border-[#252A32] text-xs text-[#F5F3EE]"
-                />
-                <button
-                  type="submit"
-                  className="px-4 h-9 rounded-lg bg-[#D6B77A] text-[#08090B] text-xs font-semibold cursor-pointer"
-                >
-                  Add
-                </button>
-              </div>
-            </form>
-
-            <div className="max-h-56 overflow-y-auto divide-y divide-[#252A32] border border-[#252A32] rounded-xl bg-[#0D0F12]">
-              {stats.categories.map((cat) => (
+              {/* Center/Right Live Preview Pane */}
+              {(editorMode === "split" || editorMode === "preview") && (
                 <div
-                  key={cat.id}
-                  className="px-3.5 py-2.5 flex items-center justify-between text-xs"
+                  className={cn(
+                    "p-6 overflow-y-auto bg-[#0B0D10]/70 space-y-4",
+                    editorMode === "preview"
+                      ? "lg:col-span-8"
+                      : "lg:col-span-3 border-r border-[#252A32]"
+                  )}
                 >
-                  <div>
-                    <span className="font-medium text-[#F5F3EE]">
-                      {cat.name}
-                    </span>
-                    <span className="ml-2 font-mono text-[10px] text-[#777D87]">
-                      /{cat.slug} ({cat.count})
-                    </span>
+                  <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-wider text-[#D6B77A]">
+                    <Eye className="w-3.5 h-3.5" />
+                    <span>Live Article Preview</span>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteCategory(cat.id, cat.name)}
-                    aria-label={`Delete ${cat.name}`}
-                    className="text-[#777D87] hover:text-[#F28B82] cursor-pointer"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
+
+                  {form.coverAssetUrl && (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={form.coverAssetUrl}
+                      alt={form.title}
+                      className="w-full aspect-[16/9] object-cover rounded-xl border border-[#252A32]"
+                    />
+                  )}
+                  <div className="space-y-1.5">
+                    <span className="inline-block px-2 py-0.5 rounded bg-[#191D23] text-[10px] font-mono uppercase text-[#D6B77A]">
+                      {form.contentType}
+                    </span>
+                    <h1 className="font-heading text-xl font-bold text-[#F5F3EE]">
+                      {form.title || "Untitled Article"}
+                    </h1>
+                    {form.subtitle && (
+                      <p className="text-sm text-[#B2B4BA]">{form.subtitle}</p>
+                    )}
+                    <p className="text-[11px] text-[#777D87] pt-1">
+                      By{" "}
+                      {stats.authors.find((a) => a.id === form.authorUserId)
+                        ?.displayName || "Studio Author"}
+                      {form.authorBio ? ` · ${form.authorBio}` : ""}
+                    </p>
+                  </div>
+                  <div className="pt-3 border-t border-[#252A32]">
+                    <MarkdownPreviewRenderer markdown={form.bodyMarkdown} />
+                  </div>
                 </div>
-              ))}
-            </div>
+              )}
+
+              {/* Right Settings & Metadata Rail */}
+              <div
+                className={cn(
+                  "p-5 space-y-4 overflow-y-auto bg-[#0D0F12]/90 text-xs",
+                  editorMode === "split" ? "lg:col-span-3" : "lg:col-span-4"
+                )}
+              >
+                <div>
+                  <label className="block text-[#8F96A3] mb-1">Content Type</label>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {(
+                      [
+                        { id: "post", label: "Blog Post", icon: FileText },
+                        { id: "insight", label: "Insight", icon: Sparkles },
+                        { id: "announcement", label: "News", icon: Megaphone },
+                      ] as const
+                    ).map((ct) => {
+                      const Icon = ct.icon;
+                      return (
+                        <button
+                          key={ct.id}
+                          type="button"
+                          onClick={() => setForm({ ...form, contentType: ct.id })}
+                          className={cn(
+                            "py-2 px-2 rounded-lg border text-[11px] flex flex-col items-center gap-1 cursor-pointer",
+                            form.contentType === ct.id
+                              ? "bg-[#D6B77A]/15 border-[#D6B77A] text-[#D6B77A]"
+                              : "bg-[#12151A] border-[#252A32] text-[#8F96A3]"
+                          )}
+                        >
+                          <Icon className="w-3.5 h-3.5" />
+                          <span>{ct.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[#8F96A3] mb-1">URL Slug *</label>
+                  <input
+                    type="text"
+                    required
+                    value={form.slug}
+                    onChange={(e) => setForm({ ...form, slug: slugify(e.target.value) })}
+                    className="w-full h-9 rounded-lg bg-[#12151A] border border-[#252A32] px-2.5 font-mono text-[#F5F3EE]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[#8F96A3] mb-1">Excerpt / Summary *</label>
+                  <textarea
+                    rows={2}
+                    required
+                    value={form.excerpt}
+                    onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
+                    className="w-full rounded-lg bg-[#12151A] border border-[#252A32] p-2.5 text-[#F5F3EE]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[#8F96A3] mb-1">Featured Image</label>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setPickerTarget("cover")}
+                      className="flex-1 h-9 rounded-lg bg-[#12151A] border border-[#252A32] hover:border-[#D6B77A] text-[#F5F3EE] inline-flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <ImageIcon className="w-3.5 h-3.5 text-[#D6B77A]" />
+                      <span>{form.coverAssetUrl ? "Change Cover" : "Pick Featured Image"}</span>
+                    </button>
+                    {form.coverAssetId && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setForm({ ...form, coverAssetId: null, coverAssetUrl: null })
+                        }
+                        className="text-[#F07878] hover:underline cursor-pointer"
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[#8F96A3] mb-1.5">Categories</label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {stats.categories.map((cat) => {
+                      const checked = form.categoryIds.includes(cat.id);
+                      return (
+                        <button
+                          key={cat.id}
+                          type="button"
+                          onClick={() => {
+                            const next = checked
+                              ? form.categoryIds.filter((id) => id !== cat.id)
+                              : [...form.categoryIds, cat.id];
+                            setForm({ ...form, categoryIds: next });
+                          }}
+                          className={cn(
+                            "px-2.5 py-1 rounded-full text-[11px] border cursor-pointer inline-flex items-center gap-1",
+                            checked
+                              ? "bg-[#D6B77A]/15 border-[#D6B77A] text-[#D6B77A]"
+                              : "bg-[#12151A] border-[#252A32] text-[#8F96A3]"
+                          )}
+                        >
+                          {checked && <Check className="w-3 h-3" />}
+                          <span>{cat.name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[#8F96A3] mb-1">Tags</label>
+                  <div className="flex flex-wrap gap-1 mb-1.5">
+                    {form.tags.map((t) => (
+                      <span
+                        key={t}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#12151A] border border-[#252A32] text-[11px] text-[#B2B4BA]"
+                      >
+                        <Tag className="w-2.5 h-2.5 text-[#D6B77A]" />
+                        <span>{t}</span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setForm({
+                              ...form,
+                              tags: form.tags.filter((x) => x !== t),
+                            })
+                          }
+                          className="text-[#777D87] hover:text-[#F07878] cursor-pointer"
+                        >
+                          <X className="w-2.5 h-2.5" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                  <div className="flex gap-1.5">
+                    <input
+                      type="text"
+                      value={tagDraft}
+                      onChange={(e) => setTagDraft(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          const clean = tagDraft.trim().toLowerCase();
+                          if (clean && !form.tags.includes(clean)) {
+                            setForm({ ...form, tags: [...form.tags, clean] });
+                          }
+                          setTagDraft("");
+                        }
+                      }}
+                      placeholder="Add tag & press Enter"
+                      className="flex-1 h-8 rounded-lg bg-[#12151A] border border-[#252A32] px-2.5 text-[#F5F3EE]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const clean = tagDraft.trim().toLowerCase();
+                        if (clean && !form.tags.includes(clean)) {
+                          setForm({ ...form, tags: [...form.tags, clean] });
+                        }
+                        setTagDraft("");
+                      }}
+                      className="px-2.5 h-8 rounded-lg bg-[#12151A] border border-[#252A32] text-[#D6B77A] cursor-pointer"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+
+                {/* Author Information */}
+                <div className="pt-2 border-t border-[#252A32] space-y-2">
+                  <span className="text-[#F5F3EE] font-medium flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5 text-[#D6B77A]" /> Author Information
+                  </span>
+                  <select
+                    value={form.authorUserId ?? ""}
+                    onChange={(e) =>
+                      setForm({ ...form, authorUserId: e.target.value || null })
+                    }
+                    className="w-full h-9 rounded-lg bg-[#12151A] border border-[#252A32] px-2.5 text-[#F5F3EE]"
+                  >
+                    <option value="">Current Signed-in User</option>
+                    {stats.authors.map((a) => (
+                      <option key={a.id} value={a.id}>
+                        {a.displayName}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="text"
+                    value={form.authorBio}
+                    onChange={(e) => setForm({ ...form, authorBio: e.target.value })}
+                    placeholder="Author role / short bio line"
+                    className="w-full h-8 rounded-lg bg-[#12151A] border border-[#252A32] px-2.5 text-[#F5F3EE]"
+                  />
+                </div>
+
+                {/* Scheduling & Publishing */}
+                <div className="pt-2 border-t border-[#252A32] space-y-2">
+                  <label className="block text-[#8F96A3]">Schedule Publication (Drafts)</label>
+                  <input
+                    type="datetime-local"
+                    value={form.scheduledFor}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        status: "draft",
+                        scheduledFor: e.target.value,
+                      })
+                    }
+                    className="w-full h-9 rounded-lg bg-[#12151A] border border-[#252A32] px-2.5 text-[#F5F3EE]"
+                  />
+                  <label className="flex items-center gap-2 text-[#B2B4BA] cursor-pointer pt-1">
+                    <input
+                      type="checkbox"
+                      checked={form.isFeatured}
+                      onChange={(e) =>
+                        setForm({ ...form, isFeatured: e.target.checked })
+                      }
+                      className="accent-[#D6B77A]"
+                    />
+                    <span>Feature in Top Insights</span>
+                  </label>
+                </div>
+
+                {/* SEO Controls */}
+                <div className="pt-2 border-t border-[#252A32] space-y-2">
+                  <span className="text-[#F5F3EE] font-medium block">SEO Metadata</span>
+                  <input
+                    type="text"
+                    value={form.seoTitle}
+                    onChange={(e) => setForm({ ...form, seoTitle: e.target.value })}
+                    placeholder="SEO Title"
+                    className="w-full h-8 rounded-lg bg-[#12151A] border border-[#252A32] px-2.5 text-[#F5F3EE]"
+                  />
+                  <textarea
+                    rows={2}
+                    value={form.seoDescription}
+                    onChange={(e) =>
+                      setForm({ ...form, seoDescription: e.target.value })
+                    }
+                    placeholder="Meta Description"
+                    className="w-full rounded-lg bg-[#12151A] border border-[#252A32] p-2 text-[#F5F3EE]"
+                  />
+                </div>
+              </div>
+            </form>
           </div>
         </div>
       )}
 
-      {/* Article Preview Modal */}
+      {/* Standalone Article Preview Modal */}
       {previewPost && (
-        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-          <div className="w-full max-w-2xl max-h-[88vh] overflow-y-auto rounded-2xl bg-[#0D0F12] border border-[#252A32] p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-[#252A32] pb-3">
-              <span className="text-xs font-mono text-[#D6B77A]">
-                Article Preview · /{previewPost.slug}
-              </span>
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="w-full max-w-3xl max-h-[88vh] flex flex-col rounded-2xl bg-[#12151A] border border-[#252A32] overflow-hidden">
+            <div className="px-6 py-4 border-b border-[#252A32] flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 rounded bg-[#191D23] border border-[#252A32] text-[10px] font-mono uppercase text-[#D6B77A]">
+                  {previewPost.contentType}
+                </span>
+                <span className="text-xs text-[#777D87] font-mono">
+                  /blog/{previewPost.slug}
+                </span>
+              </div>
               <button
                 type="button"
                 onClick={() => setPreviewPost(null)}
@@ -1423,41 +1891,165 @@ export function AdminBlogClient() {
                 <X className="w-4 h-4" />
               </button>
             </div>
-            {previewPost.coverAssetUrl && (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img
-                src={previewPost.coverAssetUrl}
-                alt={previewPost.title}
-                className="w-full aspect-video object-cover rounded-xl border border-[#252A32]"
+            <div className="p-6 overflow-y-auto space-y-5">
+              {previewPost.coverAssetUrl && (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={previewPost.coverAssetUrl}
+                  alt={previewPost.title}
+                  className="w-full aspect-[16/9] object-cover rounded-xl border border-[#252A32]"
+                />
+              )}
+              <div className="space-y-2">
+                <h2 className="font-heading text-2xl font-bold text-[#F5F3EE]">
+                  {previewPost.title}
+                </h2>
+                {previewPost.subtitle && (
+                  <p className="text-base text-[#B2B4BA]">{previewPost.subtitle}</p>
+                )}
+              </div>
+              <MarkdownPreviewRenderer markdown={previewPost.bodyMarkdown} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Category Management Modal (Create, Edit, Delete) */}
+      {catModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="w-full max-w-lg rounded-2xl bg-[#12151A] border border-[#252A32] p-6 space-y-5">
+            <div className="flex items-center justify-between">
+              <h2 className="font-heading text-base font-semibold text-[#F5F3EE]">
+                Manage Categories
+              </h2>
+              <button
+                type="button"
+                onClick={() => {
+                  setCatModalOpen(false);
+                  setEditingCatId(null);
+                }}
+                className="text-[#8F96A3] hover:text-white cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveCategory} className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <input
+                  type="text"
+                  required
+                  value={newCatName}
+                  onChange={(e) => {
+                    setNewCatName(e.target.value);
+                    if (!editingCatId) setNewCatSlug(slugify(e.target.value));
+                  }}
+                  placeholder="Category Name"
+                  className="h-9 rounded-lg bg-[#0D0F12] border border-[#252A32] px-3 text-xs text-[#F5F3EE]"
+                />
+                <input
+                  type="text"
+                  required
+                  value={newCatSlug}
+                  onChange={(e) => setNewCatSlug(slugify(e.target.value))}
+                  placeholder="slug"
+                  className="h-9 rounded-lg bg-[#0D0F12] border border-[#252A32] px-3 text-xs font-mono text-[#F5F3EE]"
+                />
+              </div>
+              <input
+                type="text"
+                value={newCatDesc}
+                onChange={(e) => setNewCatDesc(e.target.value)}
+                placeholder="Description (optional)"
+                className="w-full h-9 rounded-lg bg-[#0D0F12] border border-[#252A32] px-3 text-xs text-[#F5F3EE]"
               />
-            )}
-            <h3 className="font-heading font-bold text-2xl text-[#F5F3EE]">
-              {previewPost.title}
-            </h3>
-            <p className="text-sm text-[#B2B4BA]">{previewPost.excerpt}</p>
-            <div className="text-sm text-[#E5E2DC] whitespace-pre-wrap leading-relaxed pt-2 border-t border-[#252A32]">
-              {previewPost.bodyMarkdown}
+              <div className="flex justify-end gap-2">
+                {editingCatId && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditingCatId(null);
+                      setNewCatName("");
+                      setNewCatSlug("");
+                      setNewCatDesc("");
+                    }}
+                    className="px-3 py-1.5 text-xs text-[#8F96A3] cursor-pointer"
+                  >
+                    Cancel Edit
+                  </button>
+                )}
+                <button
+                  type="submit"
+                  disabled={savingCat}
+                  className="px-4 py-1.5 rounded-lg bg-[#D6B77A] text-[#17130B] text-xs font-semibold cursor-pointer"
+                >
+                  {editingCatId ? "Update Category" : "Create Category"}
+                </button>
+              </div>
+            </form>
+
+            <div className="border-t border-[#252A32] pt-3 space-y-2 max-h-56 overflow-y-auto">
+              {stats.categories.map((cat) => (
+                <div
+                  key={cat.id}
+                  className="flex items-center justify-between gap-2 p-2 rounded-lg bg-[#0D0F12] border border-[#252A32] text-xs"
+                >
+                  <div>
+                    <span className="font-medium text-[#F5F3EE]">{cat.name}</span>
+                    <span className="ml-2 text-[#777D87] font-mono">/{cat.slug}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] text-[#777D87]">{cat.count} posts</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingCatId(cat.id);
+                        setNewCatName(cat.name);
+                        setNewCatSlug(cat.slug);
+                        setNewCatDesc(cat.description || "");
+                      }}
+                      className="text-[#D6B77A] hover:underline cursor-pointer"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteCategory(cat)}
+                      className="text-[#F07878] hover:underline cursor-pointer"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       )}
 
       <MediaPickerModal
-        open={pickerOpen}
-        title="Select Article Cover Image"
-        selectedId={form?.coverAssetId}
-        onClose={() => setPickerOpen(false)}
-        onSelectSingle={(asset: MediaAssetItem) =>
-          setForm((prev) =>
-            prev
-              ? {
-                  ...prev,
-                  coverAssetId: asset.id,
-                  coverAssetUrl: asset.secureUrl,
-                }
-              : prev
-          )
+        open={pickerTarget !== null}
+        title={
+          pickerTarget === "inline"
+            ? "Insert Image into Article Body"
+            : "Select Featured Cover Image"
         }
+        selectedId={pickerTarget === "cover" ? form?.coverAssetId ?? null : null}
+        onClose={() => setPickerTarget(null)}
+        onSelectSingle={(asset: MediaAssetItem) => {
+          if (!form) return;
+          if (pickerTarget === "cover") {
+            setForm({
+              ...form,
+              coverAssetId: asset.id,
+              coverAssetUrl: asset.secureUrl,
+            });
+          } else if (pickerTarget === "inline") {
+            const alt = asset.altText || "Article image";
+            insertFormatting(`\n![${alt}](${asset.secureUrl})\n`, "", "");
+          }
+          setPickerTarget(null);
+        }}
       />
     </div>
   );

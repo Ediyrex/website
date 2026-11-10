@@ -66,8 +66,8 @@ const NAV_GROUPS: NavGroup[] = [
         icon: Inbox,
         children: [
           { href: "/admin/inquiries", label: "Leads & Inquiries" },
-          { href: "/admin/inquiries?status=won", label: "Clients" },
-          { href: "/admin/inquiries?status=reviewing", label: "Follow-ups" },
+          { href: "/admin/inquiries?view=clients", label: "Clients" },
+          { href: "/admin/inquiries?view=followups", label: "Follow-ups" },
         ],
       },
       { href: "/admin/tasks", label: "Projects & Tasks", icon: CheckSquare },

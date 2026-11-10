@@ -10,6 +10,7 @@ import {
   jsonb,
   check,
   index,
+  type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { enquiryStatusEnum, outboxStatusEnum } from "./enums";
@@ -56,6 +57,10 @@ export const enquiries = pgTable(
       .default("v1.0"),
     assignedAdminUserId: uuid("assigned_admin_user_id").references(
       () => users.id,
+      { onDelete: "set null" }
+    ),
+    convertedClientId: uuid("converted_client_id").references(
+      (): AnyPgColumn => crmClients.id,
       { onDelete: "set null" }
     ),
     dedupeHash: varchar("dedupe_hash", { length: 64 }),
@@ -179,4 +184,77 @@ export const notificationOutbox = pgTable(
       .where(sql`${table.status} IN ('pending', 'failed')`),
   ]
 );
+
+export const crmClients = pgTable(
+  "crm_clients",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    name: varchar("name", { length: 140 }).notNull(),
+    emailNormalized: varchar("email_normalized", { length: 255 }).notNull(),
+    companyName: varchar("company_name", { length: 140 }),
+    phone: varchar("phone", { length: 40 }),
+    serviceInterest: varchar("service_interest", { length: 160 })
+      .notNull()
+      .default("General Consultation"),
+    source: varchar("source", { length: 64 })
+      .notNull()
+      .default("inquiry_conversion"),
+    sourceEnquiryId: uuid("source_enquiry_id").references(
+      (): AnyPgColumn => enquiries.id,
+      { onDelete: "set null" }
+    ),
+    status: varchar("status", { length: 24 }).notNull().default("active"),
+    notes: text("notes").notNull().default(""),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    check(
+      "chk_crm_clients_status",
+      sql`${table.status} IN ('active', 'archived')`
+    ),
+    index("idx_crm_clients_status").on(table.status, table.createdAt),
+    index("idx_crm_clients_email").on(table.emailNormalized),
+  ]
+);
+
+export const crmFollowups = pgTable(
+  "crm_followups",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    enquiryId: uuid("enquiry_id").references(() => enquiries.id, {
+      onDelete: "cascade",
+    }),
+    clientId: uuid("client_id").references(() => crmClients.id, {
+      onDelete: "cascade",
+    }),
+    title: varchar("title", { length: 200 }).notNull(),
+    notes: text("notes").notNull().default(""),
+    channel: varchar("channel", { length: 32 }).notNull().default("email"),
+    dueAt: timestamp("due_at", { withTimezone: true, mode: "date" }).notNull(),
+    completed: boolean("completed").notNull().default(false),
+    completedAt: timestamp("completed_at", { withTimezone: true, mode: "date" }),
+    assignedUserId: uuid("assigned_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    check(
+      "chk_crm_followups_channel",
+      sql`${table.channel} IN ('email', 'call', 'meeting', 'whatsapp', 'other')`
+    ),
+    index("idx_crm_followups_due").on(table.completed, table.dueAt),
+  ]
+);
+
 

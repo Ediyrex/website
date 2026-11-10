@@ -43,6 +43,7 @@ export async function GET(request: NextRequest) {
     const queryParam = searchParams.get("q")?.trim();
     const typeParam = searchParams.get("type")?.trim();
     const folderParam = searchParams.get("folder")?.trim();
+    const tagParam = searchParams.get("tag")?.trim().toLowerCase();
     const sortParam = searchParams.get("sort")?.trim();
 
     const conditions = [isNull(mediaAssets.archivedAt)];
@@ -56,13 +57,19 @@ export async function GET(request: NextRequest) {
     if (folderParam) {
       conditions.push(eq(mediaAssets.folder, folderParam));
     }
+    if (tagParam) {
+      conditions.push(
+        sql`${mediaAssets.tags} @> ${JSON.stringify([tagParam])}::jsonb`
+      );
+    }
     if (queryParam) {
       const searchCond = or(
         ilike(mediaAssets.altText, `%${queryParam}%`),
         ilike(mediaAssets.caption, `%${queryParam}%`),
         ilike(mediaAssets.providerPublicId, `%${queryParam}%`),
         ilike(mediaAssets.secureUrl, `%${queryParam}%`),
-        ilike(mediaAssets.folder, `%${queryParam}%`)
+        ilike(mediaAssets.folder, `%${queryParam}%`),
+        sql`${mediaAssets.tags}::text ilike ${`%${queryParam}%`}`
       );
       if (searchCond) conditions.push(searchCond);
     }

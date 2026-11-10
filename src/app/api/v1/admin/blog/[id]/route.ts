@@ -134,21 +134,33 @@ export async function PATCH(
       data.status === "published"
         ? existing.publishedAt ?? new Date()
         : existing.publishedAt;
+    const scheduledFor =
+      data.status === "draft" && data.scheduledFor
+        ? new Date(data.scheduledFor)
+        : null;
 
     const updated = await db.transaction(async (tx) => {
       const [row] = await tx
         .update(blogPosts)
         .set({
           title: data.title,
+          subtitle: data.subtitle || null,
           slug: data.slug,
+          contentType: data.contentType,
           excerpt: data.excerpt,
           bodyMarkdown: data.bodyMarkdown,
+          tags: data.tags,
+          authorUserId: data.authorUserId || existing.authorUserId,
+          authorBio: data.authorBio || null,
+          isFeatured: data.isFeatured,
           coverAssetId: data.coverAssetId || null,
           status: data.status,
+          scheduledFor,
           seoTitle: data.seoTitle || null,
           seoDescription: data.seoDescription || null,
           canonicalUrl: data.canonicalUrl || null,
           publishedAt,
+          updatedAt: new Date(),
         })
         .where(eq(blogPosts.id, id))
         .returning();

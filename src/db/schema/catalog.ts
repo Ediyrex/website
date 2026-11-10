@@ -52,7 +52,11 @@ export const services = pgTable(
     slug: varchar("slug", { length: 140 }).notNull().unique(),
     summary: varchar("summary", { length: 320 }).notNull(),
     description: text("description").notNull(),
+    categoryLabel: varchar("category_label", { length: 80 }),
     deliverables: jsonb("deliverables").$type<string[]>().notNull().default([]),
+    features: jsonb("features").$type<string[]>().notNull().default([]),
+    showPricing: boolean("show_pricing").notNull().default(false),
+    startingPrice: varchar("starting_price", { length: 80 }),
     iconName: varchar("icon_name", { length: 64 }),
     coverAssetId: uuid("cover_asset_id").references(() => mediaAssets.id, {
       onDelete: "set null",

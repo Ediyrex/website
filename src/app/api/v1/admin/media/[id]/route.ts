@@ -1,6 +1,6 @@
 import { unlink } from "node:fs/promises";
 import path from "node:path";
-import { eq, sql } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
 import {
@@ -59,7 +59,7 @@ export async function GET(
         db
           .select({ id: projects.id, title: projects.title, slug: projects.slug })
           .from(projects)
-          .where(eq(projects.coverAssetId, id)),
+          .where(or(eq(projects.coverAssetId, id), eq(projects.ogImageAssetId, id))),
         db
           .select({ id: projects.id, title: projects.title, slug: projects.slug })
           .from(projectMedia)
@@ -68,15 +68,15 @@ export async function GET(
         db
           .select({ id: services.id, title: services.title, slug: services.slug })
           .from(services)
-          .where(eq(services.coverAssetId, id)),
+          .where(or(eq(services.coverAssetId, id), eq(services.ogImageAssetId, id))),
         db
           .select({ id: blogPosts.id, title: blogPosts.title, slug: blogPosts.slug })
           .from(blogPosts)
-          .where(eq(blogPosts.coverAssetId, id)),
+          .where(or(eq(blogPosts.coverAssetId, id), eq(blogPosts.ogImageAssetId, id))),
         db
           .select({ id: cmsPages.id, title: cmsPages.title, slug: cmsPages.slug })
           .from(cmsPages)
-          .where(eq(cmsPages.thumbnailAssetId, id)),
+          .where(or(eq(cmsPages.thumbnailAssetId, id), eq(cmsPages.ogImageAssetId, id))),
       ]);
 
     return apiOk({
@@ -186,36 +186,43 @@ export async function DELETE(
       return apiNotFound("Media asset not found.");
     }
 
-    const [[coverCount], [galleryCount], [serviceCount], [blogCount]] =
+    const [usedInProjects, usedInGallery, usedInServices, usedInBlog, usedInPages] =
       await Promise.all([
         db
-          .select({ count: sql<number>`count(*)::int` })
+          .select({ id: projects.id, title: projects.title, slug: projects.slug })
           .from(projects)
-          .where(eq(projects.coverAssetId, id)),
+          .where(or(eq(projects.coverAssetId, id), eq(projects.ogImageAssetId, id))),
         db
-          .select({ count: sql<number>`count(*)::int` })
+          .select({ id: projects.id, title: projects.title, slug: projects.slug })
           .from(projectMedia)
+          .innerJoin(projects, eq(projectMedia.projectId, projects.id))
           .where(eq(projectMedia.mediaAssetId, id)),
         db
-          .select({ count: sql<number>`count(*)::int` })
+          .select({ id: services.id, title: services.title, slug: services.slug })
           .from(services)
-          .where(eq(services.coverAssetId, id)),
+          .where(or(eq(services.coverAssetId, id), eq(services.ogImageAssetId, id))),
         db
-          .select({ count: sql<number>`count(*)::int` })
+          .select({ id: blogPosts.id, title: blogPosts.title, slug: blogPosts.slug })
           .from(blogPosts)
-          .where(eq(blogPosts.coverAssetId, id)),
+          .where(or(eq(blogPosts.coverAssetId, id), eq(blogPosts.ogImageAssetId, id))),
+        db
+          .select({ id: cmsPages.id, title: cmsPages.title, slug: cmsPages.slug })
+          .from(cmsPages)
+          .where(or(eq(cmsPages.thumbnailAssetId, id), eq(cmsPages.ogImageAssetId, id))),
       ]);
 
-    const totalRefs =
-      (coverCount?.count ?? 0) +
-      (galleryCount?.count ?? 0) +
-      (serviceCount?.count ?? 0) +
-      (blogCount?.count ?? 0);
+    const refs = [
+      ...usedInProjects.map((p) => `Project: ${p.title}`),
+      ...usedInGallery.map((p) => `Gallery: ${p.title}`),
+      ...usedInServices.map((s) => `Service: ${s.title}`),
+      ...usedInBlog.map((b) => `Blog: ${b.title}`),
+      ...usedInPages.map((pg) => `Page: ${pg.title}`),
+    ];
 
-    if (totalRefs > 0) {
+    if (refs.length > 0) {
       return apiError(
         "Conflict",
-        "Media asset is currently attached to one or more projects, services, or blog posts. Detach it before deleting.",
+        `Cannot delete: asset is referenced by ${refs.slice(0, 4).join(", ")}${refs.length > 4 ? ` (+${refs.length - 4} more)` : ""}. Detach it first.`,
         409
       );
     }
