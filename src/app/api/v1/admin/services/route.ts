@@ -69,42 +69,81 @@ export async function GET(request: NextRequest) {
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-    const rows = await db
-      .select({
-        id: services.id,
-        divisionId: services.divisionId,
-        title: services.title,
-        slug: services.slug,
-        summary: services.summary,
-        divisionSlug: serviceDivisions.slug,
-        divisionName: serviceDivisions.name,
-        coverAssetId: services.coverAssetId,
-        coverAssetUrl: mediaAssets.secureUrl,
-        status: services.status,
-        isFeatured: services.isFeatured,
-        displayOrder: services.displayOrder,
-        publishedAt: services.publishedAt,
-        updatedAt: services.updatedAt,
-      })
-      .from(services)
-      .innerJoin(serviceDivisions, eq(services.divisionId, serviceDivisions.id))
-      .leftJoin(mediaAssets, eq(services.coverAssetId, mediaAssets.id))
-      .where(whereClause)
-      .orderBy(asc(services.displayOrder), asc(services.title))
-      .limit(limit)
-      .offset(offset);
-
-    const [{ total }] = await db
-      .select({ total: sql<number>`count(*)::int` })
-      .from(services)
-      .innerJoin(serviceDivisions, eq(services.divisionId, serviceDivisions.id))
-      .where(whereClause);
+    const [rows, [{ total }], [globalStats], groupedDivisions] =
+      await Promise.all([
+        db
+          .select({
+            id: services.id,
+            divisionId: services.divisionId,
+            title: services.title,
+            slug: services.slug,
+            summary: services.summary,
+            deliverables: services.deliverables,
+            iconName: services.iconName,
+            divisionSlug: serviceDivisions.slug,
+            divisionName: serviceDivisions.name,
+            coverAssetId: services.coverAssetId,
+            coverAssetUrl: mediaAssets.secureUrl,
+            status: services.status,
+            isFeatured: services.isFeatured,
+            displayOrder: services.displayOrder,
+            publishedAt: services.publishedAt,
+            updatedAt: services.updatedAt,
+          })
+          .from(services)
+          .innerJoin(
+            serviceDivisions,
+            eq(services.divisionId, serviceDivisions.id)
+          )
+          .leftJoin(mediaAssets, eq(services.coverAssetId, mediaAssets.id))
+          .where(whereClause)
+          .orderBy(asc(services.displayOrder), asc(services.title))
+          .limit(limit)
+          .offset(offset),
+        db
+          .select({ total: sql<number>`count(*)::int` })
+          .from(services)
+          .innerJoin(
+            serviceDivisions,
+            eq(services.divisionId, serviceDivisions.id)
+          )
+          .where(whereClause),
+        db
+          .select({
+            totalAll: sql<number>`count(*)::int`,
+            publishedCount: sql<number>`count(*) filter (where ${services.status} = 'published')::int`,
+            draftCount: sql<number>`count(*) filter (where ${services.status} = 'draft')::int`,
+          })
+          .from(services),
+        db
+          .select({
+            slug: serviceDivisions.slug,
+            name: serviceDivisions.name,
+            count: sql<number>`count(${services.id})::int`,
+          })
+          .from(serviceDivisions)
+          .leftJoin(services, eq(serviceDivisions.id, services.divisionId))
+          .groupBy(
+            serviceDivisions.id,
+            serviceDivisions.slug,
+            serviceDivisions.name,
+            serviceDivisions.displayOrder
+          )
+          .orderBy(asc(serviceDivisions.displayOrder)),
+      ]);
 
     return apiOk(rows, {
       page,
       limit,
       total,
-      totalPages: Math.ceil(total / limit),
+      totalPages: Math.max(1, Math.ceil(total / limit)),
+      stats: {
+        totalAll: globalStats?.totalAll ?? 0,
+        publishedCount: globalStats?.publishedCount ?? 0,
+        draftCount: globalStats?.draftCount ?? 0,
+        divisionsCount: groupedDivisions.length,
+        divisionCounts: groupedDivisions,
+      },
     });
   } catch (err) {
     return handleApiError(err, "GET /api/v1/admin/services");

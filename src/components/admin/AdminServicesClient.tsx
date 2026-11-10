@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Plus,
@@ -11,8 +12,22 @@ import {
   Image as ImageIcon,
   FolderPlus,
   Loader2,
+  Layers,
+  CheckCircle2,
+  LayoutGrid,
+  List,
+  MoreHorizontal,
+  ExternalLink,
+  Film,
+  Globe,
+  Bot,
+  Sparkles,
+  Code2,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
+import { cn } from "@/lib/utils";
 import { useAdminUser } from "./AdminContext";
 import { MediaPickerModal, type MediaAssetItem } from "./MediaPickerModal";
 
@@ -32,6 +47,8 @@ interface ServiceRow {
   title: string;
   slug: string;
   summary: string;
+  deliverables?: string[];
+  iconName?: string | null;
   divisionSlug: string;
   divisionName: string;
   coverAssetId: string | null;
@@ -39,6 +56,37 @@ interface ServiceRow {
   status: "draft" | "published" | "archived";
   isFeatured: boolean;
   displayOrder: number;
+}
+
+interface ServicesStats {
+  totalAll: number;
+  publishedCount: number;
+  draftCount: number;
+  divisionsCount: number;
+  divisionCounts: { slug: string; name: string; count: number }[];
+}
+
+function getServiceIcon(iconName?: string | null, divisionSlug?: string) {
+  const key = (iconName || divisionSlug || "").toLowerCase();
+  if (key.includes("film") || key.includes("video") || key === "media") return Film;
+  if (key.includes("code") || key.includes("globe") || key === "digital") return Code2;
+  if (key.includes("bot") || key === "ai") return Bot;
+  if (key.includes("spark")) return Sparkles;
+  if (key.includes("web")) return Globe;
+  return Layers;
+}
+
+function getDivisionBadgeClass(slug: string) {
+  if (slug === "media") {
+    return "bg-[#E58A76]/12 text-[#E58A76] border-[#E58A76]/30";
+  }
+  if (slug === "digital") {
+    return "bg-[#7BA9F5]/12 text-[#7BA9F5] border-[#7BA9F5]/30";
+  }
+  if (slug === "ai") {
+    return "bg-[#B5A0F5]/12 text-[#B5A0F5] border-[#B5A0F5]/30";
+  }
+  return "bg-[#D6B77A]/12 text-[#D6B77A] border-[#D6B77A]/30";
 }
 
 interface ServiceFormState {
@@ -79,10 +127,23 @@ export function AdminServicesClient() {
 
   const [servicesList, setServicesList] = useState<ServiceRow[]>([]);
   const [divisions, setDivisions] = useState<DivisionRow[]>([]);
+  const [stats, setStats] = useState<ServicesStats>({
+    totalAll: 0,
+    publishedCount: 0,
+    draftCount: 0,
+    divisionsCount: 0,
+    divisionCounts: [],
+  });
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("");
   const [divisionFilter, setDivisionFilter] = useState("");
   const [query, setQuery] = useState("");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [pageNum, setPageNum] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(6);
+  const [totalFiltered, setTotalFiltered] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -98,7 +159,10 @@ export function AdminServicesClient() {
   const [newDivDesc, setNewDivDesc] = useState("");
 
   const fetchServicesAndDivisions = useCallback(async () => {
-    const params = new URLSearchParams({ limit: "50" });
+    const params = new URLSearchParams({
+      page: String(pageNum),
+      limit: String(rowsPerPage),
+    });
     if (statusFilter) params.set("status", statusFilter);
     if (divisionFilter) params.set("division", divisionFilter);
     if (query.trim()) params.set("q", query.trim());
@@ -121,8 +185,11 @@ export function AdminServicesClient() {
     return {
       services: (svcJson.data || []) as ServiceRow[],
       divisions: (divJson.data || []) as DivisionRow[],
+      total: (svcJson.meta?.total ?? 0) as number,
+      totalPages: (svcJson.meta?.totalPages ?? 1) as number,
+      stats: svcJson.meta?.stats as ServicesStats | undefined,
     };
-  }, [statusFilter, divisionFilter, query, router]);
+  }, [pageNum, rowsPerPage, statusFilter, divisionFilter, query, router]);
 
   const loadData = async () => {
     setLoading(true);
@@ -132,6 +199,9 @@ export function AdminServicesClient() {
       if (result) {
         setServicesList(result.services);
         setDivisions(result.divisions);
+        setTotalFiltered(result.total);
+        setTotalPages(result.totalPages);
+        if (result.stats) setStats(result.stats);
       }
     } catch (err) {
       setError(
@@ -149,6 +219,9 @@ export function AdminServicesClient() {
         if (!ignore && result) {
           setServicesList(result.services);
           setDivisions(result.divisions);
+          setTotalFiltered(result.total);
+          setTotalPages(result.totalPages);
+          if (result.stats) setStats(result.stats);
         }
       })
       .catch((err) => {
@@ -348,8 +421,8 @@ export function AdminServicesClient() {
         setError(json.message || "Unable to delete service.");
         return;
       }
-      setServicesList((prev) => prev.filter((item) => item.id !== svc.id));
       setSuccess(`Deleted service "${svc.title}".`);
+      await loadData();
     } catch {
       setError("Network error deleting service.");
     }
@@ -393,15 +466,20 @@ export function AdminServicesClient() {
     setDeliverableDraft("");
   };
 
+  const startIdx = totalFiltered === 0 ? 0 : (pageNum - 1) * rowsPerPage + 1;
+  const endIdx = Math.min(pageNum * rowsPerPage, totalFiltered);
+  const divisionSummaryText = divisions.map((d) => d.name).join(" · ");
+
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="font-heading font-bold text-2xl sm:text-3xl text-[#F5F3EE]">
-            Services &amp; Divisions
+          <h1 className="font-heading font-bold text-2xl sm:text-[28px] tracking-tight text-[#F5F3EE]">
+            Services
           </h1>
-          <p className="text-sm text-[#B2B4BA]">
-            Manage Media, Digital, AI, and custom studio offerings, deliverables, ordering, and publication status.
+          <p className="text-sm text-[#8D939E]">
+            Manage all studio services, divisions, and offerings displayed on your website.
           </p>
         </div>
 
@@ -411,7 +489,7 @@ export function AdminServicesClient() {
               <button
                 type="button"
                 onClick={() => setDivModalOpen(true)}
-                className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-lg bg-[#12151A] border border-[#252A32] text-xs text-[#F5F3EE] hover:border-[#3A414B] cursor-pointer"
+                className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-lg bg-[#111419] border border-[#1E222A] text-xs text-[#F5F3EE] hover:border-[#D6B77A]/50 cursor-pointer"
               >
                 <FolderPlus className="w-4 h-4 text-[#D6B77A]" />
                 <span>Add Division</span>
@@ -420,51 +498,194 @@ export function AdminServicesClient() {
             <button
               type="button"
               onClick={openCreateModal}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#D6B77A] text-[#08090B] text-xs font-semibold hover:bg-[#E2C68F] cursor-pointer"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#D6B77A] text-[#08090B] text-xs font-semibold hover:bg-[#E2C68F] transition-colors cursor-pointer shadow-sm"
             >
               <Plus className="w-4 h-4" />
-              <span>New Service</span>
+              <span>Add Service</span>
             </button>
           </div>
         )}
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 min-w-[220px]">
-          <Search className="w-4 h-4 text-[#777D87] absolute left-3 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search service title, slug, or summary..."
-            className="w-full h-10 pl-9 pr-3 rounded-lg bg-[#12151A] border border-[#252A32] text-sm text-[#F5F3EE] placeholder-[#777D87] focus:outline-none focus:border-[#D6B77A]"
-          />
+      {/* 4-Card KPI Strip */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="p-5 rounded-xl bg-[#111419] border border-[#1E222A] space-y-2.5">
+          <div className="flex items-center gap-2.5 text-xs text-[#9CA3AF]">
+            <span className="p-2 rounded-lg bg-[#1A160E] border border-[#D6B77A]/30 text-[#D6B77A]">
+              <Layers className="w-4 h-4" />
+            </span>
+            <span>Total Services</span>
+          </div>
+          <div className="font-heading font-bold text-3xl text-[#F5F3EE]">
+            {loading ? "—" : stats.totalAll}
+          </div>
         </div>
 
-        <select
-          value={divisionFilter}
-          onChange={(e) => setDivisionFilter(e.target.value)}
-          className="h-10 px-3 rounded-lg bg-[#12151A] border border-[#252A32] text-xs font-mono text-[#F5F3EE]"
-        >
-          <option value="">All divisions</option>
-          {divisions.map((d) => (
-            <option key={d.id} value={d.slug}>
-              {d.name}
-            </option>
-          ))}
-        </select>
+        <div className="p-5 rounded-xl bg-[#111419] border border-[#1E222A] space-y-2.5">
+          <div className="flex items-center gap-2.5 text-xs text-[#9CA3AF]">
+            <span className="p-2 rounded-lg bg-[#112419] border border-[#54C99A]/30 text-[#54C99A]">
+              <CheckCircle2 className="w-4 h-4" />
+            </span>
+            <span>Published</span>
+          </div>
+          <div className="font-heading font-bold text-3xl text-[#F5F3EE]">
+            {loading ? "—" : stats.publishedCount}
+          </div>
+        </div>
 
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="h-10 px-3 rounded-lg bg-[#12151A] border border-[#252A32] text-xs font-mono text-[#F5F3EE]"
+        <div className="p-5 rounded-xl bg-[#111419] border border-[#1E222A] space-y-2.5">
+          <div className="flex items-center gap-2.5 text-xs text-[#9CA3AF]">
+            <span className="p-2 rounded-lg bg-[#1D1629] border border-[#B5A0F5]/30 text-[#B5A0F5]">
+              <Edit3 className="w-4 h-4" />
+            </span>
+            <span>Drafts</span>
+          </div>
+          <div className="font-heading font-bold text-3xl text-[#F5F3EE]">
+            {loading ? "—" : stats.draftCount}
+          </div>
+        </div>
+
+        <div className="p-5 rounded-xl bg-[#111419] border border-[#1E222A] space-y-2">
+          <div className="flex items-center gap-2.5 text-xs text-[#9CA3AF]">
+            <span className="p-2 rounded-lg bg-[#1A160E] border border-[#D6B77A]/30 text-[#D6B77A]">
+              <LayoutGrid className="w-4 h-4" />
+            </span>
+            <span>Divisions</span>
+          </div>
+          <div className="font-heading font-bold text-3xl text-[#F5F3EE]">
+            {loading ? "—" : stats.divisionsCount || divisions.length}
+          </div>
+          {divisionSummaryText && (
+            <div className="text-[11px] text-[#777D87] truncate">
+              {divisionSummaryText}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Division Filter Tabs */}
+      <div className="flex items-center gap-6 border-b border-[#1E222A] overflow-x-auto">
+        <button
+          type="button"
+          onClick={() => {
+            setDivisionFilter("");
+            setPageNum(1);
+          }}
+          className={cn(
+            "pb-3 text-xs font-medium inline-flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap cursor-pointer",
+            divisionFilter === ""
+              ? "border-[#D6B77A] text-[#F5F3EE]"
+              : "border-transparent text-[#8D939E] hover:text-white"
+          )}
         >
-          <option value="">All statuses</option>
-          <option value="published">Published</option>
-          <option value="draft">Draft</option>
-          <option value="archived">Archived</option>
-        </select>
+          <span>All Services</span>
+          <span className="px-2 py-0.5 rounded-full bg-[#181C23] border border-[#252A32] text-[10px] font-mono text-[#B2B4BA]">
+            {stats.totalAll}
+          </span>
+        </button>
+
+        {stats.divisionCounts.map((div) => (
+          <button
+            key={div.slug}
+            type="button"
+            onClick={() => {
+              setDivisionFilter(div.slug);
+              setPageNum(1);
+            }}
+            className={cn(
+              "pb-3 text-xs font-medium inline-flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap cursor-pointer",
+              divisionFilter === div.slug
+                ? "border-[#D6B77A] text-[#F5F3EE]"
+                : "border-transparent text-[#8D939E] hover:text-white"
+            )}
+          >
+            <span>{div.name}</span>
+            <span className="px-2 py-0.5 rounded-full bg-[#181C23] border border-[#252A32] text-[10px] font-mono text-[#B2B4BA]">
+              {div.count}
+            </span>
+          </button>
+        ))}
+      </div>
+
+      {/* Filters & View Mode Toolbar */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-3 flex-1 min-w-[260px]">
+          <div className="relative flex-1 max-w-sm min-w-[200px]">
+            <Search className="w-4 h-4 text-[#777D87] absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setPageNum(1);
+              }}
+              placeholder="Search services..."
+              className="w-full h-10 pl-9 pr-3 rounded-lg bg-[#111419] border border-[#1E222A] text-sm text-[#F5F3EE] placeholder-[#6D7480] focus:outline-none focus:border-[#D6B77A]"
+            />
+          </div>
+
+          <select
+            value={divisionFilter}
+            onChange={(e) => {
+              setDivisionFilter(e.target.value);
+              setPageNum(1);
+            }}
+            aria-label="Filter services by division"
+            className="h-10 px-3 rounded-lg bg-[#111419] border border-[#1E222A] text-xs text-[#F5F3EE] focus:outline-none focus:border-[#D6B77A]"
+          >
+            <option value="">All Divisions</option>
+            {divisions.map((d) => (
+              <option key={d.id} value={d.slug}>
+                {d.name}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setPageNum(1);
+            }}
+            aria-label="Filter services by status"
+            className="h-10 px-3 rounded-lg bg-[#111419] border border-[#1E222A] text-xs text-[#F5F3EE] focus:outline-none focus:border-[#D6B77A]"
+          >
+            <option value="">All Status</option>
+            <option value="published">Published</option>
+            <option value="draft">Draft</option>
+            <option value="archived">Archived</option>
+          </select>
+        </div>
+
+        {/* Grid / List Toggle */}
+        <div className="inline-flex items-center p-1 rounded-lg bg-[#111419] border border-[#1E222A]">
+          <button
+            type="button"
+            onClick={() => setViewMode("grid")}
+            aria-label="Grid view"
+            className={cn(
+              "p-2 rounded-md transition-colors cursor-pointer",
+              viewMode === "grid"
+                ? "bg-[#D6B77A] text-[#08090B]"
+                : "text-[#8D939E] hover:text-white"
+            )}
+          >
+            <LayoutGrid className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode("list")}
+            aria-label="List view"
+            className={cn(
+              "p-2 rounded-md transition-colors cursor-pointer",
+              viewMode === "list"
+                ? "bg-[#D6B77A] text-[#08090B]"
+                : "text-[#8D939E] hover:text-white"
+            )}
+          >
+            <List className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -478,101 +699,323 @@ export function AdminServicesClient() {
         </div>
       )}
 
-      {/* Services Table */}
-      <div className="rounded-xl bg-[#12151A] border border-[#252A32] overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-[#252A32] text-[11px] font-mono uppercase tracking-wider text-[#777D87] bg-[#0D0F12]">
-                <th className="py-3 px-4">Service</th>
-                <th className="py-3 px-4">Division</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4">Featured</th>
-                <th className="py-3 px-4">Order</th>
-                <th className="py-3 px-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#252A32] text-sm">
-              {loading ? (
-                <tr>
-                  <td colSpan={6} className="p-8 text-center text-xs font-mono text-[#777D87]">
-                    Loading services...
-                  </td>
-                </tr>
-              ) : servicesList.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="p-8 text-center text-xs text-[#777D87]">
-                    No services found.
-                  </td>
-                </tr>
-              ) : (
-                servicesList.map((svc) => (
-                  <tr key={svc.id} className="hover:bg-[#161A20]">
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-3">
-                        {svc.coverAssetUrl ? (
-                          /* eslint-disable-next-line @next/next/no-img-element */
-                          <img
-                            src={svc.coverAssetUrl}
-                            alt={svc.title}
-                            className="w-10 h-10 rounded-lg object-cover border border-[#252A32] shrink-0"
-                          />
-                        ) : (
-                          <div className="w-10 h-10 rounded-lg bg-[#0D0F12] border border-[#252A32] flex items-center justify-center text-[#777D87] shrink-0">
-                            <ImageIcon className="w-4 h-4" />
-                          </div>
+      {/* Grid View (Default matching mockup) */}
+      {viewMode === "grid" ? (
+        loading ? (
+          <div className="py-14 text-center text-xs font-mono text-[#777D87]">
+            Loading services...
+          </div>
+        ) : servicesList.length === 0 ? (
+          <div className="p-12 rounded-2xl bg-[#111419] border border-[#1E222A] text-center space-y-2">
+            <p className="text-sm text-[#F5F3EE]">No services found.</p>
+            <p className="text-xs text-[#777D87]">
+              Adjust filters or click Add Service to create a studio offering.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+            {servicesList.map((svc) => {
+              const Icon = getServiceIcon(svc.iconName, svc.divisionSlug);
+              const delivCount = Array.isArray(svc.deliverables)
+                ? svc.deliverables.length
+                : 0;
+
+              return (
+                <article
+                  key={svc.id}
+                  className="group rounded-2xl bg-[#111419] border border-[#1E222A] hover:border-[#D6B77A]/40 transition-colors overflow-hidden flex flex-col justify-between relative"
+                >
+                  {/* Subtle Card Header Texture */}
+                  <div className="relative p-4 pb-3 bg-gradient-to-br from-[#1C170F]/60 via-[#111419] to-[#0B0D10]">
+                    {svc.coverAssetUrl && (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img
+                        src={svc.coverAssetUrl}
+                        alt={svc.title}
+                        className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none"
+                      />
+                    )}
+                    <div className="relative z-10 flex items-center justify-between gap-2">
+                      <span
+                        className={cn(
+                          "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border",
+                          svc.status === "published"
+                            ? "bg-[#0D2117]/85 text-[#7CD69F] border-[#54C99A]/40"
+                            : svc.status === "draft"
+                              ? "bg-[#241D11]/85 text-[#D6B77A] border-[#D6B77A]/40"
+                              : "bg-[#15181F]/85 text-[#9CA3AF] border-[#252A32]"
                         )}
-                        <div>
-                          <div className="font-medium text-[#F5F3EE]">{svc.title}</div>
-                          <div className="text-xs font-mono text-[#777D87]">
-                            /{svc.slug}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-3.5 px-4 text-xs text-[#B2B4BA]">
-                      {svc.divisionName}
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <Badge
-                        variant={svc.status === "published" ? "accent" : "default"}
                       >
-                        {svc.status}
-                      </Badge>
-                    </td>
-                    <td className="py-3.5 px-4 text-xs text-[#B2B4BA]">
-                      {svc.isFeatured ? "Featured" : "Standard"}
-                    </td>
-                    <td className="py-3.5 px-4 font-mono text-xs text-[#777D87]">
-                      #{svc.displayOrder}
-                    </td>
-                    <td className="py-3.5 px-4 text-right">
+                        <span
+                          className={cn(
+                            "w-1.5 h-1.5 rounded-full",
+                            svc.status === "published"
+                              ? "bg-[#7CD69F]"
+                              : svc.status === "draft"
+                                ? "bg-[#D6B77A]"
+                                : "bg-[#9CA3AF]"
+                          )}
+                        />
+                        <span className="capitalize">{svc.status}</span>
+                      </span>
+
                       {canEdit && (
-                        <div className="inline-flex items-center gap-1.5">
+                        <div className="relative">
                           <button
                             type="button"
-                            onClick={() => openEditModal(svc.id)}
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#191D23] border border-[#252A32] text-xs text-[#F5F3EE] hover:border-[#D6B77A] cursor-pointer"
+                            onClick={() =>
+                              setOpenMenuId(
+                                openMenuId === svc.id ? null : svc.id
+                              )
+                            }
+                            aria-label={`Actions for ${svc.title}`}
+                            className="w-7 h-7 rounded-md bg-[#0B0D10]/70 border border-[#252A32] text-[#B2B4BA] hover:text-white flex items-center justify-center cursor-pointer"
                           >
-                            <Edit3 className="w-3.5 h-3.5" />
-                            <span>Edit</span>
+                            <MoreHorizontal className="w-4 h-4" />
                           </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteService(svc)}
-                            aria-label={`Delete ${svc.title}`}
-                            className="p-1.5 rounded-lg text-[#777D87] hover:text-[#F28B82] hover:bg-[#2A1414] cursor-pointer"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+
+                          {openMenuId === svc.id && (
+                            <div className="absolute right-0 top-9 w-40 py-1.5 rounded-xl bg-[#14181F] border border-[#252A32] shadow-2xl text-xs z-30">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setOpenMenuId(null);
+                                  openEditModal(svc.id);
+                                }}
+                                className="w-full px-3.5 py-2 text-left text-[#D6B77A] hover:bg-[#1C212B] flex items-center gap-2 cursor-pointer"
+                              >
+                                <Edit3 className="w-3.5 h-3.5" />
+                                <span>Edit Service</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setOpenMenuId(null);
+                                  handleDeleteService(svc);
+                                }}
+                                className="w-full px-3.5 py-2 text-left text-[#F28B82] hover:bg-[#2A1414] flex items-center gap-2 cursor-pointer"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                                <span>Delete</span>
+                              </button>
+                            </div>
+                          )}
                         </div>
                       )}
+                    </div>
+                  </div>
+
+                  {/* Card Body */}
+                  <div className="px-4 pb-4 flex-1 flex flex-col justify-between gap-4">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-[#1A160E] border border-[#D6B77A]/30 text-[#D6B77A] flex items-center justify-center shrink-0 mt-0.5">
+                        <Icon className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0 flex-1 space-y-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <button
+                            type="button"
+                            onClick={() => canEdit && openEditModal(svc.id)}
+                            className="text-left font-heading font-semibold text-[15px] text-[#F5F3EE] hover:text-[#D6B77A] transition-colors line-clamp-1 cursor-pointer"
+                          >
+                            {svc.title}
+                          </button>
+                          <Link
+                            href={`/services/${svc.divisionSlug}`}
+                            target="_blank"
+                            aria-label={`View ${svc.divisionName} services page`}
+                            className="text-[#777D87] hover:text-[#F5F3EE] shrink-0 mt-0.5"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </Link>
+                        </div>
+                        <p className="text-xs text-[#8D939E] line-clamp-2 leading-relaxed">
+                          {svc.summary}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Card Footer */}
+                    <div className="pt-3 border-t border-[#1E222A] flex items-center justify-between gap-2 text-[11px]">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span
+                          className={cn(
+                            "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md border font-medium",
+                            getDivisionBadgeClass(svc.divisionSlug)
+                          )}
+                        >
+                          {svc.divisionName}
+                        </span>
+                        <span className="font-mono text-[#777D87] truncate">
+                          {delivCount > 0
+                            ? `${delivCount} deliverables`
+                            : `/${svc.slug}`}
+                        </span>
+                      </div>
+                      <span className="font-mono text-[#6D7480] shrink-0">
+                        #{svc.displayOrder}
+                      </span>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )
+      ) : (
+        /* List View Table */
+        <div className="rounded-xl bg-[#111419] border border-[#1E222A] overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-[#1E222A] text-[11px] font-mono uppercase tracking-wider text-[#6D7480] bg-[#0B0D10]">
+                  <th className="py-3 px-4">Service</th>
+                  <th className="py-3 px-4">Division</th>
+                  <th className="py-3 px-4">Status</th>
+                  <th className="py-3 px-4">Featured</th>
+                  <th className="py-3 px-4">Order</th>
+                  <th className="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#1E222A] text-sm">
+                {loading ? (
+                  <tr>
+                    <td
+                      colSpan={6}
+                      className="p-8 text-center text-xs font-mono text-[#777D87]"
+                    >
+                      Loading services...
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : servicesList.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={6}
+                      className="p-8 text-center text-xs text-[#777D87]"
+                    >
+                      No services found.
+                    </td>
+                  </tr>
+                ) : (
+                  servicesList.map((svc) => (
+                    <tr key={svc.id} className="hover:bg-[#151920]">
+                      <td className="py-3.5 px-4">
+                        <div className="flex items-center gap-3">
+                          {svc.coverAssetUrl ? (
+                            /* eslint-disable-next-line @next/next/no-img-element */
+                            <img
+                              src={svc.coverAssetUrl}
+                              alt={svc.title}
+                              className="w-10 h-10 rounded-lg object-cover border border-[#252A32] shrink-0"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 rounded-lg bg-[#0D0F12] border border-[#252A32] flex items-center justify-center text-[#777D87] shrink-0">
+                              <ImageIcon className="w-4 h-4" />
+                            </div>
+                          )}
+                          <div>
+                            <div className="font-medium text-[#F5F3EE]">
+                              {svc.title}
+                            </div>
+                            <div className="text-xs font-mono text-[#777D87]">
+                              /{svc.slug}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-3.5 px-4 text-xs text-[#B2B4BA]">
+                        {svc.divisionName}
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <Badge
+                          variant={
+                            svc.status === "published" ? "accent" : "default"
+                          }
+                        >
+                          {svc.status}
+                        </Badge>
+                      </td>
+                      <td className="py-3.5 px-4 text-xs text-[#B2B4BA]">
+                        {svc.isFeatured ? "Featured" : "Standard"}
+                      </td>
+                      <td className="py-3.5 px-4 font-mono text-xs text-[#777D87]">
+                        #{svc.displayOrder}
+                      </td>
+                      <td className="py-3.5 px-4 text-right">
+                        {canEdit && (
+                          <div className="inline-flex items-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => openEditModal(svc.id)}
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#191D23] border border-[#252A32] text-xs text-[#F5F3EE] hover:border-[#D6B77A] cursor-pointer"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                              <span>Edit</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteService(svc)}
+                              aria-label={`Delete ${svc.title}`}
+                              className="p-1.5 rounded-lg text-[#777D87] hover:text-[#F28B82] hover:bg-[#2A1414] cursor-pointer"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Pagination Footer */}
+      <div className="px-4 py-3 rounded-xl bg-[#111419] border border-[#1E222A] flex flex-wrap items-center justify-between gap-4 text-xs text-[#8D939E]">
+        <div>
+          Showing {startIdx}–{endIdx} of {totalFiltered} services
+        </div>
+
+        <div className="flex items-center gap-4">
+          <label className="inline-flex items-center gap-2">
+            <span>Rows per page</span>
+            <select
+              value={rowsPerPage}
+              onChange={(e) => {
+                setRowsPerPage(Number(e.target.value));
+                setPageNum(1);
+              }}
+              className="h-8 px-2 rounded bg-[#0B0D10] border border-[#1E222A] text-xs text-[#F5F3EE]"
+            >
+              <option value={6}>6</option>
+              <option value={12}>12</option>
+              <option value={24}>24</option>
+            </select>
+          </label>
+
+          <div className="inline-flex items-center gap-1">
+            <button
+              type="button"
+              disabled={pageNum <= 1}
+              onClick={() => setPageNum((p) => Math.max(1, p - 1))}
+              className="w-8 h-8 rounded-md bg-[#0B0D10] border border-[#1E222A] flex items-center justify-center disabled:opacity-40 cursor-pointer"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </button>
+            <span className="w-8 h-8 rounded-md bg-[#D6B77A] text-[#08090B] font-semibold flex items-center justify-center">
+              {pageNum}
+            </span>
+            <button
+              type="button"
+              disabled={pageNum >= totalPages}
+              onClick={() => setPageNum((p) => Math.min(totalPages, p + 1))}
+              className="w-8 h-8 rounded-md bg-[#0B0D10] border border-[#1E222A] flex items-center justify-center disabled:opacity-40 cursor-pointer"
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
       </div>
 
