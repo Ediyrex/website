@@ -136,6 +136,7 @@ export const ALLOWED_MEDIA_MIME_TYPES = [
   "image/gif",
   "video/mp4",
   "video/webm",
+  "application/pdf",
 ] as const;
 
 export const MAX_MEDIA_UPLOAD_BYTES = 10 * 1024 * 1024; // 10 MB
@@ -304,5 +305,106 @@ export const cmsPageUpsertSchema = z.object({
   canonicalUrl: optionalSafeText(300),
   noIndex: z.boolean().default(false),
   displayOrder: z.coerce.number().int().min(0).max(9999).default(0),
+});
+
+export const seoEntryPatchSchema = z.object({
+  kind: z.enum(["page", "portfolio", "service", "blog"]),
+  id: z.string().uuid("Invalid entry identifier."),
+  slug: z.string().trim().min(1).max(200).optional(),
+  seoTitle: optionalSafeText(160),
+  seoDescription: optionalSafeText(320),
+  ogTitle: optionalSafeText(160),
+  ogDescription: optionalSafeText(320),
+  ogImageAssetId: z.string().uuid().optional().nullable(),
+  canonicalUrl: optionalSafeText(300),
+  robotsDirective: z
+    .enum([
+      "index, follow",
+      "noindex, follow",
+      "index, nofollow",
+      "noindex, nofollow",
+    ])
+    .optional(),
+  schemaType: safeText(60, 2).optional(),
+  schemaJson: optionalSafeText(10000),
+  noIndex: z.boolean().optional(),
+});
+
+export const seoBulkPatchSchema = z.object({
+  items: z
+    .array(
+      z.object({
+        kind: z.enum(["page", "portfolio", "service", "blog"]),
+        id: z.string().uuid(),
+      })
+    )
+    .min(1)
+    .max(100),
+  action: z.enum(["set_robots", "set_schema"]),
+  robotsDirective: z
+    .enum([
+      "index, follow",
+      "noindex, follow",
+      "index, nofollow",
+      "noindex, nofollow",
+    ])
+    .optional(),
+  schemaType: safeText(60, 2).optional(),
+});
+
+export const seoRedirectUpsertSchema = z.object({
+  source: z
+    .string()
+    .trim()
+    .min(1)
+    .max(300)
+    .refine(
+      (val) => val.startsWith("/") && !val.startsWith("//"),
+      "Source path must start with a single '/'."
+    ),
+  destination: z
+    .string()
+    .trim()
+    .min(1, "Destination URL or path is required.")
+    .max(500)
+    .refine((val) => {
+      if (val.startsWith("/")) return !val.startsWith("//");
+      try {
+        const parsed = new URL(val);
+        return parsed.protocol === "https:" || parsed.protocol === "http:";
+      } catch {
+        return false;
+      }
+    }, "Destination must start with https://, http://, or /"),
+  statusCode: z.coerce
+    .number()
+    .int()
+    .refine((n) => n === 301 || n === 302, "Status code must be 301 or 302."),
+  isActive: z.boolean().default(true),
+  note: optionalSafeText(240),
+});
+
+export const seoTechConfigSchema = z.object({
+  robots: z
+    .object({
+      allowIndex: z.boolean(),
+      disallowPaths: z.array(safeText(200, 1)).max(50),
+      allowPaths: z.array(safeText(200, 1)).max(50),
+      customRules: optionalSafeText(2000),
+    })
+    .optional(),
+  schema: z
+    .object({
+      orgName: safeText(140, 2),
+      orgUrl: safeHttpOrRelativeUrlSchema.refine(
+        (val): val is string => typeof val === "string" && val.length > 0,
+        "Organization URL is required."
+      ),
+      orgEmail: z.string().trim().email().max(180),
+      orgDescription: safeText(400, 5),
+      areaServed: safeText(120, 2),
+      knowsAbout: z.array(safeText(120, 1)).max(25),
+    })
+    .optional(),
 });
 

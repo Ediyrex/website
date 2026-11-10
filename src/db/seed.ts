@@ -13,6 +13,7 @@ import {
   siteSettings,
   cmsPages,
   blogCategories,
+  seoRedirects,
 } from "./index";
 import { SERVICES_DATA } from "../features/services/data";
 import { PROJECTS_DATA } from "../features/work/data";
@@ -439,6 +440,27 @@ async function runSeed() {
         .insert(blogCategories)
         .values(cat)
         .onConflictDoNothing({ target: blogCategories.slug });
+    }
+
+    // 9. Seed Active SEO Redirects (matches next.config.ts aliases)
+    const defaultRedirects = [
+      { source: "/home", destination: "/", statusCode: 301, note: "Legacy home alias" },
+      { source: "/portfolio", destination: "/work", statusCode: 301, note: "Portfolio route alias" },
+      { source: "/projects", destination: "/work", statusCode: 301, note: "Projects listing alias" },
+      { source: "/projects/:slug", destination: "/work/:slug", statusCode: 301, note: "Project detail alias" },
+      { source: "/service/:division", destination: "/services/:division", statusCode: 301, note: "Singular service route" },
+      { source: "/services/branding-marketing", destination: "/services/branding", statusCode: 301, note: "Division canonical" },
+      { source: "/services/web-dev", destination: "/services/digital", statusCode: 301, note: "Division canonical" },
+      { source: "/services/agents-and-automation", destination: "/services/ai", statusCode: 301, note: "Division canonical" },
+      { source: "/privacy-policy", destination: "/privacy", statusCode: 301, note: "Legal alias" },
+      { source: "/terms-and-conditions", destination: "/terms", statusCode: 301, note: "Legal alias" },
+    ];
+
+    for (const redir of defaultRedirects) {
+      await tx
+        .insert(seoRedirects)
+        .values({ ...redir, isActive: true })
+        .onConflictDoNothing({ target: seoRedirects.source });
     }
   });
 

@@ -67,6 +67,14 @@ export const services = pgTable(
     ogImageAssetId: uuid("og_image_asset_id").references(() => mediaAssets.id, {
       onDelete: "set null",
     }),
+    canonicalUrl: varchar("canonical_url", { length: 300 }),
+    robotsDirective: varchar("robots_directive", { length: 60 })
+      .notNull()
+      .default("index, follow"),
+    schemaType: varchar("schema_type", { length: 60 })
+      .notNull()
+      .default("Service"),
+    schemaJson: text("schema_json"),
     noIndex: boolean("no_index").notNull().default(false),
     publishedAt: timestamp("published_at", {
       withTimezone: true,
@@ -119,6 +127,14 @@ export const projects = pgTable(
     ogImageAssetId: uuid("og_image_asset_id").references(() => mediaAssets.id, {
       onDelete: "set null",
     }),
+    canonicalUrl: varchar("canonical_url", { length: 300 }),
+    robotsDirective: varchar("robots_directive", { length: 60 })
+      .notNull()
+      .default("index, follow"),
+    schemaType: varchar("schema_type", { length: 60 })
+      .notNull()
+      .default("CreativeWork"),
+    schemaJson: text("schema_json"),
     noIndex: boolean("no_index").notNull().default(false),
     publishedAt: timestamp("published_at", {
       withTimezone: true,

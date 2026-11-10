@@ -43,6 +43,13 @@
       "when": 1794310672953,
       "tag": "0005_media_folders_and_tags",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794313619203,
+      "tag": "0006_seo_management_complete",
+      "breakpoints": true
     }
   ]
 }

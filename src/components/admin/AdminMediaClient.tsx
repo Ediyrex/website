@@ -162,7 +162,7 @@ export function AdminMediaClient() {
   const [bulkWorking, setBulkWorking] = useState(false);
 
   const fetchMediaAssets = useCallback(async () => {
-    const params = new URLSearchParams({ limit: "60", sort: sortBy });
+    const params = new URLSearchParams({ limit: "48", sort: sortBy });
     if (query.trim()) params.set("q", query.trim());
     if (typeFilter) params.set("type", typeFilter);
     if (activeFolder) params.set("folder", activeFolder);

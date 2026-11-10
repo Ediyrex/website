@@ -86,11 +86,12 @@ export default function RootLayout({
     email: SITE_CONFIG.contact.email,
     areaServed: "Global",
     description:
-      "Independent creative technology studio uniting commercial media production, digital experiences, and intelligent AI systems.",
+      "Independent creative technology studio uniting branding & marketing, media production, web dev & DADV, and AI agents & n8n automation.",
     knowsAbout: [
-      "Media Production",
-      "Web Design & Full-Stack Engineering",
-      "AI Agents & Workflow Automation",
+      "Branding & Marketing",
+      "Media & Video Editing",
+      "Web Dev & DADV Dashboards",
+      "AI Agents & n8n Automation",
     ],
   };
 

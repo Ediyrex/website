@@ -86,7 +86,20 @@ export const blogPosts = pgTable(
     status: publicationStatusEnum("status").notNull().default("draft"),
     seoTitle: varchar("seo_title", { length: 160 }),
     seoDescription: varchar("seo_description", { length: 320 }),
+    ogTitle: varchar("og_title", { length: 160 }),
+    ogDescription: varchar("og_description", { length: 320 }),
+    ogImageAssetId: uuid("og_image_asset_id").references(() => mediaAssets.id, {
+      onDelete: "set null",
+    }),
     canonicalUrl: text("canonical_url"),
+    robotsDirective: varchar("robots_directive", { length: 60 })
+      .notNull()
+      .default("index, follow"),
+    schemaType: varchar("schema_type", { length: 60 })
+      .notNull()
+      .default("Article"),
+    schemaJson: text("schema_json"),
+    noIndex: boolean("no_index").notNull().default(false),
     publishedAt: timestamp("published_at", {
       withTimezone: true,
       mode: "date",
@@ -286,7 +299,19 @@ export const cmsPages = pgTable(
     status: publicationStatusEnum("status").notNull().default("published"),
     seoTitle: varchar("seo_title", { length: 160 }),
     seoDescription: varchar("seo_description", { length: 320 }),
+    ogTitle: varchar("og_title", { length: 160 }),
+    ogDescription: varchar("og_description", { length: 320 }),
+    ogImageAssetId: uuid("og_image_asset_id").references(() => mediaAssets.id, {
+      onDelete: "set null",
+    }),
     canonicalUrl: varchar("canonical_url", { length: 300 }),
+    robotsDirective: varchar("robots_directive", { length: 60 })
+      .notNull()
+      .default("index, follow"),
+    schemaType: varchar("schema_type", { length: 60 })
+      .notNull()
+      .default("WebPage"),
+    schemaJson: text("schema_json"),
     noIndex: boolean("no_index").notNull().default(false),
     displayOrder: integer("display_order").notNull().default(0),
     updatedByUserId: uuid("updated_by_user_id").references(() => users.id, {
@@ -310,6 +335,27 @@ export const cmsPages = pgTable(
     ),
     check("chk_cms_pages_order", sql`${table.displayOrder} >= 0`),
     index("idx_cms_pages_status_order").on(table.status, table.displayOrder),
+  ]
+);
+
+export const seoRedirects = pgTable(
+  "seo_redirects",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    source: varchar("source", { length: 300 }).notNull().unique(),
+    destination: varchar("destination", { length: 500 }).notNull(),
+    statusCode: integer("status_code").notNull().default(301),
+    isActive: boolean("is_active").notNull().default(true),
+    note: varchar("note", { length: 240 }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    check("chk_seo_redirect_status", sql`${table.statusCode} IN (301, 302)`),
   ]
 );
 
