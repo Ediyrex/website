@@ -60,3 +60,18 @@ ediyrex/
 2. **First In-House SaaS Launch**: When the first proprietary product is ready for development as an independent web application and needs to share components, auth, and AI libraries with the agency.
 3. **Multi-Team Growth**: When client-facing web teams and product engineering teams work on different deployment cadences.
 
+---
+
+## Log Entry: 2026-11-10 — Phase 7 Backend & Database Stack Selection
+
+**Status**: Accepted  
+**Repository Mode**: Unified Next.js App at root (`src/app/api/v1/` and `src/db/`) — removed unused `apps/` and `packages/` monorepo folders per Option 1 selection.
+
+### Selected Stack
+- **Database**: PostgreSQL 18 (local development)
+- **ORM & Migrations**: Drizzle ORM + `postgres` driver + `drizzle-kit` SQL migrations (`src/db/migrations/`)
+- **Schema Validation**: Zod (`src/lib/validations/`)
+- **Structured Logging**: Pino (`src/lib/server/logger.ts`) with sensitive key redaction
+- **Testing**: Vitest (`npm test`)
+
+

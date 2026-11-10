@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1794294336499,
+      "tag": "0000_init_ediyrex_schema",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794294353571,
+      "tag": "0001_updated_at_triggers",
+      "breakpoints": true
+    }
+  ]
+}
