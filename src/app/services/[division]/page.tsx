@@ -5,6 +5,7 @@ import { ArrowLeft, ArrowUpRight, CheckCircle2 } from "lucide-react";
 import { SERVICES_DATA } from "@/features/services/data";
 import { PROJECTS_DATA } from "@/features/work/data";
 import { ServiceDivision } from "@/types";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { ProcessSection } from "@/components/sections/ProcessSection";
@@ -84,6 +85,9 @@ export async function generateMetadata({
   return {
     title: config.title,
     description: config.description,
+    alternates: {
+      canonical: `/services/${division}`,
+    },
   };
 }
 
@@ -111,6 +115,13 @@ export default async function DivisionDetailPage({ params }: DivisionPageProps) 
         style={{ backgroundImage: config.gradient }}
       >
         <div className="max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-12 space-y-8">
+          <Breadcrumbs
+            items={[
+              { label: "Home", href: "/" },
+              { label: "Services", href: "/services" },
+              { label: config.title },
+            ]}
+          />
           <Link
             href="/services"
             className="inline-flex items-center gap-2 text-xs font-mono text-[#B2B4BA] hover:text-[#F5F3EE] transition-colors"

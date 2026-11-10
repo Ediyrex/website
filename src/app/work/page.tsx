@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { WorkGallery } from "@/components/sections/WorkGallery";
 import { FinalCtaSection } from "@/components/sections/FinalCtaSection";
 
@@ -8,6 +9,9 @@ export const metadata: Metadata = {
   title: "Work & Case Studies",
   description:
     "Selected blueprints, explorations, and case studies across Media, Digital, and AI by Ediyrex Studio.",
+  alternates: {
+    canonical: "/work",
+  },
 };
 
 export default function WorkPage() {
@@ -17,6 +21,12 @@ export default function WorkPage() {
         <div className="max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-12 space-y-12">
           {/* Header */}
           <div className="max-w-3xl space-y-5">
+            <Breadcrumbs
+              items={[
+                { label: "Home", href: "/" },
+                { label: "Work & Case Studies" },
+              ]}
+            />
             <div className="flex flex-wrap items-center gap-2.5">
               <Badge variant="accent">Portfolio &amp; Case Studies</Badge>
               <Badge variant="concept">

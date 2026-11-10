@@ -1,6 +1,13 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+
+export const metadata: Metadata = {
+  title: "Page Not Found (404)",
+  description: "The requested Ediyrex Studio page could not be found.",
+  robots: { index: false, follow: true },
+};
 
 export default function NotFound() {
   return (
@@ -22,13 +29,24 @@ export default function NotFound() {
           </Button>
           <Link
             href="/services"
-            className="text-sm font-medium text-[#B2B4BA] hover:text-[#F5F3EE] px-4 py-2 transition-colors"
+            className="text-sm font-medium text-[#B2B4BA] hover:text-[#F5F3EE] px-3 py-2 transition-colors"
           >
-            Browse Services
+            Services
+          </Link>
+          <Link
+            href="/work"
+            className="text-sm font-medium text-[#B2B4BA] hover:text-[#F5F3EE] px-3 py-2 transition-colors"
+          >
+            Selected Work
+          </Link>
+          <Link
+            href="/contact"
+            className="text-sm font-medium text-[#D6B77A] hover:text-[#E6CC99] px-3 py-2 transition-colors"
+          >
+            Book a Call
           </Link>
         </div>
       </div>
     </div>
   );
 }
-

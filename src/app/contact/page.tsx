@@ -1,12 +1,16 @@
 import React, { Suspense } from "react";
 import type { Metadata } from "next";
 import { Badge } from "@/components/ui/Badge";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { EnquirySection } from "@/components/sections/EnquirySection";
 
 export const metadata: Metadata = {
   title: "Contact & Discovery Call",
   description:
     "Book a discovery call or submit a project enquiry to Ediyrex Studio for Media, Digital, or AI work.",
+  alternates: {
+    canonical: "/contact",
+  },
 };
 
 export default function ContactPage() {
@@ -21,6 +25,12 @@ export default function ContactPage() {
         }}
       >
         <div className="max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-12 space-y-4">
+          <Breadcrumbs
+            items={[
+              { label: "Home", href: "/" },
+              { label: "Contact" },
+            ]}
+          />
           <Badge variant="accent">Contact</Badge>
           <h1 className="font-heading font-bold tracking-tight text-[#F5F3EE] text-[clamp(2.5rem,5vw,4.25rem)] leading-[1.06]">
             Book a discovery call

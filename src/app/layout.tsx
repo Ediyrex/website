@@ -52,6 +52,9 @@ export const metadata: Metadata = {
     "RAG Systems",
   ],
   authors: [{ name: "Ediyrex Studio" }],
+  verification: SITE_CONFIG.verification.google
+    ? { google: SITE_CONFIG.verification.google }
+    : undefined,
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -59,12 +62,14 @@ export const metadata: Metadata = {
     title: "Ediyrex Studio — Creative Technology, Media, Digital & AI",
     description:
       "From visual storytelling and digital products to intelligent automation, Ediyrex brings creativity and technology together to build what comes next.",
+    images: ["/opengraph-image"],
   },
   twitter: {
     card: "summary_large_image",
     title: "Ediyrex Studio — Creative Technology, Media, Digital & AI",
     description:
       "One integrated partner for visual storytelling, full-stack digital products, and intelligent AI systems.",
+    images: ["/twitter-image"],
   },
 };
 
@@ -73,12 +78,34 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: SITE_CONFIG.name,
+    url: SITE_CONFIG.url,
+    email: SITE_CONFIG.contact.email,
+    areaServed: "Global",
+    description:
+      "Independent creative technology studio uniting commercial media production, digital experiences, and intelligent AI systems.",
+    knowsAbout: [
+      "Media Production",
+      "Web Design & Full-Stack Engineering",
+      "AI Agents & Workflow Automation",
+    ],
+  };
+
   return (
     <html
       lang="en"
       className={`${manrope.variable} ${inter.variable} ${ibmPlexMono.variable} h-full antialiased dark scroll-smooth`}
     >
       <body className="min-h-full flex flex-col bg-[#08090B] text-[#F5F3EE] selection:bg-[#D6B77A]/25 selection:text-[#F5F3EE]">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationSchema),
+          }}
+        />
         <PublicShell>{children}</PublicShell>
       </body>
     </html>

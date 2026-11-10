@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
   description:
     "Terms governing use of the Ediyrex Studio website and informational materials.",
+  alternates: {
+    canonical: "/terms",
+  },
 };
 
 export default function TermsPage() {
@@ -13,6 +17,12 @@ export default function TermsPage() {
     <div className="pt-32 pb-24 bg-[#08090B] min-h-screen">
       <div className="max-w-3xl mx-auto px-5 sm:px-8 space-y-10">
         <div>
+          <Breadcrumbs
+            items={[
+              { label: "Home", href: "/" },
+              { label: "Terms of Service" },
+            ]}
+          />
           <Link
             href="/"
             className="inline-flex items-center gap-2 text-xs font-mono text-[#B2B4BA] hover:text-[#F5F3EE] transition-colors"

@@ -97,6 +97,8 @@ export function WorkGallery() {
                     alt={project.coverAlt || project.title}
                     width={800}
                     height={500}
+                    loading="lazy"
+                    sizes="(max-width: 768px) 100vw, 50vw"
                     className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
                   />
                   <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between">

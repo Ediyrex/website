@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { PROJECTS_DATA } from "@/features/work/data";
 import { Badge } from "@/components/ui/Badge";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Button } from "@/components/ui/Button";
 
 type CaseStudyPageProps = {
@@ -42,6 +43,14 @@ export async function generateMetadata({
   return {
     title: project.title,
     description: project.summary,
+    alternates: {
+      canonical: `/work/${slug}`,
+    },
+    openGraph: {
+      title: project.title,
+      description: project.summary,
+      images: [project.coverImage],
+    },
   };
 }
 
@@ -64,6 +73,13 @@ export default async function CaseStudyDetailPage({
   return (
     <div className="pt-32 pb-24 bg-[#08090B] min-h-screen">
       <div className="max-w-4xl mx-auto px-5 sm:px-8 space-y-12">
+        <Breadcrumbs
+          items={[
+            { label: "Home", href: "/" },
+            { label: "Work", href: "/work" },
+            { label: project.title },
+          ]}
+        />
         {/* Back link */}
         <div>
           <Link

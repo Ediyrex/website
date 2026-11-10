@@ -10,6 +10,9 @@ export const metadata: Metadata = {
   title: "Enquiry Received",
   description:
     "Thank you for contacting Ediyrex Studio. Review your submission confirmation and next steps.",
+  alternates: {
+    canonical: "/thank-you",
+  },
   robots: {
     index: false,
     follow: false,

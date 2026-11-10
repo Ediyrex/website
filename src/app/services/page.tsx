@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ArrowUpRight } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Button } from "@/components/ui/Button";
 import { ThreeDivisionsSection } from "@/components/sections/ThreeDivisionsSection";
 import { ServiceDivisionTabs } from "@/components/sections/ServiceDivisionTabs";
@@ -12,6 +13,9 @@ export const metadata: Metadata = {
   title: "Services",
   description:
     "Explore Ediyrex Studio's integrated capabilities across Media, Digital, and Artificial Intelligence.",
+  alternates: {
+    canonical: "/services",
+  },
 };
 
 export default function ServicesPage() {
@@ -27,6 +31,12 @@ export default function ServicesPage() {
       >
         <div className="max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-12">
           <div className="max-w-3xl space-y-6">
+            <Breadcrumbs
+              items={[
+                { label: "Home", href: "/" },
+                { label: "Services" },
+              ]}
+            />
             <Badge variant="accent">Capabilities</Badge>
             <h1 className="font-heading font-bold tracking-tight text-[#F5F3EE] text-[clamp(2.5rem,5vw,4.5rem)] leading-[1.06]">
               Three Disciplines. One Integrated Studio.

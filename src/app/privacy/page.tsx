@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description:
     "How Ediyrex Studio collects, processes, and protects project enquiry information.",
+  alternates: {
+    canonical: "/privacy",
+  },
 };
 
 export default function PrivacyPolicyPage() {
@@ -13,6 +17,12 @@ export default function PrivacyPolicyPage() {
     <div className="pt-32 pb-24 bg-[#08090B] min-h-screen">
       <div className="max-w-3xl mx-auto px-5 sm:px-8 space-y-10">
         <div>
+          <Breadcrumbs
+            items={[
+              { label: "Home", href: "/" },
+              { label: "Privacy Policy" },
+            ]}
+          />
           <Link
             href="/"
             className="inline-flex items-center gap-2 text-xs font-mono text-[#B2B4BA] hover:text-[#F5F3EE] transition-colors"

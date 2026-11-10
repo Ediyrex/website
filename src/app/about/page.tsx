@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ArrowUpRight, Cpu, Film, Globe } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Button } from "@/components/ui/Button";
 import { HybridModelSection } from "@/components/sections/HybridModelSection";
 import { TrustSection } from "@/components/sections/TrustSection";
@@ -10,6 +11,9 @@ export const metadata: Metadata = {
   title: "About",
   description:
     "About Ediyrex Studio: an independent creative technology studio uniting Media, Digital, and Artificial Intelligence.",
+  alternates: {
+    canonical: "/about",
+  },
 };
 
 export default function AboutPage() {
@@ -25,6 +29,12 @@ export default function AboutPage() {
       >
         <div className="max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-12">
           <div className="max-w-3xl space-y-6">
+            <Breadcrumbs
+              items={[
+                { label: "Home", href: "/" },
+                { label: "About" },
+              ]}
+            />
             <Badge variant="accent">About Ediyrex</Badge>
             <h1 className="font-heading font-bold tracking-tight text-[#F5F3EE] text-[clamp(2.5rem,5vw,4.5rem)] leading-[1.06]">
               One integrated studio for creativity, technology and intelligence.

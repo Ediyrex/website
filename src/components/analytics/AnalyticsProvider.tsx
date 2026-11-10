@@ -17,17 +17,34 @@ export function AnalyticsProvider() {
     return () => window.removeEventListener("ediyrex:consent-updated", sync);
   }, []);
 
-  if (!analyticsAllowed || !SITE_CONFIG.analytics.plausibleDomain) {
+  if (!analyticsAllowed) {
     return null;
   }
 
+  const gaId = SITE_CONFIG.analytics.gaMeasurementId;
+  const plausibleDomain = SITE_CONFIG.analytics.plausibleDomain;
+
   return (
-    <Script
-      defer
-      data-domain={SITE_CONFIG.analytics.plausibleDomain}
-      src="https://plausible.io/js/script.js"
-      strategy="afterInteractive"
-    />
+    <>
+      {plausibleDomain && (
+        <Script
+          defer
+          data-domain={plausibleDomain}
+          src="https://plausible.io/js/script.js"
+          strategy="afterInteractive"
+        />
+      )}
+      {gaId && (
+        <>
+          <Script
+            src={`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(gaId)}`}
+            strategy="afterInteractive"
+          />
+          <Script id="ediyrex-ga4-init" strategy="afterInteractive">
+            {`window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', ${JSON.stringify(gaId)}, { anonymize_ip: true });`}
+          </Script>
+        </>
+      )}
+    </>
   );
 }
-
