@@ -202,3 +202,4 @@ export async function DELETE(request: NextRequest) {
     return handleApiError(err, "DELETE /api/v1/admin/pms/templates");
   }
 }
+

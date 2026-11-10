@@ -202,28 +202,124 @@ export const mediaBulkActionSchema = z.object({
   tag: safeText(40, 1).optional(),
 });
 
+export const siteSettingsBannerItemSchema = z.object({
+  enabled: z.boolean().default(false),
+  title: safeText(220, 0).default(""),
+  ctaText: safeText(60, 0).default(""),
+  ctaUrl: safeHttpOrRelativeUrlSchema,
+  startAt: optionalSafeText(40),
+  endAt: optionalSafeText(40),
+});
+
+export const siteSettingsSocialProfileSchema = z.object({
+  platform: z.enum([
+    "instagram",
+    "linkedin",
+    "youtube",
+    "facebook",
+    "x",
+    "behance",
+    "dribbble",
+    "github",
+  ]),
+  label: safeText(40, 1),
+  url: safeHttpOrRelativeUrlSchema,
+  visible: z.boolean().default(true),
+  order: z.coerce.number().int().min(0).max(50).default(0),
+});
+
 export const siteSettingsUpdateSchema = z.object({
+  section: z
+    .enum([
+      "all",
+      "general",
+      "seo",
+      "social",
+      "banners",
+      "integrations",
+      "advanced",
+    ])
+    .optional(),
   siteName: safeText(120, 2),
   tagline: safeText(240, 2),
-  businessEmail: z.string().trim().email("Enter a valid business email.").max(180),
+  businessEmail: z
+    .string()
+    .trim()
+    .email("Enter a valid business email.")
+    .max(180),
   phoneNumber: optionalSafeText(60),
   studioLocation: safeText(160, 2),
   officeHours: safeText(160, 2),
+  primaryContactNote: optionalSafeText(240),
   availabilityEnabled: z.boolean().default(true),
   availabilityLabel: safeText(160, 2),
   footerNote: optionalSafeText(500),
   copyrightText: safeText(200, 2),
-  socialLinks: z.object({
-    github: safeHttpOrRelativeUrlSchema,
-    linkedin: safeHttpOrRelativeUrlSchema,
-    instagram: safeHttpOrRelativeUrlSchema,
-    x: safeHttpOrRelativeUrlSchema,
-    youtube: safeHttpOrRelativeUrlSchema,
-  }),
+  defaultLanguage: safeText(24, 2).default("en-US"),
+  defaultTimezone: safeText(64, 2).default("Asia/Kolkata"),
+  logoUrl: safeHttpOrRelativeUrlSchema,
+  faviconUrl: safeHttpOrRelativeUrlSchema,
+  socialLinks: z
+    .object({
+      github: safeHttpOrRelativeUrlSchema,
+      linkedin: safeHttpOrRelativeUrlSchema,
+      instagram: safeHttpOrRelativeUrlSchema,
+      facebook: safeHttpOrRelativeUrlSchema,
+      behance: safeHttpOrRelativeUrlSchema,
+      dribbble: safeHttpOrRelativeUrlSchema,
+      x: safeHttpOrRelativeUrlSchema,
+      youtube: safeHttpOrRelativeUrlSchema,
+    })
+    .optional(),
+  socialProfiles: z.array(siteSettingsSocialProfileSchema).max(16).optional(),
   defaultSeoTitle: safeText(160, 2),
   defaultSeoDescription: safeText(320, 10),
   defaultOgImageUrl: safeHttpOrRelativeUrlSchema,
+  defaultCanonicalBaseUrl: safeHttpOrRelativeUrlSchema,
   robotsAllowIndex: z.boolean().default(true),
+  autoGenerateSitemap: z.boolean().default(true),
+  useDefaultRobots: z.boolean().default(true),
+  socialTwitterCard: z
+    .enum(["summary", "summary_large_image"])
+    .default("summary_large_image"),
+  socialLocale: safeText(20, 2).default("en_US"),
+  banners: z
+    .object({
+      announcement: siteSettingsBannerItemSchema,
+      promotional: siteSettingsBannerItemSchema,
+      defaultOgImageUrl: safeHttpOrRelativeUrlSchema,
+      defaultPlaceholderUrl: safeHttpOrRelativeUrlSchema,
+      fallbackLogoUrl: safeHttpOrRelativeUrlSchema,
+      faviconUrl: safeHttpOrRelativeUrlSchema,
+      defaultThumbnailUrl: safeHttpOrRelativeUrlSchema,
+    })
+    .optional(),
+  integrations: z
+    .object({
+      gaMeasurementId: optionalSafeText(40),
+      gtmContainerId: optionalSafeText(40),
+      gscVerificationCode: optionalSafeText(160),
+      captchaProvider: z
+        .enum(["none", "turnstile", "recaptcha"])
+        .default("none"),
+      captchaSiteKey: optionalSafeText(180),
+      emailFromName: optionalSafeText(120),
+    })
+    .optional(),
+  advanced: z
+    .object({
+      cookieConsentEnabled: z.boolean().default(true),
+      cookieBannerTitle: safeText(120, 2).default("Privacy & Cookies"),
+      cookieBannerDescription: safeText(400, 5).default(
+        "Ediyrex uses essential storage for site functionality and optional privacy-friendly analytics only if you agree."
+      ),
+      defaultConsentMode: z.enum(["essential", "analytics"]).default("essential"),
+      maintenanceMode: z.boolean().default(false),
+      maintenanceMessage: safeText(300, 0).default(
+        "We are performing scheduled studio maintenance and will return shortly."
+      ),
+    })
+    .optional(),
 });
 
 export const enquiryNoteSchema = z.object({
@@ -515,5 +611,96 @@ export const pmsProjectUpdateSchema = z.object({
   dueDateLabel: safeText(64, 1).optional(),
   summary: safeText(4000, 0).optional(),
 });
+
+export const teamInviteCreateSchema = z.object({
+  fullName: safeText(120, 2),
+  email: z.string().trim().email("Valid email address is required.").max(255),
+  studioRole: safeText(64, 2).default("team_member"),
+  department: safeText(80, 2).default("Studio Operations"),
+  jobTitle: optionalSafeText(120),
+  phone: optionalSafeText(40),
+  projectId: z.string().uuid().optional().nullable(),
+  projectRole: safeText(48, 2).default("member"),
+  expiryDays: z.coerce.number().int().min(1).max(90).default(7),
+});
+
+export const teamMemberProfileUpdateSchema = z.object({
+  displayName: safeText(120, 2).optional(),
+  studioRole: safeText(64, 2).optional(),
+  roleName: z.enum(["admin", "editor", "viewer"]).optional(),
+  department: safeText(80, 2).optional(),
+  jobTitle: optionalSafeText(120),
+  phone: optionalSafeText(40),
+  status: z.enum(["invited", "active", "disabled"]).optional(),
+  revokeAllSessions: z.boolean().optional(),
+});
+
+export const teamModulePermissionEntrySchema = z.object({
+  view: z.boolean(),
+  create: z.boolean(),
+  edit: z.boolean(),
+  delete: z.boolean(),
+});
+
+export const teamRolePermissionsPayloadSchema = z.object({
+  modules: z.record(z.string(), teamModulePermissionEntrySchema),
+  capabilities: z.object({
+    publish: z.boolean(),
+    approve: z.boolean(),
+    inviteUsers: z.boolean(),
+    manageBilling: z.boolean(),
+    viewConfidential: z.boolean(),
+  }),
+});
+
+export const teamRolePermissionsSaveSchema = z.object({
+  key: safeText(64, 2),
+  name: safeText(80, 2).optional(),
+  description: optionalSafeText(300),
+  baseRole: z.enum(["admin", "editor", "viewer"]).optional(),
+  permissions: teamRolePermissionsPayloadSchema,
+});
+
+export const teamCustomRoleCreateSchema = z.object({
+  key: z
+    .string()
+    .trim()
+    .min(2)
+    .max(48)
+    .regex(/^[a-z0-9_]+$/, "Role key must use lowercase letters, numbers, and underscores."),
+  name: safeText(80, 2),
+  description: safeText(300, 3),
+  baseRole: z.enum(["admin", "editor", "viewer"]).default("editor"),
+  permissions: teamRolePermissionsPayloadSchema.optional(),
+});
+
+export const accessGroupActionSchema = z.discriminatedUnion("action", [
+  z.object({
+    action: z.literal("create_group"),
+    name: safeText(80, 2),
+    division: safeText(48, 2).default("Studio"),
+    description: safeText(300, 0).default(""),
+    defaultStudioRole: safeText(64, 2).default("team_member"),
+  }),
+  z.object({
+    action: z.literal("add_member"),
+    groupId: z.string().uuid(),
+    userId: z.string().uuid(),
+  }),
+  z.object({
+    action: z.literal("remove_member"),
+    groupId: z.string().uuid(),
+    userId: z.string().uuid(),
+  }),
+  z.object({
+    action: z.literal("delete_group"),
+    groupId: z.string().uuid(),
+  }),
+]);
+
+export const teamInvitationActionSchema = z.object({
+  action: z.enum(["resend", "activate"]),
+});
+
 
 

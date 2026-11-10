@@ -1,6 +1,7 @@
-import { inArray } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 import type { NextRequest } from "next/server";
-import { getDb, siteSettings } from "@/db";
+import { auditLogs, getDb, siteSettings } from "@/db";
 import {
   apiBadRequest,
   apiOk,
@@ -9,41 +10,26 @@ import {
 import { recordAuditLog } from "@/lib/server/audit";
 import { handleApiError } from "@/lib/server/errors";
 import { requireAdminRole } from "@/lib/server/session";
+import {
+  DEFAULT_SITE_SETTINGS,
+  loadMergedSiteSettings,
+} from "@/lib/server/site-settings";
 import { siteSettingsUpdateSchema } from "@/lib/validations/cms";
 
-const SETTING_KEYS = [
-  "cms_site_config",
-  "contact_info",
-  "availability_banner",
-  "seo_defaults",
-  "social_links",
-] as const;
-
-const DEFAULT_SETTINGS_PAYLOAD = {
-  siteName: "Ediyrex Studio",
-  tagline: "Creative Technology, Media, Digital & AI",
-  businessEmail: "hello@ediyrex.com",
-  phoneNumber: "",
-  studioLocation: "India & Global",
-  officeHours: "Mon-Fri · 10:00 AM - 7:00 PM IST",
-  availabilityEnabled: true,
-  availabilityLabel: "Available for selected projects",
-  footerNote:
-    "Independent creative technology studio uniting commercial media production, digital experiences, and intelligent AI systems.",
-  copyrightText: "Ediyrex Studio. All rights reserved.",
-  socialLinks: {
-    github: "",
-    linkedin: "",
-    instagram: "",
-    x: "",
-    youtube: "",
-  },
-  defaultSeoTitle: "Ediyrex Studio — Creative Technology, Media, Digital & AI",
-  defaultSeoDescription:
-    "Independent creative technology studio uniting commercial media production, digital experiences, and intelligent AI systems.",
-  defaultOgImageUrl: "",
-  robotsAllowIndex: true,
-};
+async function fetchSettingsAuditHistory(db: NonNullable<ReturnType<typeof getDb>>) {
+  return db
+    .select({
+      id: auditLogs.id,
+      action: auditLogs.action,
+      actorEmail: auditLogs.actorEmailSnapshot,
+      metadata: auditLogs.metadata,
+      createdAt: auditLogs.createdAt,
+    })
+    .from(auditLogs)
+    .where(eq(auditLogs.entityType, "site_settings"))
+    .orderBy(desc(auditLogs.createdAt))
+    .limit(15);
+}
 
 export async function GET() {
   try {
@@ -55,69 +41,14 @@ export async function GET() {
       return apiServerError("Database connection unavailable.");
     }
 
-    const rows = await db
-      .select()
-      .from(siteSettings)
-      .where(inArray(siteSettings.settingKey, [...SETTING_KEYS]));
-
-    const byKey = new Map(rows.map((r) => [r.settingKey, r.settingValue]));
-
-    const siteConfig = byKey.get("cms_site_config") ?? {};
-    const contact = byKey.get("contact_info") ?? {};
-    const availability = byKey.get("availability_banner") ?? {};
-    const seo = byKey.get("seo_defaults") ?? {};
-    const social = byKey.get("social_links") ?? {};
-
-    const latestUpdatedAt =
-      rows.reduce<Date | null>((acc, r) => {
-        if (!acc || r.updatedAt > acc) return r.updatedAt;
-        return acc;
-      }, null) ?? null;
+    const [merged, changeHistory] = await Promise.all([
+      loadMergedSiteSettings(db),
+      fetchSettingsAuditHistory(db),
+    ]);
 
     return apiOk({
-      siteName:
-        (siteConfig.siteName as string) || DEFAULT_SETTINGS_PAYLOAD.siteName,
-      tagline:
-        (siteConfig.tagline as string) || DEFAULT_SETTINGS_PAYLOAD.tagline,
-      businessEmail:
-        (contact.email as string) || DEFAULT_SETTINGS_PAYLOAD.businessEmail,
-      phoneNumber:
-        (contact.phone as string) ?? DEFAULT_SETTINGS_PAYLOAD.phoneNumber,
-      studioLocation:
-        (contact.region as string) || DEFAULT_SETTINGS_PAYLOAD.studioLocation,
-      officeHours:
-        (contact.officeHours as string) || DEFAULT_SETTINGS_PAYLOAD.officeHours,
-      availabilityEnabled:
-        typeof availability.enabled === "boolean"
-          ? availability.enabled
-          : DEFAULT_SETTINGS_PAYLOAD.availabilityEnabled,
-      availabilityLabel:
-        (availability.label as string) ||
-        DEFAULT_SETTINGS_PAYLOAD.availabilityLabel,
-      footerNote:
-        (siteConfig.footerNote as string) ?? DEFAULT_SETTINGS_PAYLOAD.footerNote,
-      copyrightText:
-        (siteConfig.copyrightText as string) ||
-        DEFAULT_SETTINGS_PAYLOAD.copyrightText,
-      socialLinks: {
-        github: (social.github as string) || "",
-        linkedin: (social.linkedin as string) || "",
-        instagram: (social.instagram as string) || "",
-        x: (social.x as string) || "",
-        youtube: (social.youtube as string) || "",
-      },
-      defaultSeoTitle:
-        (seo.defaultSeoTitle as string) ||
-        DEFAULT_SETTINGS_PAYLOAD.defaultSeoTitle,
-      defaultSeoDescription:
-        (seo.defaultSeoDescription as string) ||
-        DEFAULT_SETTINGS_PAYLOAD.defaultSeoDescription,
-      defaultOgImageUrl: (seo.defaultOgImageUrl as string) || "",
-      robotsAllowIndex:
-        typeof seo.robotsAllowIndex === "boolean"
-          ? seo.robotsAllowIndex
-          : DEFAULT_SETTINGS_PAYLOAD.robotsAllowIndex,
-      updatedAt: latestUpdatedAt?.toISOString() ?? null,
+      ...merged,
+      changeHistory,
     });
   } catch (err) {
     return handleApiError(err, "GET /api/v1/admin/settings");
@@ -150,67 +81,174 @@ export async function PUT(request: NextRequest) {
     }
 
     const data = parsed.data;
+    const section = data.section || "all";
+    const include = (target: string) =>
+      section === "all" || section === target;
+
     const entries: {
       settingKey: string;
       settingValue: Record<string, unknown>;
       description: string;
       isPublic: boolean;
-    }[] = [
-      {
-        settingKey: "cms_site_config",
-        settingValue: {
-          siteName: data.siteName,
-          tagline: data.tagline,
-          footerNote: data.footerNote || "",
-          copyrightText: data.copyrightText,
+    }[] = [];
+
+    if (include("general")) {
+      entries.push(
+        {
+          settingKey: "cms_site_config",
+          settingValue: {
+            siteName: data.siteName,
+            tagline: data.tagline,
+            footerNote: data.footerNote || "",
+            copyrightText: data.copyrightText,
+            defaultLanguage: data.defaultLanguage,
+            defaultTimezone: data.defaultTimezone,
+            logoUrl: data.logoUrl || "",
+            faviconUrl: data.faviconUrl || "",
+          },
+          description: "Global website branding & footer copy",
+          isPublic: true,
         },
-        description: "Global website branding & footer copy",
-        isPublic: true,
-      },
-      {
-        settingKey: "contact_info",
-        settingValue: {
-          email: data.businessEmail,
-          phone: data.phoneNumber || "",
-          region: data.studioLocation,
-          officeHours: data.officeHours,
+        {
+          settingKey: "contact_info",
+          settingValue: {
+            email: data.businessEmail,
+            phone: data.phoneNumber || "",
+            region: data.studioLocation,
+            officeHours: data.officeHours,
+            primaryContactNote: data.primaryContactNote || "",
+          },
+          description: "Public studio contact metadata",
+          isPublic: true,
         },
-        description: "Public studio contact metadata",
-        isPublic: true,
-      },
-      {
-        settingKey: "availability_banner",
-        settingValue: {
-          enabled: data.availabilityEnabled,
-          label: data.availabilityLabel,
-        },
-        description: "Hero availability indicator",
-        isPublic: true,
-      },
-      {
+        {
+          settingKey: "availability_banner",
+          settingValue: {
+            enabled: data.availabilityEnabled,
+            label: data.availabilityLabel,
+          },
+          description: "Hero availability indicator",
+          isPublic: true,
+        }
+      );
+    }
+
+    if (include("seo") || include("general")) {
+      entries.push({
         settingKey: "seo_defaults",
         settingValue: {
           defaultSeoTitle: data.defaultSeoTitle,
           defaultSeoDescription: data.defaultSeoDescription,
           defaultOgImageUrl: data.defaultOgImageUrl || "",
+          defaultCanonicalBaseUrl:
+            data.defaultCanonicalBaseUrl ||
+            DEFAULT_SITE_SETTINGS.defaultCanonicalBaseUrl,
           robotsAllowIndex: data.robotsAllowIndex,
+          autoGenerateSitemap: data.autoGenerateSitemap,
+          useDefaultRobots: data.useDefaultRobots,
+          socialTwitterCard: data.socialTwitterCard,
+          socialLocale: data.socialLocale,
         },
         description: "Global SEO defaults",
         isPublic: true,
-      },
-      {
+      });
+    }
+
+    if (include("social")) {
+      const profiles = data.socialProfiles ?? [];
+      const flat = {
+        github:
+          profiles.find((p) => p.platform === "github")?.url ||
+          data.socialLinks?.github ||
+          "",
+        linkedin:
+          profiles.find((p) => p.platform === "linkedin")?.url ||
+          data.socialLinks?.linkedin ||
+          "",
+        instagram:
+          profiles.find((p) => p.platform === "instagram")?.url ||
+          data.socialLinks?.instagram ||
+          "",
+        facebook:
+          profiles.find((p) => p.platform === "facebook")?.url ||
+          data.socialLinks?.facebook ||
+          "",
+        behance:
+          profiles.find((p) => p.platform === "behance")?.url ||
+          data.socialLinks?.behance ||
+          "",
+        dribbble:
+          profiles.find((p) => p.platform === "dribbble")?.url ||
+          data.socialLinks?.dribbble ||
+          "",
+        x:
+          profiles.find((p) => p.platform === "x")?.url ||
+          data.socialLinks?.x ||
+          "",
+        youtube:
+          profiles.find((p) => p.platform === "youtube")?.url ||
+          data.socialLinks?.youtube ||
+          "",
+      };
+      entries.push({
         settingKey: "social_links",
         settingValue: {
-          github: data.socialLinks.github || "",
-          linkedin: data.socialLinks.linkedin || "",
-          instagram: data.socialLinks.instagram || "",
-          x: data.socialLinks.x || "",
-          youtube: data.socialLinks.youtube || "",
+          ...flat,
+          profiles,
         },
-        description: "Public social links",
+        description: "Public social profiles",
         isPublic: true,
-      },
-    ];
+      });
+    }
+
+    if (include("banners") && data.banners) {
+      entries.push({
+        settingKey: "banners_media",
+        settingValue: {
+          announcement: data.banners.announcement,
+          promotional: data.banners.promotional,
+          defaultOgImageUrl: data.banners.defaultOgImageUrl || "",
+          defaultPlaceholderUrl: data.banners.defaultPlaceholderUrl || "",
+          fallbackLogoUrl: data.banners.fallbackLogoUrl || "",
+          faviconUrl: data.banners.faviconUrl || "",
+          defaultThumbnailUrl: data.banners.defaultThumbnailUrl || "",
+        },
+        description: "Global banners and visual fallback assets",
+        isPublic: true,
+      });
+    }
+
+    if (include("integrations") && data.integrations) {
+      entries.push({
+        settingKey: "integrations_config",
+        settingValue: {
+          gaMeasurementId: data.integrations.gaMeasurementId || "",
+          gtmContainerId: data.integrations.gtmContainerId || "",
+          gscVerificationCode: data.integrations.gscVerificationCode || "",
+          captchaProvider: data.integrations.captchaProvider,
+          captchaSiteKey: data.integrations.captchaSiteKey || "",
+          emailFromName: data.integrations.emailFromName || "",
+        },
+        description: "Non-secret integration identifiers & verification tokens",
+        isPublic: false,
+      });
+    }
+
+    if ((include("advanced") || include("general")) && data.advanced) {
+      entries.push({
+        settingKey: "advanced_config",
+        settingValue: {
+          cookieConsentEnabled: data.advanced.cookieConsentEnabled,
+          cookieBannerTitle: data.advanced.cookieBannerTitle,
+          cookieBannerDescription: data.advanced.cookieBannerDescription,
+          defaultConsentMode: data.advanced.defaultConsentMode,
+          maintenanceMode: data.advanced.maintenanceMode,
+          maintenanceMessage: data.advanced.maintenanceMessage,
+        },
+        description: "Cookie consent, technical & maintenance configuration",
+        isPublic: true,
+      });
+    }
 
     await db.transaction(async (tx) => {
       for (const entry of entries) {
@@ -227,25 +265,37 @@ export async function PUT(request: NextRequest) {
               description: entry.description,
               isPublic: entry.isPublic,
               updatedByUserId: auth.session.userId,
+              updatedAt: new Date(),
             },
           });
       }
     });
 
+    revalidatePath("/robots.txt");
+    revalidatePath("/sitemap.xml");
+    revalidatePath("/");
+
     await recordAuditLog({
       actorUserId: auth.session.userId,
       actorEmailSnapshot: auth.session.email,
-      action: "settings.updated",
+      action: `settings.updated.${section}`,
       entityType: "site_settings",
-      metadata: { keys: [...SETTING_KEYS] },
+      metadata: {
+        section,
+        keys: entries.map((e) => e.settingKey),
+      },
     });
 
+    const [merged, changeHistory] = await Promise.all([
+      loadMergedSiteSettings(db),
+      fetchSettingsAuditHistory(db),
+    ]);
+
     return apiOk({
-      ...data,
-      updatedAt: new Date().toISOString(),
+      ...merged,
+      changeHistory,
     });
   } catch (err) {
     return handleApiError(err, "PUT /api/v1/admin/settings");
   }
 }
-

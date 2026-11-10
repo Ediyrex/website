@@ -8,6 +8,12 @@ import { PmsProjectWorkspace } from "./pms/PmsProjectWorkspace";
 import { PmsSecondarySidebar } from "./pms/PmsSecondarySidebar";
 import { PmsTaskDrawer } from "./pms/PmsTaskDrawer";
 import {
+  PmsReportsView,
+  PmsTemplatesView,
+  type CustomTemplateItem,
+  type PmsReportsPayload,
+} from "./pms/PmsExpansionViews";
+import {
   NewProjectModal,
   NewTaskModal,
   PmsInboxView,
@@ -21,6 +27,7 @@ import type {
   PmsMainView,
   PmsProjectSummary,
   PmsProjectTab,
+  PmsSavedFilterRow,
   PmsTemplateSummary,
   PmsWorkspacePayload,
   StudioUserSummary,
@@ -44,7 +51,9 @@ export function AdminTasksClient() {
       viewParam === "inbox" ||
       viewParam === "all" ||
       viewParam === "starred" ||
-      viewParam === "workload"
+      viewParam === "workload" ||
+      viewParam === "templates" ||
+      viewParam === "reports"
     ? viewParam
     : "overview";
 
@@ -133,6 +142,20 @@ export function AdminTasksClient() {
     []
   );
   const [loadingWorkload, setLoadingWorkload] = useState(false);
+
+  // v1.5: Templates, Reports, Saved Filters
+  const [savedFilters, setSavedFilters] = useState<PmsSavedFilterRow[]>([]);
+  const [builtInTemplates, setBuiltInTemplates] = useState<
+    CustomTemplateItem[]
+  >([]);
+  const [customTemplates, setCustomTemplates] = useState<CustomTemplateItem[]>(
+    []
+  );
+  const [loadingTemplates, setLoadingTemplates] = useState(false);
+  const [reportsData, setReportsData] = useState<PmsReportsPayload | null>(
+    null
+  );
+  const [loadingReports, setLoadingReports] = useState(false);
 
   // Modals & Drawers
   const [newProjectModal, setNewProjectModal] = useState<{
@@ -257,6 +280,41 @@ export function AdminTasksClient() {
     }
   }, []);
 
+  const loadSavedFilters = useCallback(async () => {
+    const res = await fetch("/api/v1/admin/pms/filters?scope=tasks");
+    if (res.ok) {
+      const json = await res.json();
+      setSavedFilters(json.data || []);
+    }
+  }, []);
+
+  const loadTemplates = useCallback(async () => {
+    setLoadingTemplates(true);
+    try {
+      const res = await fetch("/api/v1/admin/pms/templates");
+      const json = await res.json();
+      if (res.ok && json.data) {
+        setBuiltInTemplates(json.data.builtIn || []);
+        setCustomTemplates(json.data.custom || []);
+      }
+    } finally {
+      setLoadingTemplates(false);
+    }
+  }, []);
+
+  const loadReports = useCallback(async () => {
+    setLoadingReports(true);
+    try {
+      const res = await fetch("/api/v1/admin/pms/reports");
+      const json = await res.json();
+      if (res.ok && json.data) {
+        setReportsData(json.data);
+      }
+    } finally {
+      setLoadingReports(false);
+    }
+  }, []);
+
   useEffect(() => {
     const t = setTimeout(() => {
       loadProjectsOverview();
@@ -295,6 +353,30 @@ export function AdminTasksClient() {
     }, 0);
     return () => clearTimeout(t);
   }, [activeView, loadWorkload]);
+
+  useEffect(() => {
+    if (activeView !== "project") return;
+    const t = setTimeout(() => {
+      loadSavedFilters();
+    }, 0);
+    return () => clearTimeout(t);
+  }, [activeView, loadSavedFilters]);
+
+  useEffect(() => {
+    if (activeView !== "templates") return;
+    const t = setTimeout(() => {
+      loadTemplates();
+    }, 0);
+    return () => clearTimeout(t);
+  }, [activeView, loadTemplates]);
+
+  useEffect(() => {
+    if (activeView !== "reports") return;
+    const t = setTimeout(() => {
+      loadReports();
+    }, 0);
+    return () => clearTimeout(t);
+  }, [activeView, loadReports]);
 
   const refreshActive = useCallback(async () => {
     await loadProjectsOverview();
@@ -387,6 +469,7 @@ export function AdminTasksClient() {
           ) : workspace ? (
             <PmsProjectWorkspace
               workspace={workspace}
+              savedFilters={savedFilters}
               activeTab={tabParam}
               onTabChange={(nextTab) => updateRoute({ tab: nextTab })}
               onBackToProjects={() =>
@@ -398,6 +481,20 @@ export function AdminTasksClient() {
                 setNewTaskModal({ open: true, initialStatus })
               }
               onToggleStar={() => handleToggleStar(workspace.project.id)}
+              onSaveFilter={async (name, filterConfig) => {
+                await fetch("/api/v1/admin/pms/filters", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ scope: "tasks", name, filterConfig }),
+                });
+                await loadSavedFilters();
+              }}
+              onDeleteFilter={async (id) => {
+                await fetch(`/api/v1/admin/pms/filters?id=${id}`, {
+                  method: "DELETE",
+                });
+                await loadSavedFilters();
+              }}
             />
           ) : null
         ) : activeView === "my-tasks" ? (
@@ -460,6 +557,38 @@ export function AdminTasksClient() {
           <PmsWorkloadView
             members={workloadMembers}
             loading={loadingWorkload}
+          />
+        ) : activeView === "templates" ? (
+          <PmsTemplatesView
+            builtIn={builtInTemplates}
+            custom={customTemplates}
+            loading={loadingTemplates}
+            canEdit={canEdit}
+            onUseTemplate={(templateKey) =>
+              setNewProjectModal({ open: true, templateKey })
+            }
+            onCreateCustom={async (payload) => {
+              await fetch("/api/v1/admin/pms/templates", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+              });
+              await Promise.all([loadTemplates(), loadProjectsOverview()]);
+            }}
+            onDeleteCustom={async (id) => {
+              await fetch(`/api/v1/admin/pms/templates?id=${id}`, {
+                method: "DELETE",
+              });
+              await Promise.all([loadTemplates(), loadProjectsOverview()]);
+            }}
+          />
+        ) : activeView === "reports" ? (
+          <PmsReportsView
+            reports={reportsData}
+            loading={loadingReports}
+            onOpenProject={(pid) =>
+              updateRoute({ project: pid, view: null, tab: "overview" })
+            }
           />
         ) : (
           <PmsDashboardView
