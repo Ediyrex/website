@@ -616,11 +616,20 @@ export const teamInviteCreateSchema = z.object({
   fullName: safeText(120, 2),
   email: z.string().trim().email("Valid email address is required.").max(255),
   studioRole: safeText(64, 2).default("team_member"),
-  department: safeText(80, 2).default("Studio Operations"),
+  department: safeText(80, 2).default("Creative"),
   jobTitle: optionalSafeText(120),
   phone: optionalSafeText(40),
   projectId: z.string().uuid().optional().nullable(),
-  projectRole: safeText(48, 2).default("member"),
+  projectRole: z
+    .enum([
+      "super_admin",
+      "studio_admin",
+      "project_manager",
+      "team_lead",
+      "team_member",
+      "viewer",
+    ])
+    .default("team_member"),
   expiryDays: z.coerce.number().int().min(1).max(90).default(7),
 });
 

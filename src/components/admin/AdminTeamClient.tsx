@@ -1,197 +1,539 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { Shield } from "lucide-react";
-import { Badge } from "@/components/ui/Badge";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import {
+  Activity,
+  Check,
+  Copy,
+  Layers,
+  Shield,
+  ShieldCheck,
+  UserPlus,
+  Users,
+} from "lucide-react";
 import { useAdminUser } from "./AdminContext";
+import { TeamActivityTab } from "./team/TeamActivityTab";
+import { TeamGroupsTab } from "./team/TeamGroupsTab";
+import { TeamMembersTab } from "./team/TeamMembersTab";
+import { InviteMemberModal, MemberProfileDrawer } from "./team/TeamModals";
+import { TeamRolesTab } from "./team/TeamRolesTab";
+import type {
+  AccessGroupRecord,
+  RoleDefinitionRecord,
+  RolePermissionsMatrix,
+  TeamMemberRecord,
+  TeamOverviewResponse,
+  TeamTabKey,
+} from "./team/team-types";
 
-interface TeamMember {
-  id: string;
-  emailNormalized: string;
-  displayName: string;
-  status: "invited" | "active" | "disabled";
-  roles: string[];
-  lastLoginAt: string | null;
-}
+const TABS: Array<{
+  key: TeamTabKey;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+}> = [
+  { key: "members", label: "Team Members", icon: Users },
+  { key: "roles", label: "Roles & Permissions", icon: ShieldCheck },
+  { key: "groups", label: "Access Groups", icon: Layers },
+  { key: "activity", label: "Activity Log", icon: Activity },
+];
 
 export function AdminTeamClient() {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { user, isAdmin } = useAdminUser();
-  const [members, setMembers] = useState<TeamMember[]>([]);
+
+  const tabParam = searchParams.get("tab");
+  const activeTab: TeamTabKey =
+    tabParam === "roles" ||
+    tabParam === "groups" ||
+    tabParam === "activity" ||
+    tabParam === "members"
+      ? tabParam
+      : "members";
+
+  const [overview, setOverview] = useState<TeamOverviewResponse | null>(null);
+  const [groups, setGroups] = useState<AccessGroupRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [resentInviteUrl, setResentInviteUrl] = useState("");
+  const [copiedResent, setCopiedResent] = useState(false);
 
-  const fetchTeam = useCallback(async () => {
-    const res = await fetch("/api/v1/admin/team");
-    if (res.status === 401) {
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
+
+  const switchTab = useCallback(
+    (tab: TeamTabKey) => {
+      const next = new URLSearchParams(searchParams.toString());
+      if (tab === "members") {
+        next.delete("tab");
+      } else {
+        next.set("tab", tab);
+      }
+      const query = next.toString();
+      router.replace(query ? `${pathname}?${query}` : pathname, {
+        scroll: false,
+      });
+    },
+    [pathname, router, searchParams]
+  );
+
+  const refreshAll = useCallback(async () => {
+    const [teamRes, groupsRes] = await Promise.all([
+      fetch("/api/v1/admin/team"),
+      fetch("/api/v1/admin/team/groups"),
+    ]);
+
+    if (teamRes.status === 401 || groupsRes.status === 401) {
       router.push("/admin/login");
-      return null;
+      return;
     }
-    const json = await res.json();
-    if (!res.ok) throw new Error(json.message || "Unable to fetch team.");
-    return (json.data || []) as TeamMember[];
+
+    const teamJson = await teamRes.json();
+    if (!teamRes.ok) {
+      throw new Error(teamJson.message || "Unable to fetch team overview.");
+    }
+
+    const groupsJson = await groupsRes.json();
+    if (!groupsRes.ok) {
+      throw new Error(groupsJson.message || "Unable to fetch access groups.");
+    }
+
+    setOverview(teamJson.data as TeamOverviewResponse);
+    setGroups((groupsJson.data?.groups ?? []) as AccessGroupRecord[]);
   }, [router]);
 
   useEffect(() => {
-    let ignore = false;
-    fetchTeam()
-      .then((rows) => {
-        if (!ignore && rows) setMembers(rows);
-      })
-      .catch((err) => {
-        if (!ignore) {
+    let active = true;
+    const timer = setTimeout(() => {
+      if (!active) return;
+      setLoading(true);
+      setError("");
+      refreshAll()
+        .catch((err) => {
+          if (!active) return;
           setError(
-            err instanceof Error ? err.message : "Network error loading team."
+            err instanceof Error
+              ? err.message
+              : "Failed to load Team & Access console."
           );
-        }
-      })
-      .finally(() => {
-        if (!ignore) setLoading(false);
-      });
-    return () => {
-      ignore = true;
-    };
-  }, [fetchTeam]);
+        })
+        .finally(() => {
+          if (active) setLoading(false);
+        });
+    }, 0);
 
-  const updateMember = async (
-    id: string,
-    payload: { roleName?: string; status?: string }
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [refreshAll]);
+
+  const handleToggleSuspend = async (member: TeamMemberRecord) => {
+    setError("");
+    setSuccess("");
+    try {
+      const nextStatus = member.status === "disabled" ? "active" : "disabled";
+      const res = await fetch(`/api/v1/admin/team/${member.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: nextStatus }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.message || "Status update failed.");
+      await refreshAll();
+      setSuccess(
+        `${member.displayName} is now ${
+          nextStatus === "disabled" ? "suspended" : "active"
+        }.`
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Status update failed.");
+    }
+  };
+
+  const handleRevokeSessions = async (member: TeamMemberRecord) => {
+    setError("");
+    setSuccess("");
+    try {
+      const res = await fetch(`/api/v1/admin/team/${member.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ revokeAllSessions: true }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.message || "Failed to revoke sessions.");
+      await refreshAll();
+      setSuccess(`Revoked active sessions for ${member.displayName}.`);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to revoke sessions."
+      );
+    }
+  };
+
+  const handleRemoveMember = async (member: TeamMemberRecord) => {
+    setError("");
+    setSuccess("");
+    try {
+      const res = await fetch(`/api/v1/admin/team/${member.id}`, {
+        method: "DELETE",
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.message || "Failed to remove member.");
+      await refreshAll();
+      setSuccess(
+        `${member.displayName} removed from active studio access. Historical task and project attribution preserved.`
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to remove member.");
+    }
+  };
+
+  const handleInvitationAction = async (
+    invitationId: string,
+    action: "resend" | "activate" | "revoke"
   ) => {
     setError("");
     setSuccess("");
-    const res = await fetch(`/api/v1/admin/team/${id}`, {
-      method: "PATCH",
+    setResentInviteUrl("");
+    setCopiedResent(false);
+    try {
+      if (action === "revoke") {
+        const res = await fetch(
+          `/api/v1/admin/team/invitations/${invitationId}`,
+          { method: "DELETE" }
+        );
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.message || "Revoke failed.");
+        await refreshAll();
+        setSuccess("Invitation revoked.");
+        return;
+      }
+
+      const res = await fetch(
+        `/api/v1/admin/team/invitations/${invitationId}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action }),
+        }
+      );
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.message || "Invitation action failed.");
+      await refreshAll();
+      if (action === "resend" && json.data?.inviteUrl) {
+        setResentInviteUrl(json.data.inviteUrl as string);
+        setSuccess("Fresh invitation link generated (valid 7 days).");
+      } else {
+        setSuccess("Invited member account activated.");
+      }
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Invitation action failed."
+      );
+    }
+  };
+
+  const handleSubmitInvite = async (payload: {
+    fullName: string;
+    email: string;
+    studioRole: string;
+    department: string;
+    jobTitle: string;
+    projectId: string | null;
+    projectRole:
+      | "super_admin"
+      | "studio_admin"
+      | "project_manager"
+      | "team_lead"
+      | "team_member"
+      | "viewer";
+    expiryDays: number;
+  }) => {
+    const res = await fetch("/api/v1/admin/team", {
+      method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
     const json = await res.json();
     if (!res.ok) {
-      setError(json.message || "Unable to update team member.");
+      throw new Error(json.message || "Failed to send invitation.");
+    }
+    await refreshAll();
+    setSuccess(`Invitation sent to ${payload.email}.`);
+    return { inviteUrl: String(json.data?.inviteUrl || "") };
+  };
+
+  const handleSaveRolePermissions = async (
+    role: RoleDefinitionRecord,
+    permissions: RolePermissionsMatrix
+  ) => {
+    setError("");
+    setSuccess("");
+    const res = await fetch("/api/v1/admin/team/roles", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        key: role.key,
+        name: role.name,
+        description: role.description,
+        baseRole: role.baseRole,
+        permissions,
+      }),
+    });
+    const json = await res.json();
+    if (!res.ok) {
+      setError(json.message || "Failed to save role permissions.");
       return;
     }
-    const refreshed = await fetchTeam();
-    if (refreshed) setMembers(refreshed);
-    setSuccess("Updated access role/status.");
+    await refreshAll();
+    setSuccess(`Updated permission matrix for ${role.name}.`);
+  };
+
+  const handleCreateCustomRole = async (payload: {
+    key: string;
+    name: string;
+    description: string;
+    baseRole: "admin" | "editor" | "viewer";
+  }) => {
+    setError("");
+    setSuccess("");
+    const res = await fetch("/api/v1/admin/team/roles", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const json = await res.json();
+    if (!res.ok) {
+      setError(json.message || "Failed to create custom role.");
+      return;
+    }
+    await refreshAll();
+    setSuccess(`Created custom studio role "${payload.name}".`);
+  };
+
+  const runGroupAction = async (body: Record<string, unknown>, msg: string) => {
+    setError("");
+    setSuccess("");
+    const res = await fetch("/api/v1/admin/team/groups", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const json = await res.json();
+    if (!res.ok) {
+      setError(json.message || "Access group update failed.");
+      return;
+    }
+    await refreshAll();
+    setSuccess(msg);
   };
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-heading font-bold text-2xl sm:text-3xl text-[#F5F3EE]">
-          Team &amp; Access Control
-        </h1>
-        <p className="text-sm text-[#8D939E]">
-          Role-based access across `admin` (full control), `editor` (content &amp; media), and `viewer` (read-only review).
-        </p>
+      {/* Header */}
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#e6c27a]">
+            Studio Security & Access Control
+          </p>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight text-white">
+            Team & Access Management
+          </h1>
+          <p className="mt-1 text-xs text-neutral-400">
+            Manage studio collaborators, invitations, role permissions,
+            divisions, and security logs.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2.5">
+          {!isAdmin && (
+            <span className="inline-flex items-center gap-1.5 rounded-xl border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-xs text-amber-300">
+              <Shield className="h-3.5 w-3.5" />
+              Read-only access
+            </span>
+          )}
+
+          <button
+            type="button"
+            onClick={() => switchTab("roles")}
+            className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-[#121216] px-4 py-2 text-xs font-medium text-neutral-200 transition hover:border-white/30 hover:text-white"
+          >
+            <ShieldCheck className="h-3.5 w-3.5 text-[#e6c27a]" />
+            Manage Roles
+          </button>
+
+          {isAdmin && (
+            <button
+              type="button"
+              onClick={() => setInviteOpen(true)}
+              className="inline-flex items-center gap-2 rounded-xl bg-[#e6c27a] px-4 py-2 text-xs font-semibold text-black transition hover:bg-[#f0d290]"
+            >
+              <UserPlus className="h-3.5 w-3.5" />
+              Invite Member
+            </button>
+          )}
+        </div>
       </div>
 
+      {/* Horizontal Navigation Tabs */}
+      <div className="flex flex-wrap items-center gap-1 border-b border-white/10">
+        {TABS.map((tab) => {
+          const Icon = tab.icon;
+          const active = activeTab === tab.key;
+          return (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => switchTab(tab.key)}
+              className={`inline-flex items-center gap-2 border-b-2 px-4 py-2.5 text-xs font-medium transition ${
+                active
+                  ? "border-[#e6c27a] text-[#e6c27a]"
+                  : "border-transparent text-neutral-400 hover:text-white"
+              }`}
+            >
+              <Icon className="h-3.5 w-3.5" />
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Feedback Banners */}
       {error && (
-        <div className="p-3.5 rounded-xl bg-[#2A1414] border border-[#F28B82]/40 text-xs text-[#F28B82]">
+        <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-300">
           {error}
         </div>
       )}
       {success && (
-        <div className="p-3.5 rounded-xl bg-[#13261C] border border-[#7CD69F]/40 text-xs text-[#7CD69F]">
-          {success}
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-emerald-200">
+          <span>{success}</span>
+          {resentInviteUrl && (
+            <div className="flex items-center gap-2">
+              <code className="max-w-xs truncate rounded bg-black/40 px-2 py-1 text-[11px]">
+                {resentInviteUrl}
+              </code>
+              <button
+                type="button"
+                onClick={async () => {
+                  await navigator.clipboard.writeText(resentInviteUrl);
+                  setCopiedResent(true);
+                }}
+                className="inline-flex items-center gap-1 rounded-lg bg-[#e6c27a] px-2.5 py-1 text-[11px] font-semibold text-black"
+              >
+                {copiedResent ? (
+                  <>
+                    <Check className="h-3 w-3" />
+                    Copied
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-3 w-3" />
+                    Copy Link
+                  </>
+                )}
+              </button>
+            </div>
+          )}
         </div>
       )}
 
-      <div className="rounded-xl bg-[#111419] border border-[#1E222A] overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-[#1E222A] text-[11px] font-mono uppercase text-[#777D87] bg-[#0B0D10]">
-                <th className="py-3 px-4">Member</th>
-                <th className="py-3 px-4">Role</th>
-                <th className="py-3 px-4">Account Status</th>
-                <th className="py-3 px-4">Last Login</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#1E222A] text-sm">
-              {loading ? (
-                <tr>
-                  <td colSpan={4} className="p-8 text-center text-xs font-mono text-[#777D87]">
-                    Loading team members...
-                  </td>
-                </tr>
-              ) : (
-                members.map((m) => {
-                  const isSelf = m.id === user.id;
-                  const primaryRole = m.roles[0] || "viewer";
-                  return (
-                    <tr key={m.id} className="hover:bg-[#161920]">
-                      <td className="py-3.5 px-4">
-                        <div className="flex items-center gap-2.5">
-                          <Shield className="w-4 h-4 text-[#D6B77A]" />
-                          <div>
-                            <div className="font-medium text-[#F5F3EE]">
-                              {m.displayName}{" "}
-                              {isSelf && (
-                                <span className="text-[10px] font-mono text-[#D6B77A]">
-                                  (You)
-                                </span>
-                              )}
-                            </div>
-                            <div className="text-xs text-[#777D87]">
-                              {m.emailNormalized}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-3.5 px-4">
-                        {isAdmin && !isSelf ? (
-                          <select
-                            value={primaryRole}
-                            onChange={(e) =>
-                              updateMember(m.id, { roleName: e.target.value })
-                            }
-                            className="h-8 px-2.5 rounded bg-[#0D0F12] border border-[#252A32] text-xs font-mono text-[#F5F3EE]"
-                          >
-                            <option value="admin">admin</option>
-                            <option value="editor">editor</option>
-                            <option value="viewer">viewer</option>
-                          </select>
-                        ) : (
-                          <Badge variant="accent">{primaryRole}</Badge>
-                        )}
-                      </td>
-                      <td className="py-3.5 px-4">
-                        {isAdmin && !isSelf ? (
-                          <select
-                            value={m.status}
-                            onChange={(e) =>
-                              updateMember(m.id, { status: e.target.value })
-                            }
-                            className="h-8 px-2.5 rounded bg-[#0D0F12] border border-[#252A32] text-xs font-mono text-[#F5F3EE]"
-                          >
-                            <option value="active">active</option>
-                            <option value="invited">invited</option>
-                            <option value="disabled">disabled</option>
-                          </select>
-                        ) : (
-                          <Badge
-                            variant={m.status === "active" ? "accent" : "default"}
-                          >
-                            {m.status}
-                          </Badge>
-                        )}
-                      </td>
-                      <td className="py-3.5 px-4 text-xs text-[#777D87]">
-                        {m.lastLoginAt
-                          ? new Date(m.lastLoginAt).toLocaleString()
-                          : "Never"}
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
+      {/* Main Content Area */}
+      {loading && !overview ? (
+        <div className="rounded-2xl border border-white/10 bg-[#121216] p-10 text-center text-xs text-neutral-400">
+          Loading EDYREX Team & Access Control Center...
         </div>
-      </div>
+      ) : overview ? (
+        <>
+          {activeTab === "members" && (
+            <TeamMembersTab
+              data={overview}
+              isAdmin={isAdmin}
+              currentUserId={user?.id}
+              onOpenInvite={() => setInviteOpen(true)}
+              onOpenMemberProfile={(id) => setSelectedMemberId(id)}
+              onSwitchTab={switchTab}
+              onToggleSuspend={handleToggleSuspend}
+              onRevokeSessions={handleRevokeSessions}
+              onRemoveMember={handleRemoveMember}
+              onInvitationAction={handleInvitationAction}
+            />
+          )}
+
+          {activeTab === "roles" && (
+            <TeamRolesTab
+              roles={overview.roles}
+              isAdmin={isAdmin}
+              onSaveRolePermissions={handleSaveRolePermissions}
+              onCreateCustomRole={handleCreateCustomRole}
+            />
+          )}
+
+          {activeTab === "groups" && (
+            <TeamGroupsTab
+              groups={groups}
+              members={overview.members}
+              roles={overview.roles}
+              isAdmin={isAdmin}
+              onCreateGroup={(payload) =>
+                runGroupAction(
+                  { action: "create_group", ...payload },
+                  `Created access group "${payload.name}".`
+                )
+              }
+              onAddMemberToGroup={(groupId, userId) =>
+                runGroupAction(
+                  { action: "add_member", groupId, userId },
+                  "Added member to access group."
+                )
+              }
+              onRemoveMemberFromGroup={(groupId, userId) =>
+                runGroupAction(
+                  { action: "remove_member", groupId, userId },
+                  "Removed member from access group."
+                )
+              }
+              onDeleteGroup={(groupId) =>
+                runGroupAction(
+                  { action: "delete_group", groupId },
+                  "Access group deleted."
+                )
+              }
+              onOpenMemberProfile={(id) => setSelectedMemberId(id)}
+            />
+          )}
+
+          {activeTab === "activity" && (
+            <TeamActivityTab logs={overview.activityLogs} />
+          )}
+        </>
+      ) : null}
+
+      {/* Invite Member Modal */}
+      {overview && (
+        <InviteMemberModal
+          open={inviteOpen}
+          roles={overview.roles}
+          pmsProjects={overview.pmsProjectsList}
+          onClose={() => setInviteOpen(false)}
+          onSubmitInvite={handleSubmitInvite}
+        />
+      )}
+
+      {/* Member Profile Slide-over Drawer */}
+      {overview && (
+        <MemberProfileDrawer
+          memberId={selectedMemberId}
+          roles={overview.roles}
+          isAdmin={isAdmin}
+          currentUserId={user?.id}
+          onClose={() => setSelectedMemberId(null)}
+          onUpdated={refreshAll}
+        />
+      )}
     </div>
   );
 }
-
