@@ -1,32 +1,58 @@
 # Ediyrex Studio
 
-A premium creative technology studio website — monorepo.
+A local-first creative technology studio website uniting **Media**, **Digital**, and **Artificial Intelligence**. Built with Next.js App Router, React, TypeScript, and Tailwind CSS v4.
 
-## Structure
+---
 
-```
-ediyrex/
-├── apps/
-│   ├── web/          # Next.js public website + admin UI
-│   └── api/          # Node.js REST API (Phase 7+)
-├── packages/
-│   ├── contracts/    # Shared TypeScript types & schemas
-│   └── config/       # Shared ESLint, TS, Tailwind config
-└── infra/            # Docker, DB config (when needed)
-```
+## Tech Stack (Current Phase)
 
-## Getting Started
+- **Framework:** Next.js 16 (App Router, Turbopack)
+- **UI Library:** React 19 & TypeScript
+- **Styling:** Tailwind CSS v4 with centralized 60-30-10 design tokens (`src/app/globals.css`)
+- **Typography:** Manrope (Headings), Inter (Body/UI), IBM Plex Mono (Labels/Metadata) via `next/font/google`
+- **Icons & Motion:** Lucide React & Motion (`motion/react`, `prefers-reduced-motion` compliant)
+- **Validation:** Zod (`src/lib/validations/`)
+- **Quality Tools:** ESLint, Prettier (`prettier-plugin-tailwindcss`), TypeScript (`tsc`)
 
+---
+
+## Local Development Setup
+
+### Prerequisites
+- Node.js LTS
+- npm
+- Git
+
+### 1. Install Dependencies
 ```bash
-# Install dependencies
 npm install
+```
 
-# Start the frontend in development mode
+### 2. Configure Environment (Optional for Public Frontend)
+```bash
+cp .env.example .env.local
+```
+
+### 3. Run Development Server
+```bash
 npm run dev
 ```
+Open `http://localhost:3000` in your browser.
 
-## Tech Stack
+### 4. Verification Commands
+```bash
+npm run lint        # ESLint checks
+npx tsc --noEmit    # TypeScript static type checks
+npm run build       # Production Next.js build verification
+```
 
-- **Frontend:** Next.js, React, TypeScript, Tailwind CSS
-- **Backend:** Node.js, TypeScript, REST API (Phase 7+)
-- **Database:** PostgreSQL via Prisma (Phase 7+)
+---
+
+## Project Structure & Documentation
+
+- `src/app/` — Public routes (`/`, `/services`, `/services/[division]`, `/work`, `/work/[slug]`, `/about`, `/contact`, `/privacy`, `/terms`) and local preview `/api/v1/*` handlers.
+- `src/components/` — Reusable UI primitives (`ui/`), global shell (`layout/`), motion wrappers (`motion/`), and homepage/internal page sections (`sections/`).
+- `src/features/` — Typed local content modules (`services/`, `work/`, `products/`).
+- `src/lib/` — Shared utilities and Zod validation schemas.
+- `ARCHITECTURE_LOG.md` — Architecture Decision Record (Option 1 unified Next.js selected for initial local development; Option 2 monorepo documented for backend scaling).
+- `docs/DATABASE_SCHEMA.md` — Gap-analyzed PostgreSQL schema specification for the upcoming backend phase.
