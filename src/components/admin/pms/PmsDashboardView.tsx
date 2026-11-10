@@ -82,6 +82,12 @@ export function PmsDashboardView({
   onOpenTask,
 }: PmsDashboardViewProps) {
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
+  const [pendingDeleteProject, setPendingDeleteProject] = useState<{
+    id: string;
+    title: string;
+    referenceCode: string;
+  } | null>(null);
+  const [deletingProject, setDeletingProject] = useState(false);
 
   return (
     <div className="space-y-5">
@@ -384,7 +390,11 @@ export function PmsDashboardView({
                                   type="button"
                                   onClick={() => {
                                     setMenuOpenId(null);
-                                    onDeleteProject(p.id);
+                                    setPendingDeleteProject({
+                                      id: p.id,
+                                      title: p.title,
+                                      referenceCode: p.referenceCode,
+                                    });
                                   }}
                                   className="w-full px-3 py-2 text-xs text-[#E47777] hover:bg-[#1E232B] flex items-center gap-2 cursor-pointer"
                                 >
@@ -471,6 +481,64 @@ export function PmsDashboardView({
           </div>
         </div>
       </div>
+
+      {pendingDeleteProject && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl border border-[#E47777]/35 bg-[#111419] p-6 shadow-2xl space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#E47777]/35 bg-[#2A1517] text-[#E47777]">
+                <Trash2 className="h-4 w-4" />
+              </div>
+              <div>
+                <h3 className="text-base font-semibold text-[#F2F2F0]">
+                  Shut Down & Delete Project?
+                </h3>
+                <p className="text-xs text-[#A1A6AE] mt-0.5">
+                  #{pendingDeleteProject.referenceCode} ·{" "}
+                  {pendingDeleteProject.title}
+                </p>
+              </div>
+            </div>
+
+            <p className="text-xs text-[#D8DCE3] leading-relaxed">
+              This will permanently delete this project along with all of its
+              tasks, milestones, files, and discussion history.
+            </p>
+
+            <div className="flex items-center justify-end gap-2 pt-1">
+              <button
+                type="button"
+                disabled={deletingProject}
+                onClick={() => setPendingDeleteProject(null)}
+                className="h-9 px-3 rounded-lg border border-[#252A31] text-xs text-[#A1A6AE] hover:text-white cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={deletingProject}
+                onClick={async () => {
+                  setDeletingProject(true);
+                  try {
+                    await onDeleteProject(pendingDeleteProject.id);
+                    setPendingDeleteProject(null);
+                  } finally {
+                    setDeletingProject(false);
+                  }
+                }}
+                className="inline-flex items-center gap-1.5 h-9 px-4 rounded-lg bg-[#D94A4A] text-xs font-semibold text-white hover:bg-[#E45B5B] disabled:opacity-50 cursor-pointer"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                <span>
+                  {deletingProject
+                    ? "Deleting..."
+                    : "Delete Project Permanently"}
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

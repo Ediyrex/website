@@ -418,15 +418,23 @@ export function AdminTasksClient() {
   };
 
   const handleDeleteProject = async (id: string) => {
+    setErrorBanner("");
     const res = await fetch(`/api/v1/admin/pms/projects/${id}`, {
       method: "DELETE",
     });
-    if (res.ok) {
-      if (projectParam === id) {
-        updateRoute({ project: null, tab: null, view: "overview" });
-      }
-      await loadProjectsOverview();
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setErrorBanner(
+        (json as { message?: string }).message ||
+          "Unable to delete project permanently."
+      );
+      return;
     }
+    if (projectParam === id) {
+      setWorkspace(null);
+      updateRoute({ project: null, tab: null, task: null, view: "overview" });
+    }
+    await Promise.all([loadProjectsOverview(), loadMyTasks(), loadInbox()]);
   };
 
   return (
@@ -476,6 +484,7 @@ export function AdminTasksClient() {
                 updateRoute({ project: null, tab: null, view: "overview" })
               }
               onRefresh={refreshActive}
+              onDeleteProject={() => handleDeleteProject(workspace.project.id)}
               onOpenTask={(tid) => updateRoute({ task: tid })}
               onNewTask={(initialStatus) =>
                 setNewTaskModal({ open: true, initialStatus })

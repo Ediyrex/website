@@ -64,6 +64,7 @@ interface PmsProjectWorkspaceProps {
   onTabChange: (tab: PmsProjectTab) => void;
   onBackToProjects: () => void;
   onRefresh: () => Promise<void>;
+  onDeleteProject: () => Promise<void>;
   onOpenTask: (taskId: string) => void;
   onNewTask: (initialStatus: TaskWorkflowStatus) => void;
   onToggleStar: () => Promise<void>;
@@ -95,6 +96,7 @@ export function PmsProjectWorkspace({
   onTabChange,
   onBackToProjects,
   onRefresh,
+  onDeleteProject,
   onOpenTask,
   onNewTask,
   onToggleStar,
@@ -155,6 +157,8 @@ export function PmsProjectWorkspace({
   const [settingsDue, setSettingsDue] = useState(
     project.dueDate ? new Date(project.dueDate).toISOString().slice(0, 10) : ""
   );
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [deletingProject, setDeletingProject] = useState(false);
 
   const statusMeta =
     PROJECT_STATUS_META[project.status] ?? PROJECT_STATUS_META.planning;
@@ -546,6 +550,18 @@ export function PmsProjectWorkspace({
               >
                 <Plus className="w-3.5 h-3.5 text-[#D4AF77]" />
                 <span>Add Task</span>
+              </button>
+            )}
+
+            {permissions.canDeleteProject && (
+              <button
+                type="button"
+                onClick={() => setConfirmDeleteOpen(true)}
+                title="Shut down and delete project"
+                className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-[#2A1517] border border-[#E47777]/35 text-xs font-medium text-[#E47777] hover:bg-[#3A1C1F] hover:border-[#E47777]/60 cursor-pointer"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Delete Project</span>
               </button>
             )}
           </div>
@@ -1996,6 +2012,120 @@ export function PmsProjectWorkspace({
               </button>
             </div>
           )}
+
+          {permissions.canDeleteProject && (
+            <div className="mt-6 rounded-xl border border-[#E47777]/30 bg-[#1B1113] p-4 flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-[#E47777]">
+                  Danger Zone — Shut Down Project
+                </h4>
+                <p className="text-xs text-[#A1A6AE] mt-1">
+                  Permanently shut down this project and delete its{" "}
+                  {tasks.length} tasks, {milestones.length} milestones,{" "}
+                  {files.length} files, and discussion history. This cannot be
+                  undone.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setConfirmDeleteOpen(true)}
+                className="inline-flex items-center gap-1.5 h-9 px-4 rounded-lg bg-[#D94A4A] text-white text-xs font-semibold hover:bg-[#E45B5B] cursor-pointer shrink-0"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Delete Project Permanently</span>
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {confirmDeleteOpen && permissions.canDeleteProject && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl border border-[#E47777]/35 bg-[#111419] p-6 shadow-2xl space-y-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#E47777]/35 bg-[#2A1517] text-[#E47777]">
+                  <Trash2 className="h-4 w-4" />
+                </div>
+                <div>
+                  <h3 className="text-base font-semibold text-[#F2F2F0]">
+                    Shut Down & Delete Project?
+                  </h3>
+                  <p className="text-xs text-[#A1A6AE] mt-0.5">
+                    #{project.referenceCode} · {project.title}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                disabled={deletingProject}
+                onClick={() => setConfirmDeleteOpen(false)}
+                className="rounded-lg p-1 text-[#A1A6AE] hover:bg-white/10 hover:text-white"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="rounded-xl border border-[#252A31] bg-[#0B0D0F] p-3.5 text-xs text-[#D8DCE3] space-y-1.5">
+              <p>
+                This will permanently shut down{" "}
+                <strong className="text-white">{project.title}</strong> and
+                remove:
+              </p>
+              <ul className="list-disc pl-4 text-[#A1A6AE] space-y-0.5">
+                <li>{tasks.length} project tasks, subtasks, and work logs</li>
+                <li>{milestones.length} milestones & {files.length} attached files</li>
+                <li>{discussions.length} discussion comments & member links</li>
+              </ul>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+              <button
+                type="button"
+                disabled={deletingProject}
+                onClick={async () => {
+                  setConfirmDeleteOpen(false);
+                  await patchProject({ status: "archived" });
+                }}
+                className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg border border-[#252A31] bg-[#171B21] text-xs text-[#E7B65D] hover:border-[#E7B65D]/45 cursor-pointer"
+              >
+                <Archive className="h-3.5 w-3.5" />
+                <span>Archive Instead</span>
+              </button>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  disabled={deletingProject}
+                  onClick={() => setConfirmDeleteOpen(false)}
+                  className="h-9 px-3 rounded-lg border border-[#252A31] text-xs text-[#A1A6AE] hover:text-white cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={deletingProject}
+                  onClick={async () => {
+                    setDeletingProject(true);
+                    try {
+                      await onDeleteProject();
+                      setConfirmDeleteOpen(false);
+                    } finally {
+                      setDeletingProject(false);
+                    }
+                  }}
+                  className="inline-flex items-center gap-1.5 h-9 px-4 rounded-lg bg-[#D94A4A] text-xs font-semibold text-white hover:bg-[#E45B5B] disabled:opacity-50 cursor-pointer"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  <span>
+                    {deletingProject
+                      ? "Deleting..."
+                      : "Delete Project Permanently"}
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

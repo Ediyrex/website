@@ -585,12 +585,22 @@ export async function DELETE(
       return apiForbidden("Only Studio Admins can delete PMS projects.");
     }
 
-    const [deleted] = await db
-      .delete(pmsProjects)
-      .where(eq(pmsProjects.id, id))
-      .returning({ id: pmsProjects.id, title: pmsProjects.title });
+    const result = await db.transaction(async (tx) => {
+      // Remove tasks tied to this project so shutdown leaves no orphaned tasks behind
+      const deletedTasks = await tx
+        .delete(studioTasks)
+        .where(eq(studioTasks.pmsProjectId, id))
+        .returning({ id: studioTasks.id });
 
-    if (!deleted) {
+      const [deleted] = await tx
+        .delete(pmsProjects)
+        .where(eq(pmsProjects.id, id))
+        .returning({ id: pmsProjects.id, title: pmsProjects.title });
+
+      return { deleted, deletedTasksCount: deletedTasks.length };
+    });
+
+    if (!result.deleted) {
       return apiNotFound("PMS project not found.");
     }
 
@@ -600,10 +610,17 @@ export async function DELETE(
       action: "pms_project.deleted",
       entityType: "pms_project",
       entityId: id,
-      metadata: { title: deleted.title },
+      metadata: {
+        title: result.deleted.title,
+        deletedTasksCount: result.deletedTasksCount,
+      },
     });
 
-    return apiOk({ deleted: true, id });
+    return apiOk({
+      deleted: true,
+      id,
+      deletedTasksCount: result.deletedTasksCount,
+    });
   } catch (err) {
     return handleApiError(err, "DELETE /api/v1/admin/pms/projects/[id]");
   }
