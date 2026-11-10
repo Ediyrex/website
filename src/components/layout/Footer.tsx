@@ -1,11 +1,12 @@
 import React from "react";
 import Link from "next/link";
-import { ArrowUpRight, Mail } from "lucide-react";
+import { ArrowUpRight, Mail, Phone } from "lucide-react";
 import { CopyrightYear } from "./CopyrightYear";
+import { SITE_CONFIG } from "@/config/site";
 
 export function Footer() {
   return (
-    <footer className="bg-[#08090B] border-t border-[#252A32] pt-16 pb-6 text-[#B2B4BA] text-sm">
+    <footer className="bg-[#08090B] border-t border-[#252A32] pt-16 pb-24 md:pb-6 text-[#B2B4BA] text-sm">
       <div className="max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 pb-12 border-b border-[#252A32]">
           {/* Column 1: Brand */}
@@ -23,7 +24,7 @@ export function Footer() {
               Creative media, digital experiences and intelligent systems.
             </p>
             <p className="text-xs font-mono text-[#777D87]">
-              India &amp; International
+              {SITE_CONFIG.contact.location}
             </p>
           </div>
 
@@ -133,13 +134,24 @@ export function Footer() {
             <ul className="space-y-2.5 text-sm">
               <li>
                 <a
-                  href="mailto:hello@ediyrex.com"
+                  href={`mailto:${SITE_CONFIG.contact.email}`}
                   className="inline-flex items-center gap-2 text-[#B2B4BA] hover:text-[#F5F3EE] transition-colors"
                 >
                   <Mail className="w-4 h-4 text-[#D6B77A]" />
-                  <span>hello@ediyrex.com</span>
+                  <span>{SITE_CONFIG.contact.email}</span>
                 </a>
               </li>
+              {SITE_CONFIG.contact.phone && (
+                <li>
+                  <a
+                    href={`tel:${SITE_CONFIG.contact.phone}`}
+                    className="inline-flex items-center gap-2 text-[#B2B4BA] hover:text-[#F5F3EE] transition-colors"
+                  >
+                    <Phone className="w-4 h-4 text-[#D6B77A]" />
+                    <span>{SITE_CONFIG.contact.phone}</span>
+                  </a>
+                </li>
+              )}
               <li>
                 <Link
                   href="/contact"

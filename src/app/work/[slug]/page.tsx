@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import {
   AlertCircle,
@@ -112,6 +113,18 @@ export default async function CaseStudyDetailPage({
             </div>
           )}
         </header>
+
+        {/* Hero Visual */}
+        <div className="aspect-[16/10] rounded-2xl bg-[#12151A] border border-[#252A32] overflow-hidden">
+          <Image
+            src={project.coverImage}
+            alt={project.coverAlt || project.title}
+            width={800}
+            height={500}
+            priority
+            className="w-full h-full object-cover"
+          />
+        </div>
 
         {/* Overview */}
         <section className="space-y-4">

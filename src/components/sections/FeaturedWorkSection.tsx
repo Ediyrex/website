@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowUpRight, AlertCircle } from "lucide-react";
 import { PROJECTS_DATA } from "@/features/work/data";
 import { Badge } from "@/components/ui/Badge";
@@ -57,48 +58,29 @@ export function FeaturedWorkSection() {
                 key={project.id}
                 className="group rounded-2xl bg-[#12151A] border border-[#252A32] hover:border-[#3A414B] overflow-hidden flex flex-col justify-between transition-all duration-200"
               >
-                {/* Clean 16:10 Visual Frame (text below image per Section 6.4) */}
-                <div className="aspect-[16/10] bg-[#08090B] border-b border-[#252A32] p-6 flex flex-col justify-between relative overflow-hidden bg-editorial-grid">
-                  <div
-                    className="absolute inset-0 pointer-events-none opacity-60"
-                    style={{
-                      background: `radial-gradient(circle at 70% 30%, ${meta.accent}18 0%, transparent 65%)`,
-                    }}
+                {/* Clean 16:10 Visual Frame with Next/Image + Alt Text */}
+                <div className="aspect-[16/10] bg-[#08090B] border-b border-[#252A32] relative overflow-hidden">
+                  <Image
+                    src={project.coverImage}
+                    alt={project.coverAlt || project.title}
+                    width={800}
+                    height={500}
+                    className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
                   />
-                  <div className="relative z-10 flex items-center justify-between">
-                    <span className="text-[11px] font-mono uppercase tracking-wider text-[#777D87]">
+                  <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between">
+                    <span className="text-[11px] font-mono uppercase tracking-wider px-2.5 py-1 rounded bg-[#08090B]/90 border border-[#252A32] text-[#B2B4BA]">
                       0{index + 1} / {meta.label}
                     </span>
                     {project.isConcept ? (
-                      <Badge variant="concept">
+                      <Badge variant="concept" className="bg-[#08090B]/90">
                         <AlertCircle className="w-3 h-3" />
                         <span>Concept project</span>
                       </Badge>
                     ) : (
-                      <Badge variant="featured">Client project</Badge>
+                      <Badge variant="featured" className="bg-[#08090B]/90">
+                        Client project
+                      </Badge>
                     )}
-                  </div>
-
-                  {/* Restrained Geometric Preview */}
-                  <div
-                    aria-hidden="true"
-                    className="relative z-10 my-auto flex items-center justify-center"
-                  >
-                    <div className="w-full max-w-xs h-24 rounded-xl bg-[#12151A]/90 border border-[#252A32] group-hover:border-[#3A414B] p-4 flex flex-col justify-between transition-colors">
-                      <div className="flex items-center justify-between">
-                        <span
-                          className="w-2 h-2 rounded-full"
-                          style={{ backgroundColor: meta.accent }}
-                        />
-                        <span className="text-[10px] font-mono text-[#777D87]">
-                          {project.slug}
-                        </span>
-                      </div>
-                      <div className="space-y-1.5">
-                        <div className="h-1.5 w-3/4 rounded bg-[#252A32]" />
-                        <div className="h-1.5 w-1/2 rounded bg-[#191D23]" />
-                      </div>
-                    </div>
                   </div>
                 </div>
 

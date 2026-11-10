@@ -21,6 +21,7 @@ export interface ProjectItem {
   category: ServiceDivision | "hybrid";
   servicesDemonstrated: string[];
   coverImage: string;
+  coverAlt?: string;
   description: string;
   challenge?: string;
   approach?: string;

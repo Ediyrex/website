@@ -157,6 +157,8 @@ export async function getPublishedProjects(options?: {
     };
     const category = inferProjectCategory(linked.divisions, row.projectType);
 
+    const staticFallback = PROJECTS_DATA.find((p) => p.slug === row.slug);
+
     return {
       id: row.id,
       slug: row.slug,
@@ -164,7 +166,8 @@ export async function getPublishedProjects(options?: {
       summary: row.summary,
       category,
       servicesDemonstrated: linked.titles,
-      coverImage: "",
+      coverImage: staticFallback?.coverImage || "/images/projects/concept-digital-strata.svg",
+      coverAlt: staticFallback?.coverAlt || row.title,
       description: row.description,
       challenge: cs?.challenge,
       approach: cs?.approach,

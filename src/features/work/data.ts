@@ -14,7 +14,9 @@ export const PROJECTS_DATA: ProjectItem[] = [
       "AI Research & Knowledge Systems (RAG)",
       "SaaS Products & Dashboards",
     ],
-    coverImage: "/portfolio/concept-ai-agent.svg",
+    coverImage: "/images/projects/concept-ai-agent.svg",
+    coverAlt:
+      "Multi-agent orchestration blueprint diagram connecting specialist document and review nodes",
     description:
       "An internal studio blueprint exploring how multi-agent architectures can coordinate across ERP, CRM, and communication platforms to streamline invoice reconciliation and supplier workflows.",
     challenge:
@@ -44,7 +46,9 @@ export const PROJECTS_DATA: ProjectItem[] = [
       "Reels & Short-Form Video",
       "Brand Identity & Graphic Design",
     ],
-    coverImage: "/portfolio/concept-media-lumina.svg",
+    coverImage: "/images/projects/concept-media-lumina.svg",
+    coverAlt:
+      "Lumina brand film widescreen and vertical short-form aspect-ratio storyboard layout",
     description:
       "An exploration in high-contrast cinematic storytelling, combining product motion renders with editorial typography to demonstrate structured short-form social pacing.",
     challenge:
@@ -74,7 +78,9 @@ export const PROJECTS_DATA: ProjectItem[] = [
       "UI / UX Design",
       "Full-Stack App Development",
     ],
-    coverImage: "/portfolio/concept-digital-strata.svg",
+    coverImage: "/images/projects/concept-digital-strata.svg",
+    coverAlt:
+      "Strata Cloud telemetry SaaS dashboard interface architecture showing navigation and time-series chart grid",
     description:
       "An interface architecture prototype designed to deliver responsive rendering and legible typography across dense time-series telemetry tables and workspace views.",
     challenge:
@@ -104,7 +110,9 @@ export const PROJECTS_DATA: ProjectItem[] = [
       "Business Workflow Automation",
       "Custom AI Applications",
     ],
-    coverImage: "/portfolio/concept-hybrid-voice.svg",
+    coverImage: "/images/projects/concept-hybrid-voice.svg",
+    coverAlt:
+      "Vocalis voice receptionist streaming waveform paired with structured booking payload preview",
     description:
       "An internal studio R&D prototype combining streaming audio transport, real-time speech transcription, tool-calling state guards, and neural voice synthesis.",
     challenge:

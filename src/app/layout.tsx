@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Manrope, Inter, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { PublicShell } from "@/components/layout/PublicShell";
+import { SITE_CONFIG } from "@/config/site";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -31,6 +32,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_CONFIG.url),
   title: {
     default: "Ediyrex Studio — Creative Technology, Media, Digital & AI",
     template: "%s | Ediyrex Studio",
@@ -57,6 +59,12 @@ export const metadata: Metadata = {
     title: "Ediyrex Studio — Creative Technology, Media, Digital & AI",
     description:
       "From visual storytelling and digital products to intelligent automation, Ediyrex brings creativity and technology together to build what comes next.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Ediyrex Studio — Creative Technology, Media, Digital & AI",
+    description:
+      "One integrated partner for visual storytelling, full-stack digital products, and intelligent AI systems.",
   },
 };
 

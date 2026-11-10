@@ -1,5 +1,12 @@
 import React from "react";
+import type { Metadata } from "next";
 import { Hero } from "@/components/sections/Hero";
+
+export const metadata: Metadata = {
+  title: "Ediyrex Studio — Creative Technology, Media, Digital & AI",
+  description:
+    "Independent creative technology studio uniting commercial media production, digital experiences, and intelligent AI systems. Book a discovery call.",
+};
 import { StudioPositioningBar } from "@/components/sections/StudioPositioningBar";
 import { CountUpStatsSection } from "@/components/sections/CountUpStatsSection";
 import { ThreeDivisionsSection } from "@/components/sections/ThreeDivisionsSection";

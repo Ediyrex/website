@@ -1,12 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle, AlertCircle, Loader2, Send, Calendar } from "lucide-react";
 import { enquirySchema, EnquiryFormData } from "@/lib/validations/enquiry";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { BudgetCurrency } from "@/types";
+import { SITE_CONFIG } from "@/config/site";
+import { trackEvent } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 
 const BUDGET_TIERS: Record<BudgetCurrency, { value: string; label: string }[]> = {
@@ -29,6 +31,7 @@ const BUDGET_TIERS: Record<BudgetCurrency, { value: string; label: string }[]> =
 };
 
 export function EnquirySection() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const preselectedService = searchParams.get("service") || "";
 
@@ -110,9 +113,22 @@ export function EnquirySection() {
         throw new Error(json.message || "Failed to submit enquiry");
       }
 
-      setReferenceId(json.data?.referenceId || "");
-      setIsStored(Boolean(json.stored));
+      const ref = json.data?.referenceId || "";
+      const storedFlag = Boolean(json.stored);
+      const callFlag = Boolean(result.data.wantsDiscoveryCall);
+
+      trackEvent("Enquiry Submitted", {
+        projectType: result.data.projectType,
+        currency: result.data.budgetCurrency,
+      });
+
+      setReferenceId(ref);
+      setIsStored(storedFlag);
       setIsSuccess(true);
+
+      router.push(
+        `/thank-you?ref=${encodeURIComponent(ref)}&stored=${String(storedFlag)}&call=${String(callFlag)}`
+      );
     } catch (err: unknown) {
       const msg =
         err instanceof Error
@@ -163,13 +179,24 @@ export function EnquirySection() {
               <span className="text-[11px] font-mono text-[#D6B77A] uppercase tracking-wider block">
                 Direct Contact
               </span>
-              <p className="text-[#F5F3EE] font-medium">Ediyrex Studio</p>
+              <p className="text-[#F5F3EE] font-medium">{SITE_CONFIG.name}</p>
               <a
-                href="mailto:hello@ediyrex.com"
-                className="text-[#B2B4BA] hover:text-[#F5F3EE] font-mono text-xs transition-colors"
+                href={`mailto:${SITE_CONFIG.contact.email}`}
+                className="text-[#B2B4BA] hover:text-[#F5F3EE] font-mono text-xs transition-colors block"
               >
-                hello@ediyrex.com
+                {SITE_CONFIG.contact.email}
               </a>
+              {SITE_CONFIG.contact.phone && (
+                <a
+                  href={`tel:${SITE_CONFIG.contact.phone}`}
+                  className="text-[#B2B4BA] hover:text-[#F5F3EE] font-mono text-xs transition-colors block"
+                >
+                  {SITE_CONFIG.contact.phone}
+                </a>
+              )}
+              <p className="text-xs text-[#777D87] pt-1">
+                {SITE_CONFIG.contact.location} &middot; {SITE_CONFIG.contact.hours}
+              </p>
             </div>
           </div>
 

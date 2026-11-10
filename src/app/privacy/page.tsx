@@ -55,10 +55,10 @@ export default function PrivacyPolicyPage() {
 
           <section className="space-y-3">
             <h2 className="font-heading font-semibold text-xl text-[#F5F3EE]">
-              3. Cookies &amp; Third-Party Tracking
+              3. Cookies &amp; Consent-Gated Analytics
             </h2>
             <p>
-              During this initial release, the public website does not load third-party advertising trackers or invasive analytics scripts. Essential functional storage is kept to the minimum required for interactive navigation and form state.
+              Ediyrex uses essential browser storage to remember your privacy preference and manage secure administrative sessions when signed in. Optional privacy-friendly analytics are only loaded if you explicitly choose &ldquo;Accept analytics&rdquo; in our cookie preferences banner. We never run invasive advertising trackers.
             </p>
           </section>
 
