@@ -1,4 +1,4 @@
-export type ServiceDivision = "media" | "digital" | "ai";
+export type ServiceDivision = "branding" | "media" | "digital" | "ai";
 
 export interface ServiceItem {
   id: string;

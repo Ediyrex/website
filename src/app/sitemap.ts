@@ -19,6 +19,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     },
     {
+      url: `${siteUrl}/services/branding`,
+      lastModified: lastModifiedStatic,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
       url: `${siteUrl}/services/media`,
       lastModified: lastModifiedStatic,
       changeFrequency: "monthly",

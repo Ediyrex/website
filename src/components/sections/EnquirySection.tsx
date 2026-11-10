@@ -40,7 +40,7 @@ export function EnquirySection() {
     email: "",
     company: "",
     phone: "",
-    projectType: preselectedService || "website-design-development",
+    projectType: preselectedService || "web-dev",
     goals: "",
     budgetCurrency: "USD",
     budgetRange: "tier_2",
@@ -415,65 +415,47 @@ export function EnquirySection() {
                       onChange={handleChange}
                       className={cn(inputBaseClass, "cursor-pointer")}
                     >
-                      <optgroup label="Digital">
-                        <option value="website-design-development">
-                          Website Design &amp; Development
+                      <optgroup label="Branding / Marketing">
+                        <option value="ads-and-engagement">
+                          Ads &amp; Engagement
                         </option>
-                        <option value="saas-products-dashboards">
-                          SaaS Products &amp; Dashboards
+                        <option value="packaging-and-promotional-design">
+                          Packaging &amp; Promotional Design
                         </option>
-                        <option value="landing-pages">
-                          Landing Pages &amp; Conversion Websites
+                        <option value="seo-optimization">SEO Optimization</option>
+                        <option value="influencer-marketing">
+                          Influencer Marketing
                         </option>
-                        <option value="ecommerce-websites">
-                          E-Commerce Experiences
-                        </option>
-                        <option value="ui-ux-design">UI / UX Design</option>
-                        <option value="full-stack-app-dev">
-                          Full-Stack App Development
-                        </option>
-                        <option value="brand-identity-graphic-design">
-                          Brand Identity &amp; Graphic Design
-                        </option>
-                      </optgroup>
-                      <optgroup label="Artificial Intelligence">
-                        <option value="ai-agents">Autonomous AI Agents</option>
-                        <option value="ai-voice-receptionist">
-                          AI Voice Receptionist
-                        </option>
-                        <option value="business-workflow-automation">
-                          Business Workflow Automation
-                        </option>
-                        <option value="ai-research-knowledge-systems-rag">
-                          AI Knowledge Systems (RAG)
-                        </option>
-                        <option value="ai-chatbots-customer-support">
-                          AI Chatbots &amp; Customer Support
-                        </option>
-                        <option value="custom-ai-applications">
-                          Custom AI Applications
-                        </option>
-                        <option value="ai-integration-existing-products">
-                          AI Integration for Existing Products
-                        </option>
+                        <option value="email-marketing">Email Marketing</option>
                       </optgroup>
                       <optgroup label="Media">
-                        <option value="video-production">Video Production</option>
-                        <option value="reels-short-form-videos">
-                          Reels &amp; Short-Form Video
+                        <option value="video-editing">
+                          Video Editing (Podcast, Short-Forms, Event Videos)
                         </option>
-                        <option value="brand-films-commercials">
-                          Brand Films &amp; Commercials
+                        <option value="motion-graphics">Motion Graphics</option>
+                        <option value="graphics-design">Graphics Design</option>
+                        <option value="video-production">
+                          Video Production &amp; Brand Films
                         </option>
-                        <option value="photography">Photography</option>
-                        <option value="motion-graphics-animation">
-                          Motion Graphics &amp; Animation
+                        <option value="commercial-photography">
+                          Commercial Photography
                         </option>
-                        <option value="social-media-content">
-                          Social Media Content
+                      </optgroup>
+                      <optgroup label="Web Dev">
+                        <option value="web-dev">Web Development</option>
+                        <option value="seo">Technical &amp; On-Page SEO</option>
+                        <option value="ui-ux">UI / UX Design</option>
+                        <option value="web-extensions">Web Extensions</option>
+                        <option value="dadv">
+                          DADV (Dashboards, Data Analytics &amp; Visualization)
                         </option>
-                        <option value="content-strategy">
-                          Content Strategy
+                      </optgroup>
+                      <optgroup label="Agents &amp; Automation">
+                        <option value="chatbots">Chatbots</option>
+                        <option value="calling-agents">Calling Agents</option>
+                        <option value="ai-agents">AI Agents</option>
+                        <option value="n8n-automation">
+                          n8n &amp; Workflow Automation
                         </option>
                       </optgroup>
                     </select>

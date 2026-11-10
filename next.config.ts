@@ -19,6 +19,9 @@ const nextConfig: NextConfig = {
       { source: "/projects", destination: "/work", statusCode: 301 },
       { source: "/projects/:slug", destination: "/work/:slug", statusCode: 301 },
       { source: "/service/:division", destination: "/services/:division", statusCode: 301 },
+      { source: "/services/branding-marketing", destination: "/services/branding", statusCode: 301 },
+      { source: "/services/web-dev", destination: "/services/digital", statusCode: 301 },
+      { source: "/services/agents-and-automation", destination: "/services/ai", statusCode: 301 },
       { source: "/privacy-policy", destination: "/privacy", statusCode: 301 },
       { source: "/terms-and-conditions", destination: "/terms", statusCode: 301 },
     ];

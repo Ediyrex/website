@@ -12,7 +12,7 @@ import { FinalCtaSection } from "@/components/sections/FinalCtaSection";
 export const metadata: Metadata = {
   title: "Services",
   description:
-    "Explore Ediyrex Studio's integrated capabilities across Media, Digital, and Artificial Intelligence.",
+    "Explore Ediyrex Studio's four integrated divisions: Branding / Marketing, Media, Web Dev, and Agents & Automation.",
   alternates: {
     canonical: "/services",
   },
@@ -39,10 +39,10 @@ export default function ServicesPage() {
             />
             <Badge variant="accent">Capabilities</Badge>
             <h1 className="font-heading font-bold tracking-tight text-[#F5F3EE] text-[clamp(2.5rem,5vw,4.5rem)] leading-[1.06]">
-              Three Disciplines. One Integrated Studio.
+              Four Divisions. One Integrated Studio.
             </h1>
             <p className="text-base sm:text-lg text-[#B2B4BA] leading-relaxed">
-              Great software stalls without compelling visual storytelling, and strong creative campaigns bottleneck without automated systems. Ediyrex unites Media, Digital, and AI under one roof.
+              Great software stalls without distribution and storytelling, and growth campaigns bottleneck without automated systems. Ediyrex unites Branding &amp; Marketing, Media, Web Dev, and Agents &amp; Automation under one roof.
             </p>
             <div className="flex flex-wrap gap-4 pt-2">
               <Button href="/contact" variant="primary" size="lg">

@@ -1,4 +1,4 @@
-import { and, desc, eq, ilike, isNull, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, isNull, or, sql } from "drizzle-orm";
 import type { NextRequest } from "next/server";
 import { getDb, mediaAssets } from "@/db";
 import {
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const parsedPage = paginationSchema.safeParse({
       page: searchParams.get("page") ?? undefined,
-      limit: searchParams.get("limit") ?? undefined,
+      limit: searchParams.get("limit") ?? "12",
     });
     if (!parsedPage.success) {
       return apiBadRequest(
@@ -42,6 +42,8 @@ export async function GET(request: NextRequest) {
     const offset = (page - 1) * limit;
     const queryParam = searchParams.get("q")?.trim();
     const typeParam = searchParams.get("type")?.trim();
+    const folderParam = searchParams.get("folder")?.trim();
+    const sortParam = searchParams.get("sort")?.trim();
 
     const conditions = [isNull(mediaAssets.archivedAt)];
     if (
@@ -51,37 +53,76 @@ export async function GET(request: NextRequest) {
     ) {
       conditions.push(eq(mediaAssets.resourceType, typeParam));
     }
+    if (folderParam) {
+      conditions.push(eq(mediaAssets.folder, folderParam));
+    }
     if (queryParam) {
       const searchCond = or(
         ilike(mediaAssets.altText, `%${queryParam}%`),
         ilike(mediaAssets.caption, `%${queryParam}%`),
         ilike(mediaAssets.providerPublicId, `%${queryParam}%`),
-        ilike(mediaAssets.secureUrl, `%${queryParam}%`)
+        ilike(mediaAssets.secureUrl, `%${queryParam}%`),
+        ilike(mediaAssets.folder, `%${queryParam}%`)
       );
       if (searchCond) conditions.push(searchCond);
     }
 
     const whereClause = and(...conditions);
 
-    const rows = await db
-      .select()
-      .from(mediaAssets)
-      .where(whereClause)
-      .orderBy(desc(mediaAssets.createdAt))
-      .limit(limit)
-      .offset(offset);
+    const orderByClause =
+      sortParam === "oldest"
+        ? asc(mediaAssets.createdAt)
+        : sortParam === "largest"
+          ? desc(mediaAssets.fileSizeBytes)
+          : desc(mediaAssets.createdAt);
 
-    const [{ total }] = await db
-      .select({ total: sql<number>`count(*)::int` })
-      .from(mediaAssets)
-      .where(whereClause);
+    const [rows, [{ total }], [globalStats], folderRows] = await Promise.all([
+      db
+        .select()
+        .from(mediaAssets)
+        .where(whereClause)
+        .orderBy(orderByClause)
+        .limit(limit)
+        .offset(offset),
+      db
+        .select({ total: sql<number>`count(*)::int` })
+        .from(mediaAssets)
+        .where(whereClause),
+      db
+        .select({
+          totalAll: sql<number>`count(*)::int`,
+          imagesCount: sql<number>`count(*) filter (where ${mediaAssets.resourceType} = 'image')::int`,
+          videosCount: sql<number>`count(*) filter (where ${mediaAssets.resourceType} = 'video')::int`,
+          documentsCount: sql<number>`count(*) filter (where ${mediaAssets.resourceType} = 'document')::int`,
+          totalBytes: sql<number>`coalesce(sum(${mediaAssets.fileSizeBytes}), 0)::bigint`,
+        })
+        .from(mediaAssets)
+        .where(isNull(mediaAssets.archivedAt)),
+      db
+        .select({
+          folder: mediaAssets.folder,
+          count: sql<number>`count(*)::int`,
+        })
+        .from(mediaAssets)
+        .where(isNull(mediaAssets.archivedAt))
+        .groupBy(mediaAssets.folder)
+        .orderBy(asc(mediaAssets.folder)),
+    ]);
 
     return apiOk(rows, {
       page,
       limit,
       total,
-      totalPages: Math.ceil(total / limit),
+      totalPages: Math.max(1, Math.ceil(total / limit)),
       cloudinaryConfigured: isCloudinaryConfigured(),
+      stats: {
+        totalAll: globalStats?.totalAll ?? 0,
+        imagesCount: globalStats?.imagesCount ?? 0,
+        videosCount: globalStats?.videosCount ?? 0,
+        documentsCount: globalStats?.documentsCount ?? 0,
+        totalBytes: Number(globalStats?.totalBytes ?? 0),
+        folderCounts: folderRows,
+      },
     });
   } catch (err) {
     return handleApiError(err, "GET /api/v1/admin/media");
@@ -134,6 +175,8 @@ export async function POST(request: NextRequest) {
         height: data.height ?? null,
         altText: data.altText,
         caption: data.caption || null,
+        folder: data.folder || "Website",
+        tags: data.tags || [],
         uploadedByUserId: auth.session.userId,
       })
       .returning();
@@ -144,7 +187,10 @@ export async function POST(request: NextRequest) {
       action: "media.registered",
       entityType: "media_asset",
       entityId: created.id,
-      metadata: { storageProvider: created.storageProvider },
+      metadata: {
+        storageProvider: created.storageProvider,
+        folder: created.folder,
+      },
     });
 
     return apiOk(created, undefined, 201);
@@ -152,4 +198,3 @@ export async function POST(request: NextRequest) {
     return handleApiError(err, "POST /api/v1/admin/media");
   }
 }
-

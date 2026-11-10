@@ -24,7 +24,7 @@ export async function getPublishedServices(
   const db = getDb();
   if (!db) {
     const items = SERVICES_DATA.filter((s) => s.isPublished);
-    return divisionSlug && ["media", "digital", "ai"].includes(divisionSlug)
+    return divisionSlug && ["branding", "media", "digital", "ai"].includes(divisionSlug)
       ? items.filter((s) => s.division === divisionSlug)
       : items;
   }
@@ -33,7 +33,7 @@ export async function getPublishedServices(
     eq(services.status, "published"),
     eq(serviceDivisions.isActive, true),
   ];
-  if (divisionSlug && ["media", "digital", "ai"].includes(divisionSlug)) {
+  if (divisionSlug && ["branding", "media", "digital", "ai"].includes(divisionSlug)) {
     conditions.push(eq(serviceDivisions.slug, divisionSlug));
   }
 
@@ -73,7 +73,7 @@ function inferProjectCategory(
   projectType: "client" | "concept" | "internal"
 ): ServiceDivision | "hybrid" {
   const unique = Array.from(new Set(divisions));
-  if (unique.length === 1 && ["media", "digital", "ai"].includes(unique[0])) {
+  if (unique.length === 1 && ["branding", "media", "digital", "ai"].includes(unique[0])) {
     return unique[0] as ServiceDivision;
   }
   if (projectType === "internal" || unique.length > 1) {
@@ -91,7 +91,7 @@ export async function getPublishedProjects(options?: {
     let items = PROJECTS_DATA.filter((p) => p.isPublished);
     if (
       options?.category &&
-      ["media", "digital", "ai", "hybrid"].includes(options.category)
+      ["branding", "media", "digital", "ai", "hybrid"].includes(options.category)
     ) {
       items = items.filter((p) => p.category === options.category);
     }
@@ -194,7 +194,7 @@ export async function getPublishedProjects(options?: {
 
   if (
     options?.category &&
-    ["media", "digital", "ai", "hybrid"].includes(options.category)
+    ["branding", "media", "digital", "ai", "hybrid"].includes(options.category)
   ) {
     mapped = mapped.filter((p) => p.category === options.category);
   }

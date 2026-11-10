@@ -9,20 +9,26 @@ import { cn } from "@/lib/utils";
 
 const DIVISION_LINKS = [
   {
+    label: "Branding / Marketing",
+    description: "Ads & engagement, packaging, SEO, influencer & email marketing",
+    href: "/services/branding",
+    accent: "#D6B77A",
+  },
+  {
     label: "Media",
-    description: "Brand films, reels, photography & motion",
+    description: "Video editing (podcast, short-forms, event), motion & graphics",
     href: "/services/media",
     accent: "#E58A76",
   },
   {
-    label: "Digital",
-    description: "Websites, SaaS products, UI/UX & platforms",
+    label: "Web Dev",
+    description: "Web dev, technical SEO, UI/UX, web extensions & DADV",
     href: "/services/digital",
     accent: "#7BA9F5",
   },
   {
-    label: "AI",
-    description: "AI agents, automation, voice & RAG systems",
+    label: "Agents & Automation",
+    description: "Chatbots, calling agents, AI agents & n8n workflows",
     href: "/services/ai",
     accent: "#B5A0F5",
   },

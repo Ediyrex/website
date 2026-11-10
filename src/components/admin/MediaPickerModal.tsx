@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 export interface MediaAssetItem {
   id: string;
   storageProvider: string;
+  providerPublicId?: string | null;
   assetUrl: string;
   secureUrl: string;
   resourceType: "image" | "video" | "document";
@@ -16,6 +17,8 @@ export interface MediaAssetItem {
   height: number | null;
   altText: string;
   caption: string | null;
+  folder?: string;
+  tags?: string[];
   createdAt: string;
 }
 

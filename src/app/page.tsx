@@ -4,10 +4,10 @@ import { Hero } from "@/components/sections/Hero";
 
 export const metadata: Metadata = {
   title: {
-    absolute: "Ediyrex Studio — Creative Technology, Media, Digital & AI",
+    absolute: "Ediyrex Studio — Branding, Media, Web Dev & AI Agents",
   },
   description:
-    "Independent creative technology studio uniting commercial media production, digital experiences, and intelligent AI systems. Book a discovery call.",
+    "Independent creative technology studio uniting branding & marketing, media editing & motion, web dev & DADV dashboards, and AI agents & n8n automation.",
   alternates: {
     canonical: "/",
   },

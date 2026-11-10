@@ -66,12 +66,27 @@ export async function POST(request: NextRequest) {
 
     const altRaw = formData.get("altText");
     const captionRaw = formData.get("caption");
+    const folderRaw = formData.get("folder");
+    const tagsRaw = formData.get("tags");
+
     const altText =
       typeof altRaw === "string" ? sanitizePlainText(altRaw).slice(0, 300) : "";
     const caption =
       typeof captionRaw === "string"
         ? sanitizePlainText(captionRaw).slice(0, 500) || null
         : null;
+    const folder =
+      typeof folderRaw === "string" && sanitizePlainText(folderRaw)
+        ? sanitizePlainText(folderRaw).slice(0, 100)
+        : "Website";
+    const tags =
+      typeof tagsRaw === "string"
+        ? tagsRaw
+            .split(",")
+            .map((t) => sanitizePlainText(t).slice(0, 40))
+            .filter(Boolean)
+            .slice(0, 20)
+        : [];
 
     const db = getDb();
     if (!db) {
@@ -93,6 +108,8 @@ export async function POST(request: NextRequest) {
       height: number | null;
       altText: string;
       caption: string | null;
+      folder: string;
+      tags: string[];
       providerMetadata: Record<string, unknown>;
       uploadedByUserId: string;
     };
@@ -117,6 +134,8 @@ export async function POST(request: NextRequest) {
         height: uploaded.height,
         altText: altText || sanitizePlainText(fileEntry.name).slice(0, 120),
         caption,
+        folder,
+        tags,
         providerMetadata: uploaded.providerMetadata,
         uploadedByUserId: auth.session.userId,
       };
@@ -142,6 +161,8 @@ export async function POST(request: NextRequest) {
         height: null,
         altText: altText || sanitizePlainText(fileEntry.name).slice(0, 120),
         caption,
+        folder,
+        tags,
         providerMetadata: {
           originalName: sanitizePlainText(fileEntry.name).slice(0, 180),
           fallbackMode: true,
@@ -165,6 +186,7 @@ export async function POST(request: NextRequest) {
         storageProvider: created.storageProvider,
         mimeType: created.mimeType,
         fileSizeBytes: created.fileSizeBytes,
+        folder: created.folder,
       },
     });
 
@@ -173,4 +195,3 @@ export async function POST(request: NextRequest) {
     return handleApiError(err, "POST /api/v1/admin/media/upload");
   }
 }
-

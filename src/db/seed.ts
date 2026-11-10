@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { eq } from "drizzle-orm";
+import { eq, inArray, notInArray } from "drizzle-orm";
 import {
   getDb,
   closeDb,
@@ -12,6 +12,7 @@ import {
   studioProducts,
   siteSettings,
   cmsPages,
+  blogCategories,
 } from "./index";
 import { SERVICES_DATA } from "../features/services/data";
 import { PROJECTS_DATA } from "../features/work/data";
@@ -19,30 +20,39 @@ import { HYBRID_PRODUCTS_DATA } from "../features/products/data";
 
 const INITIAL_DIVISIONS = [
   {
-    name: "Media",
-    slug: "media",
+    name: "Branding / Marketing",
+    slug: "branding",
     description:
-      "Commercial video production, brand films, photography, short-form reels, motion graphics, and content strategy.",
-    iconName: "Film",
+      "Ads and engagement, packaging and promotional design, SEO optimization, influencer marketing, and email marketing systems.",
+    iconName: "Megaphone",
     displayOrder: 1,
     isActive: true,
   },
   {
-    name: "Digital",
-    slug: "digital",
+    name: "Media",
+    slug: "media",
     description:
-      "Editorial websites, conversion landing pages, e-commerce platforms, SaaS dashboards, UI/UX design, and full-stack development.",
-    iconName: "Globe",
+      "Video editing (podcast, short-forms, event videos), motion graphics, graphics design, video production, and photography.",
+    iconName: "Film",
     displayOrder: 2,
     isActive: true,
   },
   {
-    name: "AI",
+    name: "Web Dev",
+    slug: "digital",
+    description:
+      "Custom web development, technical & on-page SEO, UI/UX design, browser web extensions, and DADV analytics dashboards.",
+    iconName: "Globe",
+    displayOrder: 3,
+    isActive: true,
+  },
+  {
+    name: "Agents & Automation",
     slug: "ai",
     description:
-      "Autonomous AI agents, workflow automation, chatbots, voice receptionists, custom AI applications, and RAG knowledge systems.",
+      "Chatbots, AI voice calling agents, autonomous AI agents, and n8n workflow automation.",
     iconName: "Bot",
-    displayOrder: 3,
+    displayOrder: 4,
     isActive: true,
   },
 ];
@@ -109,7 +119,8 @@ async function runSeed() {
       }
     }
 
-    // 3. Seed Services (21 across Media, Digital, AI)
+    // 3. Seed Services across Branding/Marketing, Media, Web Dev, and Agents & Automation
+    const activeServiceSlugs = SERVICES_DATA.map((s) => s.slug);
     const serviceIdByTitle = new Map<string, string>();
     for (const svc of SERVICES_DATA) {
       const divisionId = divisionIdBySlug.get(svc.division);
@@ -153,6 +164,21 @@ async function runSeed() {
 
       if (row) {
         serviceIdByTitle.set(svc.title, row.id);
+      }
+    }
+
+    if (activeServiceSlugs.length > 0) {
+      const staleServices = await tx
+        .select({ id: services.id })
+        .from(services)
+        .where(notInArray(services.slug, activeServiceSlugs));
+
+      const staleIds = staleServices.map((s) => s.id);
+      if (staleIds.length > 0) {
+        await tx
+          .delete(projectServices)
+          .where(inArray(projectServices.serviceId, staleIds));
+        await tx.delete(services).where(inArray(services.id, staleIds));
       }
     }
 
@@ -396,6 +422,23 @@ async function runSeed() {
         .insert(cmsPages)
         .values(page)
         .onConflictDoNothing({ target: cmsPages.slug });
+    }
+
+    // 8. Seed Default Blog Categories
+    const defaultCategories = [
+      { name: "AI", slug: "ai", description: "AI agents, automation, and applied systems" },
+      { name: "Branding", slug: "branding", description: "Brand identity, films, and visual craft" },
+      { name: "Development", slug: "development", description: "Full-stack web and software engineering" },
+      { name: "Workflow", slug: "workflow", description: "Creative operations and studio tooling" },
+      { name: "Case Study", slug: "case-study", description: "Behind-the-scenes project breakdowns" },
+      { name: "Studio", slug: "studio", description: "Ediyrex updates, culture, and perspectives" },
+    ];
+
+    for (const cat of defaultCategories) {
+      await tx
+        .insert(blogCategories)
+        .values(cat)
+        .onConflictDoNothing({ target: blogCategories.slug });
     }
   });
 

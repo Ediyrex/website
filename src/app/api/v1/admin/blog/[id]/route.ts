@@ -1,7 +1,7 @@
 import { and, eq, ne } from "drizzle-orm";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
-import { blogPosts, getDb, mediaAssets } from "@/db";
+import { blogPostCategories, blogPosts, getDb, mediaAssets } from "@/db";
 import {
   apiBadRequest,
   apiError,
@@ -44,21 +44,28 @@ export async function GET(
       return apiNotFound("Blog post not found.");
     }
 
-    const coverRows = post.coverAssetId
-      ? await db
-          .select({
-            id: mediaAssets.id,
-            secureUrl: mediaAssets.secureUrl,
-            altText: mediaAssets.altText,
-          })
-          .from(mediaAssets)
-          .where(eq(mediaAssets.id, post.coverAssetId))
-          .limit(1)
-      : [];
+    const [coverRows, categoryRows] = await Promise.all([
+      post.coverAssetId
+        ? db
+            .select({
+              id: mediaAssets.id,
+              secureUrl: mediaAssets.secureUrl,
+              altText: mediaAssets.altText,
+            })
+            .from(mediaAssets)
+            .where(eq(mediaAssets.id, post.coverAssetId))
+            .limit(1)
+        : Promise.resolve([]),
+      db
+        .select({ categoryId: blogPostCategories.categoryId })
+        .from(blogPostCategories)
+        .where(eq(blogPostCategories.blogPostId, id)),
+    ]);
 
     return apiOk({
       ...post,
       coverAsset: coverRows[0] ?? null,
+      categoryIds: categoryRows.map((c) => c.categoryId),
     });
   } catch (err) {
     return handleApiError(err, "GET /api/v1/admin/blog/[id]");
@@ -128,22 +135,41 @@ export async function PATCH(
         ? existing.publishedAt ?? new Date()
         : existing.publishedAt;
 
-    const [updated] = await db
-      .update(blogPosts)
-      .set({
-        title: data.title,
-        slug: data.slug,
-        excerpt: data.excerpt,
-        bodyMarkdown: data.bodyMarkdown,
-        coverAssetId: data.coverAssetId || null,
-        status: data.status,
-        seoTitle: data.seoTitle || null,
-        seoDescription: data.seoDescription || null,
-        canonicalUrl: data.canonicalUrl || null,
-        publishedAt,
-      })
-      .where(eq(blogPosts.id, id))
-      .returning();
+    const updated = await db.transaction(async (tx) => {
+      const [row] = await tx
+        .update(blogPosts)
+        .set({
+          title: data.title,
+          slug: data.slug,
+          excerpt: data.excerpt,
+          bodyMarkdown: data.bodyMarkdown,
+          coverAssetId: data.coverAssetId || null,
+          status: data.status,
+          seoTitle: data.seoTitle || null,
+          seoDescription: data.seoDescription || null,
+          canonicalUrl: data.canonicalUrl || null,
+          publishedAt,
+        })
+        .where(eq(blogPosts.id, id))
+        .returning();
+
+      await tx
+        .delete(blogPostCategories)
+        .where(eq(blogPostCategories.blogPostId, id));
+      if (data.categoryIds.length > 0) {
+        await tx
+          .insert(blogPostCategories)
+          .values(
+            data.categoryIds.map((categoryId) => ({
+              blogPostId: id,
+              categoryId,
+            }))
+          )
+          .onConflictDoNothing();
+      }
+
+      return row;
+    });
 
     await recordAuditLog({
       actorUserId: auth.session.userId,
@@ -201,4 +227,3 @@ export async function DELETE(
     return handleApiError(err, "DELETE /api/v1/admin/blog/[id]");
   }
 }
-

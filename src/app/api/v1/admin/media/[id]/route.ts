@@ -4,6 +4,8 @@ import { eq, sql } from "drizzle-orm";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
 import {
+  blogPosts,
+  cmsPages,
   getDb,
   mediaAssets,
   projectMedia,
@@ -23,6 +25,74 @@ import { requireAdminRole } from "@/lib/server/session";
 import { mediaUpdateSchema } from "@/lib/validations/cms";
 
 const uuidSchema = z.string().uuid("Invalid media asset ID.");
+
+export async function GET(
+  _request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    const auth = await requireAdminRole(["admin", "editor", "viewer"]);
+    if (auth.errorResponse) return auth.errorResponse;
+
+    const { id } = await context.params;
+    if (!uuidSchema.safeParse(id).success) {
+      return apiBadRequest("Invalid media identifier.");
+    }
+
+    const db = getDb();
+    if (!db) {
+      return apiServerError("Database connection unavailable.");
+    }
+
+    const [asset] = await db
+      .select()
+      .from(mediaAssets)
+      .where(eq(mediaAssets.id, id))
+      .limit(1);
+
+    if (!asset) {
+      return apiNotFound("Media asset not found.");
+    }
+
+    const [usedInProjects, usedInGallery, usedInServices, usedInBlog, usedInPages] =
+      await Promise.all([
+        db
+          .select({ id: projects.id, title: projects.title, slug: projects.slug })
+          .from(projects)
+          .where(eq(projects.coverAssetId, id)),
+        db
+          .select({ id: projects.id, title: projects.title, slug: projects.slug })
+          .from(projectMedia)
+          .innerJoin(projects, eq(projectMedia.projectId, projects.id))
+          .where(eq(projectMedia.mediaAssetId, id)),
+        db
+          .select({ id: services.id, title: services.title, slug: services.slug })
+          .from(services)
+          .where(eq(services.coverAssetId, id)),
+        db
+          .select({ id: blogPosts.id, title: blogPosts.title, slug: blogPosts.slug })
+          .from(blogPosts)
+          .where(eq(blogPosts.coverAssetId, id)),
+        db
+          .select({ id: cmsPages.id, title: cmsPages.title, slug: cmsPages.slug })
+          .from(cmsPages)
+          .where(eq(cmsPages.thumbnailAssetId, id)),
+      ]);
+
+    return apiOk({
+      ...asset,
+      usage: [
+        ...usedInProjects.map((p) => ({ kind: "Project Cover", ...p })),
+        ...usedInGallery.map((p) => ({ kind: "Project Gallery", ...p })),
+        ...usedInServices.map((s) => ({ kind: "Service", ...s })),
+        ...usedInBlog.map((b) => ({ kind: "Blog Post", ...b })),
+        ...usedInPages.map((pg) => ({ kind: "Page", ...pg })),
+      ],
+    });
+  } catch (err) {
+    return handleApiError(err, "GET /api/v1/admin/media/[id]");
+  }
+}
 
 export async function PATCH(
   request: NextRequest,
@@ -57,12 +127,16 @@ export async function PATCH(
       return apiServerError("Database connection unavailable.");
     }
 
+    const updateSet: Record<string, unknown> = {
+      altText: parsed.data.altText,
+      caption: parsed.data.caption || null,
+    };
+    if (parsed.data.folder !== undefined) updateSet.folder = parsed.data.folder;
+    if (parsed.data.tags !== undefined) updateSet.tags = parsed.data.tags;
+
     const [updated] = await db
       .update(mediaAssets)
-      .set({
-        altText: parsed.data.altText,
-        caption: parsed.data.caption || null,
-      })
+      .set(updateSet)
       .where(eq(mediaAssets.id, id))
       .returning();
 
@@ -112,30 +186,36 @@ export async function DELETE(
       return apiNotFound("Media asset not found.");
     }
 
-    const [[coverCount], [galleryCount], [serviceCount]] = await Promise.all([
-      db
-        .select({ count: sql<number>`count(*)::int` })
-        .from(projects)
-        .where(eq(projects.coverAssetId, id)),
-      db
-        .select({ count: sql<number>`count(*)::int` })
-        .from(projectMedia)
-        .where(eq(projectMedia.mediaAssetId, id)),
-      db
-        .select({ count: sql<number>`count(*)::int` })
-        .from(services)
-        .where(eq(services.coverAssetId, id)),
-    ]);
+    const [[coverCount], [galleryCount], [serviceCount], [blogCount]] =
+      await Promise.all([
+        db
+          .select({ count: sql<number>`count(*)::int` })
+          .from(projects)
+          .where(eq(projects.coverAssetId, id)),
+        db
+          .select({ count: sql<number>`count(*)::int` })
+          .from(projectMedia)
+          .where(eq(projectMedia.mediaAssetId, id)),
+        db
+          .select({ count: sql<number>`count(*)::int` })
+          .from(services)
+          .where(eq(services.coverAssetId, id)),
+        db
+          .select({ count: sql<number>`count(*)::int` })
+          .from(blogPosts)
+          .where(eq(blogPosts.coverAssetId, id)),
+      ]);
 
     const totalRefs =
       (coverCount?.count ?? 0) +
       (galleryCount?.count ?? 0) +
-      (serviceCount?.count ?? 0);
+      (serviceCount?.count ?? 0) +
+      (blogCount?.count ?? 0);
 
     if (totalRefs > 0) {
       return apiError(
         "Conflict",
-        "Media asset is currently attached to one or more projects or services. Detach it before deleting.",
+        "Media asset is currently attached to one or more projects, services, or blog posts. Detach it before deleting.",
         409
       );
     }
@@ -170,4 +250,3 @@ export async function DELETE(
     return handleApiError(err, "DELETE /api/v1/admin/media/[id]");
   }
 }
-

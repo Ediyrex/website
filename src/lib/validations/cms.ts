@@ -179,11 +179,22 @@ export const mediaRegisterSchema = z.object({
   height: z.coerce.number().int().positive().optional().nullable(),
   altText: safeText(300, 0).default(""),
   caption: optionalSafeText(500),
+  folder: safeText(100, 1).default("Website"),
+  tags: z.array(safeText(40, 1)).max(20).default([]),
 });
 
 export const mediaUpdateSchema = z.object({
   altText: safeText(300, 0),
   caption: optionalSafeText(500),
+  folder: safeText(100, 1).optional(),
+  tags: z.array(safeText(40, 1)).max(20).optional(),
+});
+
+export const mediaBulkActionSchema = z.object({
+  ids: z.array(z.string().uuid()).min(1).max(100),
+  action: z.enum(["move_folder", "add_tag", "delete"]),
+  folder: safeText(100, 1).optional(),
+  tag: safeText(40, 1).optional(),
 });
 
 export const siteSettingsUpdateSchema = z.object({
@@ -214,6 +225,21 @@ export const enquiryNoteSchema = z.object({
   note: safeText(2000, 2),
 });
 
+export const blogCategoryCreateSchema = z.object({
+  name: safeText(80, 2),
+  slug: z
+    .string()
+    .trim()
+    .min(2)
+    .max(80)
+    .toLowerCase()
+    .regex(
+      slugPattern,
+      "Slug must contain lowercase letters, numbers, and hyphens only."
+    ),
+  description: optionalSafeText(300),
+});
+
 export const blogPostUpsertSchema = z.object({
   title: safeText(200, 3),
   slug: z
@@ -229,6 +255,7 @@ export const blogPostUpsertSchema = z.object({
   excerpt: safeText(400, 10),
   bodyMarkdown: safeText(40000, 10),
   coverAssetId: z.string().uuid().optional().nullable(),
+  categoryIds: z.array(z.string().uuid()).max(10).default([]),
   status: z.enum(["draft", "published", "archived"]).default("draft"),
   seoTitle: optionalSafeText(160),
   seoDescription: optionalSafeText(320),

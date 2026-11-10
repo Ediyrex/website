@@ -13,13 +13,15 @@ type CategoryFilter = "all" | ServiceDivision | "hybrid";
 
 const CATEGORY_TABS: { label: string; value: CategoryFilter }[] = [
   { label: "All", value: "all" },
+  { label: "Branding / Marketing", value: "branding" },
   { label: "Media", value: "media" },
-  { label: "Digital", value: "digital" },
-  { label: "AI", value: "ai" },
+  { label: "Web Dev", value: "digital" },
+  { label: "Agents & Automation", value: "ai" },
   { label: "Hybrid Labs", value: "hybrid" },
 ];
 
 const CATEGORY_COLOR: Record<string, string> = {
+  branding: "#D6B77A",
   media: "#E58A76",
   digital: "#7BA9F5",
   ai: "#B5A0F5",

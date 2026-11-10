@@ -6,11 +6,11 @@ export const paginationSchema = z.object({
 });
 
 export const servicesQuerySchema = paginationSchema.extend({
-  division: z.enum(["media", "digital", "ai"]).optional(),
+  division: z.enum(["branding", "media", "digital", "ai"]).optional(),
 });
 
 export const projectsQuerySchema = paginationSchema.extend({
-  category: z.enum(["media", "digital", "ai", "hybrid"]).optional(),
+  category: z.enum(["branding", "media", "digital", "ai", "hybrid"]).optional(),
   featured: z.enum(["true", "false"]).optional(),
 });
 

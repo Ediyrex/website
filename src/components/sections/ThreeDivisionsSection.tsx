@@ -7,13 +7,26 @@ import { gsap } from "@/lib/gsap";
 
 const DIVISIONS = [
   {
+    id: "branding",
+    label: "01 / BRANDING & MARKETING",
+    heading: "Attention that compounds.",
+    description:
+      "Position products for measurable growth with performance creative, packaging systems, search visibility, and retention campaigns.",
+    examples:
+      "Ads & engagement, packaging & promotional design, SEO optimization, influencer marketing & email marketing.",
+    cta: "Explore Branding / Marketing",
+    href: "/services/branding",
+    accent: "#D6B77A",
+    gradient: "linear-gradient(160deg, #272013 0%, #12151A 60%)",
+  },
+  {
     id: "media",
-    label: "01 / MEDIA",
+    label: "02 / MEDIA",
     heading: "Stories worth seeing.",
     description:
-      "Create visual content that captures attention, communicates meaning and builds brand recognition.",
+      "Create high-retention video edits, motion systems, and graphic design crafted to build brand authority.",
     examples:
-      "Brand films, photography, short-form video, motion graphics and content strategy.",
+      "Video editing (podcast, short-forms, event videos), motion graphics, graphics design & studio shoots.",
     cta: "Explore Media",
     href: "/services/media",
     accent: "#E58A76",
@@ -21,26 +34,26 @@ const DIVISIONS = [
   },
   {
     id: "digital",
-    label: "02 / DIGITAL",
+    label: "03 / WEB DEV",
     heading: "Digital built with intent.",
     description:
-      "Design and build websites, applications and digital products that turn complex ideas into useful experiences.",
+      "Engineer fast web platforms, intuitive interfaces, custom browser extensions, and real-time analytics products.",
     examples:
-      "Websites, e-commerce, SaaS, dashboards, UI/UX and full-stack applications.",
-    cta: "Explore Digital",
+      "Web dev, technical SEO, UI/UX design, web extensions & DADV (dashboards & data visualization).",
+    cta: "Explore Web Dev",
     href: "/services/digital",
     accent: "#7BA9F5",
     gradient: "linear-gradient(160deg, #101C31 0%, #12151A 60%)",
   },
   {
     id: "ai",
-    label: "03 / AI",
+    label: "04 / AGENTS & AUTOMATION",
     heading: "Intelligence into action.",
     description:
-      "Connect AI with real workflows to reduce repetitive work, improve access to information and support better decisions.",
+      "Connect conversational AI, voice systems, and workflow automation with real operations to scale output cleanly.",
     examples:
-      "AI agents, workflow automation, chatbots, voice receptionists and knowledge systems.",
-    cta: "Explore AI",
+      "Chatbots, calling agents, autonomous AI agents & n8n workflow automation.",
+    cta: "Explore Agents & Automation",
     href: "/services/ai",
     accent: "#B5A0F5",
     gradient: "linear-gradient(160deg, #21172D 0%, #12151A 60%)",
@@ -62,7 +75,7 @@ export function ThreeDivisionsSection() {
         y: 26,
         opacity: 0,
         duration: 0.55,
-        stagger: 0.12,
+        stagger: 0.1,
         ease: "power3.out",
         clearProps: "transform,opacity",
         scrollTrigger: {
@@ -90,33 +103,41 @@ export function ThreeDivisionsSection() {
             Capabilities
           </span>
           <h2 className="font-heading font-semibold tracking-tight text-[#F5F3EE] text-[clamp(2rem,3.6vw,3.25rem)] leading-[1.12]">
-            Three connected disciplines inside one studio.
+            Four connected divisions inside one studio.
           </h2>
           <p className="text-[#B2B4BA] text-base leading-relaxed">
-            Media creates demand, Digital converts and delivers value, and AI scales operations behind the scenes.
+            Branding &amp; Marketing builds demand, Media crafts visual authority, Web Dev engineers high-converting software, and Agents &amp; Automation scales operations.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {DIVISIONS.map((division) => (
             <div
               key={division.id}
-              className="division-card group relative rounded-2xl bg-[#12151A] border border-[#252A32] hover:border-[#3A414B] p-7 md:p-8 flex flex-col justify-between transition-all duration-200 overflow-hidden"
-              style={{ backgroundImage: division.gradient }}
+              className="division-card group relative rounded-2xl bg-[#12151A] border border-[#252A32] hover:border-[#3A414B] transition-colors p-7 md:p-8 flex flex-col justify-between overflow-hidden"
             >
               <div className="space-y-6">
-                {/* Division Artwork Motif */}
                 <div
-                  aria-hidden="true"
-                  className="h-32 rounded-xl bg-[#08090B]/70 border border-[#252A32] p-4 flex items-center justify-center relative overflow-hidden group-hover:border-[#3A414B] transition-colors"
+                  className="h-32 rounded-xl border border-[#252A32] p-5 flex items-center justify-center relative overflow-hidden"
+                  style={{ backgroundImage: division.gradient }}
                 >
-                  {division.id === "media" && (
-                    <div className="w-full h-full flex items-center justify-center gap-2">
-                      <div className="w-10 h-16 rounded border border-[#E58A76]/30 bg-[#E58A76]/5" />
-                      <div className="w-24 h-20 rounded-md border border-[#E58A76]/60 bg-[#E58A76]/10 flex items-center justify-center">
-                        <div className="w-4 h-4 rounded-full border border-[#E58A76]" />
+                  {division.id === "branding" && (
+                    <div className="w-full h-full flex items-center justify-center gap-3">
+                      <div className="w-16 h-16 rounded-2xl border border-[#D6B77A]/50 bg-[#D6B77A]/10 rotate-6" />
+                      <div className="w-16 h-16 rounded-2xl border border-[#D6B77A]/70 bg-[#12151A] -translate-x-4 -rotate-3 flex items-center justify-center">
+                        <div className="w-4 h-4 rounded-full bg-[#D6B77A]" />
                       </div>
-                      <div className="w-10 h-16 rounded border border-[#E58A76]/30 bg-[#E58A76]/5" />
+                    </div>
+                  )}
+
+                  {division.id === "media" && (
+                    <div className="w-full h-full flex items-center justify-center gap-3">
+                      <div className="w-12 h-20 rounded-md border border-[#E58A76]/40 bg-[#E58A76]/10" />
+                      <div className="w-28 h-20 rounded-md border border-[#E58A76]/50 bg-[#0D0F12]/90 flex items-center justify-center">
+                        <div className="w-6 h-6 rounded-full border border-[#E58A76]/60 flex items-center justify-center">
+                          <div className="w-0 h-0 border-y-4 border-y-transparent border-l-6 border-l-[#E58A76] ml-0.5" />
+                        </div>
+                      </div>
                     </div>
                   )}
 
@@ -184,4 +205,3 @@ export function ThreeDivisionsSection() {
     </section>
   );
 }
-

@@ -33,6 +33,8 @@ export const mediaAssets = pgTable(
     height: integer("height"),
     altText: varchar("alt_text", { length: 300 }).notNull().default(""),
     caption: text("caption"),
+    folder: varchar("folder", { length: 100 }).notNull().default("Website"),
+    tags: jsonb("tags").$type<string[]>().notNull().default([]),
     providerMetadata: jsonb("provider_metadata")
       .$type<Record<string, unknown>>()
       .notNull()

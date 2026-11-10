@@ -85,10 +85,18 @@ export function Footer() {
             <ul className="space-y-2.5 text-sm">
               <li>
                 <Link
+                  href="/services/branding"
+                  className="text-[#B2B4BA] hover:text-[#D6B77A] transition-colors"
+                >
+                  Branding / Marketing
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/services/media"
                   className="text-[#B2B4BA] hover:text-[#E58A76] transition-colors"
                 >
-                  Media
+                  Media &amp; Video Editing
                 </Link>
               </li>
               <li>
@@ -96,7 +104,7 @@ export function Footer() {
                   href="/services/digital"
                   className="text-[#B2B4BA] hover:text-[#7BA9F5] transition-colors"
                 >
-                  Digital
+                  Web Dev, Extensions &amp; DADV
                 </Link>
               </li>
               <li>
@@ -104,23 +112,15 @@ export function Footer() {
                   href="/services/ai"
                   className="text-[#B2B4BA] hover:text-[#B5A0F5] transition-colors"
                 >
-                  AI
+                  Agents &amp; n8n Automation
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/services/digital#brand-identity-graphic-design"
+                  href="/services#services"
                   className="text-[#B2B4BA] hover:text-[#F5F3EE] transition-colors"
                 >
-                  Brand identity
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/services/ai#business-workflow-automation"
-                  className="text-[#B2B4BA] hover:text-[#F5F3EE] transition-colors"
-                >
-                  Automation
+                  Full Service Directory
                 </Link>
               </li>
             </ul>

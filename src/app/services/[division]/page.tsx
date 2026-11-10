@@ -23,46 +23,60 @@ const DIVISION_CONFIG: Record<
     problems: string[];
   }
 > = {
+  branding: {
+    label: "01 / BRANDING & MARKETING",
+    title: "Branding & Marketing",
+    headline: "Attention that compounds.",
+    description:
+      "Ads and engagement campaigns, packaging and promotional design, SEO optimization, influencer marketing, and email marketing systems built for measurable growth.",
+    accent: "#D6B77A",
+    gradient: "radial-gradient(ellipse 65% 55% at 50% 20%, #29241B 0%, #08090B 72%)",
+    problems: [
+      "Paid ad spend burning budget due to weak creative hooks and fragmented funnel messaging.",
+      "Inconsistent packaging, promotional collateral, and brand presentation across launch channels.",
+      "Under-indexed organic search visibility and unsegmented email lifecycle follow-ups.",
+    ],
+  },
   media: {
-    label: "01 / MEDIA",
+    label: "02 / MEDIA",
     title: "Media & Content",
     headline: "Stories worth seeing.",
     description:
-      "Commercial video production, brand films, photography, short-form reels, and motion graphics crafted to build authority and capture attention.",
+      "Video editing across podcasts, short-form reels, and event videos, paired with motion graphics, graphics design, video production, and commercial photography.",
     accent: "#E58A76",
     gradient: "radial-gradient(ellipse 65% 55% at 50% 20%, #241411 0%, #08090B 72%)",
     problems: [
-      "Disconnected brand visuals that fail to communicate product quality.",
-      "Low short-form retention across social channels due to weak opening hooks.",
-      "Lack of cohesive photography and motion systems for product launches.",
+      "Disconnected brand visuals and raw podcast or event footage that fails to retain viewers.",
+      "Low short-form retention across Reels, TikTok, and YouTube Shorts due to weak editing pacing.",
+      "Lack of cohesive motion graphics and graphics design systems for product launches.",
     ],
   },
   digital: {
-    label: "02 / DIGITAL",
-    title: "Web & Digital Experience",
+    label: "03 / WEB DEV",
+    title: "Web Dev & Product Engineering",
     headline: "Digital built with intent.",
     description:
-      "Editorial websites, conversion landing pages, e-commerce platforms, SaaS dashboards, and full-stack software built for speed and clarity.",
+      "Custom web development, technical SEO, UI/UX design, browser web extensions, and DADV (Dashboards, Data Analytics & Visualization) engineered for speed and clarity.",
     accent: "#7BA9F5",
     gradient: "radial-gradient(ellipse 65% 55% at 50% 20%, #101C31 0%, #08090B 72%)",
     problems: [
-      "Generic templates that undermine credibility with enterprise or international buyers.",
-      "Slow, cluttered web interfaces causing drop-offs before enquiries or signups.",
-      "Complex SaaS workflows that lack intuitive UX hierarchy and maintainable code.",
+      "Generic templates that undermine credibility and fail technical SEO and Core Web Vitals checks.",
+      "Cluttered web interfaces and SaaS flows lacking intuitive UI/UX hierarchy and custom extensions.",
+      "Scattered operational data needing dedicated DADV dashboards and interactive analytics portals.",
     ],
   },
   ai: {
-    label: "03 / AI",
-    title: "AI Agents & Automation",
+    label: "04 / AGENTS & AUTOMATION",
+    title: "Agents & Automation",
     headline: "Intelligence into action.",
     description:
-      "Autonomous AI agents, workflow automation, voice receptionists, customer support bots, and RAG knowledge systems integrated into real operations.",
+      "Production chatbots, AI calling agents, autonomous AI agents, and n8n workflow automation integrated cleanly into CRM, support, and internal operations.",
     accent: "#B5A0F5",
     gradient: "radial-gradient(ellipse 65% 55% at 50% 20%, #21172D 0%, #08090B 72%)",
     problems: [
-      "Repetitive manual data entry across CRM, support, and internal back-office tools.",
-      "Missed inbound calls or slow response times during off-hours and high-volume peaks.",
-      "Scattered company documentation that teams struggle to search and synthesize.",
+      "Missed inbound calls, unresponded leads, and slow off-hours support across web and voice.",
+      "Repetitive manual copy-pasting across CRM, email, and billing tools without n8n pipelines.",
+      "Operational bottlenecks where autonomous AI agents can research, triage, and execute safely.",
     ],
   },
 };
@@ -72,7 +86,12 @@ type DivisionPageProps = {
 };
 
 export async function generateStaticParams() {
-  return [{ division: "media" }, { division: "digital" }, { division: "ai" }];
+  return [
+    { division: "branding" },
+    { division: "media" },
+    { division: "digital" },
+    { division: "ai" },
+  ];
 }
 
 export async function generateMetadata({

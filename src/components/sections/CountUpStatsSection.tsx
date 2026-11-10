@@ -12,13 +12,13 @@ interface StatItem {
 
 const STUDIO_METRICS: StatItem[] = [
   {
-    target: 21,
-    suffix: "",
+    target: 19,
+    suffix: "+",
     label: "Core Capabilities",
-    sublabel: "Across Media, Digital & AI",
+    sublabel: "Branding, Media, Web Dev & AI",
   },
   {
-    target: 3,
+    target: 4,
     suffix: "",
     label: "Integrated Divisions",
     sublabel: "Unified under one team",

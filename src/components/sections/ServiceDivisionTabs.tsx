@@ -3,29 +3,28 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import {
-  Video,
-  Share2,
+  ArrowRight,
+  Bot,
   Camera,
-  Smartphone,
+  CheckCircle2,
+  Code2,
   Film,
-  Compass,
-  Sparkles,
   Globe,
   Layout,
-  ShoppingBag,
   LayoutDashboard,
-  Palette,
-  Code2,
-  Shapes,
-  Bot,
-  Cpu,
+  Mail,
+  Megaphone,
   MessageSquareCode,
+  Package,
+  Palette,
   PhoneCall,
-  Boxes,
-  Database,
-  Network,
-  ArrowRight,
-  CheckCircle2,
+  Puzzle,
+  Scissors,
+  Sparkles,
+  TrendingUp,
+  Users,
+  Video,
+  Workflow,
 } from "lucide-react";
 import { ServiceDivision } from "@/types";
 import { SERVICES_DATA } from "@/features/services/data";
@@ -33,33 +32,40 @@ import { Badge } from "@/components/ui/Badge";
 import { cn } from "@/lib/utils";
 
 const ICON_MAP: Record<string, React.ElementType> = {
-  Video,
-  Share2,
+  Bot,
   Camera,
-  Smartphone,
+  Code2,
   Film,
-  Compass,
-  Sparkles,
   Globe,
   Layout,
-  ShoppingBag,
   LayoutDashboard,
-  Palette,
-  Code2,
-  Shapes,
-  Bot,
-  Cpu,
+  Mail,
+  Megaphone,
   MessageSquareCode,
+  Package,
+  Palette,
   PhoneCall,
-  Boxes,
-  Database,
-  Network,
+  Puzzle,
+  Scissors,
+  Sparkles,
+  TrendingUp,
+  Users,
+  Video,
+  Workflow,
 };
 
 const DIVISION_ACCENT: Record<ServiceDivision, string> = {
+  branding: "#D6B77A",
   media: "#E58A76",
   digital: "#7BA9F5",
   ai: "#B5A0F5",
+};
+
+const DIVISION_LABEL: Record<ServiceDivision, string> = {
+  branding: "Branding / Marketing",
+  media: "Media",
+  digital: "Web Dev",
+  ai: "Agents & Automation",
 };
 
 export function ServiceDivisionTabs() {
@@ -70,6 +76,9 @@ export function ServiceDivisionTabs() {
       ? SERVICES_DATA
       : SERVICES_DATA.filter((s) => s.division === activeTab);
 
+  const countByDivision = (div: ServiceDivision) =>
+    SERVICES_DATA.filter((s) => s.division === div).length;
+
   return (
     <section
       id="services"
@@ -77,11 +86,11 @@ export function ServiceDivisionTabs() {
     >
       <div className="max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-12">
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-12 gap-6">
           <div className="space-y-3 max-w-2xl">
             <Badge variant="accent">Service Directory</Badge>
             <h2 className="font-heading font-semibold tracking-tight text-[#F5F3EE] text-[clamp(1.75rem,3.4vw,2.75rem)] leading-[1.14]">
-              21 capabilities across Media, Digital &amp; AI
+              {SERVICES_DATA.length} capabilities across Branding, Media, Web Dev &amp; AI
             </h2>
             <p className="text-[#B2B4BA] text-sm sm:text-base leading-relaxed">
               Every service can be commissioned independently or orchestrated together under one unified engagement.
@@ -100,7 +109,19 @@ export function ServiceDivisionTabs() {
                   : "text-[#B2B4BA] hover:text-[#F5F3EE]"
               )}
             >
-              All (21)
+              All ({SERVICES_DATA.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("branding")}
+              className={cn(
+                "px-3.5 py-2 text-xs font-medium rounded-lg transition-colors cursor-pointer",
+                activeTab === "branding"
+                  ? "bg-[#D6B77A]/20 text-[#D6B77A] border border-[#D6B77A]/40"
+                  : "text-[#B2B4BA] hover:text-[#F5F3EE]"
+              )}
+            >
+              Branding / Marketing ({countByDivision("branding")})
             </button>
             <button
               type="button"
@@ -112,7 +133,7 @@ export function ServiceDivisionTabs() {
                   : "text-[#B2B4BA] hover:text-[#F5F3EE]"
               )}
             >
-              Media (7)
+              Media ({countByDivision("media")})
             </button>
             <button
               type="button"
@@ -124,7 +145,7 @@ export function ServiceDivisionTabs() {
                   : "text-[#B2B4BA] hover:text-[#F5F3EE]"
               )}
             >
-              Digital (7)
+              Web Dev ({countByDivision("digital")})
             </button>
             <button
               type="button"
@@ -136,7 +157,7 @@ export function ServiceDivisionTabs() {
                   : "text-[#B2B4BA] hover:text-[#F5F3EE]"
               )}
             >
-              AI (7)
+              Agents &amp; Automation ({countByDivision("ai")})
             </button>
           </div>
         </div>
@@ -154,8 +175,8 @@ export function ServiceDivisionTabs() {
                 className="group relative p-6 md:p-7 rounded-2xl bg-[#12151A] border border-[#252A32] hover:border-[#3A414B] transition-colors duration-200 flex flex-col justify-between"
               >
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="w-10 h-10 rounded-xl border border-[#252A32] bg-[#0D0F12] flex items-center justify-center">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="w-10 h-10 rounded-xl border border-[#252A32] bg-[#0D0F12] flex items-center justify-center shrink-0">
                       <Icon
                         className="w-5 h-5"
                         style={{ color: accent }}
@@ -165,10 +186,10 @@ export function ServiceDivisionTabs() {
                     <div className="flex items-center gap-2">
                       {service.featured && <Badge variant="accent">Core</Badge>}
                       <span
-                        className="text-[11px] font-mono uppercase tracking-wider"
+                        className="text-[11px] font-mono uppercase tracking-wider text-right"
                         style={{ color: accent }}
                       >
-                        {service.division}
+                        {DIVISION_LABEL[service.division]}
                       </span>
                     </div>
                   </div>

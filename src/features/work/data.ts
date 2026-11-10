@@ -9,10 +9,10 @@ export const PROJECTS_DATA: ProjectItem[] = [
       "Concept architecture for an autonomous enterprise operations hub integrating multi-agent coordination, document parsing, and human-in-the-loop review.",
     category: "ai",
     servicesDemonstrated: [
-      "Autonomous AI Agents",
-      "Business Workflow Automation",
-      "AI Research & Knowledge Systems (RAG)",
-      "SaaS Products & Dashboards",
+      "AI Agents",
+      "n8n & Workflow Automation",
+      "Chatbots",
+      "DADV — Dashboards, Data Analytics & Visualization",
     ],
     coverImage: "/images/projects/concept-ai-agent.svg",
     coverAlt:
@@ -41,10 +41,10 @@ export const PROJECTS_DATA: ProjectItem[] = [
       "Visual identity, 3D product motion graphics, and short-form video system created as a concept showcase for sustainable consumer hardware.",
     category: "media",
     servicesDemonstrated: [
-      "Brand Films & Commercials",
-      "Motion Graphics & Animation",
-      "Reels & Short-Form Video",
-      "Brand Identity & Graphic Design",
+      "Video Production & Brand Films",
+      "Motion Graphics",
+      "Video Editing",
+      "Packaging & Promotional Design",
     ],
     coverImage: "/images/projects/concept-media-lumina.svg",
     coverAlt:
@@ -73,10 +73,10 @@ export const PROJECTS_DATA: ProjectItem[] = [
       "High-contrast SaaS web application and modular design system engineered for streaming telemetry workflows and developer tooling.",
     category: "digital",
     servicesDemonstrated: [
-      "Website Design & Development",
-      "SaaS Products & Dashboards",
+      "Web Development",
+      "DADV — Dashboards, Data Analytics & Visualization",
       "UI / UX Design",
-      "Full-Stack App Development",
+      "Technical & On-Page SEO",
     ],
     coverImage: "/images/projects/concept-digital-strata.svg",
     coverAlt:
@@ -105,10 +105,10 @@ export const PROJECTS_DATA: ProjectItem[] = [
       "Low-latency conversational voice agent architecture designed for natural inbound call handling, calendar scheduling, and structured lead capture.",
     category: "hybrid",
     servicesDemonstrated: [
-      "AI Voice Receptionist",
+      "Calling Agents",
       "AI Agents",
-      "Business Workflow Automation",
-      "Custom AI Applications",
+      "n8n & Workflow Automation",
+      "Chatbots",
     ],
     coverImage: "/images/projects/concept-hybrid-voice.svg",
     coverAlt:

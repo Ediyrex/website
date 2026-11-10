@@ -8,6 +8,7 @@ import {
   Bot,
   Film,
   Globe,
+  Megaphone,
   MousePointer2,
   Pause,
   Play,
@@ -249,31 +250,39 @@ export function BentoBuildSection() {
             </Link>
           </motion.div>
 
-          {/* Bento Tiles 3, 4, 5 (Span 4 each): Media, Digital, AI */}
+          {/* Bento Tiles 3, 4, 5, 6 (Span 3 each): Branding/Marketing, Media, Web Dev, Agents & Automation */}
           {[
             {
-              title: "Media & Content",
-              desc: "Brand films, commercials, photography, short-form reels, and motion design.",
+              title: "Branding & Marketing",
+              desc: "Ads & engagement, packaging, SEO optimization, influencer & email marketing.",
+              href: "/services/branding",
+              accent: "#D6B77A",
+              icon: Megaphone,
+              delay: 0.1,
+            },
+            {
+              title: "Media & Video",
+              desc: "Video editing (podcast, short-forms, event videos), motion graphics & graphics design.",
               href: "/services/media",
               accent: "#E58A76",
               icon: Film,
-              delay: 0.12,
+              delay: 0.14,
             },
             {
-              title: "Web & Digital",
-              desc: "Editorial websites, e-commerce, SaaS dashboards, UI/UX, and full-stack apps.",
+              title: "Web Dev",
+              desc: "Web dev, SEO, UI/UX, Chrome/web extensions & DADV analytics dashboards.",
               href: "/services/digital",
               accent: "#7BA9F5",
               icon: Globe,
-              delay: 0.16,
+              delay: 0.18,
             },
             {
-              title: "AI & Automation",
-              desc: "Autonomous AI agents, chatbots, voice receptionists, and RAG systems.",
+              title: "Agents & Automation",
+              desc: "Chatbots, voice calling agents, autonomous AI agents & n8n automation.",
               href: "/services/ai",
               accent: "#B5A0F5",
               icon: Bot,
-              delay: 0.2,
+              delay: 0.22,
             },
           ].map((tile) => {
             const Icon = tile.icon;
@@ -288,7 +297,7 @@ export function BentoBuildSection() {
                   delay: tile.delay,
                   ease: [0.22, 1, 0.36, 1],
                 }}
-                className="lg:col-span-4 rounded-2xl bg-[#12151A] border border-[#252A32] hover:border-[#3A414B] p-6 flex flex-col justify-between space-y-5 transition-colors"
+                className="lg:col-span-3 rounded-2xl bg-[#12151A] border border-[#252A32] hover:border-[#3A414B] p-6 flex flex-col justify-between space-y-5 transition-colors"
               >
                 <div className="space-y-3">
                   <div className="w-9 h-9 rounded-lg bg-[#0D0F12] border border-[#252A32] flex items-center justify-center">
