@@ -270,3 +270,46 @@ export const studioTasks = pgTable(
   ]
 );
 
+export const cmsPages = pgTable(
+  "cms_pages",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    title: varchar("title", { length: 160 }).notNull(),
+    subtitle: varchar("subtitle", { length: 280 }).notNull().default(""),
+    slug: varchar("slug", { length: 180 }).notNull().unique(),
+    pageType: varchar("page_type", { length: 32 }).notNull().default("static"),
+    thumbnailAssetId: uuid("thumbnail_asset_id").references(
+      () => mediaAssets.id,
+      { onDelete: "set null" }
+    ),
+    bodyMarkdown: text("body_markdown").notNull().default(""),
+    status: publicationStatusEnum("status").notNull().default("published"),
+    seoTitle: varchar("seo_title", { length: 160 }),
+    seoDescription: varchar("seo_description", { length: 320 }),
+    canonicalUrl: varchar("canonical_url", { length: 300 }),
+    noIndex: boolean("no_index").notNull().default(false),
+    displayOrder: integer("display_order").notNull().default(0),
+    updatedByUserId: uuid("updated_by_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    publishedAt: timestamp("published_at", {
+      withTimezone: true,
+      mode: "date",
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    check(
+      "chk_cms_pages_type",
+      sql`${table.pageType} IN ('home', 'static', 'listing', 'legal')`
+    ),
+    check("chk_cms_pages_order", sql`${table.displayOrder} >= 0`),
+    index("idx_cms_pages_status_order").on(table.status, table.displayOrder),
+  ]
+);
+

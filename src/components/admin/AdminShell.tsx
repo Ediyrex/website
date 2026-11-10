@@ -35,7 +35,7 @@ interface NavGroup {
     label: string;
     icon: React.ElementType;
     exact?: boolean;
-    badge?: string;
+    children?: { href: string; label: string }[];
   }[];
 }
 
@@ -60,8 +60,17 @@ const NAV_GROUPS: NavGroup[] = [
   {
     title: "Business Management",
     items: [
-      { href: "/admin/inquiries", label: "CRM / Inquiries", icon: Inbox, badge: "Mini" },
-      { href: "/admin/tasks", label: "Projects & Tasks", icon: CheckSquare, badge: "Mini" },
+      {
+        href: "/admin/inquiries",
+        label: "CRM",
+        icon: Inbox,
+        children: [
+          { href: "/admin/inquiries", label: "Leads & Inquiries" },
+          { href: "/admin/inquiries?status=won", label: "Clients" },
+          { href: "/admin/inquiries?status=reviewing", label: "Follow-ups" },
+        ],
+      },
+      { href: "/admin/tasks", label: "Projects & Tasks", icon: CheckSquare },
     ],
   },
   {
@@ -175,9 +184,6 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               <span className="font-heading font-bold text-sm tracking-tight text-[#F5F3EE]">
                 Ediyrex Studio
               </span>
-              <span className="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-[#1B1710] text-[#D6B77A] border border-[#D6B77A]/30">
-                ADMIN v1
-              </span>
             </Link>
             <button
               type="button"
@@ -206,32 +212,43 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                     : pathname.startsWith(item.href);
 
                   return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={cn(
-                        "flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors",
-                        isActive
-                          ? "bg-[#D6B77A]/12 text-[#F5E7C8] border border-[#D6B77A]/25"
-                          : "text-[#9CA3AF] hover:text-[#F5F3EE] hover:bg-[#13161C] border border-transparent"
-                      )}
-                    >
-                      <span className="flex items-center gap-2.5 min-w-0">
-                        <Icon
-                          className={cn(
-                            "w-4 h-4 shrink-0",
-                            isActive ? "text-[#D6B77A]" : "text-[#6D7480]"
-                          )}
-                        />
-                        <span className="truncate">{item.label}</span>
-                      </span>
-                      {item.badge && (
-                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#1B1710] text-[#D6B77A] border border-[#D6B77A]/25">
-                          {item.badge}
+                    <div key={item.href} className="space-y-1">
+                      <Link
+                        href={item.href}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={cn(
+                          "flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors",
+                          isActive
+                            ? "bg-[#D6B77A]/12 text-[#F5E7C8] border border-[#D6B77A]/25"
+                            : "text-[#9CA3AF] hover:text-[#F5F3EE] hover:bg-[#13161C] border border-transparent"
+                        )}
+                      >
+                        <span className="flex items-center gap-2.5 min-w-0">
+                          <Icon
+                            className={cn(
+                              "w-4 h-4 shrink-0",
+                              isActive ? "text-[#D6B77A]" : "text-[#6D7480]"
+                            )}
+                          />
+                          <span className="truncate">{item.label}</span>
                         </span>
+                      </Link>
+                      {item.children && (
+                        <div className="pl-7 space-y-0.5">
+                          {item.children.map((sub) => (
+                            <Link
+                              key={sub.href}
+                              href={sub.href}
+                              onClick={() => setMobileMenuOpen(false)}
+                              className="flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs text-[#8D939E] hover:text-[#F5F3EE] hover:bg-[#13161C] transition-colors"
+                            >
+                              <span className="w-1 h-1 rounded-full bg-[#6D7480]" />
+                              <span>{sub.label}</span>
+                            </Link>
+                          ))}
+                        </div>
                       )}
-                    </Link>
+                    </div>
                   );
                 })}
               </div>

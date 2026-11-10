@@ -29,6 +29,13 @@
       "when": 1794303455941,
       "tag": "0003_studio_tasks",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794306732011,
+      "tag": "0004_cms_pages",
+      "breakpoints": true
     }
   ]
 }

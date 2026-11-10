@@ -11,6 +11,7 @@ import {
   projectServices,
   studioProducts,
   siteSettings,
+  cmsPages,
 } from "./index";
 import { SERVICES_DATA } from "../features/services/data";
 import { PROJECTS_DATA } from "../features/work/data";
@@ -293,6 +294,108 @@ async function runSeed() {
         .insert(siteSettings)
         .values(setting)
         .onConflictDoNothing({ target: siteSettings.settingKey });
+    }
+
+    // 7. Seed Core CMS Pages
+    const defaultPages = [
+      {
+        title: "Home",
+        subtitle: "Main landing page",
+        slug: "/",
+        pageType: "home",
+        status: "published" as const,
+        seoTitle: "Ediyrex Studio — Creative Technology, Media, Digital & AI",
+        seoDescription:
+          "Independent creative technology studio uniting commercial media production, digital experiences, and intelligent AI systems.",
+        canonicalUrl: "/",
+        displayOrder: 1,
+        publishedAt: new Date(),
+      },
+      {
+        title: "About",
+        subtitle: "Our studio, values, and approach",
+        slug: "/about",
+        pageType: "static",
+        status: "published" as const,
+        seoTitle: "About | Ediyrex Studio",
+        seoDescription:
+          "About Ediyrex Studio: an independent creative technology studio uniting Media, Digital, and Artificial Intelligence.",
+        canonicalUrl: "/about",
+        displayOrder: 2,
+        publishedAt: new Date(),
+      },
+      {
+        title: "Services",
+        subtitle: "What we offer across Media, Digital & AI",
+        slug: "/services",
+        pageType: "static",
+        status: "published" as const,
+        seoTitle: "Services | Ediyrex Studio",
+        seoDescription:
+          "Explore Ediyrex Studio's integrated capabilities across Media, Digital, and Artificial Intelligence.",
+        canonicalUrl: "/services",
+        displayOrder: 3,
+        publishedAt: new Date(),
+      },
+      {
+        title: "Work & Portfolio",
+        subtitle: "Our selected work and case studies",
+        slug: "/work",
+        pageType: "listing",
+        status: "published" as const,
+        seoTitle: "Work & Case Studies | Ediyrex Studio",
+        seoDescription:
+          "Selected blueprints, explorations, and case studies across Media, Digital, and AI by Ediyrex Studio.",
+        canonicalUrl: "/work",
+        displayOrder: 4,
+        publishedAt: new Date(),
+      },
+      {
+        title: "Contact",
+        subtitle: "Get in touch with our studio team",
+        slug: "/contact",
+        pageType: "static",
+        status: "published" as const,
+        seoTitle: "Contact & Discovery Call | Ediyrex Studio",
+        seoDescription:
+          "Book a discovery call or submit a project enquiry to Ediyrex Studio.",
+        canonicalUrl: "/contact",
+        displayOrder: 5,
+        publishedAt: new Date(),
+      },
+      {
+        title: "Privacy Policy",
+        subtitle: "Our privacy and data protection notice",
+        slug: "/privacy",
+        pageType: "legal",
+        status: "published" as const,
+        seoTitle: "Privacy Policy | Ediyrex Studio",
+        seoDescription:
+          "How Ediyrex Studio collects, processes, and protects project enquiry information.",
+        canonicalUrl: "/privacy",
+        displayOrder: 6,
+        publishedAt: new Date(),
+      },
+      {
+        title: "Terms of Service",
+        subtitle: "Terms and conditions of using our services",
+        slug: "/terms",
+        pageType: "legal",
+        status: "published" as const,
+        seoTitle: "Terms of Service | Ediyrex Studio",
+        seoDescription:
+          "Terms governing use of the Ediyrex Studio website and informational materials.",
+        canonicalUrl: "/terms",
+        displayOrder: 7,
+        publishedAt: new Date(),
+      },
+    ];
+
+    for (const page of defaultPages) {
+      await tx
+        .insert(cmsPages)
+        .values(page)
+        .onConflictDoNothing({ target: cmsPages.slug });
     }
   });
 

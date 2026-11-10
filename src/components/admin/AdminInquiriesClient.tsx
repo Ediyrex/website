@@ -67,7 +67,7 @@ export function AdminInquiriesClient() {
 
   const [rows, setRows] = useState<EnquirySummary[]>([]);
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState("");
+  const statusFilter = searchParams.get("status") ?? "";
   const [query, setQuery] = useState("");
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
@@ -311,7 +311,14 @@ export function AdminInquiriesClient() {
 
         <select
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
+          onChange={(e) => {
+            const next = e.target.value;
+            const nextParams = new URLSearchParams(searchParams.toString());
+            if (next) nextParams.set("status", next);
+            else nextParams.delete("status");
+            const qs = nextParams.toString();
+            router.replace(qs ? `/admin/inquiries?${qs}` : "/admin/inquiries");
+          }}
           aria-label="Filter inquiries by status"
           className="h-10 px-3 rounded-lg bg-[#12151A] border border-[#252A32] text-xs font-mono text-[#F5F3EE] focus:outline-none focus:border-[#D6B77A]"
         >

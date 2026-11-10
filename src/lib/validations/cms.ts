@@ -253,3 +253,29 @@ export const teamMemberUpdateSchema = z.object({
   roleName: z.enum(["admin", "editor", "viewer"]).optional(),
 });
 
+export const cmsPageSlugPattern = /^\/(?:[a-z0-9-]+(?:\/[a-z0-9-]+)*)?$/;
+
+export const cmsPageUpsertSchema = z.object({
+  title: safeText(160, 2),
+  subtitle: safeText(280, 0).default(""),
+  slug: z
+    .string()
+    .trim()
+    .min(1)
+    .max(180)
+    .toLowerCase()
+    .regex(
+      cmsPageSlugPattern,
+      "Page slug must start with / and use lowercase letters, numbers, and hyphens (e.g. /, /about, /services/ai)."
+    ),
+  pageType: z.enum(["home", "static", "listing", "legal"]).default("static"),
+  thumbnailAssetId: z.string().uuid().optional().nullable(),
+  bodyMarkdown: safeText(40000, 0).default(""),
+  status: z.enum(["draft", "published", "archived"]).default("draft"),
+  seoTitle: optionalSafeText(160),
+  seoDescription: optionalSafeText(320),
+  canonicalUrl: optionalSafeText(300),
+  noIndex: z.boolean().default(false),
+  displayOrder: z.coerce.number().int().min(0).max(9999).default(0),
+});
+
