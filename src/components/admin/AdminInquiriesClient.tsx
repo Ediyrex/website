@@ -57,21 +57,14 @@ export function AdminInquiriesClient() {
   const isAdmin = user.roles.includes("admin");
 
   const viewParam = searchParams.get("view");
-  const initialView: CrmView =
+  const activeView: CrmView =
     viewParam === "clients"
       ? "clients"
       : viewParam === "followups"
       ? "followups"
       : "leads";
 
-  const [activeView, setActiveView] = useState<CrmView>(initialView);
-
-  useEffect(() => {
-    setActiveView(initialView);
-  }, [initialView]);
-
   const switchView = (next: CrmView) => {
-    setActiveView(next);
     const params = new URLSearchParams(searchParams.toString());
     if (next === "leads") {
       params.delete("view");
@@ -280,15 +273,19 @@ export function AdminInquiriesClient() {
   }, [loadDashboard]);
 
   useEffect(() => {
-    if (activeView === "clients" || followupModalTarget.open) {
+    if (activeView !== "clients" && !followupModalTarget.open) return;
+    const timer = setTimeout(() => {
       loadClients();
-    }
+    }, 0);
+    return () => clearTimeout(timer);
   }, [activeView, followupModalTarget.open, loadClients]);
 
   useEffect(() => {
-    if (activeView === "followups") {
+    if (activeView !== "followups") return;
+    const timer = setTimeout(() => {
       loadFollowups();
-    }
+    }, 0);
+    return () => clearTimeout(timer);
   }, [activeView, loadFollowups]);
 
   const refreshAll = useCallback(() => {

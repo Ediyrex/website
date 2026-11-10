@@ -404,7 +404,7 @@ export async function POST(request: NextRequest) {
         changedById: auth.session.userId,
         previousStatus: null,
         newStatus: row.status,
-        reason: `Added in CRM by ${auth.session.name || auth.session.email}`,
+        reason: `Added in CRM by ${auth.session.displayName || auth.session.email}`,
       });
 
       return row;

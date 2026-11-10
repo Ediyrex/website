@@ -120,3 +120,4 @@ export async function DELETE(
     return handleApiError(err, "DELETE /api/v1/admin/pms/projects/[id]");
   }
 }
+

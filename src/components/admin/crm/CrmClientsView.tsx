@@ -10,7 +10,6 @@ import {
   FolderKanban,
   Mail,
   Phone,
-  Plus,
   RotateCcw,
   Search,
   UserPlus,

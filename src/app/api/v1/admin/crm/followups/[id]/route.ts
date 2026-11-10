@@ -124,3 +124,4 @@ export async function DELETE(
     return handleApiError(err, "DELETE /api/v1/admin/crm/followups/[id]");
   }
 }
+

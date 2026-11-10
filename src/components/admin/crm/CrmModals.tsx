@@ -386,19 +386,17 @@ export function CreateFollowupModal({
     ? `client:${clientsList[0].id}`
     : "";
 
-  const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
-  const defaultLocalIso = new Date(
-    tomorrow.getTime() - tomorrow.getTimezoneOffset() * 60000
-  )
-    .toISOString()
-    .slice(0, 16);
-
   const [target, setTarget] = useState(defaultTarget);
   const [title, setTitle] = useState("");
   const [channel, setChannel] = useState<
     "email" | "call" | "meeting" | "whatsapp" | "other"
   >("email");
-  const [dueAt, setDueAt] = useState(defaultLocalIso);
+  const [dueAt, setDueAt] = useState(() => {
+    const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    return new Date(tomorrow.getTime() - tomorrow.getTimezoneOffset() * 60000)
+      .toISOString()
+      .slice(0, 16);
+  });
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
