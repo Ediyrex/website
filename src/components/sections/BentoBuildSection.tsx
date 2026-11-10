@@ -55,7 +55,7 @@ const TOUR_STEPS = [
 export function BentoBuildSection() {
   const shouldReduceMotion = Boolean(useReducedMotion());
   const [activeStep, setActiveStep] = useState(0);
-  const [autoPlay, setAutoPlay] = useState(!shouldReduceMotion);
+  const [autoPlay, setAutoPlay] = useState(true);
 
   useEffect(() => {
     if (!autoPlay || shouldReduceMotion) return;
@@ -89,7 +89,7 @@ export function BentoBuildSection() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
           {/* Bento Tile 1 (Span 7): Interactive Cursor Tour */}
           <motion.div
-            initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-40px" }}
             transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
@@ -162,41 +162,39 @@ export function BentoBuildSection() {
               </div>
 
               {/* Guided Virtual Cursor */}
-              {!shouldReduceMotion && (
-                <motion.div
-                  aria-hidden="true"
-                  animate={{
-                    left: currentStep.cursorX,
-                    top: currentStep.cursorY,
+              <motion.div
+                aria-hidden="true"
+                animate={{
+                  left: currentStep.cursorX,
+                  top: currentStep.cursorY,
+                }}
+                transition={{
+                  type: "spring",
+                  stiffness: 190,
+                  damping: 24,
+                }}
+                className="hidden sm:flex items-center gap-1.5 absolute z-20 pointer-events-none"
+              >
+                <MousePointer2
+                  className="w-5 h-5 drop-shadow-md"
+                  style={{
+                    color: currentStep.accent,
+                    fill: currentStep.accent,
                   }}
-                  transition={{
-                    type: "spring",
-                    stiffness: 190,
-                    damping: 24,
-                  }}
-                  className="hidden sm:flex items-center gap-1.5 absolute z-20 pointer-events-none"
+                />
+                <span
+                  className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#08090B]/95 border text-[#F5F3EE]"
+                  style={{ borderColor: currentStep.accent }}
                 >
-                  <MousePointer2
-                    className="w-5 h-5 drop-shadow-md"
-                    style={{
-                      color: currentStep.accent,
-                      fill: currentStep.accent,
-                    }}
-                  />
-                  <span
-                    className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#08090B]/95 border text-[#F5F3EE]"
-                    style={{ borderColor: currentStep.accent }}
-                  >
-                    {currentStep.label}
-                  </span>
-                </motion.div>
-              )}
+                  {currentStep.label}
+                </span>
+              </motion.div>
             </div>
           </motion.div>
 
           {/* Bento Tile 2 (Span 5): Hybrid Venture Model */}
           <motion.div
-            initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-40px" }}
             transition={{
@@ -282,7 +280,7 @@ export function BentoBuildSection() {
             return (
               <motion.div
                 key={tile.title}
-                initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-40px" }}
                 transition={{
@@ -322,4 +320,3 @@ export function BentoBuildSection() {
     </section>
   );
 }
-

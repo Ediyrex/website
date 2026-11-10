@@ -1,5 +1,8 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useRef } from "react";
 import { Check, Minus } from "lucide-react";
+import { gsap } from "@/lib/gsap";
 
 const COMPARISON_ROWS = [
   {
@@ -30,6 +33,34 @@ const COMPARISON_ROWS = [
 ];
 
 export function UsVsThemSection() {
+  const tableRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!tableRef.current) return;
+    const mm = gsap.matchMedia();
+
+    mm.add("(prefers-reduced-motion: no-preference)", () => {
+      const rows = tableRef.current?.querySelectorAll(".comparison-row");
+      if (!rows?.length) return;
+
+      gsap.from(rows, {
+        y: 16,
+        opacity: 0,
+        duration: 0.45,
+        stagger: 0.08,
+        ease: "power2.out",
+        clearProps: "transform,opacity",
+        scrollTrigger: {
+          trigger: tableRef.current,
+          start: "top 85%",
+          once: true,
+        },
+      });
+    });
+
+    return () => mm.revert();
+  }, []);
+
   return (
     <section
       id="comparison"
@@ -58,11 +89,11 @@ export function UsVsThemSection() {
             </div>
           </div>
 
-          <div className="divide-y divide-[#252A32]">
+          <div ref={tableRef} className="divide-y divide-[#252A32]">
             {COMPARISON_ROWS.map((row) => (
               <div
                 key={row.dimension}
-                className="grid grid-cols-1 md:grid-cols-12 text-sm"
+                className="comparison-row grid grid-cols-1 md:grid-cols-12 text-sm"
               >
                 <div className="md:col-span-3 px-6 py-5 font-heading font-semibold text-[#F5F3EE]">
                   {row.dimension}

@@ -1,9 +1,12 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowUpRight, AlertCircle } from "lucide-react";
 import { PROJECTS_DATA } from "@/features/work/data";
 import { Badge } from "@/components/ui/Badge";
+import { gsap } from "@/lib/gsap";
 
 const CATEGORY_META: Record<string, { label: string; accent: string }> = {
   media: { label: "Media", accent: "#E58A76" },
@@ -13,9 +16,36 @@ const CATEGORY_META: Record<string, { label: string; accent: string }> = {
 };
 
 export function FeaturedWorkSection() {
+  const gridRef = useRef<HTMLDivElement>(null);
   const featuredProjects = PROJECTS_DATA.filter(
     (p) => p.featured && p.isPublished
   );
+
+  useEffect(() => {
+    if (!gridRef.current) return;
+    const mm = gsap.matchMedia();
+
+    mm.add("(prefers-reduced-motion: no-preference)", () => {
+      const cards = gridRef.current?.querySelectorAll(".featured-project-card");
+      if (!cards?.length) return;
+
+      gsap.from(cards, {
+        y: 28,
+        opacity: 0,
+        duration: 0.55,
+        stagger: 0.12,
+        ease: "power3.out",
+        clearProps: "transform,opacity",
+        scrollTrigger: {
+          trigger: gridRef.current,
+          start: "top 82%",
+          once: true,
+        },
+      });
+    });
+
+    return () => mm.revert();
+  }, []);
 
   return (
     <section
@@ -46,7 +76,7 @@ export function FeaturedWorkSection() {
         </div>
 
         {/* 2-Column Editorial Project Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
+        <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 gap-7">
           {featuredProjects.map((project, index) => {
             const meta = CATEGORY_META[project.category] || {
               label: project.category,
@@ -56,7 +86,7 @@ export function FeaturedWorkSection() {
             return (
               <article
                 key={project.id}
-                className="group rounded-2xl bg-[#12151A] border border-[#252A32] hover:border-[#3A414B] overflow-hidden flex flex-col justify-between transition-all duration-200"
+                className="featured-project-card group rounded-2xl bg-[#12151A] border border-[#252A32] hover:border-[#3A414B] overflow-hidden flex flex-col justify-between transition-all duration-200"
               >
                 {/* Clean 16:10 Visual Frame with Next/Image + Alt Text */}
                 <div className="aspect-[16/10] bg-[#08090B] border-b border-[#252A32] relative overflow-hidden">

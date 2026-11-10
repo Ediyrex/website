@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 
 const STAGES = [
   {
@@ -31,8 +31,6 @@ const STAGES = [
 ];
 
 export function ProcessSection() {
-  const shouldReduceMotion = Boolean(useReducedMotion());
-
   return (
     <section
       id="process"
@@ -50,7 +48,6 @@ export function ProcessSection() {
 
         {/* 4-Stage Timeline with Scroll-Drawn SVG Connector */}
         <div className="relative">
-          {/* Desktop Animated SVG Draw Path */}
           <svg
             aria-hidden="true"
             className="hidden md:block absolute top-4 left-4 right-4 w-[calc(100%-2rem)] h-2 pointer-events-none"
@@ -71,7 +68,7 @@ export function ProcessSection() {
               y2="4"
               stroke="#D6B77A"
               strokeWidth="1.5"
-              initial={shouldReduceMotion ? { pathLength: 1 } : { pathLength: 0 }}
+              initial={{ pathLength: 0 }}
               whileInView={{ pathLength: 1 }}
               viewport={{ once: true, margin: "-80px" }}
               transition={{ duration: 1.05, ease: [0.22, 1, 0.36, 1] }}
@@ -82,12 +79,12 @@ export function ProcessSection() {
             {STAGES.map((stage, i) => (
               <motion.div
                 key={stage.index}
-                initial={shouldReduceMotion ? false : { opacity: 0, y: 14 }}
+                initial={{ opacity: 0, y: 14 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{
                   duration: 0.4,
-                  delay: shouldReduceMotion ? 0 : i * 0.14,
+                  delay: i * 0.14,
                   ease: [0.22, 1, 0.36, 1],
                 }}
                 className="relative space-y-4"

@@ -3,6 +3,7 @@ import { cookies, headers } from "next/headers";
 import { and, eq, gt, isNull, sql } from "drizzle-orm";
 import { getDb, sessions, users, userRoles, roles } from "@/db";
 import { apiForbidden, apiUnauthorized } from "./api-response";
+import { getRequiredSessionSecret } from "./env";
 
 import { SESSION_COOKIE_NAME } from "./session-constants";
 
@@ -18,15 +19,8 @@ export interface AuthenticatedSession {
   expiresAt: Date;
 }
 
-function getSessionSecret(): string {
-  return (
-    process.env.SESSION_SECRET ||
-    "local-dev-fallback-secret-change-in-env-before-production"
-  );
-}
-
 export function hashSessionToken(rawToken: string): string {
-  return createHmac("sha256", getSessionSecret())
+  return createHmac("sha256", getRequiredSessionSecret())
     .update(rawToken)
     .digest("hex");
 }

@@ -50,9 +50,9 @@ export function ActivityPings() {
       <AnimatePresence mode="wait">
         <motion.div
           key={current.title}
-          initial={shouldReduceMotion ? false : { opacity: 0, y: 12 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={shouldReduceMotion ? undefined : { opacity: 0, y: -8 }}
+          exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
           className="rounded-xl bg-[#12151A]/95 backdrop-blur-md border border-[#252A32] p-3.5 shadow-xl flex items-start gap-3"
         >
@@ -96,4 +96,3 @@ export function ActivityPings() {
     </aside>
   );
 }
-

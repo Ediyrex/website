@@ -2,6 +2,7 @@
 
 import React from "react";
 import { usePathname } from "next/navigation";
+import { MotionConfig } from "motion/react";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
 import { StickyMobileCta } from "./StickyMobileCta";
@@ -17,7 +18,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <>
+    <MotionConfig reducedMotion="user">
       <AnalyticsProvider />
       <Header />
       <main id="main-content" className="flex-1">
@@ -26,6 +27,6 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
       <Footer />
       <StickyMobileCta />
       <CookieBanner />
-    </>
+    </MotionConfig>
   );
 }

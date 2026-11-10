@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { ArrowUpRight, Check, Copy } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { gsap } from "@/lib/gsap";
+import { SITE_CONFIG } from "@/config/site";
 
 const ROTATING_WORDS = [
   { text: "brand films.", color: "#E58A76" },
@@ -16,6 +18,28 @@ export function Hero() {
   const shouldReduceMotion = useReducedMotion();
   const [wordIndex, setWordIndex] = useState(0);
   const [copiedEmail, setCopiedEmail] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!sectionRef.current || !panelRef.current) return;
+    const mm = gsap.matchMedia();
+
+    mm.add("(prefers-reduced-motion: no-preference)", () => {
+      gsap.to(panelRef.current, {
+        y: 36,
+        ease: "none",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top top",
+          end: "bottom top",
+          scrub: true,
+        },
+      });
+    });
+
+    return () => mm.revert();
+  }, []);
 
   useEffect(() => {
     if (shouldReduceMotion) return;
@@ -27,7 +51,7 @@ export function Hero() {
 
   const handleCopyEmail = async () => {
     try {
-      await navigator.clipboard.writeText("hello@ediyrex.com");
+      await navigator.clipboard.writeText(SITE_CONFIG.contact.email);
       setCopiedEmail(true);
       setTimeout(() => setCopiedEmail(false), 2200);
     } catch {
@@ -39,6 +63,7 @@ export function Hero() {
 
   return (
     <section
+      ref={sectionRef}
       className="relative min-h-[680px] flex items-center pt-28 pb-20 md:pt-36 md:pb-28 overflow-hidden bg-[#08090B]"
       style={{
         backgroundImage:
@@ -50,7 +75,7 @@ export function Hero() {
           {/* Left Editorial Column with Staggered Hero Reveal */}
           <div className="lg:col-span-8 max-w-[820px] space-y-7">
             <motion.div
-              initial={shouldReduceMotion ? false : { opacity: 0, y: 12 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
               className="flex flex-wrap items-center gap-4"
@@ -65,7 +90,7 @@ export function Hero() {
             </motion.div>
 
             <motion.h1
-              initial={shouldReduceMotion ? false : { opacity: 0, y: 18 }}
+              initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{
                 duration: 0.55,
@@ -79,11 +104,9 @@ export function Hero() {
                 <AnimatePresence mode="wait">
                   <motion.span
                     key={activeWord.text}
-                    initial={
-                      shouldReduceMotion ? false : { opacity: 0, y: 18 }
-                    }
+                    initial={{ opacity: 0, y: 18 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={shouldReduceMotion ? undefined : { opacity: 0, y: -18 }}
+                    exit={{ opacity: 0, y: -18 }}
                     transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
                     className="inline-block"
                     style={{ color: activeWord.color }}
@@ -95,7 +118,7 @@ export function Hero() {
             </motion.h1>
 
             <motion.p
-              initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{
                 duration: 0.5,
@@ -108,7 +131,7 @@ export function Hero() {
             </motion.p>
 
             <motion.div
-              initial={shouldReduceMotion ? false : { opacity: 0, y: 14 }}
+              initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{
                 duration: 0.5,
@@ -136,24 +159,24 @@ export function Hero() {
                   {copiedEmail ? (
                     <motion.span
                       key="copied"
-                      initial={shouldReduceMotion ? false : { scale: 0.85, opacity: 0 }}
+                      initial={{ scale: 0.85, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
-                      exit={shouldReduceMotion ? undefined : { opacity: 0 }}
+                      exit={{ opacity: 0 }}
                       className="inline-flex items-center gap-1.5 text-[#54C99A]"
                     >
                       <Check className="w-3.5 h-3.5" />
-                      <span>Copied hello@ediyrex.com</span>
+                      <span>Copied {SITE_CONFIG.contact.email}</span>
                     </motion.span>
                   ) : (
                     <motion.span
                       key="copy"
-                      initial={shouldReduceMotion ? false : { opacity: 0 }}
+                      initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      exit={shouldReduceMotion ? undefined : { opacity: 0 }}
+                      exit={{ opacity: 0 }}
                       className="inline-flex items-center gap-1.5"
                     >
                       <Copy className="w-3.5 h-3.5 text-[#D6B77A]" />
-                      <span>hello@ediyrex.com</span>
+                      <span>{SITE_CONFIG.contact.email}</span>
                     </motion.span>
                   )}
                 </AnimatePresence>
@@ -161,9 +184,10 @@ export function Hero() {
             </motion.div>
           </div>
 
-          {/* Right CSS Architectural Composition with Subtle Reveal */}
+          {/* Right CSS Architectural Composition with GSAP Scroll Parallax */}
           <motion.div
-            initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.97 }}
+            ref={panelRef}
+            initial={{ opacity: 0, scale: 0.97 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{
               duration: 0.65,

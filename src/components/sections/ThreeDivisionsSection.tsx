@@ -1,6 +1,9 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useRef } from "react";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
+import { gsap } from "@/lib/gsap";
 
 const DIVISIONS = [
   {
@@ -45,12 +48,43 @@ const DIVISIONS = [
 ];
 
 export function ThreeDivisionsSection() {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const mm = gsap.matchMedia();
+
+    mm.add("(prefers-reduced-motion: no-preference)", () => {
+      const cards = containerRef.current?.querySelectorAll(".division-card");
+      if (!cards?.length) return;
+
+      gsap.from(cards, {
+        y: 26,
+        opacity: 0,
+        duration: 0.55,
+        stagger: 0.12,
+        ease: "power3.out",
+        clearProps: "transform,opacity",
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "top 82%",
+          once: true,
+        },
+      });
+    });
+
+    return () => mm.revert();
+  }, []);
+
   return (
     <section
       id="divisions"
       className="py-16 md:py-28 bg-[#08090B] border-b border-[#252A32]"
     >
-      <div className="max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-12 space-y-10 md:space-y-12">
+      <div
+        ref={containerRef}
+        className="max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-12 space-y-10 md:space-y-12"
+      >
         <div className="max-w-2xl space-y-4">
           <span className="text-[11px] font-mono uppercase tracking-[0.16em] text-[#D6B77A] block">
             Capabilities
@@ -67,7 +101,7 @@ export function ThreeDivisionsSection() {
           {DIVISIONS.map((division) => (
             <div
               key={division.id}
-              className="group relative rounded-2xl bg-[#12151A] border border-[#252A32] hover:border-[#3A414B] p-7 md:p-8 flex flex-col justify-between transition-all duration-200 overflow-hidden"
+              className="division-card group relative rounded-2xl bg-[#12151A] border border-[#252A32] hover:border-[#3A414B] p-7 md:p-8 flex flex-col justify-between transition-all duration-200 overflow-hidden"
               style={{ backgroundImage: division.gradient }}
             >
               <div className="space-y-6">

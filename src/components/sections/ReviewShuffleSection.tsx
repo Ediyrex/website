@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import { ArrowRight, Shuffle } from "lucide-react";
 
 const STUDIO_NOTES = [
@@ -44,7 +44,6 @@ const STUDIO_NOTES = [
 ];
 
 export function ReviewShuffleSection() {
-  const shouldReduceMotion = Boolean(useReducedMotion());
   const [index, setIndex] = useState(0);
 
   const handleNext = () => {
@@ -60,7 +59,6 @@ export function ReviewShuffleSection() {
     >
       <div className="max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-          {/* Left Explanation */}
           <div className="lg:col-span-5 space-y-5">
             <span className="text-[11px] font-mono uppercase tracking-[0.16em] text-[#D6B77A] block">
               Standards &amp; Collaboration
@@ -84,7 +82,6 @@ export function ReviewShuffleSection() {
             </div>
           </div>
 
-          {/* Right Interactive Stacked Card Shuffle */}
           <div className="lg:col-span-7 relative min-h-[250px] flex items-center">
             <div
               aria-hidden="true"
@@ -98,17 +95,9 @@ export function ReviewShuffleSection() {
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeNote.id}
-                initial={
-                  shouldReduceMotion
-                    ? false
-                    : { opacity: 0, x: 24, rotate: 1 }
-                }
+                initial={{ opacity: 0, x: 24, rotate: 1 }}
                 animate={{ opacity: 1, x: 0, rotate: 0 }}
-                exit={
-                  shouldReduceMotion
-                    ? undefined
-                    : { opacity: 0, x: -24, rotate: -1 }
-                }
+                exit={{ opacity: 0, x: -24, rotate: -1 }}
                 transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
                 onClick={handleNext}
                 className="relative z-10 w-full rounded-2xl bg-[#12151A] border border-[#3A414B] p-7 sm:p-9 space-y-6 cursor-pointer hover:border-[#D6B77A]/70 transition-colors"
@@ -148,4 +137,3 @@ export function ReviewShuffleSection() {
     </section>
   );
 }
-

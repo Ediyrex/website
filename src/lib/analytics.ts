@@ -43,3 +43,4 @@ export function trackEvent(
     plausible(eventName, props ? { props } : undefined);
   }
 }
+

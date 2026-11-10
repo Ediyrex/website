@@ -48,15 +48,18 @@ function AnimatedCounter({
   active: boolean;
   reducedMotion: boolean;
 }) {
-  const [value, setValue] = useState(0);
+  // Initial state equals target so SSR and first client hydration always match
+  const [value, setValue] = useState(target);
+  const hasAnimatedRef = useRef(false);
 
   useEffect(() => {
-    if (reducedMotion || !active) {
+    if (reducedMotion || !active || hasAnimatedRef.current) {
       return;
     }
 
+    hasAnimatedRef.current = true;
     let rafId = 0;
-    const duration = 900;
+    const duration = 850;
     const start = performance.now();
 
     const tick = (now: number) => {
@@ -73,11 +76,9 @@ function AnimatedCounter({
     return () => cancelAnimationFrame(rafId);
   }, [target, active, reducedMotion]);
 
-  const displayed = reducedMotion ? target : value;
-
   return (
     <span className="font-heading font-bold text-3xl sm:text-4xl text-[#F5F3EE] tabular-nums">
-      {displayed}
+      {value}
       <span className="text-[#D6B77A]">{suffix}</span>
     </span>
   );

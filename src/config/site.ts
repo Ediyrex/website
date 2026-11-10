@@ -12,3 +12,4 @@ export const SITE_CONFIG = {
     plausibleDomain: process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN || "",
   },
 };
+

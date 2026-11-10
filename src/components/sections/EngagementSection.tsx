@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import { ArrowUpRight, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
@@ -58,7 +58,6 @@ const ENGAGEMENT_MODELS = [
 ];
 
 export function EngagementSection() {
-  const shouldReduceMotion = Boolean(useReducedMotion());
   const [selectedId, setSelectedId] = useState("project");
   const [currency, setCurrency] = useState<"USD" | "INR">("USD");
 
@@ -111,7 +110,6 @@ export function EngagementSection() {
           </div>
         </div>
 
-        {/* Interactive Engagement Cards + Rolling Quotation Panel */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
           <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-4">
             {ENGAGEMENT_MODELS.map((model) => {
@@ -148,7 +146,6 @@ export function EngagementSection() {
             })}
           </div>
 
-          {/* Rolling Scope & Quotation Readout */}
           <div className="lg:col-span-5 rounded-2xl bg-[#12151A] border border-[#252A32] p-7 flex flex-col justify-between space-y-6 overflow-hidden">
             <div className="space-y-4">
               <div className="flex items-center justify-between text-xs font-mono text-[#777D87]">
@@ -160,13 +157,9 @@ export function EngagementSection() {
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={`${active.id}-${currency}`}
-                    initial={
-                      shouldReduceMotion ? false : { opacity: 0, y: 16 }
-                    }
+                    initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={
-                      shouldReduceMotion ? undefined : { opacity: 0, y: -16 }
-                    }
+                    exit={{ opacity: 0, y: -16 }}
                     transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
                     className="space-y-2"
                   >
