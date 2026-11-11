@@ -12,7 +12,7 @@ export default function AdminTasksPage() {
     <Suspense
       fallback={
         <div className="py-12 text-xs font-mono text-[#777D87]">
-          Loading EDYREX Studio PMS...
+          Loading EDIYREX Studio PMS...
         </div>
       }
     >

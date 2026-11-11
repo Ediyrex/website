@@ -141,7 +141,7 @@ export function Header() {
                   isLightHeroNav ? "text-[#0B0D10]" : "text-[#F5F3EE]"
                 )}
               >
-                EDYREX
+                EDIYREX
                 {isLightHeroNav && (
                   <sup className="text-[10px] font-medium ml-0.5 align-super">
                     ®

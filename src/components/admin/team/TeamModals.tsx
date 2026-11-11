@@ -222,7 +222,7 @@ export function InviteMemberModal({
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="priya@edyrex.com"
+                  placeholder="priya@ediyrex.com"
                   className="w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-sm text-white placeholder-neutral-500"
                 />
               </div>

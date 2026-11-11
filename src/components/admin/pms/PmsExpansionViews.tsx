@@ -263,7 +263,7 @@ export function PmsTemplatesView({
 
           <div className="space-y-3">
             <div className="text-[11px] font-mono uppercase tracking-[0.14em] text-[#6D7480]">
-              Built-in EDYREX Blueprints
+              Built-in EDIYREX Blueprints
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {builtIn
@@ -689,7 +689,7 @@ export function PmsWorkflowView({
           </h1>
           <p className="text-xs text-[#A1A6AE] mt-1">
             Configure Kanban workflow stages and reusable taxonomy labels across
-            EDYREX studio projects.
+            EDIYREX studio projects.
           </p>
         </div>
         {selectedProject && (

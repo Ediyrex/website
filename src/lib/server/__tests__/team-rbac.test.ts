@@ -54,7 +54,7 @@ describe("Team RBAC definitions and schemas", () => {
   it("validates team invite and custom role schemas", () => {
     const validInvite = teamInviteCreateSchema.safeParse({
       fullName: "Priya Sharma",
-      email: "priya@edyrex.com",
+      email: "priya@ediyrex.com",
       studioRole: "team_member",
       department: "Creative",
       projectRole: "team_member",

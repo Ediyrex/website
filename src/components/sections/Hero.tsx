@@ -21,7 +21,7 @@ const ITALIC_PHRASES = [
 ] as const;
 
 const HERO_DESCRIPTION_WORDS =
-  "From visual storytelling and digital products to intelligent automation, Edyrex brings creativity and technology together to build what comes next.".split(
+  "From visual storytelling and digital products to intelligent automation, Ediyrex brings creativity and technology together to build what comes next.".split(
     " "
   );
 
@@ -291,7 +291,7 @@ export function Hero() {
               >
                 <Image
                   src="/images/hero-sculpture.png"
-                  alt="Monochrome classical marble sculpture with translucent orange accent across the eyes representing Edyrex creativity and technology"
+                  alt="Monochrome classical marble sculpture with translucent orange accent across the eyes representing Ediyrex creativity and technology"
                   width={1024}
                   height={935}
                   priority
@@ -309,7 +309,7 @@ export function Hero() {
         <div
           role="dialog"
           aria-modal="true"
-          aria-label="Edyrex Studio Showreel"
+          aria-label="Ediyrex Studio Showreel"
           onClick={() => setShowreelOpen(false)}
           className="fixed inset-0 z-50 bg-[#08090B]/85 backdrop-blur-sm flex items-center justify-center p-4"
         >
@@ -320,7 +320,7 @@ export function Hero() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-[11px] font-mono uppercase tracking-[0.16em] text-[#D6B77A]">
-                  EDYREX STUDIO SHOWREEL
+                  EDIYREX STUDIO SHOWREEL
                 </p>
                 <h2 className="font-heading font-bold text-2xl mt-1">
                   Creative Production &times; Digital Craft &times; AI Systems
@@ -343,7 +343,7 @@ export function Hero() {
               <p className="text-sm text-[#B2B4BA] max-w-md leading-relaxed">
                 Explore our selected commercial films, brand identities,
                 interactive web platforms, and AI automation systems in the
-                Edyrex showcase.
+                Ediyrex showcase.
               </p>
               <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
                 <Link

@@ -182,7 +182,7 @@ export function ThreeDivisionsSection() {
               style={{ fontFamily: "var(--font-space-grotesk)" }}
               className="text-sm sm:text-base font-bold tracking-tight text-[#17191C]"
             >
-              EDYREX<sup className="text-[9px] font-medium ml-0.5">®</sup>
+              EDIYREX<sup className="text-[9px] font-medium ml-0.5">®</sup>
             </span>
           </div>
 

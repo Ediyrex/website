@@ -203,7 +203,7 @@ function escapeCsvCell(value: string): string {
 
 export function exportTeamMembersCsv(
   members: TeamMemberRecord[],
-  filenamePrefix = "edyrex-team-members"
+  filenamePrefix = "ediyrex-team-members"
 ): void {
   const headers = [
     "Name",

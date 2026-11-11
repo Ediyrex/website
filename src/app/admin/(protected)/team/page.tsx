@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { AdminTeamClient } from "@/components/admin/AdminTeamClient";
 
 export const metadata: Metadata = {
-  title: "Team & Access Control | EDYREX Admin",
+  title: "Team & Access Control | EDIYREX Admin",
   robots: { index: false, follow: false },
 };
 

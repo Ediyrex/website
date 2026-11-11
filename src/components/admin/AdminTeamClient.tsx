@@ -484,7 +484,7 @@ export function AdminTeamClient() {
       {/* Main Content Area */}
       {loading && !overview ? (
         <div className="rounded-2xl border border-white/10 bg-[#121216] p-10 text-center text-xs text-neutral-400">
-          Loading EDYREX Team & Access Control Center...
+          Loading EDIYREX Team & Access Control Center...
         </div>
       ) : overview ? (
         <>

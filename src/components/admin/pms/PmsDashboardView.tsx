@@ -185,7 +185,7 @@ export function PmsDashboardView({
                 No projects match this filter
               </div>
               <p className="text-xs text-[#A1A6AE]">
-                Create a project from an EDYREX template or convert a won CRM
+                Create a project from an EDIYREX template or convert a won CRM
                 inquiry.
               </p>
             </div>

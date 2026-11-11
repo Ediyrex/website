@@ -535,7 +535,7 @@ export function TeamMembersTab({
                   onClick={() =>
                     exportTeamMembersCsv(
                       data.members.filter((m) => selectedIds.includes(m.id)),
-                      "edyrex-selected-members"
+                      "ediyrex-selected-members"
                     )
                   }
                   className="inline-flex items-center gap-1 rounded-lg bg-[#e6c27a] px-2.5 py-1 font-semibold text-black hover:bg-[#f0d290]"

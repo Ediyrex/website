@@ -565,7 +565,7 @@ export function NewProjectModal({
               Create Studio Project
             </h3>
             <p className="text-xs text-[#A1A6AE]">
-              Start blank or seed predefined milestones and tasks from an EDYREX
+              Start blank or seed predefined milestones and tasks from an EDIYREX
               template.
             </p>
           </div>
