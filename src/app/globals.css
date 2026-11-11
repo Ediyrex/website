@@ -61,6 +61,7 @@
   --font-space-grotesk: var(--font-space-grotesk), system-ui, sans-serif;
   --font-instrument-serif: var(--font-instrument-serif), Georgia, serif;
   --font-space-mono: var(--font-space-mono), monospace;
+  --font-playfair: var(--font-playfair), Georgia, serif;
 }
 
 html {

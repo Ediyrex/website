@@ -6,6 +6,7 @@ import {
   Space_Grotesk,
   Instrument_Serif,
   Space_Mono,
+  Playfair_Display,
 } from "next/font/google";
 import "./globals.css";
 import { PublicShell } from "@/components/layout/PublicShell";
@@ -21,7 +22,7 @@ const manrope = Manrope({
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700", "800"],
   display: "swap",
 });
 
@@ -51,6 +52,14 @@ const spaceMono = Space_Mono({
   variable: "--font-space-mono",
   subsets: ["latin"],
   weight: ["400", "700"],
+  display: "swap",
+});
+
+const playfairDisplay = Playfair_Display({
+  variable: "--font-playfair",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  style: ["normal", "italic"],
   display: "swap",
 });
 
@@ -127,7 +136,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${manrope.variable} ${inter.variable} ${ibmPlexMono.variable} ${spaceGrotesk.variable} ${instrumentSerif.variable} ${spaceMono.variable} h-full antialiased dark scroll-smooth`}
+      className={`${manrope.variable} ${inter.variable} ${ibmPlexMono.variable} ${spaceGrotesk.variable} ${instrumentSerif.variable} ${spaceMono.variable} ${playfairDisplay.variable} h-full antialiased dark scroll-smooth`}
     >
       <body className="min-h-full flex flex-col bg-[#08090B] text-[#F5F3EE] selection:bg-[#D6B77A]/25 selection:text-[#F5F3EE]">
         <script

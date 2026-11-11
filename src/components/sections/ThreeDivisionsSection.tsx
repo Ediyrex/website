@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "motion/react";
+import { motion, useInView, useReducedMotion } from "motion/react";
 import { ArrowUpRight } from "lucide-react";
 
 export interface ServiceDivisionCardData {
@@ -107,6 +107,13 @@ export function ThreeDivisionsSection() {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [divisions, setDivisions] =
     useState<ServiceDivisionCardData[]>(FALLBACK_DIVISIONS);
+  const shouldReduceMotion = useReducedMotion();
+  const headerRef = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const headerInView = useInView(headerRef, { once: true, amount: 0.05 });
+  const gridInView = useInView(gridRef, { once: true, amount: 0.05 });
+  const showHeader = Boolean(shouldReduceMotion) || headerInView;
+  const showGrid = Boolean(shouldReduceMotion) || gridInView;
 
   useEffect(() => {
     let ignore = false;
@@ -134,20 +141,15 @@ export function ThreeDivisionsSection() {
     >
       <div className="max-w-[1600px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16 space-y-10 lg:space-y-12">
         {/* Top Editorial Row */}
-        <div className="space-y-6">
-          <div className="flex items-center gap-3">
-            <motion.span
-              aria-hidden="true"
-              initial={{ scaleX: 0 }}
-              whileInView={{ scaleX: 1 }}
-              viewport={{ once: true, amount: 0.4 }}
-              transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-              className="w-7 h-px bg-[#17191C] shrink-0 origin-left"
-            />
+        <div ref={headerRef} className="space-y-6">
+          <div className="flex items-center">
             <motion.span
               initial={{ opacity: 0, letterSpacing: "0.2em" }}
-              whileInView={{ opacity: 1, letterSpacing: "0.12em" }}
-              viewport={{ once: true, amount: 0.4 }}
+              animate={
+                showHeader
+                  ? { opacity: 1, letterSpacing: "0.12em" }
+                  : { opacity: 0, letterSpacing: "0.2em" }
+              }
               transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
               style={{ fontFamily: "var(--font-space-mono)" }}
               className="text-[12px] font-semibold uppercase text-[#17191C]"
@@ -159,41 +161,51 @@ export function ThreeDivisionsSection() {
           {/* Main Header + Supporting Copy */}
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 lg:gap-10">
             <h2 className="m-0">
-              <span className="block overflow-hidden pb-[0.06em]">
+              <span className="block overflow-hidden pb-[0.08em] pr-[0.14em] pl-[0.04em] -ml-[0.04em]">
                 <motion.span
-                  initial={{ y: "105%", skewY: 2.5, opacity: 0 }}
-                  whileInView={{ y: "0%", skewY: 0, opacity: 1 }}
-                  viewport={{ once: true, amount: 0.3 }}
+                  initial={{ y: "100%", skewY: 2, opacity: 0 }}
+                  animate={
+                    showHeader
+                      ? { y: "0%", skewY: 0, opacity: 1 }
+                      : { y: "100%", skewY: 2, opacity: 0 }
+                  }
                   transition={{
                     duration: 0.7,
                     ease: [0.16, 1, 0.3, 1],
                   }}
                   style={{ fontFamily: "var(--font-space-grotesk)" }}
-                  className="block font-bold text-[#111315] text-[38px] sm:text-[50px] md:text-[58px] lg:text-[64px] xl:text-[74px] leading-[0.92] tracking-[-0.065em]"
+                  className="block pr-[0.06em] font-bold text-[#111315] text-[38px] sm:text-[50px] md:text-[58px] lg:text-[64px] xl:text-[74px] leading-[0.94] tracking-[-0.065em]"
                 >
                   Four connected divisions
                 </motion.span>
               </span>
-              <span className="block overflow-hidden pb-[0.08em] -mt-0.5 sm:-mt-1">
+              <span className="block overflow-hidden pb-[0.1em] pr-[0.12em] pl-[0.04em] -ml-[0.04em] -mt-0.5 sm:-mt-1">
                 <motion.span
                   initial={{
-                    y: "105%",
+                    y: "100%",
                     opacity: 0,
                     filter: "blur(5px)",
                   }}
-                  whileInView={{
-                    y: "0%",
-                    opacity: 1,
-                    filter: "blur(0px)",
-                  }}
-                  viewport={{ once: true, amount: 0.3 }}
+                  animate={
+                    showHeader
+                      ? {
+                          y: "0%",
+                          opacity: 1,
+                          filter: "blur(0px)",
+                        }
+                      : {
+                          y: "100%",
+                          opacity: 0,
+                          filter: "blur(5px)",
+                        }
+                  }
                   transition={{
                     duration: 0.75,
                     delay: 0.12,
                     ease: [0.16, 1, 0.3, 1],
                   }}
                   style={{ fontFamily: "var(--font-instrument-serif)" }}
-                  className="block font-normal italic text-[#77777A] text-[42px] sm:text-[56px] md:text-[64px] lg:text-[72px] xl:text-[84px] leading-[0.95] tracking-[-0.045em]"
+                  className="block pr-[0.06em] font-normal italic text-[#77777A] text-[42px] sm:text-[56px] md:text-[64px] lg:text-[72px] xl:text-[84px] leading-[0.96] tracking-[-0.045em]"
                 >
                   inside one studio.
                 </motion.span>
@@ -204,8 +216,11 @@ export function ThreeDivisionsSection() {
               <motion.span
                 aria-hidden="true"
                 initial={{ scaleY: 0, opacity: 0 }}
-                whileInView={{ scaleY: 1, opacity: 1 }}
-                viewport={{ once: true, amount: 0.3 }}
+                animate={
+                  showHeader
+                    ? { scaleY: 1, opacity: 1 }
+                    : { scaleY: 0, opacity: 0 }
+                }
                 transition={{
                   duration: 0.6,
                   delay: 0.2,
@@ -215,8 +230,11 @@ export function ThreeDivisionsSection() {
               />
               <motion.p
                 initial={{ opacity: 0, x: -10, filter: "blur(4px)" }}
-                whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-                viewport={{ once: true, amount: 0.3 }}
+                animate={
+                  showHeader
+                    ? { opacity: 1, x: 0, filter: "blur(0px)" }
+                    : { opacity: 0, x: -10, filter: "blur(4px)" }
+                }
                 transition={{
                   duration: 0.65,
                   delay: 0.24,
@@ -234,6 +252,7 @@ export function ThreeDivisionsSection() {
 
         {/* Four Connected Service Division Cards */}
         <div
+          ref={gridRef}
           onMouseLeave={() => setHoveredId(null)}
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5 xl:gap-4 items-stretch"
         >
@@ -245,8 +264,11 @@ export function ThreeDivisionsSection() {
                 key={division.id}
                 onMouseEnter={() => setHoveredId(division.id)}
                 initial={{ opacity: 0, y: 26, scale: 0.985 }}
-                whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                viewport={{ once: true, amount: 0.15 }}
+                animate={
+                  showGrid
+                    ? { opacity: 1, y: 0, scale: 1 }
+                    : { opacity: 0, y: 26, scale: 0.985 }
+                }
                 transition={{
                   duration: 0.6,
                   delay: idx * 0.08,
@@ -293,22 +315,29 @@ export function ThreeDivisionsSection() {
                         {division.name}
                       </span>
 
-                      <h3 className="mt-2.5 leading-[0.98]">
+                      <h3 className="mt-2.5 leading-[1.02] transition-transform duration-300 ease-out group-hover:translate-x-0.5">
                         <span
                           style={{ fontFamily: "var(--font-space-grotesk)" }}
-                          className="block font-bold text-[#F5F4F0] text-[30px] md:text-[32px] lg:text-[28px] xl:text-[38px] leading-[0.98] tracking-[-0.04em] transition-transform duration-300 ease-out group-hover:translate-x-0.5"
+                          className="font-bold text-[#F5F4F0] text-[28px] sm:text-[30px] md:text-[31px] lg:text-[26px] xl:text-[34px] leading-[1.02] tracking-[-0.04em]"
                         >
                           {division.heading}
                         </span>
                         {division.italicHeading && (
-                          <span
-                            style={{
-                              fontFamily: "var(--font-instrument-serif)",
-                            }}
-                            className="block font-normal italic text-[#F5F4F0]/90 text-[32px] md:text-[34px] lg:text-[30px] xl:text-[42px] leading-[1.02] tracking-[-0.02em] transition-all duration-300 ease-out group-hover:translate-x-1 group-hover:text-white"
-                          >
-                            {division.italicHeading}
-                          </span>
+                          <>
+                            {" "}
+                            <span
+                              style={{
+                                fontFamily: "var(--font-instrument-serif)",
+                              }}
+                              className={`inline-block font-normal italic text-[#F5F4F0]/90 text-[30px] sm:text-[32px] md:text-[33px] lg:text-[28px] xl:text-[38px] leading-[1.02] tracking-[-0.02em] transition-colors duration-300 group-hover:text-white ${
+                                division.italicHeading.length <= 16
+                                  ? "whitespace-nowrap"
+                                  : ""
+                              }`}
+                            >
+                              {division.italicHeading}
+                            </span>
+                          </>
                         )}
                       </h3>
 

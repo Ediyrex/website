@@ -12,6 +12,7 @@ export const metadata: Metadata = {
     canonical: "/",
   },
 };
+import { AboutSection } from "@/components/sections/about/AboutSection";
 import { ThreeDivisionsSection } from "@/components/sections/ThreeDivisionsSection";
 import { BentoBuildSection } from "@/components/sections/BentoBuildSection";
 import { FeaturedWorkSection } from "@/components/sections/FeaturedWorkSection";
@@ -29,6 +30,7 @@ export default function HomePage() {
   return (
     <>
       <Hero />
+      <AboutSection />
       <ThreeDivisionsSection />
       <BentoBuildSection />
       <FeaturedWorkSection />
