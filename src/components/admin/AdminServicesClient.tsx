@@ -34,12 +34,21 @@ import { MediaPickerModal, type MediaAssetItem } from "./MediaPickerModal";
 
 interface DivisionRow {
   id: string;
+  displayNumber: string;
   name: string;
   slug: string;
+  heading: string;
+  italicHeading: string;
   description: string;
+  tags: string[];
+  ctaLabel: string;
+  destinationUrl: string;
+  coverImageUrl: string;
+  coverAlt: string;
   iconName: string | null;
   displayOrder: number;
   isActive: boolean;
+  isFeatured: boolean;
 }
 
 interface ServiceRow {
@@ -162,7 +171,16 @@ export function AdminServicesClient() {
   const [featureDraft, setFeatureDraft] = useState("");
   const [form, setForm] = useState<ServiceFormState | null>(null);
   const [previewService, setPreviewService] = useState<ServiceFormState | null>(null);
-  const [pickerTarget, setPickerTarget] = useState<"cover" | "og" | null>(null);
+  const [pickerTarget, setPickerTarget] = useState<
+    "cover" | "og" | "division-cover" | null
+  >(null);
+
+  const [showDivisionsPanel, setShowDivisionsPanel] = useState(false);
+  const [editingDivision, setEditingDivision] = useState<DivisionRow | null>(
+    null
+  );
+  const [divisionTagsDraft, setDivisionTagsDraft] = useState("");
+  const [savingDivision, setSavingDivision] = useState(false);
 
   const [divModalOpen, setDivModalOpen] = useState(false);
   const [newDivName, setNewDivName] = useState("");
@@ -590,8 +608,93 @@ export function AdminServicesClient() {
               {divisionSummaryText}
             </div>
           )}
+          <button
+            type="button"
+            onClick={() => setShowDivisionsPanel((v) => !v)}
+            className="mt-1 text-[11px] font-medium text-[#D6B77A] hover:underline cursor-pointer"
+          >
+            {showDivisionsPanel
+              ? "Hide Homepage Divisions ↑"
+              : "Manage Homepage Cards (01–04) →"}
+          </button>
         </div>
       </div>
+
+      {showDivisionsPanel && (
+        <div className="rounded-2xl bg-[#111419] border border-[#252A32] p-5 space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h2 className="text-sm font-semibold text-[#F5F3EE]">
+                Homepage Service Division Showcase (01–04)
+              </h2>
+              <p className="text-xs text-[#8D939E]">
+                Configure card thumbnails, editorial headlines, tags, CTAs, and
+                display order synced with the homepage Services section.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+            {divisions.map((div) => (
+              <div
+                key={div.id}
+                className="rounded-xl bg-[#0B0D10] border border-[#252A32] overflow-hidden flex flex-col justify-between"
+              >
+                <div>
+                  <div
+                    role="img"
+                    aria-label={div.coverAlt || div.name}
+                    style={
+                      div.coverImageUrl
+                        ? { backgroundImage: `url("${div.coverImageUrl}")` }
+                        : undefined
+                    }
+                    className="aspect-video w-full bg-[#15181F] bg-cover bg-center relative"
+                  >
+                    <span className="absolute top-2 left-2 px-2 py-0.5 rounded bg-black/70 text-[10px] font-mono text-[#D6B77A]">
+                      {div.displayNumber || "01"}
+                    </span>
+                    {!div.isActive && (
+                      <span className="absolute top-2 right-2 px-2 py-0.5 rounded bg-rose-950/90 border border-rose-500/40 text-[10px] text-rose-200">
+                        Hidden
+                      </span>
+                    )}
+                  </div>
+                  <div className="p-3.5 space-y-1.5">
+                    <div className="text-[10px] font-mono uppercase tracking-wider text-[#8D939E]">
+                      {div.name} · Order #{div.displayOrder}
+                    </div>
+                    <div className="text-sm font-semibold text-[#F5F3EE]">
+                      {div.heading || div.name}{" "}
+                      <em className="font-serif italic text-[#D6B77A]">
+                        {div.italicHeading}
+                      </em>
+                    </div>
+                    <p className="text-[11px] text-[#9CA3AF] line-clamp-2">
+                      {div.description}
+                    </p>
+                  </div>
+                </div>
+                {canEdit && (
+                  <div className="px-3.5 pb-3.5 pt-2 border-t border-[#1E222A] flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingDivision({ ...div });
+                        setDivisionTagsDraft((div.tags || []).join(", "));
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#171B21] border border-[#252A32] hover:border-[#D6B77A]/50 text-xs text-[#D6B77A] cursor-pointer"
+                    >
+                      <Edit3 className="w-3 h-3" />
+                      <span>Edit Division Card</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Division Filter Tabs */}
       <div className="flex items-center gap-6 border-b border-[#1E222A] overflow-x-auto">
@@ -1625,18 +1728,355 @@ export function AdminServicesClient() {
         </div>
       )}
 
+      {/* Division Showcase Editor Modal */}
+      {editingDivision && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4">
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              setSavingDivision(true);
+              setError("");
+              setSuccess("");
+              try {
+                const tags = divisionTagsDraft
+                  .split(",")
+                  .map((s) => s.trim().toUpperCase())
+                  .filter(Boolean);
+                const res = await fetch(
+                  `/api/v1/admin/divisions/${editingDivision.id}`,
+                  {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      displayNumber: editingDivision.displayNumber,
+                      name: editingDivision.name,
+                      heading: editingDivision.heading,
+                      italicHeading: editingDivision.italicHeading,
+                      description: editingDivision.description,
+                      tags,
+                      ctaLabel: editingDivision.ctaLabel,
+                      destinationUrl: editingDivision.destinationUrl,
+                      coverImageUrl: editingDivision.coverImageUrl,
+                      coverAlt: editingDivision.coverAlt,
+                      displayOrder: editingDivision.displayOrder,
+                      isActive: editingDivision.isActive,
+                      isFeatured: editingDivision.isFeatured,
+                    }),
+                  }
+                );
+                const json = await res.json();
+                if (!res.ok) {
+                  throw new Error(
+                    json.message || "Failed to update division card."
+                  );
+                }
+                setEditingDivision(null);
+                setSuccess("Updated service division showcase card.");
+                await loadData();
+              } catch (err) {
+                setError(
+                  err instanceof Error
+                    ? err.message
+                    : "Failed to update division."
+                );
+              } finally {
+                setSavingDivision(false);
+              }
+            }}
+            className="w-full max-w-2xl max-h-[90vh] flex flex-col rounded-2xl bg-[#12151A] border border-[#252A32] overflow-hidden shadow-2xl"
+          >
+            <div className="px-6 py-4 border-b border-[#252A32] flex items-center justify-between">
+              <h3 className="font-heading font-semibold text-base text-[#F5F3EE]">
+                Edit Division Card — {editingDivision.name}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setEditingDivision(null)}
+                className="text-[#777D87] hover:text-white cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto space-y-4 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-[#B2B4BA] font-mono mb-1">
+                    Display Number
+                  </label>
+                  <input
+                    type="text"
+                    value={editingDivision.displayNumber}
+                    onChange={(e) =>
+                      setEditingDivision({
+                        ...editingDivision,
+                        displayNumber: e.target.value,
+                      })
+                    }
+                    className="w-full h-9 px-3 rounded-lg bg-[#0D0F12] border border-[#252A32] text-[#F5F3EE]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[#B2B4BA] font-mono mb-1">
+                    Division Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={editingDivision.name}
+                    onChange={(e) =>
+                      setEditingDivision({
+                        ...editingDivision,
+                        name: e.target.value,
+                      })
+                    }
+                    className="w-full h-9 px-3 rounded-lg bg-[#0D0F12] border border-[#252A32] text-[#F5F3EE]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[#B2B4BA] font-mono mb-1">
+                    Display Order
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={editingDivision.displayOrder}
+                    onChange={(e) =>
+                      setEditingDivision({
+                        ...editingDivision,
+                        displayOrder: Number(e.target.value),
+                      })
+                    }
+                    className="w-full h-9 px-3 rounded-lg bg-[#0D0F12] border border-[#252A32] text-[#F5F3EE]"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[#B2B4BA] font-mono mb-1">
+                    Card Heading
+                  </label>
+                  <input
+                    type="text"
+                    value={editingDivision.heading}
+                    onChange={(e) =>
+                      setEditingDivision({
+                        ...editingDivision,
+                        heading: e.target.value,
+                      })
+                    }
+                    placeholder="Build brands that"
+                    className="w-full h-9 px-3 rounded-lg bg-[#0D0F12] border border-[#252A32] text-[#F5F3EE]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[#B2B4BA] font-mono mb-1">
+                    Italic Emphasis Phrase
+                  </label>
+                  <input
+                    type="text"
+                    value={editingDivision.italicHeading}
+                    onChange={(e) =>
+                      setEditingDivision({
+                        ...editingDivision,
+                        italicHeading: e.target.value,
+                      })
+                    }
+                    placeholder="last."
+                    className="w-full h-9 px-3 rounded-lg bg-[#0D0F12] border border-[#252A32] text-[#F5F3EE]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[#B2B4BA] font-mono mb-1">
+                  Description *
+                </label>
+                <textarea
+                  rows={2}
+                  required
+                  value={editingDivision.description}
+                  onChange={(e) =>
+                    setEditingDivision({
+                      ...editingDivision,
+                      description: e.target.value,
+                    })
+                  }
+                  className="w-full p-2.5 rounded-lg bg-[#0D0F12] border border-[#252A32] text-[#F5F3EE]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[#B2B4BA] font-mono mb-1">
+                  Service Tags (comma-separated)
+                </label>
+                <input
+                  type="text"
+                  value={divisionTagsDraft}
+                  onChange={(e) => setDivisionTagsDraft(e.target.value)}
+                  placeholder="BRAND IDENTITY, GROWTH, SEO, CAMPAIGNS"
+                  className="w-full h-9 px-3 rounded-lg bg-[#0D0F12] border border-[#252A32] text-[#F5F3EE]"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[#B2B4BA] font-mono mb-1">
+                    CTA Label
+                  </label>
+                  <input
+                    type="text"
+                    value={editingDivision.ctaLabel}
+                    onChange={(e) =>
+                      setEditingDivision({
+                        ...editingDivision,
+                        ctaLabel: e.target.value,
+                      })
+                    }
+                    className="w-full h-9 px-3 rounded-lg bg-[#0D0F12] border border-[#252A32] text-[#F5F3EE]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[#B2B4BA] font-mono mb-1">
+                    Destination URL
+                  </label>
+                  <input
+                    type="text"
+                    value={editingDivision.destinationUrl}
+                    onChange={(e) =>
+                      setEditingDivision({
+                        ...editingDivision,
+                        destinationUrl: e.target.value,
+                      })
+                    }
+                    className="w-full h-9 px-3 rounded-lg bg-[#0D0F12] border border-[#252A32] text-[#F5F3EE]"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[#B2B4BA] font-mono mb-1">
+                    Thumbnail URL
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={editingDivision.coverImageUrl}
+                      onChange={(e) =>
+                        setEditingDivision({
+                          ...editingDivision,
+                          coverImageUrl: e.target.value,
+                        })
+                      }
+                      className="flex-1 h-9 px-3 rounded-lg bg-[#0D0F12] border border-[#252A32] text-[#F5F3EE]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setPickerTarget("division-cover")}
+                      className="px-3 h-9 rounded-lg bg-[#171B21] border border-[#252A32] text-[#D6B77A] hover:border-[#D6B77A]/50 cursor-pointer"
+                    >
+                      Media
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[#B2B4BA] font-mono mb-1">
+                    Thumbnail Alt Text
+                  </label>
+                  <input
+                    type="text"
+                    value={editingDivision.coverAlt}
+                    onChange={(e) =>
+                      setEditingDivision({
+                        ...editingDivision,
+                        coverAlt: e.target.value,
+                      })
+                    }
+                    className="w-full h-9 px-3 rounded-lg bg-[#0D0F12] border border-[#252A32] text-[#F5F3EE]"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-6 pt-1">
+                <label className="inline-flex items-center gap-2 text-[#E5E2DC] cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={editingDivision.isActive}
+                    onChange={(e) =>
+                      setEditingDivision({
+                        ...editingDivision,
+                        isActive: e.target.checked,
+                      })
+                    }
+                    className="accent-[#D6B77A]"
+                  />
+                  <span>Published / Visible</span>
+                </label>
+                <label className="inline-flex items-center gap-2 text-[#E5E2DC] cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={editingDivision.isFeatured}
+                    onChange={(e) =>
+                      setEditingDivision({
+                        ...editingDivision,
+                        isFeatured: e.target.checked,
+                      })
+                    }
+                    className="accent-[#D6B77A]"
+                  />
+                  <span>Featured on Homepage</span>
+                </label>
+              </div>
+            </div>
+
+            <div className="px-6 py-4 border-t border-[#252A32] flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setEditingDivision(null)}
+                className="px-4 py-2 text-xs text-[#B2B4BA] cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={savingDivision}
+                className="px-4 py-2 rounded-lg bg-[#D6B77A] text-[#08090B] text-xs font-semibold cursor-pointer disabled:opacity-50"
+              >
+                {savingDivision ? "Saving..." : "Save Division Card"}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
       <MediaPickerModal
         open={pickerTarget !== null}
         title={
           pickerTarget === "og"
             ? "Select Open Graph Image"
+            : pickerTarget === "division-cover"
+            ? "Select Division Thumbnail"
             : "Select Service Media"
         }
         selectedId={
-          pickerTarget === "og" ? form?.ogImageAssetId : form?.coverAssetId
+          pickerTarget === "og"
+            ? form?.ogImageAssetId
+            : pickerTarget === "cover"
+            ? form?.coverAssetId
+            : undefined
         }
         onClose={() => setPickerTarget(null)}
         onSelectSingle={(asset: MediaAssetItem) => {
+          if (pickerTarget === "division-cover" && editingDivision) {
+            setEditingDivision({
+              ...editingDivision,
+              coverImageUrl: asset.secureUrl,
+              coverAlt: editingDivision.coverAlt || asset.altText || editingDivision.name,
+            });
+            return;
+          }
           if (!form) return;
           if (pickerTarget === "cover") {
             setForm({

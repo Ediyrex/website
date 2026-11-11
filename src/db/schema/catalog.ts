@@ -23,12 +23,27 @@ export const serviceDivisions = pgTable(
   "service_divisions",
   {
     id: uuid("id").defaultRandom().primaryKey(),
+    displayNumber: varchar("display_number", { length: 12 })
+      .notNull()
+      .default("01"),
     name: varchar("name", { length: 80 }).notNull(),
     slug: varchar("slug", { length: 80 }).notNull().unique(),
+    heading: varchar("heading", { length: 120 }).notNull().default(""),
+    italicHeading: varchar("italic_heading", { length: 80 })
+      .notNull()
+      .default(""),
     description: text("description").notNull(),
+    tags: jsonb("tags").$type<string[]>().notNull().default([]),
+    ctaLabel: varchar("cta_label", { length: 80 }).notNull().default("Explore"),
+    destinationUrl: varchar("destination_url", { length: 160 })
+      .notNull()
+      .default("/services"),
+    coverImageUrl: text("cover_image_url").notNull().default(""),
+    coverAlt: varchar("cover_alt", { length: 240 }).notNull().default(""),
     iconName: varchar("icon_name", { length: 64 }),
     displayOrder: integer("display_order").notNull().default(0),
     isActive: boolean("is_active").notNull().default(true),
+    isFeatured: boolean("is_featured").notNull().default(true),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
       .notNull()
       .defaultNow(),

@@ -310,3 +310,189 @@ export async function getPublishedStudioProducts(): Promise<HybridProduct[]> {
     demoUrl: row.demoUrl ?? undefined,
   }));
 }
+
+export interface HomepageDivisionItem {
+  id: string;
+  displayNumber: string;
+  name: string;
+  slug: string;
+  heading: string;
+  italicHeading: string;
+  description: string;
+  tags: string[];
+  ctaLabel: string;
+  destinationUrl: string;
+  coverImageUrl: string;
+  coverAlt: string;
+  displayOrder: number;
+  isActive: boolean;
+  isFeatured: boolean;
+}
+
+export const DEFAULT_HOMEPAGE_DIVISIONS: HomepageDivisionItem[] = [
+  {
+    id: "branding",
+    displayNumber: "01",
+    name: "Branding & Marketing",
+    slug: "branding",
+    heading: "Build brands that",
+    italicHeading: "last.",
+    description:
+      "Strategic branding, growth marketing and campaigns that create real demand.",
+    tags: ["BRAND IDENTITY", "GROWTH", "SEO", "CAMPAIGNS", "PACKAGING"],
+    ctaLabel: "Explore Branding",
+    destinationUrl: "/services/branding",
+    coverImageUrl: "/images/services/branding.jpg",
+    coverAlt:
+      "Cinema camera lens with warm orange reflections in a dark studio representing Branding and Marketing",
+    displayOrder: 1,
+    isActive: true,
+    isFeatured: true,
+  },
+  {
+    id: "digital",
+    displayNumber: "02",
+    name: "Web Development",
+    slug: "digital",
+    heading: "Digital products with",
+    italicHeading: "intent.",
+    description:
+      "High-performance websites, SaaS platforms and digital experiences built for scale.",
+    tags: ["WEBSITES", "SAAS", "DASHBOARDS", "UI / UX", "INTEGRATIONS"],
+    ctaLabel: "Explore Web Dev",
+    destinationUrl: "/services/digital",
+    coverImageUrl: "/images/services/web-dev.jpg",
+    coverAlt:
+      "Minimalist dark laptop showing software engineering environment on textured rock representing Web Development",
+    displayOrder: 2,
+    isActive: true,
+    isFeatured: true,
+  },
+  {
+    id: "ai",
+    displayNumber: "03",
+    name: "Agents & Automation",
+    slug: "ai",
+    heading: "Intelligence",
+    italicHeading: "into action.",
+    description:
+      "AI agents, conversational systems and workflow automation that get things done.",
+    tags: ["AI AGENTS", "CHATBOTS", "AUTOMATION", "INTEGRATIONS", "WORKFLOW"],
+    ctaLabel: "Explore Automation",
+    destinationUrl: "/services/ai",
+    coverImageUrl: "/images/services/automation.jpg",
+    coverAlt:
+      "Translucent computational glass core with connected AI workflow nodes representing Agents and Automation",
+    displayOrder: 3,
+    isActive: true,
+    isFeatured: true,
+  },
+  {
+    id: "media",
+    displayNumber: "04",
+    name: "Media",
+    slug: "media",
+    heading: "Stories worth",
+    italicHeading: "seeing.",
+    description:
+      "End-to-end media production, from concept to cinematic content that engages and inspires.",
+    tags: ["VIDEO PRODUCTION", "MOTION GRAPHICS", "PHOTOGRAPHY", "EDITING"],
+    ctaLabel: "Explore Media",
+    destinationUrl: "/services/media",
+    coverImageUrl: "/images/services/media.jpg",
+    coverAlt:
+      "Edyrex production clapperboard, cinema camera, and studio headphones in dramatic orange studio light",
+    displayOrder: 4,
+    isActive: true,
+    isFeatured: true,
+  },
+];
+
+export async function ensureDivisionEditorialDefaults(
+  db: NonNullable<ReturnType<typeof getDb>>
+): Promise<void> {
+  const existing = await db.select().from(serviceDivisions);
+  const defaultsBySlug = new Map(
+    DEFAULT_HOMEPAGE_DIVISIONS.map((d) => [d.slug, d])
+  );
+
+  for (const row of existing) {
+    const def = defaultsBySlug.get(row.slug);
+    if (!def) continue;
+    // Only backfill rows that haven't been customized with editorial assets yet
+    if (!row.coverImageUrl && !row.heading) {
+      await db
+        .update(serviceDivisions)
+        .set({
+          displayNumber: def.displayNumber,
+          name: def.name,
+          heading: def.heading,
+          italicHeading: def.italicHeading,
+          description: def.description,
+          tags: def.tags,
+          ctaLabel: def.ctaLabel,
+          destinationUrl: def.destinationUrl,
+          coverImageUrl: def.coverImageUrl,
+          coverAlt: def.coverAlt,
+          displayOrder: def.displayOrder,
+          isFeatured: def.isFeatured,
+          updatedAt: new Date(),
+        })
+        .where(eq(serviceDivisions.id, row.id));
+    }
+  }
+}
+
+export async function getPublishedDivisions(): Promise<HomepageDivisionItem[]> {
+  const db = getDb();
+  if (!db) {
+    return DEFAULT_HOMEPAGE_DIVISIONS;
+  }
+
+  await ensureDivisionEditorialDefaults(db);
+
+  const rows = await db
+    .select()
+    .from(serviceDivisions)
+    .where(eq(serviceDivisions.isActive, true))
+    .orderBy(asc(serviceDivisions.displayOrder), asc(serviceDivisions.name));
+
+  if (rows.length === 0) {
+    return DEFAULT_HOMEPAGE_DIVISIONS;
+  }
+
+  const defaultsBySlug = new Map(
+    DEFAULT_HOMEPAGE_DIVISIONS.map((d) => [d.slug, d])
+  );
+
+  return rows.map((row, idx) => {
+    const def = defaultsBySlug.get(row.slug);
+    return {
+      id: row.id,
+      displayNumber:
+        row.displayNumber ||
+        def?.displayNumber ||
+        String(idx + 1).padStart(2, "0"),
+      name: row.name,
+      slug: row.slug,
+      heading: row.heading || def?.heading || row.name,
+      italicHeading: row.italicHeading || def?.italicHeading || "",
+      description: row.description || def?.description || "",
+      tags:
+        Array.isArray(row.tags) && row.tags.length > 0
+          ? row.tags
+          : def?.tags ?? [],
+      ctaLabel: row.ctaLabel || def?.ctaLabel || `Explore ${row.name}`,
+      destinationUrl:
+        row.destinationUrl || def?.destinationUrl || `/services/${row.slug}`,
+      coverImageUrl:
+        row.coverImageUrl ||
+        def?.coverImageUrl ||
+        "/images/services/branding.jpg",
+      coverAlt: row.coverAlt || def?.coverAlt || row.name,
+      displayOrder: row.displayOrder,
+      isActive: row.isActive,
+      isFeatured: row.isFeatured,
+    };
+  });
+}

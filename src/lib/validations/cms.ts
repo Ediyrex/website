@@ -118,6 +118,7 @@ export const serviceUpsertSchema = z.object({
 });
 
 export const divisionCreateSchema = z.object({
+  displayNumber: safeText(12, 1).default("01"),
   name: safeText(80, 2),
   slug: z
     .string()
@@ -126,11 +127,21 @@ export const divisionCreateSchema = z.object({
     .max(80)
     .toLowerCase()
     .regex(slugPattern, "Slug must contain lowercase letters, numbers, and hyphens only."),
+  heading: safeText(120, 0).default(""),
+  italicHeading: safeText(80, 0).default(""),
   description: safeText(1000, 5),
+  tags: z.array(safeText(40, 1)).max(12).default([]),
+  ctaLabel: safeText(80, 0).default("Explore"),
+  destinationUrl: safeHttpOrRelativeUrlSchema.default("/services"),
+  coverImageUrl: safeHttpOrRelativeUrlSchema.default(""),
+  coverAlt: safeText(240, 0).default(""),
   iconName: optionalSafeText(64),
   displayOrder: z.coerce.number().int().min(0).max(999).default(0),
   isActive: z.boolean().default(true),
+  isFeatured: z.boolean().default(true),
 });
+
+export const divisionUpdateSchema = divisionCreateSchema.partial();
 
 export const ALLOWED_MEDIA_MIME_TYPES = [
   "image/jpeg",

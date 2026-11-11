@@ -21,40 +21,80 @@ import { HYBRID_PRODUCTS_DATA } from "../features/products/data";
 
 const INITIAL_DIVISIONS = [
   {
-    name: "Branding / Marketing",
+    displayNumber: "01",
+    name: "Branding & Marketing",
     slug: "branding",
+    heading: "Build brands that",
+    italicHeading: "last.",
     description:
-      "Ads and engagement, packaging and promotional design, SEO optimization, influencer marketing, and email marketing systems.",
+      "Strategic branding, growth marketing and campaigns that create real demand.",
+    tags: ["BRAND IDENTITY", "GROWTH", "SEO", "CAMPAIGNS", "PACKAGING"],
+    ctaLabel: "Explore Branding",
+    destinationUrl: "/services/branding",
+    coverImageUrl: "/images/services/branding.jpg",
+    coverAlt:
+      "Cinema camera lens with warm orange reflections in a dark studio representing Branding and Marketing",
     iconName: "Megaphone",
     displayOrder: 1,
     isActive: true,
+    isFeatured: true,
   },
   {
-    name: "Media",
-    slug: "media",
+    displayNumber: "02",
+    name: "Web Development",
+    slug: "digital",
+    heading: "Digital products with",
+    italicHeading: "intent.",
     description:
-      "Video editing (podcast, short-forms, event videos), motion graphics, graphics design, video production, and photography.",
-    iconName: "Film",
+      "High-performance websites, SaaS platforms and digital experiences built for scale.",
+    tags: ["WEBSITES", "SAAS", "DASHBOARDS", "UI / UX", "INTEGRATIONS"],
+    ctaLabel: "Explore Web Dev",
+    destinationUrl: "/services/digital",
+    coverImageUrl: "/images/services/web-dev.jpg",
+    coverAlt:
+      "Minimalist dark laptop showing software engineering environment on textured rock representing Web Development",
+    iconName: "Globe",
     displayOrder: 2,
     isActive: true,
+    isFeatured: true,
   },
   {
-    name: "Web Dev",
-    slug: "digital",
-    description:
-      "Custom web development, technical & on-page SEO, UI/UX design, browser web extensions, and DADV analytics dashboards.",
-    iconName: "Globe",
-    displayOrder: 3,
-    isActive: true,
-  },
-  {
+    displayNumber: "03",
     name: "Agents & Automation",
     slug: "ai",
+    heading: "Intelligence",
+    italicHeading: "into action.",
     description:
-      "Chatbots, AI voice calling agents, autonomous AI agents, and n8n workflow automation.",
+      "AI agents, conversational systems and workflow automation that get things done.",
+    tags: ["AI AGENTS", "CHATBOTS", "AUTOMATION", "INTEGRATIONS", "WORKFLOW"],
+    ctaLabel: "Explore Automation",
+    destinationUrl: "/services/ai",
+    coverImageUrl: "/images/services/automation.jpg",
+    coverAlt:
+      "Translucent computational glass core with connected AI workflow nodes representing Agents and Automation",
     iconName: "Bot",
+    displayOrder: 3,
+    isActive: true,
+    isFeatured: true,
+  },
+  {
+    displayNumber: "04",
+    name: "Media",
+    slug: "media",
+    heading: "Stories worth",
+    italicHeading: "seeing.",
+    description:
+      "End-to-end media production, from concept to cinematic content that engages and inspires.",
+    tags: ["VIDEO PRODUCTION", "MOTION GRAPHICS", "PHOTOGRAPHY", "EDITING"],
+    ctaLabel: "Explore Media",
+    destinationUrl: "/services/media",
+    coverImageUrl: "/images/services/media.jpg",
+    coverAlt:
+      "Edyrex production clapperboard, cinema camera, and studio headphones in dramatic orange studio light",
+    iconName: "Film",
     displayOrder: 4,
     isActive: true,
+    isFeatured: true,
   },
 ];
 
