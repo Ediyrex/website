@@ -12,8 +12,6 @@ export const metadata: Metadata = {
     canonical: "/",
   },
 };
-import { StudioPositioningBar } from "@/components/sections/StudioPositioningBar";
-import { CountUpStatsSection } from "@/components/sections/CountUpStatsSection";
 import { ThreeDivisionsSection } from "@/components/sections/ThreeDivisionsSection";
 import { BentoBuildSection } from "@/components/sections/BentoBuildSection";
 import { FeaturedWorkSection } from "@/components/sections/FeaturedWorkSection";
@@ -31,8 +29,6 @@ export default function HomePage() {
   return (
     <>
       <Hero />
-      <StudioPositioningBar />
-      <CountUpStatsSection />
       <ThreeDivisionsSection />
       <BentoBuildSection />
       <FeaturedWorkSection />

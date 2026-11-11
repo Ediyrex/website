@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { ArrowUpRight, Menu, X, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
@@ -44,20 +44,31 @@ const NAV_LINKS = [
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [pastHero, setPastHero] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
   const pathname = usePathname();
+  const isLightHeroNav = pathname === "/" && !pastHero;
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const mobileTriggerRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 16);
+    const handleScroll = () => {
+      const y = window.scrollY;
+      setIsScrolled(y > 16);
+      const heroLimit = Math.max(window.innerHeight - 96, 520);
+      setPastHero(pathname === "/" ? y > heroLimit : y > 16);
+    };
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    window.addEventListener("resize", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+    };
+  }, [pathname]);
 
   // Close dropdown on click outside or Escape
   useEffect(() => {
@@ -107,27 +118,49 @@ export function Header() {
       <header
         className={cn(
           "fixed top-0 left-0 right-0 z-50 transition-all duration-200",
-          isScrolled
-            ? "bg-[#08090B]/88 backdrop-blur-md border-b border-[#252A32]"
+          isLightHeroNav
+            ? isScrolled
+              ? "bg-[#F8F6F2]/88 backdrop-blur-md border-b border-[#0B0D10]/10"
+              : "bg-transparent border-b border-transparent"
+            : isScrolled || pathname !== "/"
+            ? "bg-[#08090B]/90 backdrop-blur-md border-b border-[#252A32]"
             : "bg-transparent border-b border-transparent"
         )}
       >
-        <div className="max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-12">
+        <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-14">
           <div className="h-[68px] md:h-20 flex items-center justify-between gap-6">
             {/* Wordmark */}
             <Link
               href="/"
-              className="flex items-center gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D6B77A] rounded-md px-1 -ml-1"
+              className="flex items-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D6B77A] rounded-md px-1 -ml-1"
             >
-              <span className="font-heading font-bold text-2xl tracking-tight text-[#F5F3EE]">
-                Ediyrex
+              <span
+                style={{ fontFamily: "var(--font-space-grotesk)" }}
+                className={cn(
+                  "font-bold text-xl sm:text-2xl tracking-tight transition-colors",
+                  isLightHeroNav ? "text-[#0B0D10]" : "text-[#F5F3EE]"
+                )}
+              >
+                EDYREX
+                {isLightHeroNav && (
+                  <sup className="text-[10px] font-medium ml-0.5 align-super">
+                    ®
+                  </sup>
+                )}
               </span>
-              <span className="hidden sm:inline-block w-1.5 h-1.5 rounded-full bg-[#D6B77A]" />
+              {!isLightHeroNav && (
+                <span className="hidden sm:inline-block w-1.5 h-1.5 rounded-full bg-[#D6B77A]" />
+              )}
             </Link>
 
             {/* Desktop Navigation */}
             <nav
               aria-label="Primary Navigation"
+              style={
+                isLightHeroNav
+                  ? { fontFamily: "var(--font-space-grotesk)" }
+                  : undefined
+              }
               className="hidden md:flex items-center gap-7 lg:gap-9"
             >
               {NAV_LINKS.map((link) => {
@@ -147,7 +180,11 @@ export function Header() {
                         href={link.href}
                         className={cn(
                           "text-sm font-medium transition-colors py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D6B77A] rounded",
-                          isActive
+                          isLightHeroNav
+                            ? isActive
+                              ? "text-[#0B0D10] underline underline-offset-8 decoration-[#0B0D10]"
+                              : "text-[#0B0D10]/80 hover:text-[#0B0D10]"
+                            : isActive
                             ? "text-[#F5F3EE]"
                             : "text-[#B2B4BA] hover:text-[#F5F3EE]"
                         )}
@@ -160,7 +197,12 @@ export function Header() {
                         aria-expanded={servicesOpen}
                         aria-controls="services-desktop-dropdown"
                         aria-label="Toggle Services divisions menu"
-                        className="p-1 text-[#B2B4BA] hover:text-[#F5F3EE] rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D6B77A] cursor-pointer"
+                        className={cn(
+                          "p-1 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D6B77A] cursor-pointer transition-colors",
+                          isLightHeroNav
+                            ? "text-[#0B0D10]/80 hover:text-[#0B0D10]"
+                            : "text-[#B2B4BA] hover:text-[#F5F3EE]"
+                        )}
                       >
                         <ChevronDown
                           className={cn(
@@ -217,7 +259,11 @@ export function Header() {
                     href={link.href}
                     className={cn(
                       "text-sm font-medium transition-colors py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D6B77A] rounded",
-                      isActive
+                      isLightHeroNav
+                        ? isActive
+                          ? "text-[#0B0D10] underline underline-offset-8 decoration-[#0B0D10] decoration-2"
+                          : "text-[#0B0D10]/80 hover:text-[#0B0D10]"
+                        : isActive
                         ? "text-[#F5F3EE]"
                         : "text-[#B2B4BA] hover:text-[#F5F3EE]"
                     )}
@@ -231,16 +277,31 @@ export function Header() {
             {/* Primary CTA & Mobile Trigger */}
             <div className="flex items-center gap-3">
               <div className="hidden md:block">
-                <Button href="/contact" size="md" variant="primary">
-                  Book a discovery call
-                </Button>
+                {isLightHeroNav ? (
+                  <Link
+                    href="/contact"
+                    className="inline-flex items-center gap-1.5 h-10 px-5 rounded-full bg-[#0B0D10] text-white text-sm font-semibold hover:bg-[#1F242B] transition-colors"
+                  >
+                    <span>Book a discovery call</span>
+                    <ArrowUpRight className="w-3.5 h-3.5" />
+                  </Link>
+                ) : (
+                  <Button href="/contact" size="md" variant="primary">
+                    Book a discovery call
+                  </Button>
+                )}
               </div>
 
               <button
                 ref={mobileTriggerRef}
                 type="button"
                 onClick={() => setMobileMenuOpen((prev) => !prev)}
-                className="md:hidden w-11 h-11 flex items-center justify-center text-[#F5F3EE] rounded-lg border border-[#252A32] bg-[#12151A] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D6B77A]"
+                className={cn(
+                  "md:hidden w-11 h-11 flex items-center justify-center rounded-lg border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D6B77A]",
+                  isLightHeroNav
+                    ? "text-[#0B0D10] border-[#0B0D10]/15 bg-white/60"
+                    : "text-[#F5F3EE] border-[#252A32] bg-[#12151A]"
+                )}
                 aria-label="Toggle Navigation Menu"
                 aria-expanded={mobileMenuOpen}
                 aria-controls="mobile-nav-overlay"
