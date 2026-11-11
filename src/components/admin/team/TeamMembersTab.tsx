@@ -8,6 +8,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock,
+  Download,
   FolderKanban,
   LayoutGrid,
   List,
@@ -18,9 +19,11 @@ import {
   UserCheck,
   UserPlus,
   Users,
+  X,
   XCircle,
 } from "lucide-react";
 import type {
+  AccessGroupRecord,
   RoleDefinitionRecord,
   TeamInvitationRecord,
   TeamMemberRecord,
@@ -28,6 +31,7 @@ import type {
   TeamTabKey,
 } from "./team-types";
 import {
+  exportTeamMembersCsv,
   formatRelativeTime,
   getInitials,
   getRoleBadgeClass,
@@ -36,6 +40,7 @@ import {
 
 interface TeamMembersTabProps {
   data: TeamOverviewResponse;
+  groups: AccessGroupRecord[];
   isAdmin: boolean;
   currentUserId?: string;
   onOpenInvite: () => void;
@@ -48,10 +53,17 @@ interface TeamMembersTabProps {
     invitationId: string,
     action: "resend" | "activate" | "revoke"
   ) => Promise<void>;
+  onBulkAction: (
+    payload:
+      | { action: "set_status"; userIds: string[]; status: "active" | "disabled" }
+      | { action: "set_role"; userIds: string[]; studioRole: string }
+      | { action: "add_to_group"; userIds: string[]; groupId: string }
+  ) => Promise<void>;
 }
 
 export function TeamMembersTab({
   data,
+  groups,
   isAdmin,
   currentUserId,
   onOpenInvite,
@@ -61,8 +73,13 @@ export function TeamMembersTab({
   onRevokeSessions,
   onRemoveMember,
   onInvitationAction,
+  onBulkAction,
 }: TeamMembersTabProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [bulkRole, setBulkRole] = useState("team_member");
+  const [bulkGroupId, setBulkGroupId] = useState("");
+  const [bulkBusy, setBulkBusy] = useState(false);
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [departmentFilter, setDepartmentFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<
@@ -354,8 +371,181 @@ export function TeamMembersTab({
                   <LayoutGrid className="h-3.5 w-3.5" />
                 </button>
               </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  exportTeamMembersCsv(
+                    selectedIds.length > 0
+                      ? data.members.filter((m) => selectedIds.includes(m.id))
+                      : filteredMembers
+                  )
+                }
+                className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-xs font-medium text-neutral-200 hover:border-white/25 hover:text-white"
+              >
+                <Download className="h-3.5 w-3.5 text-[#e6c27a]" />
+                <span>
+                  {selectedIds.length > 0
+                    ? `CSV (${selectedIds.length})`
+                    : "Download CSV"}
+                </span>
+              </button>
             </div>
           </div>
+
+          {/* Bulk Selection Actions Bar */}
+          {selectedIds.length > 0 && (
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#e6c27a]/35 bg-[#17150f] px-3.5 py-2.5 text-xs">
+              <div className="flex items-center gap-2.5">
+                <span className="rounded-md bg-[#e6c27a] px-2 py-0.5 font-semibold text-black">
+                  {selectedIds.length} selected
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setSelectedIds([])}
+                  className="inline-flex items-center gap-1 text-neutral-400 hover:text-white"
+                >
+                  <X className="h-3 w-3" />
+                  Clear
+                </button>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                {isAdmin && (
+                  <>
+                    <div className="flex items-center gap-1">
+                      <select
+                        value={bulkRole}
+                        onChange={(e) => setBulkRole(e.target.value)}
+                        aria-label="Bulk role select"
+                        className="rounded-lg border border-white/15 bg-black/50 px-2 py-1 text-xs text-neutral-200"
+                      >
+                        {data.roles.map((r) => (
+                          <option key={r.key} value={r.key}>
+                            {r.name}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        disabled={bulkBusy}
+                        onClick={async () => {
+                          setBulkBusy(true);
+                          try {
+                            await onBulkAction({
+                              action: "set_role",
+                              userIds: selectedIds,
+                              studioRole: bulkRole,
+                            });
+                            setSelectedIds([]);
+                          } finally {
+                            setBulkBusy(false);
+                          }
+                        }}
+                        className="rounded-lg border border-white/15 bg-white/5 px-2.5 py-1 text-xs text-white hover:bg-white/10 disabled:opacity-40"
+                      >
+                        Set Role
+                      </button>
+                    </div>
+
+                    {groups.length > 0 && (
+                      <div className="flex items-center gap-1">
+                        <select
+                          value={bulkGroupId || groups[0]?.id || ""}
+                          onChange={(e) => setBulkGroupId(e.target.value)}
+                          aria-label="Bulk access group select"
+                          className="rounded-lg border border-white/15 bg-black/50 px-2 py-1 text-xs text-neutral-200"
+                        >
+                          {groups.map((g) => (
+                            <option key={g.id} value={g.id}>
+                              {g.name}
+                            </option>
+                          ))}
+                        </select>
+                        <button
+                          type="button"
+                          disabled={bulkBusy}
+                          onClick={async () => {
+                            const targetGroupId = bulkGroupId || groups[0]?.id;
+                            if (!targetGroupId) return;
+                            setBulkBusy(true);
+                            try {
+                              await onBulkAction({
+                                action: "add_to_group",
+                                userIds: selectedIds,
+                                groupId: targetGroupId,
+                              });
+                              setSelectedIds([]);
+                            } finally {
+                              setBulkBusy(false);
+                            }
+                          }}
+                          className="rounded-lg border border-white/15 bg-white/5 px-2.5 py-1 text-xs text-white hover:bg-white/10 disabled:opacity-40"
+                        >
+                          Add to Group
+                        </button>
+                      </div>
+                    )}
+
+                    <button
+                      type="button"
+                      disabled={bulkBusy}
+                      onClick={async () => {
+                        setBulkBusy(true);
+                        try {
+                          await onBulkAction({
+                            action: "set_status",
+                            userIds: selectedIds,
+                            status: "active",
+                          });
+                          setSelectedIds([]);
+                        } finally {
+                          setBulkBusy(false);
+                        }
+                      }}
+                      className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-xs text-emerald-300 hover:bg-emerald-500/20 disabled:opacity-40"
+                    >
+                      Activate
+                    </button>
+                    <button
+                      type="button"
+                      disabled={bulkBusy}
+                      onClick={async () => {
+                        setBulkBusy(true);
+                        try {
+                          await onBulkAction({
+                            action: "set_status",
+                            userIds: selectedIds,
+                            status: "disabled",
+                          });
+                          setSelectedIds([]);
+                        } finally {
+                          setBulkBusy(false);
+                        }
+                      }}
+                      className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-2.5 py-1 text-xs text-rose-300 hover:bg-rose-500/20 disabled:opacity-40"
+                    >
+                      Suspend
+                    </button>
+                  </>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    exportTeamMembersCsv(
+                      data.members.filter((m) => selectedIds.includes(m.id)),
+                      "edyrex-selected-members"
+                    )
+                  }
+                  className="inline-flex items-center gap-1 rounded-lg bg-[#e6c27a] px-2.5 py-1 font-semibold text-black hover:bg-[#f0d290]"
+                >
+                  <Download className="h-3 w-3" />
+                  Export
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Empty State */}
           {paginatedMembers.length === 0 ? (
@@ -386,11 +576,40 @@ export function TeamMembersTab({
               <table className="w-full text-left text-sm">
                 <thead>
                   <tr className="border-b border-white/10 text-[11px] font-medium uppercase tracking-wider text-neutral-400">
+                    <th className="w-8 py-3 pr-2">
+                      <input
+                        type="checkbox"
+                        aria-label="Select all visible members"
+                        checked={
+                          paginatedMembers.length > 0 &&
+                          paginatedMembers.every((m) =>
+                            selectedIds.includes(m.id)
+                          )
+                        }
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            const next = new Set([
+                              ...selectedIds,
+                              ...paginatedMembers.map((m) => m.id),
+                            ]);
+                            setSelectedIds(Array.from(next));
+                          } else {
+                            const pageIds = new Set(
+                              paginatedMembers.map((m) => m.id)
+                            );
+                            setSelectedIds((prev) =>
+                              prev.filter((id) => !pageIds.has(id))
+                            );
+                          }
+                        }}
+                        className="h-4 w-4 rounded border-white/25 bg-black/50 accent-[#e6c27a]"
+                      />
+                    </th>
                     <th className="py-3 pr-3">Member</th>
                     <th className="px-3 py-3">Role</th>
-                    <th className="px-3 py-3">Department</th>
+                    <th className="px-3 py-3">Teams & Groups</th>
                     <th className="px-3 py-3">Status</th>
-                    <th className="px-3 py-3">Projects</th>
+                    <th className="px-3 py-3">Date Added</th>
                     <th className="px-3 py-3">Last Active</th>
                     <th className="py-3 pl-3 text-right">Actions</th>
                   </tr>
@@ -400,12 +619,39 @@ export function TeamMembersTab({
                     const statusStyle = getStatusDotAndLabel(member.status);
                     const isSelf = member.id === currentUserId;
                     const menuOpen = openMenuId === member.id;
+                    const isSelected = selectedIds.includes(member.id);
+                    const isRoleAdmin =
+                      member.studioRole === "super_admin" ||
+                      member.studioRole === "studio_admin";
 
                     return (
                       <tr
                         key={member.id}
-                        className="group transition hover:bg-white/[0.025]"
+                        className={`group transition hover:bg-white/[0.025] ${
+                          isSelected ? "bg-[#e6c27a]/[0.05]" : ""
+                        }`}
                       >
+                        <td className="py-3.5 pr-2">
+                          <input
+                            type="checkbox"
+                            aria-label={`Select ${member.displayName}`}
+                            checked={isSelected}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedIds((prev) =>
+                                  prev.includes(member.id)
+                                    ? prev
+                                    : [...prev, member.id]
+                                );
+                              } else {
+                                setSelectedIds((prev) =>
+                                  prev.filter((id) => id !== member.id)
+                                );
+                              }
+                            }}
+                            className="h-4 w-4 rounded border-white/25 bg-black/50 accent-[#e6c27a]"
+                          />
+                        </td>
                         <td className="py-3.5 pr-3">
                           <button
                             type="button"
@@ -421,6 +667,11 @@ export function TeamMembersTab({
                             <div>
                               <div className="flex items-center gap-1.5 font-medium text-white group-hover:text-[#e6c27a]">
                                 {member.displayName}
+                                {isRoleAdmin && (
+                                  <span className="rounded border border-[#e6c27a]/40 bg-[#e6c27a]/15 px-1.5 py-0.5 text-[9px] font-bold tracking-wider text-[#f0d290]">
+                                    ADMIN
+                                  </span>
+                                )}
                                 {isSelf && (
                                   <span className="rounded bg-white/10 px-1.5 py-0.5 text-[10px] text-neutral-300">
                                     You
@@ -445,9 +696,24 @@ export function TeamMembersTab({
                         </td>
 
                         <td className="px-3 py-3.5">
-                          <span className="inline-flex items-center rounded-lg border border-white/10 bg-white/[0.03] px-2.5 py-1 text-xs text-neutral-300">
-                            {member.department || "Studio"}
-                          </span>
+                          <div className="flex flex-wrap items-center gap-1">
+                            <span className="inline-flex items-center rounded-md border border-white/10 bg-white/[0.03] px-2 py-0.5 text-[11px] text-neutral-300">
+                              {member.department || "Studio"}
+                            </span>
+                            {member.accessGroups.slice(0, 2).map((grp) => (
+                              <span
+                                key={grp.id}
+                                className="inline-flex items-center rounded-md border border-[#e6c27a]/25 bg-[#e6c27a]/10 px-2 py-0.5 text-[11px] text-[#e6c27a]"
+                              >
+                                {grp.name}
+                              </span>
+                            ))}
+                            {member.accessGroups.length > 2 && (
+                              <span className="text-[11px] text-neutral-400">
+                                +{member.accessGroups.length - 2}
+                              </span>
+                            )}
+                          </div>
                         </td>
 
                         <td className="px-3 py-3.5">
@@ -461,19 +727,25 @@ export function TeamMembersTab({
                           </span>
                         </td>
 
-                        <td className="px-3 py-3.5">
-                          <button
-                            type="button"
-                            onClick={() => onOpenMemberProfile(member.id)}
-                            className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-black/30 px-2.5 py-1 text-xs text-neutral-200 hover:border-[#e6c27a]/40"
-                          >
-                            <FolderKanban className="h-3.5 w-3.5 text-[#e6c27a]" />
-                            {member.pmsProjectsCount}
-                          </button>
+                        <td className="px-3 py-3.5 text-xs text-neutral-400">
+                          {new Date(member.createdAt).toLocaleDateString(
+                            "en-US",
+                            {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            }
+                          )}
                         </td>
 
                         <td className="px-3 py-3.5 text-xs text-neutral-400">
-                          {formatRelativeTime(member.lastLoginAt)}
+                          <div className="flex flex-col">
+                            <span>{formatRelativeTime(member.lastLoginAt)}</span>
+                            <span className="inline-flex items-center gap-1 text-[10px] text-neutral-500">
+                              <FolderKanban className="h-2.5 w-2.5 text-[#e6c27a]" />
+                              {member.pmsProjectsCount} projects
+                            </span>
+                          </div>
                         </td>
 
                         <td className="relative py-3.5 pl-3 text-right">

@@ -80,6 +80,7 @@ export async function GET(request: NextRequest) {
           startDate: pmsProjects.startDate,
           dueDate: pmsProjects.dueDate,
           templateKey: pmsProjects.templateKey,
+          workflowConfig: pmsProjects.workflowConfig,
           leadUserId: pmsProjects.leadUserId,
           createdAt: pmsProjects.createdAt,
           updatedAt: pmsProjects.updatedAt,

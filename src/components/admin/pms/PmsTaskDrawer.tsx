@@ -5,6 +5,7 @@ import {
   Check,
   Clock,
   GitBranch,
+  Link2,
   Loader2,
   Paperclip,
   Pause,
@@ -129,6 +130,7 @@ export function PmsTaskDrawer({
   const [timerRunning, setTimerRunning] = useState(false);
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [busyAction, setBusyAction] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
 
   const loadTask = useCallback(async (id: string) => {
     setLoading(true);
@@ -380,6 +382,29 @@ export function PmsTaskDrawer({
           </div>
 
           <div className="flex items-center gap-1.5 shrink-0">
+            {detail && (
+              <button
+                type="button"
+                onClick={async () => {
+                  const url = `${window.location.origin}/admin/tasks?${
+                    detail.task.pmsProjectId
+                      ? `project=${detail.task.pmsProjectId}&tab=tasks&`
+                      : ""
+                  }task=${detail.task.id}`;
+                  await navigator.clipboard.writeText(url);
+                  setCopiedLink(true);
+                  setTimeout(() => setCopiedLink(false), 2000);
+                }}
+                title="Copy task link"
+                className="p-1.5 rounded-lg text-[#A1A6AE] hover:text-[#D4AF77] hover:bg-[#171B21] cursor-pointer"
+              >
+                {copiedLink ? (
+                  <Check className="w-4 h-4 text-[#56C88A]" />
+                ) : (
+                  <Link2 className="w-4 h-4" />
+                )}
+              </button>
+            )}
             {canEditTasks && detail && (
               <button
                 type="button"
@@ -650,6 +675,77 @@ export function PmsTaskDrawer({
                   </div>
                 </div>
               )}
+
+              {/* Inline Subtasks Checklist (Details tab preview & toggle) */}
+              <div className="p-4 rounded-xl bg-[#0B0D0F] border border-[#252A31] space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="text-xs font-semibold text-[#F2F2F0]">
+                    Subtasks
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-mono text-[#D4AF77]">
+                      {subtasksDone}/{subtasksTotal}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setTab("subtasks")}
+                      className="text-[11px] text-[#A1A6AE] hover:text-[#D4AF77] cursor-pointer"
+                    >
+                      Manage →
+                    </button>
+                  </div>
+                </div>
+
+                {subtasksTotal > 0 && (
+                  <div className="h-1.5 rounded-full bg-[#171B21] overflow-hidden">
+                    <div
+                      className="h-full bg-[#D4AF77] transition-all"
+                      style={{
+                        width: `${Math.round((subtasksDone / subtasksTotal) * 100)}%`,
+                      }}
+                    />
+                  </div>
+                )}
+
+                {detail.subtasks.length === 0 ? (
+                  <p className="text-[11px] text-[#6D7480]">
+                    No subtasks added yet.
+                  </p>
+                ) : (
+                  <div className="space-y-1.5">
+                    {detail.subtasks.map((st) => (
+                      <button
+                        key={st.id}
+                        type="button"
+                        disabled={!canEditTasks}
+                        onClick={() => handleSubtask("toggle", st.id)}
+                        className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg bg-[#111419] border border-[#252A31] hover:border-[#D4AF77]/35 text-left cursor-pointer disabled:opacity-60"
+                      >
+                        <span
+                          className={cn(
+                            "w-4 h-4 rounded border flex items-center justify-center shrink-0",
+                            st.completed
+                              ? "bg-[#56C88A] border-[#56C88A] text-[#08090B]"
+                              : "border-[#383F4B]"
+                          )}
+                        >
+                          {st.completed && <Check className="w-3 h-3 stroke-[2.5]" />}
+                        </span>
+                        <span
+                          className={cn(
+                            "text-xs truncate",
+                            st.completed
+                              ? "line-through text-[#6D7480]"
+                              : "text-[#F2F2F0]"
+                          )}
+                        >
+                          {st.title}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               {/* Review & Approval Workflow */}
               <div className="p-4 rounded-xl bg-[#0B0D0F] border border-[#252A31] space-y-3">

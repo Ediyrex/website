@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import {
   BarChart3,
   CheckSquare,
@@ -10,6 +11,7 @@ import {
   LayoutDashboard,
   Plus,
   Star,
+  Tags,
   Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -185,10 +187,18 @@ export function PmsSecondarySidebar({
         <div className="px-2.5 text-[10px] font-mono uppercase tracking-[0.14em] text-[#6D7480] mb-1.5">
           Insights &amp; System
         </div>
+        <Link
+          href="/admin/team"
+          className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs font-medium transition-colors text-[#A1A6AE] hover:text-[#F2F2F0] hover:bg-[#111419] border border-transparent"
+        >
+          <Users className="w-3.5 h-3.5 shrink-0" />
+          <span>Team &amp; Access</span>
+        </Link>
         {(
           [
             { id: "workload", label: "Team Workload", icon: Users },
             { id: "templates", label: "Project Templates", icon: Layers },
+            { id: "workflow", label: "Workflow & Labels", icon: Tags },
             { id: "reports", label: "Reports & Analytics", icon: BarChart3 },
           ] as const
         ).map((item) => {

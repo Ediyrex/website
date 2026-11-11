@@ -1,5 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Manrope, Inter, IBM_Plex_Mono } from "next/font/google";
+import {
+  Manrope,
+  Inter,
+  IBM_Plex_Mono,
+  Space_Grotesk,
+  Instrument_Serif,
+  Space_Mono,
+} from "next/font/google";
 import "./globals.css";
 import { PublicShell } from "@/components/layout/PublicShell";
 import { SITE_CONFIG } from "@/config/site";
@@ -22,6 +29,28 @@ const ibmPlexMono = IBM_Plex_Mono({
   variable: "--font-ibm-plex-mono",
   subsets: ["latin"],
   weight: ["400", "500"],
+  display: "swap",
+});
+
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
+const instrumentSerif = Instrument_Serif({
+  variable: "--font-instrument-serif",
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
+  display: "swap",
+});
+
+const spaceMono = Space_Mono({
+  variable: "--font-space-mono",
+  subsets: ["latin"],
+  weight: ["400", "700"],
   display: "swap",
 });
 

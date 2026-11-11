@@ -692,6 +692,14 @@ export const accessGroupActionSchema = z.discriminatedUnion("action", [
     defaultStudioRole: safeText(64, 2).default("team_member"),
   }),
   z.object({
+    action: z.literal("update_group"),
+    groupId: z.string().uuid(),
+    name: safeText(80, 2),
+    division: safeText(48, 2).default("Studio"),
+    description: safeText(300, 0).default(""),
+    defaultStudioRole: safeText(64, 2).default("team_member"),
+  }),
+  z.object({
     action: z.literal("add_member"),
     groupId: z.string().uuid(),
     userId: z.string().uuid(),
@@ -703,6 +711,55 @@ export const accessGroupActionSchema = z.discriminatedUnion("action", [
   }),
   z.object({
     action: z.literal("delete_group"),
+    groupId: z.string().uuid(),
+  }),
+  z.object({
+    action: z.literal("set_project_access"),
+    groupId: z.string().uuid(),
+    projectId: z.string().uuid(),
+    projectRole: z.enum([
+      "super_admin",
+      "studio_admin",
+      "project_manager",
+      "team_lead",
+      "team_member",
+      "viewer",
+      "no_access",
+    ]),
+    allowedBoards: z
+      .array(z.enum(["backlog", "todo", "in_progress", "in_review", "done"]))
+      .optional(),
+    boardRoles: z
+      .record(
+        z.enum(["backlog", "todo", "in_progress", "in_review", "done"]),
+        z.enum([
+          "super_admin",
+          "studio_admin",
+          "project_manager",
+          "team_lead",
+          "team_member",
+          "viewer",
+          "no_access",
+        ])
+      )
+      .optional(),
+  }),
+]);
+
+export const teamBulkActionSchema = z.discriminatedUnion("action", [
+  z.object({
+    action: z.literal("set_status"),
+    userIds: z.array(z.string().uuid()).min(1).max(100),
+    status: z.enum(["active", "disabled"]),
+  }),
+  z.object({
+    action: z.literal("set_role"),
+    userIds: z.array(z.string().uuid()).min(1).max(100),
+    studioRole: safeText(64, 2),
+  }),
+  z.object({
+    action: z.literal("add_to_group"),
+    userIds: z.array(z.string().uuid()).min(1).max(100),
     groupId: z.string().uuid(),
   }),
 ]);

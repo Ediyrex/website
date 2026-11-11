@@ -6,6 +6,7 @@ export type PmsMainView =
   | "starred"
   | "workload"
   | "templates"
+  | "workflow"
   | "reports"
   | "project";
 
@@ -193,6 +194,10 @@ export interface PmsProjectSummary {
   startDate: string | null;
   dueDate: string | null;
   templateKey: string | null;
+  workflowConfig?: {
+    labels?: string[];
+    stageNames?: Record<string, string>;
+  };
   isStarred: boolean;
   totalTasks: number;
   completedTasks: number;

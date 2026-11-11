@@ -6,6 +6,7 @@ import {
   Activity,
   Check,
   Copy,
+  Download,
   Layers,
   Shield,
   ShieldCheck,
@@ -18,13 +19,17 @@ import { TeamGroupsTab } from "./team/TeamGroupsTab";
 import { TeamMembersTab } from "./team/TeamMembersTab";
 import { InviteMemberModal, MemberProfileDrawer } from "./team/TeamModals";
 import { TeamRolesTab } from "./team/TeamRolesTab";
-import type {
-  AccessGroupRecord,
-  RoleDefinitionRecord,
-  RolePermissionsMatrix,
-  TeamMemberRecord,
-  TeamOverviewResponse,
-  TeamTabKey,
+import {
+  exportTeamMembersCsv,
+  type AccessGroupRecord,
+  type GroupProjectBoardKey,
+  type GroupProjectRoleValue,
+  type PmsProjectOption,
+  type RoleDefinitionRecord,
+  type RolePermissionsMatrix,
+  type TeamMemberRecord,
+  type TeamOverviewResponse,
+  type TeamTabKey,
 } from "./team/team-types";
 
 const TABS: Array<{
@@ -55,6 +60,7 @@ export function AdminTeamClient() {
 
   const [overview, setOverview] = useState<TeamOverviewResponse | null>(null);
   const [groups, setGroups] = useState<AccessGroupRecord[]>([]);
+  const [groupProjects, setGroupProjects] = useState<PmsProjectOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -103,6 +109,7 @@ export function AdminTeamClient() {
 
     setOverview(teamJson.data as TeamOverviewResponse);
     setGroups((groupsJson.data?.groups ?? []) as AccessGroupRecord[]);
+    setGroupProjects((groupsJson.data?.projects ?? []) as PmsProjectOption[]);
   }, [router]);
 
   useEffect(() => {
@@ -332,6 +339,28 @@ export function AdminTeamClient() {
     setSuccess(msg);
   };
 
+  const handleBulkAction = async (
+    payload:
+      | { action: "set_status"; userIds: string[]; status: "active" | "disabled" }
+      | { action: "set_role"; userIds: string[]; studioRole: string }
+      | { action: "add_to_group"; userIds: string[]; groupId: string }
+  ) => {
+    setError("");
+    setSuccess("");
+    const res = await fetch("/api/v1/admin/team/bulk", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const json = await res.json();
+    if (!res.ok) {
+      setError(json.message || "Bulk update failed.");
+      return;
+    }
+    await refreshAll();
+    setSuccess(`Updated ${json.data?.updatedCount ?? payload.userIds.length} selected team members.`);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -355,6 +384,17 @@ export function AdminTeamClient() {
               <Shield className="h-3.5 w-3.5" />
               Read-only access
             </span>
+          )}
+
+          {overview && (
+            <button
+              type="button"
+              onClick={() => exportTeamMembersCsv(overview.members)}
+              className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-[#121216] px-4 py-2 text-xs font-medium text-neutral-200 transition hover:border-white/30 hover:text-white"
+            >
+              <Download className="h-3.5 w-3.5 text-[#e6c27a]" />
+              Download CSV
+            </button>
           )}
 
           <button
@@ -451,6 +491,7 @@ export function AdminTeamClient() {
           {activeTab === "members" && (
             <TeamMembersTab
               data={overview}
+              groups={groups}
               isAdmin={isAdmin}
               currentUserId={user?.id}
               onOpenInvite={() => setInviteOpen(true)}
@@ -460,6 +501,7 @@ export function AdminTeamClient() {
               onRevokeSessions={handleRevokeSessions}
               onRemoveMember={handleRemoveMember}
               onInvitationAction={handleInvitationAction}
+              onBulkAction={handleBulkAction}
             />
           )}
 
@@ -475,6 +517,11 @@ export function AdminTeamClient() {
           {activeTab === "groups" && (
             <TeamGroupsTab
               groups={groups}
+              projects={
+                groupProjects.length > 0
+                  ? groupProjects
+                  : overview.pmsProjectsList
+              }
               members={overview.members}
               roles={overview.roles}
               isAdmin={isAdmin}
@@ -482,6 +529,12 @@ export function AdminTeamClient() {
                 runGroupAction(
                   { action: "create_group", ...payload },
                   `Created access group "${payload.name}".`
+                )
+              }
+              onUpdateGroup={(payload) =>
+                runGroupAction(
+                  { action: "update_group", ...payload },
+                  `Updated access group "${payload.name}".`
                 )
               }
               onAddMemberToGroup={(groupId, userId) =>
@@ -500,6 +553,20 @@ export function AdminTeamClient() {
                 runGroupAction(
                   { action: "delete_group", groupId },
                   "Access group deleted."
+                )
+              }
+              onSetGroupProjectAccess={(payload: {
+                groupId: string;
+                projectId: string;
+                projectRole: GroupProjectRoleValue;
+                allowedBoards?: GroupProjectBoardKey[];
+                boardRoles?: Partial<
+                  Record<GroupProjectBoardKey, GroupProjectRoleValue>
+                >;
+              }) =>
+                runGroupAction(
+                  { action: "set_project_access", ...payload },
+                  "Updated project & workflow board access for group."
                 )
               }
               onOpenMemberProfile={(id) => setSelectedMemberId(id)}

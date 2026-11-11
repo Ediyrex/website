@@ -7,6 +7,8 @@ import {
   inferBaseRoleSync,
 } from "@/lib/server/team-rbac";
 import {
+  accessGroupActionSchema,
+  teamBulkActionSchema,
   teamCustomRoleCreateSchema,
   teamInviteCreateSchema,
 } from "@/lib/validations/cms";
@@ -66,6 +68,22 @@ describe("Team RBAC definitions and schemas", () => {
       description: "Scope description",
     });
     expect(invalidCustomRole.success).toBe(false);
+
+    const validBulk = teamBulkActionSchema.safeParse({
+      action: "set_status",
+      userIds: ["550e8400-e29b-41d4-a716-446655440000"],
+      status: "disabled",
+    });
+    expect(validBulk.success).toBe(true);
+
+    const validProjectAccess = accessGroupActionSchema.safeParse({
+      action: "set_project_access",
+      groupId: "550e8400-e29b-41d4-a716-446655440000",
+      projectId: "550e8400-e29b-41d4-a716-446655440001",
+      projectRole: "project_manager",
+      allowedBoards: ["backlog", "todo", "in_progress"],
+    });
+    expect(validProjectAccess.success).toBe(true);
   });
 });
 

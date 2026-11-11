@@ -124,6 +124,14 @@ export interface AccessGroupMemberItem {
   avatarUrl: string | null;
 }
 
+export interface AccessGroupProjectAccessItem {
+  id: string;
+  projectId: string;
+  projectRole: string;
+  allowedBoards: string[];
+  boardRoles: Record<string, string>;
+}
+
 export interface AccessGroupRecord {
   id: string;
   name: string;
@@ -133,6 +141,120 @@ export interface AccessGroupRecord {
   defaultStudioRole: string;
   createdAt: string;
   members: AccessGroupMemberItem[];
+  projectAccess: AccessGroupProjectAccessItem[];
+}
+
+export const GROUP_PROJECT_BOARDS = [
+  { key: "backlog", label: "Backlog" },
+  { key: "todo", label: "To Do" },
+  { key: "in_progress", label: "In Progress" },
+  { key: "in_review", label: "In Review" },
+  { key: "done", label: "Done" },
+] as const;
+
+export type GroupProjectBoardKey = (typeof GROUP_PROJECT_BOARDS)[number]["key"];
+
+export const GROUP_PROJECT_ROLE_OPTIONS = [
+  {
+    value: "studio_admin",
+    label: "Owner / Admin",
+    shortLabel: "Owner",
+    description: "Unrestricted access to project, boards, and settings.",
+  },
+  {
+    value: "project_manager",
+    label: "Manager",
+    shortLabel: "Manager",
+    description: "Can add and remove members, tasks, and milestones.",
+  },
+  {
+    value: "team_lead",
+    label: "Team Lead",
+    shortLabel: "Team Lead",
+    description: "Can coordinate workflow, review work, and assign tasks.",
+  },
+  {
+    value: "team_member",
+    label: "Member",
+    shortLabel: "Member",
+    description: "Can interact with tasks and files, cannot manage members.",
+  },
+  {
+    value: "viewer",
+    label: "Guest (Viewer)",
+    shortLabel: "Guest",
+    description: "Viewing access to project content, cannot make changes.",
+  },
+  {
+    value: "no_access",
+    label: "No Access",
+    shortLabel: "No Access",
+    description: "No group-level access to this project or board.",
+  },
+] as const;
+
+export type GroupProjectRoleValue =
+  (typeof GROUP_PROJECT_ROLE_OPTIONS)[number]["value"];
+
+function escapeCsvCell(value: string): string {
+  const safe = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
+  return `"${safe.replaceAll('"', '""')}"`;
+}
+
+export function exportTeamMembersCsv(
+  members: TeamMemberRecord[],
+  filenamePrefix = "edyrex-team-members"
+): void {
+  const headers = [
+    "Name",
+    "Email",
+    "Studio Role",
+    "Department",
+    "Access Groups",
+    "Status",
+    "PMS Projects",
+    "Date Added",
+    "Last Active",
+  ];
+  const rows = members.map((m) => [
+    m.displayName,
+    m.emailNormalized,
+    m.studioRoleLabel,
+    m.department || "Studio",
+    m.accessGroups.map((g) => g.name).join("; "),
+    m.status === "invited"
+      ? "Pending"
+      : m.status === "disabled"
+      ? "Suspended"
+      : "Active",
+    String(m.pmsProjectsCount),
+    new Date(m.createdAt).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }),
+    m.lastLoginAt
+      ? new Date(m.lastLoginAt).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        })
+      : "Never",
+  ]);
+
+  const csvContent = [headers, ...rows]
+    .map((row) => row.map(escapeCsvCell).join(","))
+    .join("\r\n");
+
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `${filenamePrefix}-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 }
 
 export interface TeamMemberDetailResponse {

@@ -10,6 +10,7 @@ import { PmsTaskDrawer } from "./pms/PmsTaskDrawer";
 import {
   PmsReportsView,
   PmsTemplatesView,
+  PmsWorkflowView,
   type CustomTemplateItem,
   type PmsReportsPayload,
 } from "./pms/PmsExpansionViews";
@@ -53,6 +54,7 @@ export function AdminTasksClient() {
       viewParam === "starred" ||
       viewParam === "workload" ||
       viewParam === "templates" ||
+      viewParam === "workflow" ||
       viewParam === "reports"
     ? viewParam
     : "overview";
@@ -590,6 +592,22 @@ export function AdminTasksClient() {
               });
               await Promise.all([loadTemplates(), loadProjectsOverview()]);
             }}
+          />
+        ) : activeView === "workflow" ? (
+          <PmsWorkflowView
+            projects={projects}
+            canEdit={canEdit}
+            onSaveWorkflowConfig={async (projectId, workflowConfig) => {
+              await fetch(`/api/v1/admin/pms/projects/${projectId}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ workflowConfig }),
+              });
+              await loadProjectsOverview();
+            }}
+            onOpenProject={(pid) =>
+              updateRoute({ project: pid, view: null, tab: "tasks" })
+            }
           />
         ) : activeView === "reports" ? (
           <PmsReportsView

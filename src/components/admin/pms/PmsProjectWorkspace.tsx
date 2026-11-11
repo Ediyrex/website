@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
   Activity,
   Archive,
   Bookmark,
   Calendar as CalendarIcon,
+  Check,
   CheckSquare,
   ChevronDown,
   ChevronLeft,
@@ -32,6 +33,7 @@ import {
   Search,
   Send,
   Settings,
+  SlidersHorizontal,
   Star,
   StickyNote,
   Trash2,
@@ -160,16 +162,84 @@ export function PmsProjectWorkspace({
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [deletingProject, setDeletingProject] = useState(false);
 
+  // Project-wide quick search (⌘K) + Board stage customization
+  const [projectSearch, setProjectSearch] = useState("");
+  const projectSearchRef = useRef<HTMLInputElement | null>(null);
+  const [showBoardSettings, setShowBoardSettings] = useState(false);
+  const [stageNameDrafts, setStageNameDrafts] = useState<Record<string, string>>(
+    () => ({ ...(project.workflowConfig?.stageNames ?? {}) })
+  );
+  const [customLabelsDraft, setCustomLabelsDraft] = useState<string[]>(
+    () => [...(project.workflowConfig?.labels ?? [])]
+  );
+  const [newBoardLabel, setNewBoardLabel] = useState("");
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        projectSearchRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
+  const getStageLabel = (colId: TaskWorkflowStatus, fallback: string) =>
+    project.workflowConfig?.stageNames?.[colId]?.trim() || fallback;
+
   const statusMeta =
     PROJECT_STATUS_META[project.status] ?? PROJECT_STATUS_META.planning;
 
   const availableLabels = useMemo(() => {
-    const set = new Set<string>();
+    const set = new Set<string>(project.workflowConfig?.labels ?? []);
     for (const t of tasks) {
       for (const l of t.labels) set.add(l);
     }
     return Array.from(set).sort();
-  }, [tasks]);
+  }, [project.workflowConfig?.labels, tasks]);
+
+  const taskImagesByTaskId = useMemo(() => {
+    const map = new Map<string, Array<{ id: string; title: string; url: string }>>();
+    for (const f of files) {
+      if (!f.taskId) continue;
+      const isImage =
+        f.resourceType === "image" || f.mimeType.startsWith("image/");
+      if (!isImage) continue;
+      const list = map.get(f.taskId) ?? [];
+      list.push({ id: f.id, title: f.title, url: f.secureUrl });
+      map.set(f.taskId, list);
+    }
+    return map;
+  }, [files]);
+
+  const projectCoverPreview = useMemo(() => {
+    if (project.coverUrl) return project.coverUrl;
+    const firstImage = files.find(
+      (f) => f.resourceType === "image" || f.mimeType.startsWith("image/")
+    );
+    return firstImage?.secureUrl ?? null;
+  }, [files, project.coverUrl]);
+
+  const projectSearchResults = useMemo(() => {
+    const q = projectSearch.trim().toLowerCase();
+    if (!q) return null;
+    return {
+      tasks: tasks
+        .filter((t) =>
+          `${t.title} ${t.taskCode} ${t.labels.join(" ")}`
+            .toLowerCase()
+            .includes(q)
+        )
+        .slice(0, 5),
+      milestones: milestones
+        .filter((m) => `${m.title} ${m.description}`.toLowerCase().includes(q))
+        .slice(0, 3),
+      files: files
+        .filter((f) => `${f.title} ${f.category}`.toLowerCase().includes(q))
+        .slice(0, 3),
+    };
+  }, [files, milestones, projectSearch, tasks]);
 
   const unfinishedTaskIds = useMemo(() => {
     return new Set(
@@ -443,25 +513,141 @@ export function PmsProjectWorkspace({
 
   return (
     <div className="space-y-5">
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-xs text-[#6D7480]">
-        <button
-          type="button"
-          onClick={onBackToProjects}
-          className="hover:text-[#D4AF77] cursor-pointer"
-        >
-          Projects
-        </button>
-        <ChevronRight className="w-3.5 h-3.5" />
-        <span className="text-[#F2F2F0] font-medium">{project.title}</span>
+      {/* Breadcrumb + Search in project (⌘K) */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2 text-xs text-[#6D7480]">
+          <button
+            type="button"
+            onClick={onBackToProjects}
+            className="hover:text-[#D4AF77] cursor-pointer"
+          >
+            Projects
+          </button>
+          <ChevronRight className="w-3.5 h-3.5" />
+          <span className="text-[#F2F2F0] font-medium">{project.title}</span>
+        </div>
+
+        <div className="relative w-full sm:w-72">
+          <Search className="w-3.5 h-3.5 text-[#6D7480] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <input
+            ref={projectSearchRef}
+            type="search"
+            value={projectSearch}
+            onChange={(e) => setProjectSearch(e.target.value)}
+            placeholder="Search in project..."
+            className="w-full h-8 pl-8 pr-12 rounded-lg bg-[#111419] border border-[#252A31] text-xs text-[#F2F2F0] placeholder-[#6D7480] focus:outline-none focus:border-[#D4AF77]/60"
+          />
+          <kbd className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 rounded border border-[#252A31] bg-[#0B0D0F] px-1.5 py-0.5 text-[10px] font-mono text-[#6D7480]">
+            ⌘K
+          </kbd>
+
+          {projectSearchResults && (
+            <div className="absolute right-0 z-40 mt-1.5 w-80 rounded-xl border border-[#252A31] bg-[#111419] p-2.5 shadow-2xl space-y-2 text-xs">
+              {projectSearchResults.tasks.length === 0 &&
+              projectSearchResults.milestones.length === 0 &&
+              projectSearchResults.files.length === 0 ? (
+                <div className="py-3 text-center text-[#6D7480]">
+                  No project items match &ldquo;{projectSearch}&rdquo;.
+                </div>
+              ) : (
+                <>
+                  {projectSearchResults.tasks.length > 0 && (
+                    <div>
+                      <div className="px-2 pb-1 text-[10px] font-mono uppercase text-[#6D7480]">
+                        Tasks
+                      </div>
+                      {projectSearchResults.tasks.map((t) => (
+                        <button
+                          key={t.id}
+                          type="button"
+                          onClick={() => {
+                            setProjectSearch("");
+                            onOpenTask(t.id);
+                          }}
+                          className="w-full flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg hover:bg-[#171B21] text-left cursor-pointer"
+                        >
+                          <span className="truncate text-[#F2F2F0]">
+                            {t.title}
+                          </span>
+                          <span className="text-[10px] font-mono text-[#D4AF77] shrink-0">
+                            {t.taskCode}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {projectSearchResults.milestones.length > 0 && (
+                    <div>
+                      <div className="px-2 pb-1 text-[10px] font-mono uppercase text-[#6D7480]">
+                        Milestones
+                      </div>
+                      {projectSearchResults.milestones.map((m) => (
+                        <button
+                          key={m.id}
+                          type="button"
+                          onClick={() => {
+                            setProjectSearch("");
+                            onTabChange("milestones");
+                          }}
+                          className="w-full flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg hover:bg-[#171B21] text-left cursor-pointer"
+                        >
+                          <span className="truncate text-[#F2F2F0]">
+                            {m.title}
+                          </span>
+                          <span className="text-[10px] font-mono text-[#A1A6AE]">
+                            {m.status}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {projectSearchResults.files.length > 0 && (
+                    <div>
+                      <div className="px-2 pb-1 text-[10px] font-mono uppercase text-[#6D7480]">
+                        Files
+                      </div>
+                      {projectSearchResults.files.map((f) => (
+                        <button
+                          key={f.id}
+                          type="button"
+                          onClick={() => {
+                            setProjectSearch("");
+                            onTabChange("files");
+                          }}
+                          className="w-full flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg hover:bg-[#171B21] text-left cursor-pointer"
+                        >
+                          <span className="truncate text-[#F2F2F0]">
+                            {f.title}
+                          </span>
+                          <span className="text-[10px] font-mono text-[#A1A6AE]">
+                            v{f.version}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Project Header */}
       <div className="p-5 rounded-xl bg-[#111419] border border-[#252A31] space-y-4">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-start gap-4 min-w-0">
-            <div className="w-16 h-12 rounded-xl bg-gradient-to-br from-[#2B2316] via-[#171B21] to-[#0B0D0F] border border-[#D4AF77]/35 flex items-center justify-center text-[#D4AF77] font-heading font-bold text-lg shrink-0 overflow-hidden">
-              {getInitials(project.title)}
+            <div
+              role={projectCoverPreview ? "img" : undefined}
+              aria-label={projectCoverPreview ? `${project.title} cover` : undefined}
+              style={
+                projectCoverPreview
+                  ? { backgroundImage: `url("${projectCoverPreview}")` }
+                  : undefined
+              }
+              className="w-20 h-14 rounded-xl bg-gradient-to-br from-[#2B2316] via-[#171B21] to-[#0B0D0F] bg-cover bg-center border border-[#D4AF77]/35 flex items-center justify-center text-[#D4AF77] font-heading font-bold text-lg shrink-0 overflow-hidden"
+            >
+              {!projectCoverPreview && getInitials(project.title)}
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
@@ -829,8 +1015,117 @@ export function PmsProjectWorkspace({
                 <Bookmark className="w-3 h-3" />
                 <span>Save View</span>
               </button>
+
+              {permissions.canManageProject && (
+                <button
+                  type="button"
+                  onClick={() => setShowBoardSettings((v) => !v)}
+                  className={cn(
+                    "inline-flex items-center justify-center h-8 w-8 rounded-lg border cursor-pointer",
+                    showBoardSettings
+                      ? "bg-[#261E12] border-[#D4AF77]/50 text-[#D4AF77]"
+                      : "bg-[#171B21] border-[#252A31] text-[#A1A6AE] hover:text-white"
+                  )}
+                  title="Customize Kanban stages & labels"
+                >
+                  <SlidersHorizontal className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
           </div>
+
+          {showBoardSettings && permissions.canManageProject && (
+            <div className="p-4 rounded-xl bg-[#0B0D0F] border border-[#D4AF77]/35 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-[#F2F2F0]">
+                  Customize Workflow Stages &amp; Project Labels
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowBoardSettings(false)}
+                  className="text-xs text-[#6D7480] hover:text-white"
+                >
+                  Close
+                </button>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-5 gap-2">
+                {KANBAN_COLUMNS.map((col) => (
+                  <div key={col.id}>
+                    <label className="block text-[10px] font-mono text-[#6D7480] mb-1">
+                      {col.label}
+                    </label>
+                    <input
+                      type="text"
+                      value={stageNameDrafts[col.id] ?? col.label}
+                      onChange={(e) =>
+                        setStageNameDrafts((prev) => ({
+                          ...prev,
+                          [col.id]: e.target.value,
+                        }))
+                      }
+                      className="w-full h-8 px-2.5 rounded-lg bg-[#111419] border border-[#252A31] text-xs text-[#F2F2F0]"
+                    />
+                  </div>
+                ))}
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                {customLabelsDraft.map((lbl) => (
+                  <span
+                    key={lbl}
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#171B21] border border-[#252A31] text-[11px] text-[#D4AF77]"
+                  >
+                    {lbl}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setCustomLabelsDraft((prev) =>
+                          prev.filter((l) => l !== lbl)
+                        )
+                      }
+                      className="text-[#6D7480] hover:text-[#E47777]"
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+                <input
+                  type="text"
+                  value={newBoardLabel}
+                  onChange={(e) => setNewBoardLabel(e.target.value)}
+                  placeholder="Add label..."
+                  className="h-7 px-2.5 rounded bg-[#111419] border border-[#252A31] text-xs text-[#F2F2F0]"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const val = newBoardLabel.trim();
+                    if (val && !customLabelsDraft.includes(val)) {
+                      setCustomLabelsDraft((prev) => [...prev, val]);
+                    }
+                    setNewBoardLabel("");
+                  }}
+                  className="h-7 px-2.5 rounded border border-[#252A31] text-xs text-[#D4AF77]"
+                >
+                  + Label
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await patchProject({
+                      workflowConfig: {
+                        stageNames: stageNameDrafts,
+                        labels: customLabelsDraft,
+                      },
+                    });
+                    setShowBoardSettings(false);
+                  }}
+                  className="ml-auto h-7 px-3 rounded bg-[#D4AF77] text-[#08090B] text-xs font-semibold cursor-pointer"
+                >
+                  Save Board Config
+                </button>
+              </div>
+            </div>
+          )}
 
           {(showSaveFilter || savedFilters.length > 0) && (
             <div className="px-3.5 py-2.5 rounded-xl bg-[#0B0D0F] border border-[#252A31] flex flex-wrap items-center justify-between gap-2">
@@ -937,7 +1232,7 @@ export function PmsProjectWorkspace({
                       <div className="flex items-center gap-2">
                         <span className={cn("w-2 h-2 rounded-full", col.dotColor)} />
                         <span className="text-xs font-semibold text-[#F2F2F0]">
-                          {col.label}
+                          {getStageLabel(col.id, col.label)}
                         </span>
                         <span className="text-[11px] font-mono text-[#6D7480]">
                           {colTasks.length}
@@ -1022,14 +1317,56 @@ export function PmsProjectWorkspace({
                                 )}
                             </div>
 
-                            {task.subtasksTotal > 0 && (
+                            {/* Visual Task Media / Moodboard Preview */}
+                            {(() => {
+                              const thumbs = taskImagesByTaskId.get(task.id) ?? [];
+                              if (thumbs.length === 1) {
+                                return (
+                                  <div
+                                    role="img"
+                                    aria-label={thumbs[0].title}
+                                    style={{
+                                      backgroundImage: `url("${thumbs[0].url}")`,
+                                    }}
+                                    className="h-20 w-full rounded-lg border border-[#252A31] bg-cover bg-center"
+                                  />
+                                );
+                              }
+                              if (thumbs.length >= 2) {
+                                return (
+                                  <div className="grid grid-cols-3 gap-1.5">
+                                    {thumbs.slice(0, 3).map((thumb) => (
+                                      <div
+                                        key={thumb.id}
+                                        role="img"
+                                        aria-label={thumb.title}
+                                        style={{
+                                          backgroundImage: `url("${thumb.url}")`,
+                                        }}
+                                        className="h-11 rounded-md border border-[#252A31] bg-cover bg-center"
+                                      />
+                                    ))}
+                                  </div>
+                                );
+                              }
+                              return null;
+                            })()}
+
+                            {col.id === "done" || task.completed ? (
+                              <div className="inline-flex items-center gap-1 text-[11px] font-medium text-[#56C88A]">
+                                <Check className="w-3 h-3 stroke-[2.5]" />
+                                <span>Completed</span>
+                              </div>
+                            ) : (
                               <div className="space-y-1">
                                 <div className="flex justify-between text-[10px] font-mono text-[#6D7480]">
                                   <span>{subPct}%</span>
-                                  <span>
-                                    {task.subtasksCompleted}/
-                                    {task.subtasksTotal}
-                                  </span>
+                                  {task.subtasksTotal > 0 && (
+                                    <span>
+                                      {task.subtasksCompleted}/
+                                      {task.subtasksTotal}
+                                    </span>
+                                  )}
                                 </div>
                                 <div className="h-1 rounded-full bg-[#08090B] overflow-hidden">
                                   <div

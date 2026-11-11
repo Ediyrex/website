@@ -14,7 +14,12 @@ import {
   Trash2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { formatMinutes } from "./pms-types";
+import {
+  KANBAN_COLUMNS,
+  formatMinutes,
+  type PmsProjectSummary,
+  type TaskWorkflowStatus,
+} from "./pms-types";
 
 /* -------------------------------------------------------------------------- */
 /*  1. Custom Project Templates & Workflows View (PMS v1.5)                   */
@@ -591,6 +596,312 @@ function StatTile({
         {value}
       </div>
       <div className="text-[11px] text-[#6D7480]">{sub}</div>
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*  4. Workflow Stages & Labels Configuration View                             */
+/* -------------------------------------------------------------------------- */
+
+const DEFAULT_STUDIO_LABELS = [
+  "Research",
+  "Branding",
+  "Design",
+  "Marketing",
+  "Web",
+  "UI",
+  "Video",
+  "Production",
+  "Planning",
+  "AI",
+];
+
+export function PmsWorkflowView({
+  projects,
+  canEdit,
+  onSaveWorkflowConfig,
+  onOpenProject,
+}: {
+  projects: PmsProjectSummary[];
+  canEdit: boolean;
+  onSaveWorkflowConfig: (
+    projectId: string,
+    workflowConfig: {
+      stageNames: Record<string, string>;
+      labels: string[];
+    }
+  ) => Promise<void>;
+  onOpenProject: (projectId: string) => void;
+}) {
+  const [selectedProjectId, setSelectedProjectId] = useState<string>(
+    projects[0]?.id ?? ""
+  );
+  const selectedProject =
+    projects.find((p) => p.id === selectedProjectId) ?? projects[0] ?? null;
+
+  const [stageNames, setStageNames] = useState<Record<string, string>>(() => ({
+    backlog: selectedProject?.workflowConfig?.stageNames?.backlog || "Backlog",
+    todo: selectedProject?.workflowConfig?.stageNames?.todo || "To Do",
+    in_progress:
+      selectedProject?.workflowConfig?.stageNames?.in_progress || "In Progress",
+    in_review:
+      selectedProject?.workflowConfig?.stageNames?.in_review || "In Review",
+    done: selectedProject?.workflowConfig?.stageNames?.done || "Done",
+  }));
+
+  const [labelsList, setLabelsList] = useState<string[]>(
+    () =>
+      selectedProject?.workflowConfig?.labels &&
+      selectedProject.workflowConfig.labels.length > 0
+        ? selectedProject.workflowConfig.labels
+        : DEFAULT_STUDIO_LABELS
+  );
+  const [newLabelInput, setNewLabelInput] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [savedMsg, setSavedMsg] = useState("");
+
+  const handleSelectProject = (pid: string) => {
+    setSelectedProjectId(pid);
+    const nextProj = projects.find((p) => p.id === pid);
+    setStageNames({
+      backlog: nextProj?.workflowConfig?.stageNames?.backlog || "Backlog",
+      todo: nextProj?.workflowConfig?.stageNames?.todo || "To Do",
+      in_progress:
+        nextProj?.workflowConfig?.stageNames?.in_progress || "In Progress",
+      in_review: nextProj?.workflowConfig?.stageNames?.in_review || "In Review",
+      done: nextProj?.workflowConfig?.stageNames?.done || "Done",
+    });
+    setLabelsList(
+      nextProj?.workflowConfig?.labels && nextProj.workflowConfig.labels.length > 0
+        ? nextProj.workflowConfig.labels
+        : DEFAULT_STUDIO_LABELS
+    );
+    setSavedMsg("");
+  };
+
+  return (
+    <div className="space-y-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="font-heading font-bold text-2xl text-[#F2F2F0]">
+            Workflow &amp; Labels
+          </h1>
+          <p className="text-xs text-[#A1A6AE] mt-1">
+            Configure Kanban workflow stages and reusable taxonomy labels across
+            EDYREX studio projects.
+          </p>
+        </div>
+        {selectedProject && (
+          <button
+            type="button"
+            onClick={() => onOpenProject(selectedProject.id)}
+            className="h-9 px-3.5 rounded-lg bg-[#171B21] border border-[#252A31] hover:border-[#D4AF77]/45 text-xs text-[#D4AF77] cursor-pointer"
+          >
+            Open Board →
+          </button>
+        )}
+      </div>
+
+      {/* Complete 4-Stage Studio Lifecycle Banner */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+        {[
+          {
+            step: "01",
+            title: "Plan",
+            desc: "Create Project or Use Template",
+          },
+          {
+            step: "02",
+            title: "Collaborate",
+            desc: "Assign, Discuss and Execute",
+          },
+          {
+            step: "03",
+            title: "Review",
+            desc: "Submit, Feedback & Revisions",
+          },
+          {
+            step: "04",
+            title: "Deliver",
+            desc: "Approve and Complete",
+          },
+        ].map((phase) => (
+          <div
+            key={phase.step}
+            className="p-3.5 rounded-xl bg-[#111419] border border-[#252A31] flex items-center gap-3"
+          >
+            <span className="w-8 h-8 rounded-lg bg-[#241E14] border border-[#D4AF77]/40 text-[#D4AF77] text-xs font-mono font-bold flex items-center justify-center shrink-0">
+              {phase.step}
+            </span>
+            <div>
+              <div className="text-xs font-semibold text-[#F2F2F0]">
+                {phase.title}
+              </div>
+              <div className="text-[11px] text-[#A1A6AE]">{phase.desc}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {projects.length === 0 ? (
+        <div className="p-8 rounded-xl bg-[#111419] border border-[#252A31] text-center text-xs text-[#6D7480]">
+          Create a project first to customize project-specific workflow stages
+          and labels.
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          {/* Workflow Stages Editor */}
+          <div className="lg:col-span-7 rounded-xl bg-[#111419] border border-[#252A31] p-5 space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-sm font-semibold text-[#F2F2F0]">
+                Kanban Stage Names
+              </h2>
+              <select
+                value={selectedProject?.id ?? ""}
+                onChange={(e) => handleSelectProject(e.target.value)}
+                aria-label="Select project to configure workflow"
+                className="h-8 px-2.5 rounded-lg bg-[#08090B] border border-[#252A31] text-xs text-[#F2F2F0]"
+              >
+                {projects.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    #{p.referenceCode} · {p.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-2.5">
+              {KANBAN_COLUMNS.map((col) => {
+                const key = col.id as TaskWorkflowStatus;
+                return (
+                  <div
+                    key={col.id}
+                    className="p-3 rounded-lg bg-[#0B0D0F] border border-[#252A31] flex flex-wrap items-center justify-between gap-3"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <span
+                        className={cn("w-2.5 h-2.5 rounded-full", col.dotColor)}
+                      />
+                      <div>
+                        <div className="text-xs font-medium text-[#F2F2F0]">
+                          Default: {col.label}
+                        </div>
+                        <div className="text-[11px] text-[#6D7480]">
+                          {col.description}
+                        </div>
+                      </div>
+                    </div>
+                    <input
+                      type="text"
+                      disabled={!canEdit}
+                      value={stageNames[key] ?? col.label}
+                      onChange={(e) =>
+                        setStageNames((prev) => ({
+                          ...prev,
+                          [key]: e.target.value,
+                        }))
+                      }
+                      className="h-8 px-2.5 rounded-lg bg-[#111419] border border-[#252A31] text-xs text-[#F2F2F0] w-44 disabled:opacity-60"
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Label Taxonomy Editor */}
+          <div className="lg:col-span-5 rounded-xl bg-[#111419] border border-[#252A31] p-5 flex flex-col justify-between space-y-4">
+            <div className="space-y-3">
+              <h2 className="text-sm font-semibold text-[#F2F2F0]">
+                Project Labels Library
+              </h2>
+              <p className="text-xs text-[#A1A6AE]">
+                Define quick-select labels available on tasks and filters for{" "}
+                <strong className="text-[#F2F2F0]">
+                  {selectedProject?.title}
+                </strong>
+                .
+              </p>
+
+              <div className="flex flex-wrap gap-1.5">
+                {labelsList.map((label) => (
+                  <span
+                    key={label}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#171B21] border border-[#252A31] text-xs text-[#D4AF77]"
+                  >
+                    <span>{label}</span>
+                    {canEdit && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setLabelsList((prev) =>
+                            prev.filter((l) => l !== label)
+                          )
+                        }
+                        className="text-[#6D7480] hover:text-[#E47777] cursor-pointer"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </span>
+                ))}
+              </div>
+
+              {canEdit && (
+                <div className="flex gap-2 pt-2">
+                  <input
+                    type="text"
+                    value={newLabelInput}
+                    onChange={(e) => setNewLabelInput(e.target.value)}
+                    placeholder="Add custom label (e.g. Motion, QA)..."
+                    className="flex-1 h-8 px-2.5 rounded-lg bg-[#08090B] border border-[#252A31] text-xs text-[#F2F2F0]"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const val = newLabelInput.trim();
+                      if (val && !labelsList.includes(val)) {
+                        setLabelsList((prev) => [...prev, val]);
+                      }
+                      setNewLabelInput("");
+                    }}
+                    className="h-8 px-3 rounded-lg bg-[#171B21] border border-[#D4AF77]/45 text-xs text-[#D4AF77] cursor-pointer"
+                  >
+                    Add
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {canEdit && selectedProject && (
+              <div className="pt-3 border-t border-[#252A31] flex items-center justify-between gap-2">
+                <span className="text-xs text-[#56C88A]">{savedMsg}</span>
+                <button
+                  type="button"
+                  disabled={saving}
+                  onClick={async () => {
+                    setSaving(true);
+                    try {
+                      await onSaveWorkflowConfig(selectedProject.id, {
+                        stageNames,
+                        labels: labelsList,
+                      });
+                      setSavedMsg("Saved!");
+                      setTimeout(() => setSavedMsg(""), 2500);
+                    } finally {
+                      setSaving(false);
+                    }
+                  }}
+                  className="h-9 px-4 rounded-lg bg-[#D4AF77] text-[#08090B] text-xs font-semibold cursor-pointer disabled:opacity-50"
+                >
+                  {saving ? "Saving..." : "Save Workflow & Labels"}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

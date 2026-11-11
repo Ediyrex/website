@@ -14,7 +14,7 @@ import {
   type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
-import { users } from "./auth";
+import { accessGroups, users } from "./auth";
 import { crmClients, enquiries } from "./enquiries";
 import { mediaAssets } from "./media";
 
@@ -521,5 +521,41 @@ export const pmsSavedFilters = pgTable(
     index("idx_pms_saved_filters_user").on(table.userId, table.scope),
   ]
 );
+
+export const accessGroupProjectAccess = pgTable(
+  "access_group_project_access",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    groupId: uuid("group_id")
+      .notNull()
+      .references(() => accessGroups.id, { onDelete: "cascade" }),
+    projectId: uuid("project_id")
+      .notNull()
+      .references(() => pmsProjects.id, { onDelete: "cascade" }),
+    projectRole: varchar("project_role", { length: 32 })
+      .notNull()
+      .default("team_member"),
+    allowedBoards: jsonb("allowed_boards")
+      .$type<string[]>()
+      .notNull()
+      .default(["backlog", "todo", "in_progress", "in_review", "done"]),
+    boardRoles: jsonb("board_roles")
+      .$type<Record<string, string>>()
+      .notNull()
+      .default({}),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    unique("uq_access_group_project").on(table.groupId, table.projectId),
+    check(
+      "chk_group_project_role",
+      sql`${table.projectRole} IN ('super_admin', 'studio_admin', 'project_manager', 'team_lead', 'team_member', 'viewer', 'no_access')`
+    ),
+    index("idx_group_project_access_group").on(table.groupId),
+  ]
+);
+
 
 
