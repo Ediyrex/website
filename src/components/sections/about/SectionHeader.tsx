@@ -9,7 +9,7 @@ export function SectionHeader() {
       className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 md:pb-5"
     >
       <div className="flex items-center">
-        <span className="text-[13px] lg:text-[14px] font-bold uppercase tracking-[1.5px] text-[#111111]">
+        <span className="text-[14px] lg:text-[16px] font-black uppercase tracking-[1.4px] text-[#111111]">
           ABOUT EDIYREX
         </span>
       </div>

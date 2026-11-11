@@ -5,29 +5,21 @@ export function FounderCard() {
   return (
     <article
       data-about-founder
-      className="relative rounded-[18px] bg-[#F5F0E9] border border-[#D9D2C8] overflow-hidden flex flex-col md:block h-full"
+      className="relative rounded-[18px] bg-[#F5F0E9] border border-[#D9D2C8] overflow-hidden flex flex-col md:flex-row h-full"
     >
-      {/* Complete Photographic Portrait (Full 16:9 on mobile, proportional left bleed on desktop) */}
-      <div className="relative w-full aspect-video md:aspect-auto md:absolute md:inset-y-0 md:left-0 md:w-[68%] bg-[#11100F] overflow-hidden">
+      {/* Left Complete Portrait — anchored left to preserve the orange corner and full profile */}
+      <div className="relative w-full aspect-video md:aspect-auto md:w-[47%] shrink-0 bg-[#F5F0E9] overflow-hidden">
         <Image
           src="/images/about/founder.jpg"
           alt="Founder of EDIYREX studio looking upward in dark architectural light"
           fill
-          sizes="(min-width: 1024px) 30vw, (min-width: 768px) 55vw, 100vw"
-          className="object-cover object-[center_20%] md:object-[25%_22%]"
-        />
-        <div
-          aria-hidden="true"
-          className="hidden md:block absolute inset-0"
-          style={{
-            background:
-              "linear-gradient(90deg, rgba(245,240,233,0) 48%, rgba(245,240,233,0.88) 65%, #F5F0E9 76%, #F5F0E9 100%)",
-          }}
+          sizes="(min-width: 1024px) 24vw, (min-width: 768px) 44vw, 100vw"
+          className="object-cover object-left md:[clip-path:polygon(0_0,88%_0,100%_100%,0_100%)]"
         />
       </div>
 
       {/* Right Statement & Attribution */}
-      <div className="relative z-10 md:ml-[46%] md:w-[54%] h-full p-5 sm:p-5 lg:p-6 flex flex-col justify-between gap-3.5">
+      <div className="relative z-10 flex-1 p-5 sm:p-5 lg:p-5 xl:p-6 flex flex-col justify-between gap-3.5">
         <div className="space-y-2.5">
           <div className="flex items-center gap-3">
             <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#111111] shrink-0">

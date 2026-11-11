@@ -168,12 +168,12 @@ export function TechStackCard() {
           <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/90 shrink-0">
             BUILT ON
           </span>
-          <span aria-hidden="true" className="h-px flex-1 bg-white/20" />
+          <span aria-hidden="true" className="h-[1.5px] flex-1 bg-white/30" />
         </div>
 
         <h3
           style={{ fontFamily: "var(--font-playfair)" }}
-          className="text-[20px] sm:text-[21px] lg:text-[19px] xl:text-[22px] font-normal leading-[1.2] text-white"
+          className="text-[20px] sm:text-[21px] lg:text-[19px] xl:text-[22px] font-bold leading-[1.2] text-white"
         >
           A modern, scalable and automation-first stack.
         </h3>

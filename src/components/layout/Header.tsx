@@ -58,8 +58,15 @@ export function Header() {
     const handleScroll = () => {
       const y = window.scrollY;
       setIsScrolled(y > 16);
-      const heroLimit = Math.max(window.innerHeight - 96, 520);
-      setPastHero(pathname === "/" ? y > heroLimit : y > 16);
+      if (pathname === "/") {
+        const darkStartEl = document.getElementById("work");
+        const isPastLightSections = darkStartEl
+          ? darkStartEl.getBoundingClientRect().top <= 80
+          : false;
+        setPastHero(isPastLightSections);
+      } else {
+        setPastHero(y > 16);
+      }
     };
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
