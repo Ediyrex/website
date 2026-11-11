@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 import { AboutSection } from "@/components/sections/about/AboutSection";
 import { ThreeDivisionsSection } from "@/components/sections/ThreeDivisionsSection";
 import { StudioArchitecture } from "@/components/sections/studio-architecture/StudioArchitecture";
-import { FeaturedWorkSection } from "@/components/sections/FeaturedWorkSection";
+import { SelectedWork } from "@/components/sections/selected-work/SelectedWork";
 import { BeforeAfterSection } from "@/components/sections/BeforeAfterSection";
 import { HybridModelSection } from "@/components/sections/HybridModelSection";
 import { ProcessSection } from "@/components/sections/ProcessSection";
@@ -33,7 +33,7 @@ export default function HomePage() {
       <AboutSection />
       <ThreeDivisionsSection />
       <StudioArchitecture />
-      <FeaturedWorkSection />
+      <SelectedWork />
       <BeforeAfterSection />
       <HybridModelSection />
       <ProcessSection />
