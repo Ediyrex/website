@@ -16,7 +16,7 @@ import { AboutSection } from "@/components/sections/about/AboutSection";
 import { ThreeDivisionsSection } from "@/components/sections/ThreeDivisionsSection";
 import { StudioArchitecture } from "@/components/sections/studio-architecture/StudioArchitecture";
 import { SelectedWork } from "@/components/sections/selected-work/SelectedWork";
-import { BeforeAfterSection } from "@/components/sections/BeforeAfterSection";
+import { OperationalShift } from "@/components/sections/operational-shift/OperationalShift";
 import { HybridModelSection } from "@/components/sections/HybridModelSection";
 import { ProcessSection } from "@/components/sections/ProcessSection";
 import { EngagementSection } from "@/components/sections/EngagementSection";
@@ -34,7 +34,7 @@ export default function HomePage() {
       <ThreeDivisionsSection />
       <StudioArchitecture />
       <SelectedWork />
-      <BeforeAfterSection />
+      <OperationalShift />
       <HybridModelSection />
       <ProcessSection />
       <EngagementSection />

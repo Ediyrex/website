@@ -39,3 +39,4 @@ export function BackgroundTerrain() {
     </div>
   );
 }
+
