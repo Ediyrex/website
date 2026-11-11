@@ -90,7 +90,7 @@ const INITIAL_DIVISIONS = [
     destinationUrl: "/services/media",
     coverImageUrl: "/images/services/media.jpg",
     coverAlt:
-      "Edyrex production clapperboard, cinema camera, and studio headphones in dramatic orange studio light",
+      "Ediyrex production clapperboard, cinema camera, and studio headphones in dramatic orange studio light",
     iconName: "Film",
     displayOrder: 4,
     isActive: true,

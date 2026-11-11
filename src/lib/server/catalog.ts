@@ -401,7 +401,7 @@ export const DEFAULT_HOMEPAGE_DIVISIONS: HomepageDivisionItem[] = [
     destinationUrl: "/services/media",
     coverImageUrl: "/images/services/media.jpg",
     coverAlt:
-      "Edyrex production clapperboard, cinema camera, and studio headphones in dramatic orange studio light",
+      "Ediyrex production clapperboard, cinema camera, and studio headphones in dramatic orange studio light",
     displayOrder: 4,
     isActive: true,
     isFeatured: true,
