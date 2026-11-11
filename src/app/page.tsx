@@ -17,7 +17,7 @@ import { ThreeDivisionsSection } from "@/components/sections/ThreeDivisionsSecti
 import { StudioArchitecture } from "@/components/sections/studio-architecture/StudioArchitecture";
 import { SelectedWork } from "@/components/sections/selected-work/SelectedWork";
 import { OperationalShift } from "@/components/sections/operational-shift/OperationalShift";
-import { HybridModelSection } from "@/components/sections/HybridModelSection";
+import { WhyEdiyrexSection } from "@/components/sections/why-ediyrex/WhyEdiyrexSection";
 import { ProcessSection } from "@/components/sections/ProcessSection";
 import { EngagementSection } from "@/components/sections/EngagementSection";
 import { UsVsThemSection } from "@/components/sections/UsVsThemSection";
@@ -35,7 +35,7 @@ export default function HomePage() {
       <StudioArchitecture />
       <SelectedWork />
       <OperationalShift />
-      <HybridModelSection />
+      <WhyEdiyrexSection />
       <ProcessSection />
       <EngagementSection />
       <UsVsThemSection />

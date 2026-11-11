@@ -40,21 +40,21 @@ export function ArchitectureConnections({
       {/* Outgoing Orange Flow Lines From Central Transition Node Into Core */}
       <path
         data-os-connect-line
-        d="M -68 210 C -22 210, 42 150, 145 128"
+        d="M -46 210 C -8 210, 48 150, 145 128"
         stroke="#F36B16"
         strokeOpacity="0.45"
         strokeWidth="1.2"
       />
       <path
         data-os-connect-line
-        d="M -68 210 C -18 210, 48 210, 210 210"
+        d="M -46 210 C -4 210, 52 210, 210 210"
         stroke="#F36B16"
         strokeOpacity="0.55"
         strokeWidth="1.25"
       />
       <path
         data-os-connect-line
-        d="M -68 210 C -22 210, 42 270, 145 292"
+        d="M -46 210 C -8 210, 48 270, 145 292"
         stroke="#F36B16"
         strokeOpacity="0.45"
         strokeWidth="1.2"
