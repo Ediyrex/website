@@ -50,7 +50,10 @@ export function Footer() {
   const socialProfiles = live?.socialProfiles ?? [];
 
   return (
-    <footer className="bg-[#08090B] border-t border-[#252A32] pt-16 pb-24 md:pb-6 text-[#B2B4BA] text-sm">
+    <footer
+      id="site-footer"
+      className="bg-[#08090B] border-t border-[#252A32] pt-16 pb-24 md:pb-6 text-[#B2B4BA] text-sm"
+    >
       <div className="max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 pb-12 border-b border-[#252A32]">
           {/* Column 1: Brand */}

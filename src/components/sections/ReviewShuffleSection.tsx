@@ -54,6 +54,7 @@ export function ReviewShuffleSection() {
 
   return (
     <section
+      id="studio-standards"
       aria-label="Studio Standards Shuffle Deck"
       className="py-16 md:py-24 bg-[#0D0F12] border-b border-[#252A32]"
     >

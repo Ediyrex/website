@@ -20,9 +20,8 @@ import { OperationalShift } from "@/components/sections/operational-shift/Operat
 import { WhyEdiyrexSection } from "@/components/sections/why-ediyrex/WhyEdiyrexSection";
 import { WorkflowSection } from "@/components/sections/workflow/WorkflowSection";
 import { EngagementSection } from "@/components/sections/engagement/EngagementSection";
-import { UsVsThemSection } from "@/components/sections/UsVsThemSection";
-import { ReviewShuffleSection } from "@/components/sections/ReviewShuffleSection";
-import { FaqSection } from "@/components/sections/FaqSection";
+import { StudioComparisonSection } from "@/components/sections/StudioComparisonSection/StudioComparisonSection";
+import { StandardsSection } from "@/components/sections/StandardsSection/StandardsSection";
 import { FinalCtaSection } from "@/components/sections/FinalCtaSection";
 import { ActivityPings } from "@/components/sections/ActivityPings";
 
@@ -38,9 +37,8 @@ export default function HomePage() {
       <WhyEdiyrexSection />
       <WorkflowSection />
       <EngagementSection />
-      <UsVsThemSection />
-      <ReviewShuffleSection />
-      <FaqSection />
+      <StudioComparisonSection />
+      <StandardsSection />
       <FinalCtaSection />
       <ActivityPings />
     </>
