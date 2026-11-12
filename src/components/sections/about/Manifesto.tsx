@@ -4,20 +4,6 @@ export function Manifesto() {
   return (
     <div className="flex flex-col justify-center h-full lg:pr-4">
       <div className="space-y-3.5 lg:space-y-4">
-        {/* Section Label + Extending Hairline */}
-        <div
-          data-about-manifesto-line
-          className="flex items-center gap-3.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#111111]"
-        >
-          <span
-            style={{ fontFamily: "var(--font-space-mono)" }}
-            className="shrink-0"
-          >
-            01 / THE MANIFESTO
-          </span>
-          <span aria-hidden="true" className="h-px flex-1 bg-[#D9D2C8]" />
-        </div>
-
         {/* Editorial Headline */}
         <h2 className="m-0 space-y-0.5">
           <span

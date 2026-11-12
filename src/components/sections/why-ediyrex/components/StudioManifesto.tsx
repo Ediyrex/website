@@ -1,11 +1,8 @@
 import React from "react";
-import { SectionLabel } from "./SectionLabel";
 
 export function StudioManifesto() {
   return (
     <div className="space-y-6">
-      <SectionLabel text="WHY EDIYREX" />
-
       <h2 className="m-0">
         <span
           data-we-manifesto-line

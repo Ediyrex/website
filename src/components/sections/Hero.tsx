@@ -108,21 +108,6 @@ export function Hero() {
       >
         <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-14 w-full relative z-10">
           <div className="w-full md:w-[52%] lg:w-[47%] xl:w-[46%] relative z-10 space-y-3.5 md:space-y-4 xl:space-y-5">
-            {/* Eyebrow Label */}
-            <motion.div
-              initial={{ opacity: 0, letterSpacing: "0.18em" }}
-              animate={{ opacity: 1, letterSpacing: "0.08em" }}
-              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              className="flex items-center"
-            >
-              <span
-                style={{ fontFamily: "var(--font-space-mono)" }}
-                className="text-[12px] sm:text-[13px] font-normal uppercase text-[#45484B]"
-              >
-                CREATIVE TECHNOLOGY STUDIO
-              </span>
-            </motion.div>
-
             {/* Four-Line Editorial Headline — Masked Curtain Slide + Rotating Serif Phrase */}
             <h1 className="m-0 pb-1 sm:pb-2">
               <span className="block overflow-hidden pb-[0.06em]">

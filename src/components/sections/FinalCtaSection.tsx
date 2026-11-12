@@ -137,13 +137,6 @@ export function FinalCtaSection() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
           {/* Left Column: Headline + Subcopy */}
           <div className="lg:col-span-6 space-y-6">
-            <div
-              data-next-reveal
-              className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#FF640A]"
-            >
-              [ THE NEXT STEP / 06 ]
-            </div>
-
             <h2
               data-next-reveal
               className="font-heading font-bold tracking-[-0.035em] text-[#141414] text-[clamp(2.35rem,4.5vw,4.15rem)] leading-[0.98]"

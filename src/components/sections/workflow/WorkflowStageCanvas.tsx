@@ -43,16 +43,7 @@ export function WorkflowStageCanvas({
         {/* Persistent Top Editorial Title Row Inside Canvas */}
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-6 border-b border-[#DED4CA]/70">
           <div>
-            <div className="flex items-center gap-2.5">
-              <span aria-hidden="true" className="w-5 h-px bg-[#111111]" />
-              <span
-                style={{ fontFamily: "var(--font-mono)" }}
-                className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-[#111111]"
-              >
-                OUR WORKFLOW
-              </span>
-            </div>
-            <p className="mt-2 text-[22px] sm:text-[26px] xl:text-[30px] font-bold text-[#111111] leading-[1.06] tracking-[-0.03em]">
+            <p className="text-[22px] sm:text-[26px] xl:text-[30px] font-bold text-[#111111] leading-[1.06] tracking-[-0.03em]">
               From first thought
               <span
                 style={{ fontFamily: "var(--font-playfair)" }}

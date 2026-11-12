@@ -3,16 +3,9 @@ import React from "react";
 export function WorkHeader() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[62fr_38fr] lg:items-end gap-8 lg:gap-14">
-      {/* Left Column: Label + Mixed Editorial Heading */}
+      {/* Left Column: Mixed Editorial Heading */}
       <div>
-        <div data-sw-label className="flex items-center gap-3.5">
-          <span aria-hidden="true" className="w-8 h-px bg-[#111111] shrink-0" />
-          <span className="text-[12px] font-bold uppercase tracking-[0.14em] text-[#111111]">
-            FEATURED WORK
-          </span>
-        </div>
-
-        <h2 className="mt-6 m-0">
+        <h2 className="m-0">
           <span
             data-sw-headline-line
             className="block font-extrabold text-[#111111] text-[clamp(2.65rem,4.8vw,4.5rem)] leading-[0.96] tracking-[-0.035em]"

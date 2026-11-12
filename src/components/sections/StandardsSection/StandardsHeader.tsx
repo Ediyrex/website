@@ -8,14 +8,7 @@ export function StandardsHeader() {
       className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start"
     >
       {/* Left column */}
-      <div className="lg:col-span-7 space-y-5">
-        <div className="flex items-center gap-3">
-          <span className="h-px w-8 bg-[#FF6900] shrink-0" aria-hidden="true" />
-          <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-[#48433F]">
-            STANDARDS &amp; COLLABORATION
-          </span>
-        </div>
-
+      <div className="lg:col-span-7">
         <h2 className="font-heading font-bold tracking-[-0.03em] text-[#111111] text-[clamp(2.25rem,4.1vw,3.85rem)] leading-[1.04]">
           <span data-brutal-headline className="block">
             The principles

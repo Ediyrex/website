@@ -142,22 +142,6 @@ export function ThreeDivisionsSection() {
       <div className="max-w-[1600px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16 space-y-10 lg:space-y-12">
         {/* Top Editorial Row */}
         <div ref={headerRef} className="space-y-6">
-          <div className="flex items-center">
-            <motion.span
-              initial={{ opacity: 0, letterSpacing: "0.2em" }}
-              animate={
-                showHeader
-                  ? { opacity: 1, letterSpacing: "0.12em" }
-                  : { opacity: 0, letterSpacing: "0.2em" }
-              }
-              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-              style={{ fontFamily: "var(--font-space-mono)" }}
-              className="text-[12px] font-semibold uppercase text-[#17191C]"
-            >
-              OUR SERVICES
-            </motion.span>
-          </div>
-
           {/* Main Header + Supporting Copy */}
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 lg:gap-10">
             <h2 className="m-0">

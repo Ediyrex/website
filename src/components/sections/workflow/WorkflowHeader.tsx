@@ -4,16 +4,6 @@ export function WorkflowHeader() {
   return (
     <div className="flex flex-col md:flex-row md:items-end justify-between gap-5 pb-6 lg:pb-7">
       <div className="space-y-3">
-        <div className="flex items-center gap-3">
-          <span aria-hidden="true" className="w-7 h-px bg-[#111111]" />
-          <span
-            style={{ fontFamily: "var(--font-mono)" }}
-            className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#111111]"
-          >
-            OUR WORKFLOW
-          </span>
-        </div>
-
         <h2 className="m-0">
           <span className="block font-bold text-[#111111] text-[30px] sm:text-[38px] lg:text-[42px] leading-[1.0] tracking-[-0.035em]">
             A clear process from

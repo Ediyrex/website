@@ -8,13 +8,7 @@ export function InHouseProducts() {
       {/* Header Row: Left Heading + Right Supporting Description */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <span
-            style={{ fontFamily: "var(--font-mono)" }}
-            className="block text-[11.5px] font-semibold uppercase tracking-[0.14em] text-[#111111]/80"
-          >
-            STUDIO INNOVATION
-          </span>
-          <h3 className="mt-1.5 text-[28px] sm:text-[32px] font-bold text-[#111111] leading-[1.1] tracking-[-0.03em]">
+          <h3 className="text-[28px] sm:text-[32px] font-bold text-[#111111] leading-[1.1] tracking-[-0.03em]">
             Our in-house products
           </h3>
         </div>

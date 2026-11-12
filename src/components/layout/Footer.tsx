@@ -69,7 +69,10 @@ export function Footer() {
     };
   }, []);
 
-  const email = live?.businessEmail || SITE_CONFIG.contact.email;
+  const email =
+    live?.businessEmail && live.businessEmail !== "hello@ediyrex.com"
+      ? live.businessEmail
+      : SITE_CONFIG.contact.email;
   const footerNote =
     live?.footerNote ||
     "A creative and technology studio that helps businesses build websites, digital products and intelligent systems that work in the real world.";

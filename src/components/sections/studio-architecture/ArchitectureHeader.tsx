@@ -2,15 +2,7 @@ import React from "react";
 
 export function ArchitectureHeader() {
   return (
-    <div className="max-w-[660px] space-y-2.5">
-      {/* Eyebrow Label with Horizontal Hairline */}
-      <div data-arch-label className="flex items-center gap-3">
-        <span aria-hidden="true" className="w-7 h-px bg-[#111111] shrink-0" />
-        <span className="text-[11.5px] sm:text-[12px] font-bold uppercase tracking-[0.6px] text-[#111111]">
-          STUDIO ARCHITECTURE
-        </span>
-      </div>
-
+    <div className="max-w-[660px] space-y-4">
       {/* Mixed-Type Editorial Headline */}
       <h2 className="m-0">
         <span
@@ -35,7 +27,7 @@ export function ArchitectureHeader() {
       {/* Supporting Paragraph */}
       <p
         data-arch-intro-copy
-        className="text-[14.5px] sm:text-[15.5px] xl:text-[16.5px] font-normal text-[#333333] leading-[1.42] max-w-[540px] pt-0.5"
+        className="text-[14.5px] sm:text-[15.5px] xl:text-[16.5px] font-normal text-[#333333] leading-[1.48] max-w-[540px] pt-2"
       >
         Explore how our divisions interlock&mdash;from interactive workflow
         planning to production launch.

@@ -3,16 +3,9 @@ import React from "react";
 export function OperationalHeader() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[62fr_38fr] lg:items-end gap-7 lg:gap-14">
-      {/* Left Column: Identifier + Mixed-Type Headline */}
+      {/* Left Column: Mixed-Type Headline */}
       <div>
-        <div data-os-label className="flex items-center gap-3.5">
-          <span aria-hidden="true" className="w-8 h-px bg-[#111111] shrink-0" />
-          <span className="text-[11.5px] sm:text-[12px] font-bold uppercase tracking-[0.14em] text-[#111111]">
-            OPERATIONAL SHIFT
-          </span>
-        </div>
-
-        <h2 className="mt-5 m-0">
+        <h2 className="m-0">
           <span
             data-os-headline-line
             className="block font-extrabold text-[#111111] text-[clamp(2.35rem,4.5vw,4.35rem)] leading-[0.98] tracking-[-0.035em]"

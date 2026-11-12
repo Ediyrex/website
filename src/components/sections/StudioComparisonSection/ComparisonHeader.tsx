@@ -1,22 +1,6 @@
 export function ComparisonHeader() {
   return (
-    <header className="space-y-5">
-      {/* Top micro metadata bar */}
-      <div
-        data-sc-label
-        className="flex items-center justify-between gap-4"
-      >
-        <div className="flex items-center gap-3">
-          <span className="h-[2px] w-7 bg-[#FF7900]" aria-hidden="true" />
-          <span className="font-mono text-[12px] font-medium uppercase tracking-[0.18em] text-[#48433F]">
-            STUDIO COMPARISON
-          </span>
-        </div>
-        <span className="hidden sm:inline-block font-mono text-[11px] uppercase tracking-[0.2em] text-[#817A72]">
-          EDIYREX STUDIO
-        </span>
-      </div>
-
+    <header>
       {/* Two-column editorial heading & description */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-7 lg:gap-10 items-center">
         <div className="lg:col-span-8">
