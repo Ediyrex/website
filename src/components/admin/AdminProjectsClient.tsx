@@ -252,7 +252,7 @@ export function AdminProjectsClient() {
       ogDescription: "",
       ogImageAssetId: null,
       noIndex: false,
-      includeCaseStudy: false,
+      includeCaseStudy: true,
       challenge: "",
       approach: "",
       solution: "",
@@ -1058,9 +1058,13 @@ export function AdminProjectsClient() {
                     className="w-full h-10 px-3 rounded-lg bg-[#0D0F12] border border-[#252A32] text-sm text-[#F5F3EE]"
                   >
                     <option value="concept">Concept / Studio R&amp;D</option>
-                    <option value="client">Client Project</option>
-                    <option value="internal">Internal Platform</option>
+                    <option value="client">Client Project (Shipped)</option>
+                    <option value="internal">Internal Platform (R&amp;D)</option>
                   </select>
+                  <p className="text-[11px] text-[#777D87]">
+                    Controls public case-study status &amp; deliverables heading
+                    (Shipped, Concept, or R&amp;D).
+                  </p>
                 </div>
 
                 <div className="space-y-1.5">
@@ -1419,7 +1423,13 @@ export function AdminProjectsClient() {
                       onChange={(e) =>
                         setForm({ ...form, solution: e.target.value })
                       }
-                      placeholder="Delivered Solution *"
+                      placeholder={
+                        form.projectType === "client"
+                          ? "Delivered Solution *"
+                          : form.projectType === "internal"
+                          ? "Experiments & Technical Findings *"
+                          : "Proposed Solution & Design Outputs *"
+                      }
                       className="w-full p-2.5 rounded-lg bg-[#12151A] border border-[#252A32] text-xs text-[#F5F3EE]"
                     />
 

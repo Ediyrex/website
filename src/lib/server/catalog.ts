@@ -6,6 +6,8 @@ import {
   projects,
   caseStudies,
   projectServices,
+  projectMedia,
+  mediaAssets,
   studioProducts,
 } from "@/db";
 import { SERVICES_DATA } from "@/features/services/data";
@@ -82,13 +84,46 @@ function inferProjectCategory(
   return "digital";
 }
 
+function mapProjectWorkStatus(
+  projectType: "client" | "concept" | "internal",
+  slug: string
+): "shipped" | "concept" | "rnd" {
+  if (projectType === "client") return "shipped";
+  if (projectType === "internal" || slug.includes("voice")) return "rnd";
+  return "concept";
+}
+
+function mapProjectClassification(
+  projectType: "client" | "concept" | "internal",
+  industry?: string | null
+): string {
+  if (industry?.trim()) return industry.trim();
+  if (projectType === "client") return "Client Case Study";
+  if (projectType === "internal") return "Internal R&D";
+  return "Studio R&D Concept";
+}
+
 export async function getPublishedProjects(options?: {
   category?: string;
   featuredOnly?: boolean;
 }): Promise<ProjectItem[]> {
   const db = getDb();
   if (!db) {
-    let items = PROJECTS_DATA.filter((p) => p.isPublished);
+    let items = PROJECTS_DATA.filter((p) => p.isPublished).map((p) => ({
+      ...p,
+      projectType: (p.slug.includes("voice") ? "internal" : "concept") as
+        | "client"
+        | "concept"
+        | "internal",
+      workStatus: (p.slug.includes("voice") ? "rnd" : "concept") as
+        | "shipped"
+        | "in-progress"
+        | "concept"
+        | "rnd",
+      classification: p.slug.includes("voice")
+        ? "Internal R&D"
+        : "Studio R&D Concept",
+    }));
     if (
       options?.category &&
       ["branding", "media", "digital", "ai", "hybrid"].includes(options.category)
@@ -118,9 +153,16 @@ export async function getPublishedProjects(options?: {
   }
 
   const projectIds = projectRows.map((p) => p.id);
+  const coverAssetIds = Array.from(
+    new Set(
+      projectRows
+        .map((p) => p.coverAssetId)
+        .filter((id): id is string => Boolean(id))
+    )
+  );
 
   // Batch fetch child records using IN clause (prevents N+1 queries)
-  const [caseStudyRows, linkedServicesRows] = await Promise.all([
+  const [caseStudyRows, linkedServicesRows, coverAssetRows] = await Promise.all([
     db
       .select()
       .from(caseStudies)
@@ -140,8 +182,19 @@ export async function getPublishedProjects(options?: {
       .innerJoin(services, eq(projectServices.serviceId, services.id))
       .innerJoin(serviceDivisions, eq(services.divisionId, serviceDivisions.id))
       .where(inArray(projectServices.projectId, projectIds)),
+    coverAssetIds.length > 0
+      ? db
+          .select({
+            id: mediaAssets.id,
+            secureUrl: mediaAssets.secureUrl,
+            altText: mediaAssets.altText,
+          })
+          .from(mediaAssets)
+          .where(inArray(mediaAssets.id, coverAssetIds))
+      : Promise.resolve([]),
   ]);
 
+  const coverByAssetId = new Map(coverAssetRows.map((a) => [a.id, a]));
   const caseStudyByProjectId = new Map(
     caseStudyRows.map((cs) => [cs.projectId, cs])
   );
@@ -168,6 +221,9 @@ export async function getPublishedProjects(options?: {
     };
     const category = inferProjectCategory(linked.divisions, row.projectType);
     const staticFallback = PROJECTS_DATA.find((p) => p.slug === row.slug);
+    const coverAsset = row.coverAssetId
+      ? coverByAssetId.get(row.coverAssetId)
+      : undefined;
 
     return {
       id: row.id,
@@ -177,14 +233,30 @@ export async function getPublishedProjects(options?: {
       category,
       servicesDemonstrated: linked.titles,
       coverImage:
+        coverAsset?.secureUrl ||
         staticFallback?.coverImage ||
         "/images/projects/concept-digital-strata.svg",
-      coverAlt: staticFallback?.coverAlt || row.title,
+      coverAlt: coverAsset?.altText || staticFallback?.coverAlt || row.title,
       description: row.description,
       challenge: cs?.challenge,
       approach: cs?.approach,
+      solution: cs?.solution,
       outcomes: cs?.verifiedOutcomes ?? [],
       isConcept: row.projectType !== "client",
+      projectType: row.projectType,
+      workStatus: mapProjectWorkStatus(row.projectType, row.slug),
+      classification: mapProjectClassification(row.projectType, row.industry),
+      industry: row.industry ?? undefined,
+      clientName:
+        row.projectType === "client" && row.clientIsPublic
+          ? (row.clientName ?? undefined)
+          : undefined,
+      projectDate: row.projectDate ?? undefined,
+      techStack: Array.isArray(row.techStack) ? row.techStack : [],
+      liveUrl: row.liveUrl ?? undefined,
+      repositoryUrl: row.repositoryUrl ?? undefined,
+      seoTitle: row.seoTitle ?? undefined,
+      seoDescription: row.seoDescription ?? undefined,
       featured: row.isFeatured,
       isPublished: true,
       createdAt: (row.publishedAt ?? row.createdAt).toISOString(),
@@ -207,7 +279,16 @@ export async function getPublishedProjectBySlug(
 ): Promise<ProjectItem | null> {
   const db = getDb();
   if (!db) {
-    return PROJECTS_DATA.find((p) => p.slug === slug && p.isPublished) ?? null;
+    const found = PROJECTS_DATA.find((p) => p.slug === slug && p.isPublished);
+    if (!found) return null;
+    return {
+      ...found,
+      projectType: found.slug.includes("voice") ? "internal" : "concept",
+      workStatus: found.slug.includes("voice") ? "rnd" : "concept",
+      classification: found.slug.includes("voice")
+        ? "Internal R&D"
+        : "Studio R&D Concept",
+    };
   }
 
   const [row] = await db
@@ -220,7 +301,7 @@ export async function getPublishedProjectBySlug(
     return null;
   }
 
-  const [csRows, linkedRows] = await Promise.all([
+  const [csRows, linkedRows, coverRows, galleryRows] = await Promise.all([
     db
       .select()
       .from(caseStudies)
@@ -240,9 +321,30 @@ export async function getPublishedProjectBySlug(
       .innerJoin(services, eq(projectServices.serviceId, services.id))
       .innerJoin(serviceDivisions, eq(services.divisionId, serviceDivisions.id))
       .where(eq(projectServices.projectId, row.id)),
+    row.coverAssetId
+      ? db
+          .select({
+            secureUrl: mediaAssets.secureUrl,
+            altText: mediaAssets.altText,
+          })
+          .from(mediaAssets)
+          .where(eq(mediaAssets.id, row.coverAssetId))
+          .limit(1)
+      : Promise.resolve([]),
+    db
+      .select({
+        id: mediaAssets.id,
+        src: mediaAssets.secureUrl,
+        alt: mediaAssets.altText,
+      })
+      .from(projectMedia)
+      .innerJoin(mediaAssets, eq(projectMedia.mediaAssetId, mediaAssets.id))
+      .where(eq(projectMedia.projectId, row.id))
+      .orderBy(asc(projectMedia.displayOrder)),
   ]);
 
   const cs = csRows[0];
+  const coverAsset = coverRows[0];
   const titles = linkedRows.map((l) => l.serviceTitle);
   const divisions = linkedRows.map((l) => l.divisionSlug);
   const category = inferProjectCategory(divisions, row.projectType);
@@ -256,14 +358,35 @@ export async function getPublishedProjectBySlug(
     category,
     servicesDemonstrated: titles,
     coverImage:
+      coverAsset?.secureUrl ||
       staticFallback?.coverImage ||
       "/images/projects/concept-digital-strata.svg",
-    coverAlt: staticFallback?.coverAlt || row.title,
+    coverAlt: coverAsset?.altText || staticFallback?.coverAlt || row.title,
     description: row.description,
     challenge: cs?.challenge,
     approach: cs?.approach,
+    solution: cs?.solution,
     outcomes: cs?.verifiedOutcomes ?? [],
     isConcept: row.projectType !== "client",
+    projectType: row.projectType,
+    workStatus: mapProjectWorkStatus(row.projectType, row.slug),
+    classification: mapProjectClassification(row.projectType, row.industry),
+    industry: row.industry ?? undefined,
+    clientName:
+      row.projectType === "client" && row.clientIsPublic
+        ? (row.clientName ?? undefined)
+        : undefined,
+    projectDate: row.projectDate ?? undefined,
+    techStack: Array.isArray(row.techStack) ? row.techStack : [],
+    gallery: galleryRows.map((g) => ({
+      id: g.id,
+      src: g.src,
+      alt: g.alt || row.title,
+    })),
+    liveUrl: row.liveUrl ?? undefined,
+    repositoryUrl: row.repositoryUrl ?? undefined,
+    seoTitle: row.seoTitle ?? undefined,
+    seoDescription: row.seoDescription ?? undefined,
     featured: row.isFeatured,
     isPublished: true,
     createdAt: (row.publishedAt ?? row.createdAt).toISOString(),
