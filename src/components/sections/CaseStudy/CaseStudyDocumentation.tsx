@@ -83,7 +83,7 @@ export function CaseStudyDocumentation({ project }: { project: ProjectItem }) {
                     key={outcome}
                     className="flex items-start gap-3.5 text-base leading-relaxed text-[#F5F2EC]"
                   >
-                    <span className="mt-0.5 shrink-0 font-mono text-xs font-semibold text-[#F06419]">
+                    <span className="mt-0.5 shrink-0 font-mono text-xs font-semibold text-[#D9B875]">
                       {String(i + 1).padStart(2, "0")}
                     </span>
                     <span>{outcome}</span>
