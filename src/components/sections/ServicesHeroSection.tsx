@@ -14,14 +14,14 @@ const HERO_DIVISIONS = [
   },
   {
     number: "02",
-    title: "MEDIA & PRODUCTION",
-    description: "Video production, photography, motion graphics and content.",
+    title: "MEDIA & CONTENT PRODUCTION",
+    description: "Content strategy, copywriting, video, photography and motion design.",
     href: "/services/media",
   },
   {
     number: "03",
-    title: "WEB & DIGITAL PRODUCTS",
-    description: "Web development, UI/UX, SaaS and digital experiences.",
+    title: "WEB, APPS & DIGITAL PRODUCTS",
+    description: "Websites, UI/UX, mobile apps, SaaS, custom CRM, ERP and AMC.",
     href: "/services/digital",
   },
   {

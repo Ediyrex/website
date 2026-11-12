@@ -7,6 +7,7 @@ import {
   Instrument_Serif,
   Space_Mono,
   Playfair_Display,
+  Archivo_Narrow,
 } from "next/font/google";
 import "./globals.css";
 import { PublicShell } from "@/components/layout/PublicShell";
@@ -59,6 +60,14 @@ const playfairDisplay = Playfair_Display({
   variable: "--font-playfair",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
+  display: "swap",
+});
+
+const archivoNarrow = Archivo_Narrow({
+  variable: "--font-archivo-narrow",
+  subsets: ["latin"],
+  weight: ["700"],
   style: ["normal", "italic"],
   display: "swap",
 });
@@ -136,7 +145,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${manrope.variable} ${inter.variable} ${ibmPlexMono.variable} ${spaceGrotesk.variable} ${instrumentSerif.variable} ${spaceMono.variable} ${playfairDisplay.variable} h-full antialiased dark scroll-smooth`}
+      className={`${manrope.variable} ${inter.variable} ${ibmPlexMono.variable} ${spaceGrotesk.variable} ${instrumentSerif.variable} ${spaceMono.variable} ${playfairDisplay.variable} ${archivoNarrow.variable} h-full antialiased dark scroll-smooth`}
     >
       <body className="min-h-full flex flex-col bg-[#08090B] text-[#F5F3EE] selection:bg-[#D6B77A]/25 selection:text-[#F5F3EE]">
         <script

@@ -1,5 +1,6 @@
 import { DirectoryHeader } from "./DirectoryHeader";
 import { DivisionList } from "./DivisionList";
+import { RetainerModels } from "./RetainerModels";
 
 export function ServicesDirectory() {
   return (
@@ -11,6 +12,7 @@ export function ServicesDirectory() {
       <div className="mx-auto max-w-[1500px] px-6 sm:px-10 lg:px-14">
         <DirectoryHeader />
         <DivisionList />
+        <RetainerModels />
       </div>
     </section>
   );
