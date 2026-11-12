@@ -341,7 +341,7 @@ async function runSeed() {
     const defaultSettings = [
       {
         settingKey: "contact_info",
-        settingValue: { email: "hello@ediyrex.com", region: "India & Global" },
+        settingValue: { email: "ediyrex@gmail.com", region: "India & Global" },
         description: "Public studio contact metadata",
         isPublic: true,
       },

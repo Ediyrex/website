@@ -265,10 +265,10 @@ export function EnquirySection() {
                     <p className="text-sm text-[#B2B4BA] max-w-md mx-auto leading-relaxed">
                       Your brief passed client and server validation, but persistent database storage and email notifications are not yet connected in this local preview build. Please email{" "}
                       <a
-                        href="mailto:hello@ediyrex.com"
+                        href="mailto:ediyrex@gmail.com"
                         className="text-[#D6B77A] underline hover:text-[#E6CC99]"
                       >
-                        hello@ediyrex.com
+                        ediyrex@gmail.com
                       </a>{" "}
                       directly to reach the studio.
                     </p>

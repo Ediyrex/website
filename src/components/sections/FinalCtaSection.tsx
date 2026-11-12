@@ -231,13 +231,9 @@ export function FinalCtaSection() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1.5 shrink-0 font-mono text-[13px] font-medium text-[#FF640A]">
-                      <span>{option.number}</span>
-                      <ArrowUpRight
-                        className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-                        aria-hidden="true"
-                      />
-                    </div>
+                    <span className="shrink-0 font-mono text-[13px] font-medium text-[#FF640A]">
+                      {option.number}
+                    </span>
                   </button>
                 );
               })}
@@ -270,15 +266,9 @@ export function FinalCtaSection() {
               }}
             />
 
-            <div className="relative z-10 flex items-center gap-3.5 sm:gap-5">
-              <ArrowUpRight
-                className="h-5 w-5 text-[#FF640A] shrink-0 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-                aria-hidden="true"
-              />
-              <span className="font-mono sm:font-heading text-[15px] sm:text-[21px] font-medium uppercase tracking-[0.18em] text-[#F6F1EA]">
-                START A CONVERSATION
-              </span>
-            </div>
+            <span className="relative z-10 font-mono sm:font-heading text-[15px] sm:text-[21px] font-medium uppercase tracking-[0.18em] text-[#F6F1EA]">
+              START A CONVERSATION
+            </span>
 
             <span
               aria-hidden="true"
@@ -292,27 +282,34 @@ export function FinalCtaSection() {
         {/* Bottom Email + THINK / BUILD / DELIVER Strip */}
         <div
           data-next-reveal
-          className="flex flex-wrap items-center justify-between gap-4 pt-1"
+          className="flex flex-wrap items-center justify-between gap-4 pt-2"
         >
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3.5">
             <a
               href={`mailto:${email}`}
-              className="inline-flex items-center gap-2.5 text-[14.5px] font-medium text-[#141414] hover:text-[#FF640A] transition-colors"
+              className="group inline-flex items-center gap-2.5 text-[14.5px] font-medium text-[#141414] hover:text-[#FF640A] transition-colors"
             >
-              <Mail className="h-4 w-4 text-[#141414]" aria-hidden="true" />
-              <span>{email}</span>
+              <Mail
+                className="h-4 w-4 text-[#FF640A] transition-transform duration-200 group-hover:scale-105"
+                aria-hidden="true"
+              />
+              <span className="border-b border-transparent group-hover:border-[#FF640A] transition-colors">
+                {email}
+              </span>
             </a>
+
+            <span aria-hidden="true" className="h-3.5 w-px bg-[#CFC5B9]" />
 
             <button
               type="button"
               onClick={handleCopy}
               aria-label={`Copy ${email}`}
-              className="inline-flex items-center gap-1 rounded-full border border-[#CFC5B9] bg-[#FAF6F0] px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.1em] text-[#45413E] hover:border-[#141414] hover:text-[#141414] transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 font-mono text-[10.5px] uppercase tracking-[0.14em] text-[#6D665E] hover:text-[#141414] transition-colors cursor-pointer"
             >
               {copied ? (
                 <>
-                  <Check className="h-3 w-3 text-[#18A879]" aria-hidden="true" />
-                  <span>Copied</span>
+                  <Check className="h-3.5 w-3.5 text-[#18A879]" aria-hidden="true" />
+                  <span className="text-[#18A879] font-medium">Copied</span>
                 </>
               ) : (
                 <>
@@ -325,10 +322,10 @@ export function FinalCtaSection() {
 
           <span
             aria-hidden="true"
-            className="hidden md:block h-px flex-1 mx-4 bg-[#CFC5B9]"
+            className="hidden md:block h-px flex-1 mx-6 bg-[#141414]/25"
           />
 
-          <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-[#141414]">
+          <span className="font-mono text-[11px] font-medium uppercase tracking-[0.22em] text-[#141414]">
             THINK &nbsp;/&nbsp; BUILD &nbsp;/&nbsp; DELIVER
           </span>
         </div>

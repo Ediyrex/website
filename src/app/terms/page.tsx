@@ -79,10 +79,10 @@ export default function TermsPage() {
             <p>
               Questions regarding these terms may be directed to{" "}
               <a
-                href="mailto:hello@ediyrex.com"
+                href="mailto:ediyrex@gmail.com"
                 className="text-[#D6B77A] hover:text-[#E6CC99] underline"
               >
-                hello@ediyrex.com
+                ediyrex@gmail.com
               </a>
               .
             </p>

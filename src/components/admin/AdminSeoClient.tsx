@@ -257,7 +257,7 @@ export function AdminSeoClient() {
   const [schemaConfig, setSchemaConfig] = useState<SchemaConfig>({
     orgName: "Ediyrex Studio",
     orgUrl: "https://ediyrex.com",
-    orgEmail: "hello@ediyrex.com",
+    orgEmail: "ediyrex@gmail.com",
     orgDescription: "",
     areaServed: "Global",
     knowsAbout: [],

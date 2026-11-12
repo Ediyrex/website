@@ -56,7 +56,7 @@ export const DEFAULT_SOCIAL_PROFILES: SocialProfileItem[] = [
 export const DEFAULT_SITE_SETTINGS = {
   siteName: "Ediyrex Studio",
   tagline: "Creative Technology, Media, Digital & AI",
-  businessEmail: "hello@ediyrex.com",
+  businessEmail: "ediyrex@gmail.com",
   phoneNumber: "",
   studioLocation: "India & Global",
   officeHours: "Mon-Fri · 10:00 AM - 7:00 PM IST",
@@ -95,7 +95,7 @@ export const DEFAULT_SITE_SETTINGS = {
   seoSchema: {
     orgName: "Ediyrex Studio",
     orgUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://ediyrex.com",
-    orgEmail: "hello@ediyrex.com",
+    orgEmail: "ediyrex@gmail.com",
     orgDescription:
       "Independent creative technology studio uniting commercial media, web architecture, and intelligent AI systems.",
     areaServed: "India & Global",

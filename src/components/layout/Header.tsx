@@ -377,7 +377,7 @@ export function Header() {
               Book a discovery call
             </Button>
             <p className="text-center text-xs font-mono text-[#777D87]">
-              hello@ediyrex.com
+              ediyrex@gmail.com
             </p>
           </div>
         </div>

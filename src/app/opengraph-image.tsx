@@ -99,7 +99,7 @@ export default function OpenGraphImage() {
             color: "#777D87",
           }}
         >
-          <span>hello@ediyrex.com</span>
+          <span>ediyrex@gmail.com</span>
           <span style={{ color: "#D6B77A" }}>India &amp; Global</span>
         </div>
       </div>

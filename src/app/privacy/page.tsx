@@ -79,10 +79,10 @@ export default function PrivacyPolicyPage() {
             <p>
               We retain enquiry records only as long as reasonably necessary to manage active project discussions or fulfill legal obligations. To request access, correction, or deletion of your enquiry details, please email{" "}
               <a
-                href="mailto:hello@ediyrex.com"
+                href="mailto:ediyrex@gmail.com"
                 className="text-[#D6B77A] hover:text-[#E6CC99] underline"
               >
-                hello@ediyrex.com
+                ediyrex@gmail.com
               </a>
               .
             </p>

@@ -66,7 +66,7 @@ describe("CMS Zod validations", () => {
     const settings = siteSettingsUpdateSchema.safeParse({
       siteName: "Ediyrex Studio",
       tagline: "Creative Technology, Media, Digital & AI",
-      businessEmail: "hello@ediyrex.com",
+      businessEmail: "ediyrex@gmail.com",
       studioLocation: "India & Global",
       officeHours: "Mon-Fri 10am-7pm",
       availabilityEnabled: true,

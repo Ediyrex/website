@@ -200,7 +200,7 @@ export async function GET() {
       orgEmail:
         (schemaSaved.orgEmail as string) ||
         (contactSaved.email as string) ||
-        "hello@ediyrex.com",
+        "ediyrex@gmail.com",
       orgDescription:
         (schemaSaved.orgDescription as string) ||
         "Independent creative technology studio uniting Branding & Marketing, Media, Web Dev, and Agents & Automation.",
