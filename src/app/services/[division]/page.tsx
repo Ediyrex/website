@@ -8,7 +8,6 @@ import { ServiceDivision } from "@/types";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import { ProcessSection } from "@/components/sections/ProcessSection";
 import { FinalCtaSection } from "@/components/sections/FinalCtaSection";
 
 const DIVISION_CONFIG: Record<
@@ -310,7 +309,6 @@ export default async function DivisionDetailPage({ params }: DivisionPageProps) 
         </section>
       )}
 
-      <ProcessSection />
       <FinalCtaSection />
     </div>
   );

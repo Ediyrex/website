@@ -48,7 +48,7 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
   const pathname = usePathname();
-  const isLightHeroNav = pathname === "/" && !pastHero;
+  const isLightHeroNav = !pastHero;
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
@@ -58,15 +58,11 @@ export function Header() {
     const handleScroll = () => {
       const y = window.scrollY;
       setIsScrolled(y > 16);
-      if (pathname === "/") {
-        const darkStartEl = document.getElementById("site-footer");
-        const isPastLightSections = darkStartEl
-          ? darkStartEl.getBoundingClientRect().top <= 80
-          : false;
-        setPastHero(isPastLightSections);
-      } else {
-        setPastHero(y > 16);
-      }
+      const darkStartEl = document.getElementById("site-footer");
+      const isPastLightSections = darkStartEl
+        ? darkStartEl.getBoundingClientRect().top <= 80
+        : false;
+      setPastHero(isPastLightSections);
     };
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -129,7 +125,7 @@ export function Header() {
             ? isScrolled
               ? "bg-[#F8F6F2]/88 backdrop-blur-md border-b border-[#0B0D10]/10"
               : "bg-transparent border-b border-transparent"
-            : isScrolled || pathname !== "/"
+            : isScrolled
             ? "bg-[#08090B]/90 backdrop-blur-md border-b border-[#252A32]"
             : "bg-transparent border-b border-transparent"
         )}
