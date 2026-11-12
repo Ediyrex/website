@@ -30,10 +30,32 @@ const BUDGET_TIERS: Record<BudgetCurrency, { value: string; label: string }[]> =
   ],
 };
 
+const ENGAGEMENT_OPTIONS = [
+  { id: "project-based", label: "Project-Based" },
+  { id: "ongoing-collaboration", label: "Ongoing Collaboration" },
+  { id: "custom-engagement", label: "Custom Engagement" },
+] as const;
+
+function normalizeEngagementParam(raw: string): string {
+  const value = raw.trim().toLowerCase();
+  if (!value) return "";
+  if (value.includes("project")) return "Project-Based";
+  if (value.includes("ongoing")) return "Ongoing Collaboration";
+  if (value.includes("custom")) return "Custom Engagement";
+  return "";
+}
+
 export function EnquirySection() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const preselectedService = searchParams.get("service") || "";
+  const preselectedEngagement = normalizeEngagementParam(
+    searchParams.get("engagement") || ""
+  );
+
+  const [engagementModel, setEngagementModel] = useState<string>(
+    preselectedEngagement
+  );
 
   const [formData, setFormData] = useState<Partial<EnquiryFormData>>({
     name: "",
@@ -100,11 +122,18 @@ export function EnquirySection() {
 
     setIsSubmitting(true);
 
+    const enrichedPayload = engagementModel
+      ? {
+          ...result.data,
+          goals: `[Engagement Model: ${engagementModel}]\n${result.data.goals}`,
+        }
+      : result.data;
+
     try {
       const res = await fetch("/api/v1/enquiries", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(result.data),
+        body: JSON.stringify(enrichedPayload),
       });
 
       const json = await res.json();
@@ -397,6 +426,40 @@ export function EnquirySection() {
                         placeholder="+91 / +1 ..."
                         className={inputBaseClass}
                       />
+                    </div>
+                  </div>
+
+                  {/* Engagement Model */}
+                  <div>
+                    <span className="block text-xs font-medium text-[#F5F3EE] mb-2">
+                      Preferred Engagement Model
+                    </span>
+                    <div
+                      className="grid grid-cols-1 sm:grid-cols-3 gap-2.5"
+                      role="group"
+                      aria-label="Preferred Engagement Model"
+                    >
+                      {ENGAGEMENT_OPTIONS.map((opt) => {
+                        const isSelected = engagementModel === opt.label;
+                        return (
+                          <button
+                            key={opt.id}
+                            type="button"
+                            onClick={() =>
+                              setEngagementModel(isSelected ? "" : opt.label)
+                            }
+                            aria-pressed={isSelected}
+                            className={cn(
+                              "px-3.5 py-2.5 rounded-[8px] border text-left text-xs font-medium transition-colors",
+                              isSelected
+                                ? "bg-[#FF6900]/15 border-[#FF6900] text-[#F5F3EE]"
+                                : "bg-[#0D0F12] border-[#3A414B] text-[#B2B4BA] hover:border-[#6B7280] hover:text-[#F5F3EE]"
+                            )}
+                          >
+                            {opt.label}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 

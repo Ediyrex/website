@@ -78,41 +78,17 @@ export function initWhyEdiyrexAnimations(rootEl: HTMLElement): () => void {
         },
       });
 
-      const loopTrace = flywheel.querySelector<SVGGeometryElement>(
-        "[data-we-loop-draw]"
+      tl.from(
+        flywheel,
+        {
+          opacity: 0,
+          scale: 0.96,
+          duration: 1.0,
+          ease: "power3.out",
+          clearProps: "opacity,scale",
+        },
+        0
       );
-      if (loopTrace) {
-        const total =
-          typeof loopTrace.getTotalLength === "function"
-            ? loopTrace.getTotalLength()
-            : 1600;
-        gsap.set(loopTrace, {
-          strokeDasharray: total,
-          strokeDashoffset: total,
-        });
-        tl.to(
-          loopTrace,
-          { strokeDashoffset: 0, duration: 1.35, ease: "power3.out" },
-          0
-        );
-      }
-
-      const loopGlass = flywheel.querySelector("[data-we-loop-base]");
-      const loopHighlight = flywheel.querySelector("[data-we-loop-highlight]");
-      if (loopGlass || loopHighlight) {
-        tl.from(
-          [loopGlass, loopHighlight].filter(Boolean),
-          {
-            opacity: 0,
-            scale: 0.96,
-            transformOrigin: "center center",
-            duration: 1.15,
-            ease: "power3.out",
-            clearProps: "opacity,scale",
-          },
-          0.08
-        );
-      }
 
       const core = flywheel.querySelector("[data-we-flywheel-core]");
       if (core) {
@@ -125,7 +101,7 @@ export function initWhyEdiyrexAnimations(rootEl: HTMLElement): () => void {
             ease: "power3.out",
             clearProps: "transform,opacity,scale",
           },
-          0.25
+          0.18
         );
       }
 
@@ -153,7 +129,7 @@ export function initWhyEdiyrexAnimations(rootEl: HTMLElement): () => void {
               });
             },
           },
-          0.32
+          0.26
         );
       }
 
@@ -168,21 +144,8 @@ export function initWhyEdiyrexAnimations(rootEl: HTMLElement): () => void {
             ease: "power2.out",
             clearProps: "opacity",
           },
-          0.5
+          0.45
         );
-      }
-
-      // Travelling highlight along infinity loop (10s cycle)
-      const loopPulse = flywheel.querySelector<SVGGeometryElement>(
-        "[data-we-loop-pulse]"
-      );
-      if (loopPulse) {
-        gsap.to(loopPulse, {
-          strokeDashoffset: -1735,
-          duration: 10,
-          repeat: -1,
-          ease: "none",
-        });
       }
     }
 

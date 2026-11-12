@@ -18,8 +18,8 @@ import { StudioArchitecture } from "@/components/sections/studio-architecture/St
 import { SelectedWork } from "@/components/sections/selected-work/SelectedWork";
 import { OperationalShift } from "@/components/sections/operational-shift/OperationalShift";
 import { WhyEdiyrexSection } from "@/components/sections/why-ediyrex/WhyEdiyrexSection";
-import { ProcessSection } from "@/components/sections/ProcessSection";
-import { EngagementSection } from "@/components/sections/EngagementSection";
+import { WorkflowSection } from "@/components/sections/workflow/WorkflowSection";
+import { EngagementSection } from "@/components/sections/engagement/EngagementSection";
 import { UsVsThemSection } from "@/components/sections/UsVsThemSection";
 import { ReviewShuffleSection } from "@/components/sections/ReviewShuffleSection";
 import { FaqSection } from "@/components/sections/FaqSection";
@@ -36,7 +36,7 @@ export default function HomePage() {
       <SelectedWork />
       <OperationalShift />
       <WhyEdiyrexSection />
-      <ProcessSection />
+      <WorkflowSection />
       <EngagementSection />
       <UsVsThemSection />
       <ReviewShuffleSection />

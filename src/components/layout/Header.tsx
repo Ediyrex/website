@@ -59,7 +59,7 @@ export function Header() {
       const y = window.scrollY;
       setIsScrolled(y > 16);
       if (pathname === "/") {
-        const darkStartEl = document.getElementById("process");
+        const darkStartEl = document.getElementById("comparison");
         const isPastLightSections = darkStartEl
           ? darkStartEl.getBoundingClientRect().top <= 80
           : false;

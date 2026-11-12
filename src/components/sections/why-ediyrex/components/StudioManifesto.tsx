@@ -34,7 +34,7 @@ export function StudioManifesto() {
 
       <p
         data-we-manifesto-copy
-        className="text-[17px] sm:text-[18.5px] lg:text-[19px] font-normal text-[#44403D] leading-[1.52] max-w-[520px]"
+        className="pt-3 sm:pt-4 text-[17px] sm:text-[18.5px] lg:text-[19px] font-normal text-[#44403D] leading-[1.52] max-w-[520px]"
       >
         We bring strategy, creative direction, technology and intelligent
         systems together to transform ideas into meaningful outcomes.
