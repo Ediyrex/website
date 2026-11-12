@@ -28,7 +28,7 @@ export function StandardsHeader() {
       {/* Right column */}
       <div
         data-brutal-fade
-        className="lg:col-span-5 lg:pt-7 space-y-5"
+        className="lg:col-span-5 lg:pt-1 space-y-5"
       >
         <div className="lg:border-l lg:border-[#D8CEC4] lg:pl-6 space-y-4 max-w-[420px]">
           <p className="text-[15px] sm:text-[16px] leading-[1.58] text-[#48433F]">

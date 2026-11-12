@@ -8,13 +8,9 @@ import {
   AppWindow,
   ArrowUpRight,
   Box,
-  Check,
-  Copy,
   Layers,
-  Mail,
   PlayCircle,
 } from "lucide-react";
-import { SITE_CONFIG } from "@/config/site";
 import { cn } from "@/lib/utils";
 
 if (typeof window !== "undefined") {
@@ -55,9 +51,6 @@ const BUILD_OPTIONS = [
 export function FinalCtaSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const [selectedService, setSelectedService] = useState<string>("branding");
-  const [copied, setCopied] = useState(false);
-
-  const email = SITE_CONFIG.contact.email;
 
   useEffect(() => {
     const container = sectionRef.current;
@@ -98,22 +91,12 @@ export function FinalCtaSection() {
     };
   }, []);
 
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(email);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2200);
-    } catch {
-      // Ignore if clipboard unavailable
-    }
-  };
-
   return (
     <section
       id="final-cta"
       ref={sectionRef}
       aria-label="Start a conversation with EDIYREX"
-      className="relative overflow-hidden bg-[#F6F1EA] border-t border-[#DED5CC] py-16 sm:py-20 lg:py-24 text-[#141414]"
+      className="relative overflow-hidden bg-[#F6F1EA] border-t border-[#DED5CC] py-14 sm:py-16 lg:py-20 text-[#141414]"
     >
       {/* Left edge diagonal orange stripe accent */}
       <div
@@ -270,57 +253,6 @@ export function FinalCtaSection() {
               <ArrowUpRight className="h-5 w-5 stroke-[2.2] transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </span>
           </Link>
-        </div>
-
-        {/* Bottom Email + THINK / BUILD / DELIVER Strip */}
-        <div
-          data-next-reveal
-          className="flex flex-wrap items-center justify-between gap-4 pt-2"
-        >
-          <div className="flex items-center gap-3.5">
-            <a
-              href={`mailto:${email}`}
-              className="group inline-flex items-center gap-2.5 text-[14.5px] font-medium text-[#141414] hover:text-[#FF640A] transition-colors"
-            >
-              <Mail
-                className="h-4 w-4 text-[#FF640A] transition-transform duration-200 group-hover:scale-105"
-                aria-hidden="true"
-              />
-              <span className="border-b border-transparent group-hover:border-[#FF640A] transition-colors">
-                {email}
-              </span>
-            </a>
-
-            <span aria-hidden="true" className="h-3.5 w-px bg-[#CFC5B9]" />
-
-            <button
-              type="button"
-              onClick={handleCopy}
-              aria-label={`Copy ${email}`}
-              className="inline-flex items-center gap-1.5 font-mono text-[10.5px] uppercase tracking-[0.14em] text-[#6D665E] hover:text-[#141414] transition-colors cursor-pointer"
-            >
-              {copied ? (
-                <>
-                  <Check className="h-3.5 w-3.5 text-[#18A879]" aria-hidden="true" />
-                  <span className="text-[#18A879] font-medium">Copied</span>
-                </>
-              ) : (
-                <>
-                  <Copy className="h-3 w-3" aria-hidden="true" />
-                  <span>Copy</span>
-                </>
-              )}
-            </button>
-          </div>
-
-          <span
-            aria-hidden="true"
-            className="hidden md:block h-px flex-1 mx-6 bg-[#141414]/25"
-          />
-
-          <span className="font-mono text-[11px] font-medium uppercase tracking-[0.22em] text-[#141414]">
-            THINK &nbsp;/&nbsp; BUILD &nbsp;/&nbsp; DELIVER
-          </span>
         </div>
       </div>
     </section>

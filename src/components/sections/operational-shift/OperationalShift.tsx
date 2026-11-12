@@ -29,7 +29,7 @@ export function OperationalShift() {
           "--os-border": "#DED6CE",
         } as React.CSSProperties
       }
-      className="relative w-full overflow-hidden bg-[#F7F3ED] text-[#111111] py-16 md:py-20 lg:py-24 border-t border-[#DED6CE]"
+      className="relative w-full overflow-hidden bg-[#F7F3ED] text-[#111111] py-14 md:py-16 lg:py-20 border-t border-[#DED6CE]"
     >
       {/* Subtle Background Terrain & Atmospheric Texture Behind Content */}
       <BackgroundTerrain />

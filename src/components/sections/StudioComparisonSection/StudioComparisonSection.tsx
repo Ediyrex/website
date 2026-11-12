@@ -29,9 +29,9 @@ export function StudioComparisonSection() {
     <section
       id="comparison"
       ref={sectionRef}
-      className="relative overflow-hidden bg-[#FAF6F0] border-t border-[#E5DED5] py-20 sm:py-24 lg:py-[112px]"
+      className="relative overflow-hidden bg-[#FAF6F0] border-t border-[#E5DED5] py-14 sm:py-20 lg:py-24"
     >
-      <div className="mx-auto max-w-[1480px] px-5 sm:px-8 lg:px-[5.5vw] space-y-12 lg:space-y-14">
+      <div className="mx-auto max-w-[1480px] px-5 sm:px-8 lg:px-[5.5vw] space-y-10 lg:space-y-12">
         {/* Area 1: Editorial Heading */}
         <ComparisonHeader />
 

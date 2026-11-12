@@ -49,7 +49,7 @@ export function SelectedWork() {
           "--sw-border": "#DED6CE",
         } as React.CSSProperties
       }
-      className="w-full bg-[#F7F2EC] text-[#111111] py-20 md:py-24 lg:py-[104px] border-t border-[#DED6CE]"
+      className="w-full bg-[#F7F2EC] text-[#111111] py-14 md:py-20 lg:py-24 border-t border-[#DED6CE]"
     >
       <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-14 space-y-8 md:space-y-10">
         {/* Block One: Editorial Heading */}

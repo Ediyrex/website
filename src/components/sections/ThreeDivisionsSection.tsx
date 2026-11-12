@@ -141,7 +141,7 @@ export function ThreeDivisionsSection() {
     >
       <div className="max-w-[1600px] mx-auto px-5 sm:px-8 lg:px-12 xl:px-16 space-y-10 lg:space-y-12">
         {/* Top Editorial Row */}
-        <div ref={headerRef} className="space-y-6">
+        <div ref={headerRef}>
           {/* Main Header + Supporting Copy */}
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 lg:gap-10">
             <h2 className="m-0">

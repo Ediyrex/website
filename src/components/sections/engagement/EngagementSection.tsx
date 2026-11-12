@@ -28,7 +28,7 @@ export function EngagementSection() {
     <section
       id="engagement"
       ref={sectionRef}
-      className="relative overflow-hidden bg-[#F7F1E9] py-20 sm:py-28 lg:py-32 border-t border-[#E6DDD3]"
+      className="relative overflow-hidden bg-[#F7F1E9] py-14 sm:py-20 lg:py-24 border-t border-[#E6DDD3]"
     >
       {/* Subtle warm radial light wash */}
       <div
@@ -64,12 +64,12 @@ export function EngagementSection() {
 
       <div className="relative z-10 mx-auto max-w-[1440px] px-5 sm:px-10 lg:px-16">
         {/* Part A: Header & Controls */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start mb-12 sm:mb-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start mb-10 sm:mb-12">
           <div className="lg:col-span-7">
             <EngagementHeader />
           </div>
 
-          <div className="lg:col-span-5 lg:pt-7 space-y-5">
+          <div className="lg:col-span-5 lg:pt-1 space-y-5">
             <p
               data-engagement-header
               className="border-l border-[#D5CBC0] pl-5 text-[15px] sm:text-[16px] leading-[1.55] text-[#45413C] max-w-[420px]"

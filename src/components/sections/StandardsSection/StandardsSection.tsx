@@ -21,7 +21,7 @@ export function StandardsSection() {
       id="studio-standards"
       ref={sectionRef}
       aria-label="Standards & Collaboration"
-      className="standards-canvas relative overflow-hidden border-t border-[#E5DED5] py-20 sm:py-24 lg:py-[104px]"
+      className="standards-canvas relative overflow-hidden border-t border-[#E5DED5] py-14 sm:py-20 lg:py-24"
     >
       {/* Subtle warm radial light matching rest of EDIYREX homepage */}
       <div
@@ -29,7 +29,7 @@ export function StandardsSection() {
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_85%_18%,rgba(255,140,66,0.09),transparent_44%),radial-gradient(circle_at_12%_82%,rgba(255,180,120,0.08),transparent_40%)]"
       />
 
-      <div className="relative z-10 mx-auto max-w-[1440px] px-5 sm:px-8 lg:px-16 space-y-12 lg:space-y-14">
+      <div className="relative z-10 mx-auto max-w-[1440px] px-5 sm:px-8 lg:px-16 space-y-10 lg:space-y-12">
         <StandardsHeader />
 
         {/* Unified 2x2 Rounded Editorial Principles Grid */}
