@@ -48,7 +48,10 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
   const pathname = usePathname();
-  const hasDarkHero = pathname === "/work";
+  const hasDarkHero =
+    pathname === "/work" ||
+    pathname === "/contact" ||
+    pathname === "/industries";
   const isLightHeroNav = !hasDarkHero && !pastHero;
 
   const dropdownRef = useRef<HTMLDivElement>(null);
