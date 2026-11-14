@@ -1,87 +1,126 @@
 import React from "react";
 import Link from "next/link";
-import { ArrowUpRight, ArrowRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
+
+interface NextDirection {
+  number: string;
+  kicker: string;
+  title: string;
+  description: string;
+  badge: string;
+  href: string;
+}
+
+const NEXT_DIRECTIONS: readonly NextDirection[] = [
+  {
+    number: "01",
+    kicker: "THE CAPABILITIES",
+    title: "Explore our Services Directory",
+    description:
+      "Explore our four divisions and the capabilities available across branding, media, digital products and AI.",
+    badge: "35+ CAPABILITIES / 04 DIVISIONS",
+    href: "/services",
+  },
+  {
+    number: "02",
+    kicker: "THE EVIDENCE",
+    title: "Explore our Work Archive",
+    description:
+      "Inspect published case studies, actual project deliverables, technical explorations and clearly labelled concepts.",
+    badge: "CASE STUDIES / STUDIO R&D",
+    href: "/work",
+  },
+];
 
 export function AboutNextStep() {
   return (
     <section
       id="next-step"
-      aria-label="Next Steps"
-      className="py-16 md:py-24 bg-[#08090B]"
+      aria-label="05 / Where To Go Next"
+      className="w-full bg-[#FAF8F5] text-[#0B0D10] py-16 sm:py-20 lg:py-24 border-b border-[#EAE5DC]"
     >
-      <div className="max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-12 space-y-10">
-        {/* Section Header */}
-        <div className="space-y-3 max-w-2xl">
-          <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#FF6900]" />
-            <span className="text-[11px] font-mono uppercase tracking-[0.16em] text-[#FF6900]">
-              05 / WHERE TO GO NEXT
-            </span>
+      <div className="max-w-[1450px] mx-auto px-5 sm:px-8 lg:px-12 space-y-8 lg:space-y-10">
+        {/* Main Content: 2-Column Split */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-0 items-start">
+          {/* Left Column: Headline & Subtitle */}
+          <div className="lg:col-span-5 lg:pr-10 xl:pr-14 lg:border-r lg:border-[#EAE5DC] space-y-6">
+            <div>
+              <h2 className="font-heading font-extrabold text-[clamp(2.5rem,4.5vw,4.5rem)] leading-[0.98] tracking-[-0.035em] text-[#0B0D10]">
+                Choose your
+                <br />
+                next direction.
+              </h2>
+              <p className="text-[#FF6900] italic font-heading font-extrabold text-[clamp(2.5rem,4.5vw,4.5rem)] leading-[0.98] tracking-[-0.035em] mt-2 mb-6">
+                See what we do.
+                <br />
+                See what we build.
+              </p>
+              <p className="text-[15px] sm:text-[16px] text-[#555962] leading-relaxed max-w-md">
+                Explore the capabilities behind the studio or discover the projects, systems and
+                experiments that bring our approach to life.
+              </p>
+            </div>
           </div>
-          <h2 className="font-heading font-semibold text-[#F5F3EE] text-[clamp(2rem,3.2vw,2.75rem)] leading-[1.15] tracking-tight">
-            Ready to explore our work or capabilities?
-          </h2>
-          <p className="text-[#B2B4BA] text-sm sm:text-base leading-relaxed">
-            Choose your next step below to see our complete service directory or inspect published project case studies.
-          </p>
+
+          {/* Right Column: 2 Stacked Directions */}
+          <div className="lg:col-span-7 lg:pl-10 xl:pl-14 divide-y divide-[#EAE5DC]">
+            {NEXT_DIRECTIONS.map((direction) => (
+              <Link
+                key={direction.number}
+                href={direction.href}
+                className="group py-8 first:pt-0 flex items-start justify-between gap-6 transition-colors hover:bg-[#FFFFFF] px-3 sm:px-4 rounded-xl block"
+              >
+                {/* Number */}
+                <span className="font-heading font-extrabold text-4xl sm:text-5xl text-[#FF6900] leading-none shrink-0 w-16 pt-1">
+                  {direction.number}
+                </span>
+
+                {/* Content Block */}
+                <div className="flex-1 min-w-0 space-y-2">
+                  <span className="text-[11px] sm:text-xs font-mono font-bold uppercase tracking-[0.18em] text-[#9E7B35] block">
+                    {direction.kicker}
+                  </span>
+                  <h3 className="font-heading font-extrabold text-xl sm:text-2xl text-[#0B0D10] tracking-tight group-hover:text-black transition-colors">
+                    {direction.title}
+                  </h3>
+                  <p className="text-xs sm:text-[13.5px] text-[#555962] leading-relaxed max-w-lg">
+                    {direction.description}
+                  </p>
+                  <div className="pt-2">
+                    <span className="inline-flex items-center px-3.5 py-1 rounded-full border border-[#D9D2C8] bg-[#F5F1EB] text-[#555962] text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-wider">
+                      {direction.badge}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Arrow */}
+                <ArrowUpRight className="w-6 h-6 sm:w-7 sm:h-7 text-[#FF6900] shrink-0 pt-1 transition-transform duration-200 group-hover:translate-x-1 group-hover:-translate-y-1" />
+              </Link>
+            ))}
+          </div>
         </div>
 
-        {/* 2-Column Direct Navigation Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Card 1: Services Directory */}
-          <Link
-            href="/services"
-            className="group p-6 sm:p-8 rounded-2xl bg-[#0D0F12] border border-[#252A32] hover:border-[#FF6900] transition-all duration-200 flex flex-col justify-between space-y-6"
-          >
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono uppercase tracking-wider text-[#D6B77A] px-2.5 py-1 rounded bg-[#12151A] border border-[#252A32]">
-                  35+ CAPABILITIES &middot; 4 DIVISIONS
-                </span>
-                <ArrowUpRight className="w-5 h-5 text-[#777D87] group-hover:text-[#FF6900] transition-colors" />
-              </div>
-              <h3 className="font-heading font-semibold text-xl sm:text-2xl text-[#F5F3EE] group-hover:text-white transition-colors">
-                Explore the Services Directory
-              </h3>
-              <p className="text-xs sm:text-sm text-[#9EA2A8] leading-relaxed">
-                Detailed breakdowns of our capabilities across Branding &amp; Marketing, Media Production, Web &amp; App Engineering, and AI Systems.
-              </p>
-            </div>
+        {/* Bottom Subline Bar */}
+        <div className="pt-8 border-t border-[#EAE5DC] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <span className="font-mono text-xs sm:text-[13px] font-bold uppercase tracking-[0.18em] text-[#777D87]">
+            BUILT WITH INTENT. CONNECTED BY DESIGN.
+          </span>
 
-            <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase text-[#FF6900] pt-2">
-              <span>View full directory</span>
-              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-            </div>
-          </Link>
-
-          {/* Card 2: Work Archive */}
-          <Link
-            href="/work"
-            className="group p-6 sm:p-8 rounded-2xl bg-[#0D0F12] border border-[#252A32] hover:border-[#FF6900] transition-all duration-200 flex flex-col justify-between space-y-6"
-          >
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono uppercase tracking-wider text-[#D6B77A] px-2.5 py-1 rounded bg-[#12151A] border border-[#252A32]">
-                  CASE STUDIES &amp; R&amp;D CONCEPTS
-                </span>
-                <ArrowUpRight className="w-5 h-5 text-[#777D87] group-hover:text-[#FF6900] transition-colors" />
-              </div>
-              <h3 className="font-heading font-semibold text-xl sm:text-2xl text-[#F5F3EE] group-hover:text-white transition-colors">
-                Inspect Published Work
-              </h3>
-              <p className="text-xs sm:text-sm text-[#9EA2A8] leading-relaxed">
-                Review real case studies, technical architecture diagrams, autonomous agent workflows, and digital products engineered by our studio.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase text-[#FF6900] pt-2">
-              <span>Browse case studies</span>
-              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-            </div>
-          </Link>
+          <div className="flex items-center gap-4">
+            <span
+              aria-hidden="true"
+              className="hidden sm:inline-block w-px h-5 bg-[#EAE5DC]"
+            />
+            <Link
+              href="/contact"
+              className="inline-flex items-center gap-1.5 font-mono text-xs sm:text-[13px] font-bold uppercase tracking-[0.18em] text-[#FF6900] hover:text-[#E55E00] transition-colors"
+            >
+              <span>START A PROJECT</span>
+              <ArrowUpRight className="w-4 h-4" />
+            </Link>
+          </div>
         </div>
       </div>
     </section>
   );
 }
-

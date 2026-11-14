@@ -47,7 +47,7 @@ export function AboutHero() {
         <nav
           aria-label="Breadcrumb"
           data-about-reveal
-          className="mb-5 flex items-center gap-1.5 font-mono text-xs text-[#77716A]"
+          className="mb-8 flex items-center gap-1.5 font-mono text-xs text-[#77716A]"
         >
           <Link href="/" className="transition-colors hover:text-[#F06419]">
             Home
@@ -55,12 +55,6 @@ export function AboutHero() {
           <ChevronRight className="h-3 w-3 text-[#77716A]" aria-hidden="true" />
           <span className="font-medium text-[#141414]">About</span>
         </nav>
-
-        <div data-about-reveal className="mb-8">
-          <span className="inline-flex items-center rounded-full border border-[#F06419]/60 bg-[#FBE5D3]/60 px-3.5 py-1 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-[#F06419]">
-            ABOUT EDIYREX
-          </span>
-        </div>
 
         {/* Two-Column Editorial Split (52% / 48%) */}
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-[52%_1px_1fr] lg:items-center lg:gap-12">
@@ -147,19 +141,6 @@ export function AboutHero() {
               ))}
             </ul>
           </nav>
-        </div>
-
-        {/* Bottom Editorial Signature */}
-        <div
-          data-about-reveal
-          className="mt-12 flex flex-col items-start justify-between gap-3 border-t border-[#CFC5B9] pt-6 sm:mt-14 sm:flex-row sm:items-center"
-        >
-          <p className="font-mono text-xs uppercase tracking-[0.18em] text-[#49433E] sm:text-[13px]">
-            THINK / DESIGN / BUILD / DELIVER
-          </p>
-          <p className="font-mono text-xs font-semibold uppercase tracking-[0.18em] text-[#F06419] sm:text-[13px]">
-            EDYREX STUDIO®
-          </p>
         </div>
       </div>
     </section>

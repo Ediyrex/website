@@ -94,7 +94,7 @@ export function WhyEdiyrexSection() {
     <section
       id="why-ediyrex"
       aria-label="Why Ediyrex — Studio Philosophy & In-House Labs"
-      className="w-full bg-[#08090B] text-[#F5F3EE] py-16 md:py-24 lg:py-28 border-b border-[#222731]"
+      className="w-full bg-[#FAF8F5] text-[#0B0D10] py-16 md:py-24 lg:py-28 border-b border-[#EAE5DC]"
     >
       <div className="max-w-[1500px] mx-auto px-5 sm:px-8 lg:px-14">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 xl:gap-14 items-start">
@@ -102,38 +102,26 @@ export function WhyEdiyrexSection() {
           <div className="lg:col-span-7 xl:col-span-7 flex flex-col justify-between space-y-10">
             {/* Header Block */}
             <div className="space-y-4">
-              {/* Tag / Kicker with Orange Square and Divider */}
-              <div className="flex items-center gap-3">
-                <span className="w-2.5 h-2.5 bg-[#FF6900] inline-block shrink-0" />
-                <span className="text-xs font-mono font-bold uppercase tracking-[0.2em] text-[#C2C6CE]">
-                  WHY EDIYREX
-                </span>
-                <span
-                  aria-hidden="true"
-                  className="h-px bg-[#262B34] w-24 sm:w-36 inline-block"
-                />
-              </div>
-
               {/* Display Headline */}
-              <h2 className="font-heading font-extrabold text-[clamp(2.5rem,4.4vw,4.25rem)] leading-[1.04] tracking-[-0.035em] text-[#F5F3EE]">
+              <h2 className="font-heading font-extrabold text-[clamp(2.5rem,4.4vw,4.25rem)] leading-[1.04] tracking-[-0.035em] text-[#0B0D10]">
                 Creative thinking.
                 <br />
                 Technical execution.
                 <br />
-                <span className="text-[#FF6900] italic font-heading font-normal">
+                <span className="text-[#FF6900] italic font-heading font-extrabold">
                   One connected process.
                 </span>
               </h2>
 
               {/* Subtitle */}
-              <p className="text-base sm:text-lg text-[#9EA2A8] leading-relaxed max-w-2xl pt-1">
+              <p className="text-base sm:text-lg text-[#555962] leading-relaxed max-w-2xl pt-1">
                 Client engagements fuel and pressure-test our internal product development &mdash;
                 ensuring every pattern we deploy is grounded in real-world engineering.
               </p>
             </div>
 
             {/* 4 Principles in Responsive Row with Vertical Dividers */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-[#222731] pt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-[#EAE5DC] pt-2">
               {PRINCIPLES.map((principle, idx) => (
                 <div
                   key={principle.index}
@@ -146,10 +134,10 @@ export function WhyEdiyrexSection() {
                     <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-[5px] border border-[#FF6900] text-[#FF6900] font-mono text-[11px] font-bold tracking-wider">
                       {principle.index}
                     </span>
-                    <h3 className="font-heading font-extrabold text-[15px] sm:text-[16px] text-[#F5F3EE] tracking-tight leading-snug uppercase pt-1">
+                    <h3 className="font-heading font-extrabold text-[15px] sm:text-[16px] text-[#0B0D10] tracking-tight leading-snug uppercase pt-1">
                       {principle.title}
                     </h3>
-                    <p className="text-xs sm:text-[13px] text-[#8C919C] leading-relaxed">
+                    <p className="text-xs sm:text-[13px] text-[#555962] leading-relaxed">
                       {principle.description}
                     </p>
                   </div>
@@ -166,14 +154,14 @@ export function WhyEdiyrexSection() {
             <div className="flex flex-wrap items-center gap-4 pt-4">
               <Link
                 href="#philosophy"
-                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#FF6900] text-[#090A0D] text-sm font-bold hover:bg-[#E55E00] transition-colors shadow-sm"
+                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#FF6900] text-white text-sm font-bold hover:bg-[#E55E00] transition-colors shadow-sm"
               >
                 <span>Explore our studio approach</span>
-                <ArrowUpRight className="w-4 h-4 text-[#090A0D]" strokeWidth={2.5} />
+                <ArrowUpRight className="w-4 h-4 text-white" strokeWidth={2.5} />
               </Link>
               <Link
                 href="/work"
-                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-transparent border border-[#343B47] text-[#F5F3EE] text-sm font-semibold hover:border-[#F5F3EE] hover:bg-[#12151A] transition-all duration-200"
+                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-transparent border border-[#0B0D10] text-[#0B0D10] text-sm font-semibold hover:bg-[#0B0D10] hover:text-white transition-all duration-200"
               >
                 <span>View our work</span>
                 <ArrowUpRight className="w-4 h-4" />
@@ -183,18 +171,18 @@ export function WhyEdiyrexSection() {
 
           {/* Right Column: In-House Labs Showcase */}
           <div className="lg:col-span-5 xl:col-span-5">
-            <div className="p-6 sm:p-8 rounded-[28px] bg-[#0E1015] border border-[#222731] space-y-6">
+            <div className="p-6 sm:p-8 rounded-[28px] bg-[#FFFFFF] border border-[#EAE5DC] shadow-[0_4px_24px_rgba(0,0,0,0.03)] space-y-6">
               {/* Card Header */}
-              <div className="flex items-start justify-between gap-4 border-b border-[#222731] pb-5">
+              <div className="flex items-start justify-between gap-4 border-b border-[#EAE5DC] pb-5">
                 <div>
                   <span className="text-[11px] font-mono uppercase tracking-[0.18em] text-[#FF6900] font-semibold block mb-1">
                     IN-HOUSE LABS
                   </span>
-                  <h3 className="font-heading font-extrabold text-xl sm:text-2xl text-[#F5F3EE] tracking-tight">
+                  <h3 className="font-heading font-extrabold text-xl sm:text-2xl text-[#0B0D10] tracking-tight">
                     Client Services &times; Product R&amp;D
                   </h3>
                 </div>
-                <span className="shrink-0 px-3.5 py-1 rounded-full border border-[#2E3542] text-[10px] font-mono uppercase tracking-wider text-[#8C919C] bg-[#13171E] font-semibold">
+                <span className="shrink-0 px-3.5 py-1 rounded-full border border-[#D9D2C8] text-[10px] font-mono uppercase tracking-wider text-[#555962] bg-[#FAF8F5] font-semibold">
                   HYBRID STUDIO
                 </span>
               </div>
@@ -206,11 +194,11 @@ export function WhyEdiyrexSection() {
                   return (
                     <div
                       key={product.id}
-                      className="p-5 sm:p-6 rounded-2xl bg-[#12151D] border border-[#222731] hover:border-[#333B49] transition-all duration-200 flex items-center gap-5"
+                      className="p-5 sm:p-6 rounded-2xl bg-[#FAF8F5] border border-[#EAE5DC] hover:border-[#FF6900]/50 hover:bg-[#FFFFFF] transition-all duration-200 flex items-center gap-5"
                     >
                       {/* Left Icon with Vertical Divider Rule */}
-                      <div className="pr-4 border-r border-[#222731] flex items-center justify-center self-stretch shrink-0">
-                        <div className="w-12 h-12 rounded-xl bg-[#171B25] border border-[#262D3D] text-[#FF6900] flex items-center justify-center shrink-0">
+                      <div className="pr-4 border-r border-[#EAE5DC] flex items-center justify-center self-stretch shrink-0">
+                        <div className="w-12 h-12 rounded-xl bg-[#FFFFFF] border border-[#FF6900]/30 text-[#FF6900] flex items-center justify-center shrink-0 shadow-sm">
                           <Icon className="w-5 h-5 text-[#FF6900]" />
                         </div>
                       </div>
@@ -218,14 +206,14 @@ export function WhyEdiyrexSection() {
                       {/* Content Area */}
                       <div className="flex-1 min-w-0 space-y-2">
                         <div className="flex items-center justify-between gap-2">
-                          <h4 className="font-heading font-bold text-base text-[#F5F3EE] truncate">
+                          <h4 className="font-heading font-bold text-base text-[#0B0D10] truncate">
                             {product.name}
                           </h4>
-                          <span className="shrink-0 text-[10px] font-mono font-bold uppercase px-2.5 py-0.5 rounded-full border border-[#FF6900] text-[#FF6900] tracking-wider">
+                          <span className="shrink-0 text-[10px] font-mono font-bold uppercase px-2.5 py-0.5 rounded-full border border-[#FF6900] text-[#FF6900] bg-[#FF6900]/5 tracking-wider">
                             {product.status}
                           </span>
                         </div>
-                        <p className="text-xs sm:text-[13px] text-[#8C919C] leading-relaxed">
+                        <p className="text-xs sm:text-[13px] text-[#555962] leading-relaxed">
                           {product.tagline}
                         </p>
                         {/* Tech Stack Tags */}
@@ -233,7 +221,7 @@ export function WhyEdiyrexSection() {
                           {product.techStack.map((tech) => (
                             <span
                               key={tech}
-                              className="text-[10px] sm:text-[10.5px] font-mono px-2 py-0.5 rounded-[4px] bg-[#161B24] text-[#8C919C] border border-[#262D3D] font-medium"
+                              className="text-[10px] sm:text-[10.5px] font-mono px-2 py-0.5 rounded-[4px] bg-[#FFFFFF] text-[#555962] border border-[#EAE5DC] font-medium"
                             >
                               {tech}
                             </span>

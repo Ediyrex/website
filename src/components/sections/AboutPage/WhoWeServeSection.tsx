@@ -49,29 +49,12 @@ export function WhoWeServeSection() {
       className="w-full bg-[#08090B] text-[#F5F2EC] py-16 sm:py-20 lg:py-24 border-b border-[#262A33]"
     >
       <div className="max-w-[1450px] mx-auto px-5 sm:px-8 lg:px-12 space-y-8 lg:space-y-10">
-        {/* Section Header Row */}
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 flex-1">
-            <span className="w-2.5 h-2.5 bg-[#FF6900] inline-block shrink-0" />
-            <span className="text-xs sm:text-[13px] font-mono font-bold uppercase tracking-[0.18em] text-[#F5F2EC]">
-              02 / WHO WE SERVE
-            </span>
-            <span
-              aria-hidden="true"
-              className="h-px bg-[#262A33] flex-1 max-w-[280px] sm:max-w-[360px] inline-block ml-2"
-            />
-          </div>
-          <span className="text-xs sm:text-[13px] font-mono uppercase tracking-[0.18em] text-[#898D94] font-medium hidden sm:inline-block">
-            OUR CLIENT LANDSCAPE
-          </span>
-        </div>
-
         {/* Display Headline */}
         <div className="space-y-3">
           <h2 className="font-heading font-extrabold text-[clamp(2.5rem,4.5vw,4.5rem)] leading-[0.98] tracking-[-0.035em] text-[#F5F2EC]">
             Different stages.
             <br />
-            <span className="text-[#FF6900] italic font-heading font-normal">
+            <span className="text-[#FF6900] italic font-heading font-extrabold">
               Shared ambition.
             </span>
           </h2>

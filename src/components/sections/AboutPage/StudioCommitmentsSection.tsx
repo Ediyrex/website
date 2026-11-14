@@ -37,24 +37,12 @@ export function StudioCommitmentsSection() {
       <div className="max-w-[1500px] mx-auto px-5 sm:px-8 lg:px-14">
         {/* Section Header */}
         <div className="space-y-4">
-          {/* Kicker with Orange Square and Divider Rule */}
-          <div className="flex items-center gap-3">
-            <span className="w-2.5 h-2.5 bg-[#FF6900] inline-block shrink-0" />
-            <span className="text-xs font-mono font-bold uppercase tracking-[0.18em] text-[#F5F3EE]">
-              STUDIO COMMITMENTS
-            </span>
-            <span
-              aria-hidden="true"
-              className="h-px bg-[#252A32] w-24 sm:w-36 inline-block"
-            />
-          </div>
-
           {/* Headline with Orange Italic Accent */}
           <h2 className="font-heading font-extrabold text-[clamp(2.5rem,4.5vw,4.25rem)] leading-[1.05] tracking-[-0.035em] text-[#F5F3EE]">
             Credibility earned through
             <br />
             transparency,{" "}
-            <span className="text-[#FF6900] italic font-heading font-normal">
+            <span className="text-[#FF6900] italic font-heading font-extrabold">
               not inflated claims.
             </span>
           </h2>

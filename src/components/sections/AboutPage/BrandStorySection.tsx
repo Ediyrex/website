@@ -59,37 +59,20 @@ export function BrandStorySection() {
     <section
       id="brand-story"
       aria-label="01 / Brand Story & Origin"
-      className="w-full bg-[#0C0D0F] text-[#F5F2EC] py-16 sm:py-20 lg:py-24 border-b border-[#333333]"
+      className="w-full bg-[#FAF8F5] text-[#0B0D10] py-16 sm:py-20 lg:py-24 border-b border-[#EAE5DC]"
     >
       <div className="max-w-[1450px] mx-auto px-5 sm:px-8 lg:px-12 space-y-10 lg:space-y-12">
-        {/* 01. SECTION HEADER */}
-        <div className="flex items-center justify-between gap-4 pb-1">
-          <div className="flex items-center gap-3 flex-1">
-            <span className="w-2.5 h-2.5 bg-[#F06419] inline-block shrink-0" />
-            <span className="text-xs sm:text-[13px] font-mono font-bold uppercase tracking-[0.18em] text-[#F5F2EC]">
-              01 / BRAND STORY &amp; ORIGIN
-            </span>
-            <span
-              aria-hidden="true"
-              className="h-px bg-[#333333] flex-1 max-w-[280px] sm:max-w-[360px] inline-block ml-2"
-            />
-          </div>
-          <span className="text-xs sm:text-[13px] font-mono uppercase tracking-[0.18em] text-[#898D94] font-medium hidden sm:inline-block">
-            THE REASON WE EXIST
-          </span>
-        </div>
-
         {/* 02. SECTION INTRODUCTION */}
         <div className="space-y-4">
-          <h2 className="font-heading font-extrabold text-[clamp(2.35rem,4.4vw,4.25rem)] leading-[0.98] tracking-[-0.035em] text-[#F5F2EC]">
+          <h2 className="font-heading font-extrabold text-[clamp(2.35rem,4.4vw,4.25rem)] leading-[0.98] tracking-[-0.035em] text-[#0B0D10]">
             Great ideas shouldn&apos;t get lost between teams.
             <br />
-            <span className="text-[#F06419] italic font-heading font-normal">
+            <span className="text-[#F06419] italic font-heading font-extrabold">
               We built a better way to work.
             </span>
           </h2>
 
-          <p className="text-[16px] sm:text-[18px] text-[#B8B9BC] leading-[1.55] max-w-[1300px] pt-1">
+          <p className="text-[16px] sm:text-[18px] text-[#555962] leading-[1.55] max-w-[1300px] pt-1">
             Building a modern business requires branding, content, web engineering and automation.
             Yet traditional agency structures often separate these disciplines, creating unnecessary
             handoffs, repeated conversations and disconnected execution.
@@ -99,9 +82,9 @@ export function BrandStorySection() {
         {/* 03. DIAGRAMS WRAPPER */}
         <div className="space-y-6">
           {/* STAGE 01 — THE FRAGMENTED MODEL */}
-          <div className="rounded-[20px] bg-[#0C0D0F] border border-[#333333] p-5 sm:p-7 lg:p-8 space-y-7">
+          <div className="rounded-[20px] bg-[#FFFFFF] border border-[#EAE5DC] p-5 sm:p-7 lg:p-8 space-y-7 shadow-[0_4px_24px_rgba(0,0,0,0.03)]">
             {/* Stage Status Header */}
-            <div className="flex flex-wrap items-center gap-3 pb-4 border-b border-[#252830]">
+            <div className="flex flex-wrap items-center gap-3 pb-4 border-b border-[#EAE5DC]">
               <div className="flex items-center gap-2 text-[#F06464]">
                 <span className="inline-flex items-center justify-center w-4 h-4 rounded-full border border-[#F06464] text-[10px] font-bold leading-none">
                   &times;
@@ -110,8 +93,8 @@ export function BrandStorySection() {
                   THE FRAGMENTED MODEL
                 </span>
               </div>
-              <span className="text-[#444444]">|</span>
-              <span className="text-xs sm:text-[12px] font-mono uppercase tracking-wider text-[#898D94]">
+              <span className="text-[#D9D2C8]">|</span>
+              <span className="text-xs sm:text-[12px] font-mono uppercase tracking-wider text-[#777D87]">
                 MULTIPLE TEAMS &middot; DISCONNECTED EXECUTION
               </span>
             </div>
@@ -121,15 +104,15 @@ export function BrandStorySection() {
               {FRAGMENTED_NODES.map((node, idx) => (
                 <React.Fragment key={node.index}>
                   {/* Node Box */}
-                  <div className="flex-1 rounded-[14px] border border-[#555555] bg-[#0C0D0F] p-5 min-h-[110px] flex flex-col justify-between">
+                  <div className="flex-1 rounded-[14px] border border-[#EAE5DC] bg-[#FAF8F5] p-5 min-h-[110px] flex flex-col justify-between">
                     <span className="font-mono text-xs font-bold text-[#F06419] block mb-2">
                       {node.index}
                     </span>
                     <div>
-                      <h3 className="font-heading font-extrabold text-[16px] sm:text-[17px] text-[#F5F2EC] tracking-tight uppercase leading-tight">
+                      <h3 className="font-heading font-extrabold text-[16px] sm:text-[17px] text-[#0B0D10] tracking-tight uppercase leading-tight">
                         {node.title}
                       </h3>
-                      <p className="text-[12.5px] sm:text-[13px] text-[#898D94] mt-1 leading-snug">
+                      <p className="text-[12.5px] sm:text-[13px] text-[#555962] mt-1 leading-snug">
                         {node.subtitle}
                       </p>
                     </div>
@@ -149,7 +132,7 @@ export function BrandStorySection() {
             </div>
 
             {/* The Three Problems Row */}
-            <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-[#252830] pt-6 border-t border-[#252830] text-[14px] sm:text-[15px] text-[#B8B9BC]">
+            <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-[#EAE5DC] pt-6 border-t border-[#EAE5DC] text-[14px] sm:text-[15px] text-[#555962]">
               <div className="flex items-center gap-3 py-2 md:py-0 md:pr-4">
                 <span className="text-[#F06464] font-bold text-base shrink-0">&times;</span>
                 <span>Context gets lost between teams.</span>
@@ -240,15 +223,15 @@ export function BrandStorySection() {
         </div>
 
         {/* 04. STAGE 03 — THE STUDIO THESIS */}
-        <div className="pt-8 border-t border-[#333333] flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8">
+        <div className="pt-8 border-t border-[#EAE5DC] flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8">
           <span className="text-xs sm:text-[14px] font-mono font-bold uppercase tracking-[0.18em] text-[#F06419] shrink-0">
             THE STUDIO THESIS
           </span>
           <span
             aria-hidden="true"
-            className="hidden sm:inline-block w-px h-8 bg-[#333333]"
+            className="hidden sm:inline-block w-px h-8 bg-[#EAE5DC]"
           />
-          <p className="text-[18px] sm:text-[21px] lg:text-[23px] text-[#F5F2EC] font-heading font-semibold leading-[1.38]">
+          <p className="text-[18px] sm:text-[21px] lg:text-[23px] text-[#0B0D10] font-heading font-semibold leading-[1.38]">
             We founded EDIYREX to bring high-craft creative direction and robust technical
             engineering together, executed through one connected team.
           </p>

@@ -1,6 +1,6 @@
 export function PhilosophyIntroduction() {
   return (
-    <div className="mt-8 grid grid-cols-1 gap-8 lg:mt-10 lg:grid-cols-[54%_1px_1fr] lg:items-center lg:gap-10">
+    <div className="grid grid-cols-1 gap-8 lg:grid-cols-[54%_1px_1fr] lg:items-center lg:gap-10">
       <h2
         style={{ fontFamily: "var(--font-space-grotesk), system-ui, sans-serif" }}
         className="text-[clamp(2.25rem,4.2vw,3.9rem)] font-bold leading-[0.98] tracking-[-0.03em] text-[#F5F2EC]"
