@@ -200,7 +200,7 @@ export default function IndustriesPage() {
                           key={cap}
                           className="text-xs text-[#C2C6CE] flex items-start gap-2"
                         >
-                          <span className="text-[#FF6900] font-mono mt-0.5">&rarr;</span>
+                          <span className="text-[#FF6900] font-mono mt-0.5">→</span>
                           <span>{cap}</span>
                         </li>
                       ))}

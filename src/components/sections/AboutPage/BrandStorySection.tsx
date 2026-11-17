@@ -62,6 +62,23 @@ export function BrandStorySection() {
       className="w-full bg-[#FAF8F5] text-[#0B0D10] py-16 sm:py-20 lg:py-24 border-b border-[#EAE5DC]"
     >
       <div className="max-w-[1450px] mx-auto px-5 sm:px-8 lg:px-12 space-y-10 lg:space-y-12">
+        {/* 01. SECTION HEADER */}
+        <div className="flex items-center justify-between gap-4 pb-1">
+          <div className="flex items-center gap-3 flex-1">
+            <span className="w-2.5 h-2.5 bg-[#F06419] inline-block shrink-0" />
+            <span className="text-xs sm:text-[13px] font-mono font-bold uppercase tracking-[0.18em] text-[#0B0D10]">
+              01 / BRAND STORY &amp; ORIGIN
+            </span>
+            <span
+              aria-hidden="true"
+              className="h-px bg-[#EAE5DC] flex-1 max-w-[280px] sm:max-w-[360px] inline-block ml-2"
+            />
+          </div>
+          <span className="text-xs sm:text-[13px] font-mono uppercase tracking-[0.18em] text-[#777D87] font-medium hidden sm:inline-block">
+            THE REASON WE EXIST
+          </span>
+        </div>
+
         {/* 02. SECTION INTRODUCTION */}
         <div className="space-y-4">
           <h2 className="font-heading font-extrabold text-[clamp(2.35rem,4.4vw,4.25rem)] leading-[0.98] tracking-[-0.035em] text-[#0B0D10]">

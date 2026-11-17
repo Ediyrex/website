@@ -50,7 +50,14 @@ export const enquirySchema = z.object({
     }
   ),
   timeline: z.enum(
-    ["immediate", "within_1_month", "1_to_3_months", "flexible"],
+    [
+      "immediate",
+      "within_1_month",
+      "1_to_3_months",
+      "3_to_6_months",
+      "flexible",
+      "not_decided",
+    ],
     {
       message: "Please select your expected timeline",
     }

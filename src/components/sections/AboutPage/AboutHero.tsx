@@ -40,20 +40,20 @@ export function AboutHero() {
       ref={sectionRef}
       aria-label="About Ediyrex Studio Manifesto"
       style={{ fontFamily: "var(--font-space-grotesk), system-ui, sans-serif" }}
-      className="border-b border-[#DED5CC] bg-[#FAF8F5] pb-12 pt-28 text-[#141414] sm:pb-14 sm:pt-32 lg:pt-36"
+      className="border-b border-[#292E35] bg-[#0C0D0F] pb-12 pt-28 text-[#F5F2EC] sm:pb-14 sm:pt-32 lg:pt-36"
     >
       <div className="mx-auto max-w-[1500px] px-5 sm:px-8 lg:px-14">
         {/* Breadcrumb & Outlined Label */}
         <nav
           aria-label="Breadcrumb"
           data-about-reveal
-          className="mb-8 flex items-center gap-1.5 font-mono text-xs text-[#77716A]"
+          className="mb-8 flex items-center gap-1.5 font-mono text-xs text-[#898D94]"
         >
           <Link href="/" className="transition-colors hover:text-[#F06419]">
             Home
           </Link>
-          <ChevronRight className="h-3 w-3 text-[#77716A]" aria-hidden="true" />
-          <span className="font-medium text-[#141414]">About</span>
+          <ChevronRight className="h-3 w-3 text-[#898D94]" aria-hidden="true" />
+          <span className="font-medium text-[#F5F2EC]">About</span>
         </nav>
 
         {/* Two-Column Editorial Split (52% / 48%) */}
@@ -65,8 +65,8 @@ export function AboutHero() {
               style={{ fontFamily: "var(--font-archivo-narrow), sans-serif" }}
               className="text-[clamp(2.75rem,5.2vw,5.25rem)] font-bold uppercase leading-[0.9] tracking-[-0.025em]"
             >
-              <span className="block text-[#141414]">ONE INTEGRATED</span>
-              <span className="block text-[#141414]">STUDIO.</span>
+              <span className="block text-[#F5F2EC]">ONE INTEGRATED</span>
+              <span className="block text-[#F5F2EC]">STUDIO.</span>
               <span className="mt-1 block italic text-[#F06419]">
                 FOUR CONNECTED
               </span>
@@ -75,7 +75,7 @@ export function AboutHero() {
 
             <p
               data-about-reveal
-              className="max-w-[620px] text-[16px] leading-[1.6] text-[#49433E] sm:text-[18px]"
+              className="max-w-[620px] text-[16px] leading-[1.6] text-[#B8B9BC] sm:text-[18px]"
             >
               We bring creative direction, media production, digital engineering
               and intelligent systems together to build meaningful work for real
@@ -88,7 +88,7 @@ export function AboutHero() {
             >
               <Link
                 href="/contact"
-                className="group inline-flex h-12 items-center justify-center gap-2 rounded-[4px] bg-[#F06419] px-6 text-sm font-semibold text-[#FFFFFF] transition-colors duration-200 hover:bg-[#D95612] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F06419] focus-visible:ring-offset-2 focus-visible:ring-offset-[#F6F1EA]"
+                className="group inline-flex h-12 items-center justify-center gap-2 rounded-[4px] bg-[#F06419] px-6 text-sm font-semibold text-[#FFFFFF] transition-colors duration-200 hover:bg-[#D95612] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F06419] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0C0D0F]"
               >
                 <span>Book a discovery call</span>
                 <ArrowUpRight
@@ -99,7 +99,7 @@ export function AboutHero() {
 
               <Link
                 href="/work"
-                className="inline-flex h-12 items-center justify-center rounded-[4px] border border-[#141414] bg-transparent px-6 text-sm font-medium text-[#141414] transition-colors duration-200 hover:bg-[#141414] hover:text-[#F6F1EA] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F06419] focus-visible:ring-offset-2 focus-visible:ring-offset-[#F6F1EA]"
+                className="inline-flex h-12 items-center justify-center rounded-[4px] border border-[#292E35] bg-transparent px-6 text-sm font-medium text-[#F5F2EC] transition-colors duration-200 hover:bg-[#121519] hover:border-[#444C58] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F06419] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0C0D0F]"
               >
                 Explore our work
               </Link>
@@ -107,11 +107,11 @@ export function AboutHero() {
           </div>
 
           {/* Central Divider (Horizontal on mobile, 1px Vertical on desktop) */}
-          <div className="h-px w-full bg-[#CFC5B9] lg:h-full lg:w-px" />
+          <div className="h-px w-full bg-[#292E35] lg:h-full lg:w-px" />
 
           {/* Right Discipline Directory */}
           <nav aria-label="Studio Disciplines">
-            <ul className="divide-y divide-[#CFC5B9] border-b border-[#CFC5B9] lg:border-t lg:border-t-transparent">
+            <ul className="divide-y divide-[#292E35] border-b border-[#292E35] lg:border-t lg:border-t-transparent">
               {STUDIO_DISCIPLINES.map((discipline) => (
                 <li key={discipline.id} data-about-reveal>
                   <Link
@@ -123,10 +123,10 @@ export function AboutHero() {
                         {discipline.number}
                       </span>
                       <div className="min-w-0">
-                        <h2 className="text-[17px] font-bold uppercase leading-tight tracking-[-0.01em] text-[#141414] transition-colors duration-200 group-hover:text-[#F06419] sm:text-[22px]">
+                        <h2 className="text-[17px] font-bold uppercase leading-tight tracking-[-0.01em] text-[#F5F2EC] transition-colors duration-200 group-hover:text-[#F06419] sm:text-[22px]">
                           {discipline.title}
                         </h2>
-                        <p className="mt-1 text-sm text-[#77716A] transition-colors duration-200 group-hover:text-[#49433E] sm:text-[15px]">
+                        <p className="mt-1 text-sm text-[#898D94] transition-colors duration-200 group-hover:text-[#B8B9BC] sm:text-[15px]">
                           {discipline.descriptor}
                         </p>
                       </div>

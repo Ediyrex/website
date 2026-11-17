@@ -19,7 +19,7 @@ export function Button({
   ...props
 }: ButtonProps) {
   const baseStyles =
-    "inline-flex items-center justify-center font-sans font-semibold rounded-[8px] transition-all duration-150 cursor-pointer disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D6B77A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#08090B]";
+    "inline-flex items-center justify-center font-sans font-semibold rounded-[8px] transition-all duration-150 cursor-pointer disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F06419] focus-visible:ring-offset-2 focus-visible:ring-offset-[#08090B]";
 
   const sizeStyles = {
     sm: "h-9 px-4 text-xs gap-1.5",
@@ -29,13 +29,13 @@ export function Button({
 
   const variantStyles = {
     primary:
-      "bg-[#D6B77A] text-[#17130B] hover:bg-[#E6CC99] hover:-translate-y-[1px] active:translate-y-0",
+      "bg-[#F06419] text-[#090A0D] font-bold hover:bg-[#D95612] hover:-translate-y-[1px] active:translate-y-0 shadow-sm",
     secondary:
       "bg-[#12151A] text-[#F5F3EE] border border-[#252A32] hover:bg-[#191D23] hover:border-[#3A414B]",
     outline:
-      "bg-transparent text-[#F5F3EE] border border-[#3A414B] hover:bg-[#12151A] hover:border-[#D6B77A]/60",
+      "bg-transparent text-[#F5F2EC] border border-[#F06419] hover:bg-[#F06419]/10",
     ghost:
-      "bg-transparent text-[#B2B4BA] hover:text-[#F5F3EE] hover:bg-[#12151A]",
+      "bg-transparent text-[#B2B4BA] hover:text-[#F5F2EC] hover:bg-[#12151A]",
   };
 
   const combinedClasses = cn(

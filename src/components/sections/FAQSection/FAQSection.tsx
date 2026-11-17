@@ -3,10 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "motion/react";
 import { FAQ_CATEGORIES } from "./faq.data";
-import { FAQMasthead } from "./FAQMasthead";
 import { FAQIntroduction } from "./FAQIntroduction";
 import { FAQContent } from "./FAQContent";
-import { FAQFooter } from "./FAQFooter";
 
 export function FAQSection() {
   const [activeQuestionId, setActiveQuestionId] = useState<string | null>(
@@ -65,9 +63,7 @@ export function FAQSection() {
       className="bg-[#F5EFE5] py-14 text-[#171717] sm:py-16 lg:py-[72px]"
     >
       <div className="mx-auto max-w-[1500px] px-6 sm:px-10 lg:px-14">
-        <FAQMasthead />
-
-        <div className="mt-10 grid grid-cols-1 gap-10 lg:mt-12 lg:grid-cols-[30%_1fr] lg:gap-11">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[30%_1fr] lg:gap-11">
           <FAQIntroduction
             categories={FAQ_CATEGORIES}
             activeCategoryId={activeCategoryId}
@@ -81,8 +77,6 @@ export function FAQSection() {
             onToggleQuestion={handleToggleQuestion}
           />
         </div>
-
-        <FAQFooter />
       </div>
     </section>
   );

@@ -276,7 +276,7 @@ export default async function DivisionDetailPage({ params }: DivisionPageProps) 
                 href="/work"
                 className="text-sm text-[#D6B77A] hover:text-[#E6CC99]"
               >
-                All work &rarr;
+                All work →
               </Link>
             </div>
 

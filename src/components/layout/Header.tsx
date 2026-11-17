@@ -3,40 +3,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowUpRight, Menu, X, ChevronDown } from "lucide-react";
+import { ArrowUpRight, Menu, X, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 
-const DIVISION_LINKS = [
-  {
-    label: "Branding / Marketing",
-    description: "Ads & engagement, packaging, SEO, influencer & email marketing",
-    href: "/services/branding",
-    accent: "#D6B77A",
-  },
-  {
-    label: "Media",
-    description: "Video editing (podcast, short-forms, event), motion & graphics",
-    href: "/services/media",
-    accent: "#E58A76",
-  },
-  {
-    label: "Web Dev",
-    description: "Web dev, technical SEO, UI/UX, web extensions & DADV",
-    href: "/services/digital",
-    accent: "#7BA9F5",
-  },
-  {
-    label: "Agents & Automation",
-    description: "Chatbots, calling agents, AI agents & n8n workflows",
-    href: "/services/ai",
-    accent: "#B5A0F5",
-  },
-];
-
 const NAV_LINKS = [
   { label: "Home", href: "/" },
-  { label: "Services", href: "/services", hasDropdown: true },
+  { label: "Services", href: "/services" },
   { label: "Work", href: "/work" },
   { label: "About", href: "/about" },
   { label: "Contact", href: "/contact" },
@@ -46,15 +19,14 @@ export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [pastHero, setPastHero] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [servicesOpen, setServicesOpen] = useState(false);
   const pathname = usePathname();
   const hasDarkHero =
     pathname === "/work" ||
     pathname === "/contact" ||
-    pathname === "/industries";
+    pathname === "/industries" ||
+    pathname === "/about";
   const isLightHeroNav = !hasDarkHero && !pastHero;
 
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const mobileTriggerRef = useRef<HTMLButtonElement>(null);
 
@@ -77,31 +49,17 @@ export function Header() {
     };
   }, [pathname]);
 
-  // Close dropdown on click outside or Escape
+  // Handle Escape key to close mobile menu
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setServicesOpen(false);
-      }
-    };
-
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setServicesOpen(false);
-        if (mobileMenuOpen) {
-          setMobileMenuOpen(false);
-          mobileTriggerRef.current?.focus();
-        }
+      if (event.key === "Escape" && mobileMenuOpen) {
+        setMobileMenuOpen(false);
+        mobileTriggerRef.current?.focus();
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
     document.addEventListener("keydown", handleKeyDown);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [mobileMenuOpen]);
@@ -176,96 +134,12 @@ export function Header() {
                     ? pathname === "/"
                     : pathname.startsWith(link.href);
 
-                if (link.hasDropdown) {
-                  return (
-                    <div
-                      key={link.href}
-                      ref={dropdownRef}
-                      className="relative flex items-center gap-1"
-                    >
-                      <Link
-                        href={link.href}
-                        className={cn(
-                          "text-sm font-medium transition-colors py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D6B77A] rounded",
-                          isLightHeroNav
-                            ? isActive
-                              ? "text-[#0B0D10] underline underline-offset-8 decoration-[#0B0D10]"
-                              : "text-[#0B0D10]/80 hover:text-[#0B0D10]"
-                            : isActive
-                            ? "text-[#F5F3EE]"
-                            : "text-[#B2B4BA] hover:text-[#F5F3EE]"
-                        )}
-                      >
-                        {link.label}
-                      </Link>
-                      <button
-                        type="button"
-                        onClick={() => setServicesOpen((prev) => !prev)}
-                        aria-expanded={servicesOpen}
-                        aria-controls="services-desktop-dropdown"
-                        aria-label="Toggle Services divisions menu"
-                        className={cn(
-                          "p-1 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D6B77A] cursor-pointer transition-colors",
-                          isLightHeroNav
-                            ? "text-[#0B0D10]/80 hover:text-[#0B0D10]"
-                            : "text-[#B2B4BA] hover:text-[#F5F3EE]"
-                        )}
-                      >
-                        <ChevronDown
-                          className={cn(
-                            "w-3.5 h-3.5 transition-transform duration-150",
-                            servicesOpen && "rotate-180"
-                          )}
-                        />
-                      </button>
-
-                      {servicesOpen && (
-                        <div
-                          id="services-desktop-dropdown"
-                          className="absolute top-full left-0 mt-2 w-72 rounded-2xl bg-[#12151A] border border-[#252A32] p-2 shadow-2xl"
-                        >
-                          <div className="px-3 py-2 border-b border-[#252A32] mb-1">
-                            <Link
-                              href="/services"
-                              onClick={() => setServicesOpen(false)}
-                              className="text-xs font-mono uppercase tracking-wider text-[#D6B77A] hover:text-[#E6CC99]"
-                            >
-                              All 3 Divisions &rarr;
-                            </Link>
-                          </div>
-                          {DIVISION_LINKS.map((item) => (
-                            <Link
-                              key={item.href}
-                              href={item.href}
-                              onClick={() => setServicesOpen(false)}
-                              className="flex items-start gap-3 p-3 rounded-xl hover:bg-[#191D23] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D6B77A]"
-                            >
-                              <span
-                                className="w-2 h-2 rounded-full mt-1.5 shrink-0"
-                                style={{ backgroundColor: item.accent }}
-                              />
-                              <div>
-                                <div className="text-sm font-medium text-[#F5F3EE]">
-                                  {item.label}
-                                </div>
-                                <div className="text-xs text-[#777D87]">
-                                  {item.description}
-                                </div>
-                              </div>
-                            </Link>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  );
-                }
-
                 return (
                   <Link
                     key={link.href}
                     href={link.href}
                     className={cn(
-                      "text-sm font-medium transition-colors py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D6B77A] rounded",
+                      "text-sm font-medium transition-colors py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F06419] rounded",
                       isLightHeroNav
                         ? isActive
                           ? "text-[#0B0D10] underline underline-offset-8 decoration-[#0B0D10] decoration-2"
@@ -287,15 +161,19 @@ export function Header() {
                 {isLightHeroNav ? (
                   <Link
                     href="/contact"
-                    className="inline-flex items-center gap-1.5 h-10 px-5 rounded-full bg-[#0B0D10] text-white text-sm font-semibold hover:bg-[#1F242B] transition-colors"
+                    className="inline-flex items-center gap-1.5 h-10 px-5 rounded-[8px] bg-[#0B0D10] text-white text-sm font-semibold hover:bg-[#1F242B] transition-colors"
                   >
                     <span>Book a discovery call</span>
                     <ArrowUpRight className="w-3.5 h-3.5" />
                   </Link>
                 ) : (
-                  <Button href="/contact" size="md" variant="primary">
-                    Book a discovery call
-                  </Button>
+                  <Link
+                    href="/contact"
+                    className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] border border-[#F06419] bg-transparent text-[#F5F2EC] text-xs sm:text-sm font-medium hover:bg-[#F06419]/10 hover:border-[#FF7A29] transition-all"
+                  >
+                    <Calendar className="w-4 h-4 text-[#F06419]" />
+                    <span>Book a discovery call</span>
+                  </Link>
                 )}
               </div>
 
@@ -340,42 +218,23 @@ export function Header() {
                 <Link
                   href={link.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="block font-heading font-semibold text-2xl text-[#F5F3EE] hover:text-[#D6B77A] transition-colors py-1"
+                  className="block font-heading font-semibold text-2xl text-[#F5F3EE] hover:text-[#F06419] transition-colors py-1"
                 >
                   {link.label}
                 </Link>
-                {link.hasDropdown && (
-                  <div className="mt-2 pl-3 space-y-2">
-                    {DIVISION_LINKS.map((div) => (
-                      <Link
-                        key={div.href}
-                        href={div.href}
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="flex items-center gap-2 text-sm text-[#B2B4BA] hover:text-[#F5F3EE] py-1"
-                      >
-                        <span
-                          className="w-1.5 h-1.5 rounded-full"
-                          style={{ backgroundColor: div.accent }}
-                        />
-                        <span>{div.label}</span>
-                      </Link>
-                    ))}
-                  </div>
-                )}
               </div>
             ))}
           </nav>
 
           <div className="pt-8 space-y-4">
-            <Button
+            <Link
               href="/contact"
-              size="lg"
-              variant="primary"
-              className="w-full"
               onClick={() => setMobileMenuOpen(false)}
+              className="w-full h-12 rounded-[8px] bg-[#F06419] text-black font-mono font-bold text-xs sm:text-sm uppercase tracking-wider hover:bg-[#D95612] transition-colors flex items-center justify-center gap-2 shadow-md"
             >
-              Book a discovery call
-            </Button>
+              <Calendar className="w-4 h-4" />
+              <span>Book a discovery call</span>
+            </Link>
             <p className="text-center text-xs font-mono text-[#777D87]">
               ediyrex@gmail.com
             </p>

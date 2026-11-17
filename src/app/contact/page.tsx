@@ -1,7 +1,6 @@
 import React, { Suspense } from "react";
 import type { Metadata } from "next";
-import { ContactProjectIntakeHero } from "@/components/sections/ContactProjectIntakeHero";
-import { EnquirySection } from "@/components/sections/EnquirySection";
+import { ProjectBriefDesk } from "@/components/sections/ContactPage/ProjectBriefDesk";
 
 export const metadata: Metadata = {
   title: "Contact & Project Intake",
@@ -14,19 +13,15 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   return (
-    <div className="bg-[#08090B] min-h-screen">
-      {/* Project Intake Hero */}
-      <ContactProjectIntakeHero />
-
-      {/* Enquiry Form */}
+    <div className="bg-[#0C0D0F] min-h-screen text-[#F5F2EC]">
       <Suspense
         fallback={
-          <div className="py-24 text-center text-[#777D87] font-mono text-xs">
-            Loading enquiry interface...
+          <div className="py-36 text-center text-[#898D94] font-mono text-xs">
+            Loading Project Brief Desk...
           </div>
         }
       >
-        <EnquirySection />
+        <ProjectBriefDesk />
       </Suspense>
     </div>
   );
