@@ -7,9 +7,7 @@ import { FAQIntroduction } from "./FAQIntroduction";
 import { FAQContent } from "./FAQContent";
 
 export function FAQSection() {
-  const [activeQuestionId, setActiveQuestionId] = useState<string | null>(
-    "single-or-multiple-services",
-  );
+  const [activeQuestionId, setActiveQuestionId] = useState<string | null>(null);
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(
     "working-together",
   );

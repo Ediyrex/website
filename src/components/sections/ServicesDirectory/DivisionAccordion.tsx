@@ -2,6 +2,7 @@
 
 import { useId } from "react";
 import { Minus, Plus } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import type { DirectoryDivision } from "./services.data";
 import { DivisionNumber } from "./DivisionNumber";
 import { DivisionIcon } from "./DivisionIcon";
@@ -91,19 +92,22 @@ export function DivisionAccordion({
         </div>
       </button>
 
-      <div
-        id={panelId}
-        role="region"
-        aria-labelledby={headerId}
-        style={{ gridTemplateRows: isExpanded ? "1fr" : "0fr" }}
-        className={`grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-          isExpanded ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
-      >
-        <div className="overflow-hidden min-h-0">
-          <ExpandedCapabilities division={division} onCollapse={onToggle} />
-        </div>
-      </div>
+      <AnimatePresence initial={false}>
+        {isExpanded && (
+          <motion.div
+            id={panelId}
+            role="region"
+            aria-labelledby={headerId}
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="overflow-hidden"
+          >
+            <ExpandedCapabilities division={division} onCollapse={onToggle} />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -12,7 +12,7 @@ interface EngagementFAQProps {
 }
 
 export function EngagementFAQ({ onBackToWays }: EngagementFAQProps) {
-  const [openId, setOpenId] = useState<string>(ENGAGEMENT_FAQS[0].id);
+  const [openId, setOpenId] = useState<string | null>(null);
 
   return (
     <motion.div
@@ -65,7 +65,7 @@ export function EngagementFAQ({ onBackToWays }: EngagementFAQProps) {
             <div key={item.id} className="py-5">
               <button
                 type="button"
-                onClick={() => setOpenId(isOpen ? "" : item.id)}
+                onClick={() => setOpenId(isOpen ? null : item.id)}
                 aria-expanded={isOpen}
                 className="flex w-full items-start justify-between gap-4 text-left cursor-pointer group"
               >
@@ -90,18 +90,21 @@ export function EngagementFAQ({ onBackToWays }: EngagementFAQProps) {
                 </span>
               </button>
 
-              <div
-                style={{ gridTemplateRows: isOpen ? "1fr" : "0fr" }}
-                className={`grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-                  isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-                }`}
-              >
-                <div className="overflow-hidden min-h-0">
-                  <p className="pl-7 pt-3 pr-8 pb-3 text-[14px] leading-[1.6] text-[#4B4742]">
-                    {item.answer}
-                  </p>
-                </div>
-              </div>
+              <AnimatePresence initial={false}>
+                {isOpen && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+                    className="overflow-hidden"
+                  >
+                    <p className="pl-7 pt-3 pr-8 pb-3 text-[14px] leading-[1.6] text-[#4B4742]">
+                      {item.answer}
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           );
         })}
