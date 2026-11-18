@@ -23,7 +23,6 @@ import { EngagementSection } from "@/components/sections/engagement/EngagementSe
 import { StudioComparisonSection } from "@/components/sections/StudioComparisonSection/StudioComparisonSection";
 import { StandardsSection } from "@/components/sections/StandardsSection/StandardsSection";
 import { FinalCtaSection } from "@/components/sections/FinalCtaSection";
-import { ActivityPings } from "@/components/sections/ActivityPings";
 
 export default function HomePage() {
   return (
@@ -40,7 +39,6 @@ export default function HomePage() {
       <StudioComparisonSection />
       <StandardsSection />
       <FinalCtaSection />
-      <ActivityPings />
     </>
   );
 }
