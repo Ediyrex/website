@@ -1,6 +1,7 @@
 import React from "react";
 import type { Metadata } from "next";
 import { IndustriesHero } from "@/components/sections/IndustriesPage/IndustriesHero";
+import { SectorIntelligence } from "@/components/sections/IndustriesPage/SectorIntelligence";
 import { IndustriesRegister } from "@/components/sections/IndustriesPage/IndustriesRegister";
 import { RelevantBlueprints } from "@/components/sections/RelevantBlueprints";
 import { IndustriesCTA } from "@/components/sections/IndustriesPage/IndustriesCTA";
@@ -17,16 +18,19 @@ export const metadata: Metadata = {
 export default function IndustriesPage() {
   return (
     <main className="w-full bg-[#08090B] text-[#F5F2EC] min-h-screen">
-      {/* 01. Editorial Manifesto Hero */}
+      {/* Section 01: Editorial Industry Index Hero */}
       <IndustriesHero />
 
-      {/* 02. Six-Sector Editorial Register */}
+      {/* Section 02: Sector Intelligence & Featured Sector Architectures */}
+      <SectorIntelligence />
+
+      {/* Section 03: Full Industry Directory Register */}
       <IndustriesRegister />
 
-      {/* 03. Relevant Sector Blueprints */}
+      {/* Section 04: Relevant Sector Blueprints */}
       <RelevantBlueprints division="all" />
 
-      {/* 04. Custom Domain Engagement CTA */}
+      {/* Section 05: Custom Domain Engagement CTA */}
       <IndustriesCTA />
     </main>
   );

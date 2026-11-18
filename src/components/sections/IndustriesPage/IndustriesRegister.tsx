@@ -1,13 +1,24 @@
 import React from "react";
 import Link from "next/link";
 import { ArrowUpRight, CheckCircle2 } from "lucide-react";
-import { INDUSTRIES_DATA } from "./industries.data";
+import { INITIAL_SECTORS, type SectorRecord } from "./industries.data";
 
-export function IndustriesRegister() {
+interface IndustriesRegisterProps {
+  sectors?: readonly SectorRecord[];
+}
+
+export function IndustriesRegister({
+  sectors = INITIAL_SECTORS,
+}: IndustriesRegisterProps) {
+  const publishedSectors = sectors
+    .filter((s) => s.published)
+    .sort((a, b) => a.displayOrder - b.displayOrder);
+
   return (
     <section
+      id="industry-directory"
       aria-label="Industry Sector Register — Core Disciplines"
-      className="relative w-full bg-[#0C0D0F] text-[#F5F2EC] py-16 sm:py-20 lg:py-24 border-b border-[#252A32]"
+      className="relative w-full bg-[#0C0D0F] text-[#F5F2EC] py-16 sm:py-20 lg:py-24 border-b border-[#252A32] scroll-mt-20"
     >
       <div className="max-w-[1450px] mx-auto px-5 sm:px-8 lg:px-12 space-y-8 sm:space-y-10">
         {/* Main Editorial Headline */}
@@ -15,7 +26,7 @@ export function IndustriesRegister() {
           <h2 className="font-heading font-extrabold text-[clamp(2.35rem,4.4vw,4.25rem)] leading-[0.98] tracking-[-0.035em] text-[#F5F2EC]">
             <span>Domain-specific systems. </span>
             <span className="italic text-[#F06419] font-extrabold">
-              Proven across 06 core sectors.
+              Proven across {String(publishedSectors.length).padStart(2, "0")} sectors.
             </span>
           </h2>
           <p className="text-base sm:text-lg text-[#B8B9BC] leading-relaxed max-w-4xl">
@@ -26,20 +37,22 @@ export function IndustriesRegister() {
         {/* Horizontal Divider Before Sector Register Rows */}
         <div className="h-px bg-[#444444] w-full" />
 
-        {/* 6 Full-Width Horizontal Sector Register Rows */}
+        {/* Full-Width Horizontal Sector Register Rows */}
         <div className="divide-y divide-[#444444]">
-          {INDUSTRIES_DATA.map((sector, idx) => {
+          {publishedSectors.map((sector, idx) => {
+            const formattedNumber = String(idx + 1).padStart(2, "0");
             const isFirst = idx === 0;
 
             return (
               <div
+                id={sector.slug}
                 key={sector.id}
-                className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-0 items-center py-7 sm:py-9 transition-colors group"
+                className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-0 items-center py-7 sm:py-9 transition-colors group scroll-mt-24"
               >
                 {/* Column 1: Number + Divider */}
                 <div className="lg:col-span-1 xl:col-span-1 flex items-center justify-between lg:pr-6">
                   <span className="font-heading font-extrabold text-5xl sm:text-6xl lg:text-[68px] text-[#F06419] leading-none shrink-0 group-hover:text-[#FF762F] transition-colors">
-                    {sector.number}
+                    {formattedNumber}
                   </span>
                   <span
                     aria-hidden="true"
@@ -54,7 +67,7 @@ export function IndustriesRegister() {
                       {sector.tagline}
                     </span>
                     <h3 className="font-heading font-bold text-xl sm:text-2xl lg:text-[23px] text-[#F5F2EC] tracking-tight leading-snug group-hover:text-[#F06419] transition-colors">
-                      {sector.title}
+                      {sector.name}
                     </h3>
                     <p className="text-xs sm:text-sm text-[#B8B9BC] leading-relaxed">
                       {sector.description}
