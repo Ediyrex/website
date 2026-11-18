@@ -14,6 +14,9 @@ import {
   ChevronRight,
   Filter,
 } from "lucide-react";
+import { SkeletonTable } from "@/components/ui/Skeleton";
+import { useDebouncedLoading } from "@/hooks/ui-speed";
+import { startProgressBar, finishProgressBar } from "@/components/ui/OptimisticProgressBar";
 
 interface OutboxStats {
   total: number;
@@ -52,25 +55,42 @@ export function AdminNotificationsClient() {
   const [jobs, setJobs] = useState<OutboxJob[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const [page, setPage] = useState<number>(1);
+  const [limit, setLimit] = useState<number>(20);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 20,
+    total: 0,
+    totalPages: 1,
+    hasNextPage: false,
+    hasPrevPage: false,
+  });
   const [testEmailAddress, setTestEmailAddress] = useState<string>("");
   const [isSendingTest, setIsSendingTest] = useState<boolean>(false);
   const [testMessageResult, setTestMessageResult] = useState<string | null>(null);
   const [isProcessingQueue, setIsProcessingQueue] = useState<boolean>(false);
   const [retryingId, setRetryingId] = useState<string | null>(null);
 
+  // Suppress loader flashes under 300ms ("no loader under 300ms")
+  const showSkeleton = useDebouncedLoading(isLoading, { delayMs: 300 });
+
   const fetchOutboxData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const url =
-        selectedStatus === "all"
-          ? "/api/v1/admin/notifications"
-          : `/api/v1/admin/notifications?status=${selectedStatus}`;
-      const res = await fetch(url);
+      const params = new URLSearchParams();
+      if (selectedStatus !== "all") params.set("status", selectedStatus);
+      params.set("page", String(page));
+      params.set("limit", String(limit));
+
+      const res = await fetch(`/api/v1/admin/notifications?${params.toString()}`);
       if (res.ok) {
         const json = await res.json();
         if (json.data) {
           setStats(json.data.stats || stats);
           setJobs(json.data.jobs || []);
+          if (json.data.pagination) {
+            setPagination(json.data.pagination);
+          }
         }
       }
     } catch (err) {
@@ -78,7 +98,7 @@ export function AdminNotificationsClient() {
     } finally {
       setIsLoading(false);
     }
-  }, [selectedStatus]);
+  }, [selectedStatus, page, limit]);
 
   useEffect(() => {
     fetchOutboxData();
@@ -133,6 +153,29 @@ export function AdminNotificationsClient() {
 
   const handleRetryJob = async (jobId: string) => {
     setRetryingId(jobId);
+    startProgressBar();
+
+    // Optimistic UI: Snapshot current state for instantaneous UI transition
+    const prevJobs = [...jobs];
+    const prevStats = { ...stats };
+
+    // Update job status immediately in client state
+    setJobs((prev) =>
+      prev.map((j) =>
+        j.id === jobId
+          ? { ...j, status: "pending", lastError: null, attemptCount: 0 }
+          : j
+      )
+    );
+
+    // Optimistically update stat pill counts
+    setStats((prev) => ({
+      ...prev,
+      failed: Math.max(0, prev.failed - 1),
+      deadLetter: Math.max(0, prev.deadLetter - (prevJobs.find((j) => j.id === jobId)?.status === "dead_letter" ? 1 : 0)),
+      pending: prev.pending + 1,
+    }));
+
     try {
       const res = await fetch("/api/v1/admin/notifications/retry", {
         method: "POST",
@@ -141,10 +184,18 @@ export function AdminNotificationsClient() {
       });
       if (res.ok) {
         await fetchOutboxData();
+      } else {
+        // Rollback on server error
+        setJobs(prevJobs);
+        setStats(prevStats);
       }
     } catch (err) {
       console.error("Failed to retry job:", err);
+      // Rollback on network failure
+      setJobs(prevJobs);
+      setStats(prevStats);
     } finally {
+      finishProgressBar();
       setRetryingId(null);
     }
   };
@@ -307,11 +358,10 @@ export function AdminNotificationsClient() {
 
         {testMessageResult && (
           <div
-            className={`mt-3 p-3 rounded-lg text-xs font-mono ${
-              testMessageResult.startsWith("Test email dispatched")
-                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                : "bg-rose-500/10 text-rose-400 border border-rose-500/20"
-            }`}
+            className={`mt-3 p-3 rounded-lg text-xs font-mono ${testMessageResult.startsWith("Test email dispatched")
+              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+              : "bg-rose-500/10 text-rose-400 border border-rose-500/20"
+              }`}
           >
             {testMessageResult}
           </div>
@@ -326,12 +376,14 @@ export function AdminNotificationsClient() {
             {["all", "pending", "sent", "failed", "dead_letter"].map((statusKey) => (
               <button
                 key={statusKey}
-                onClick={() => setSelectedStatus(statusKey)}
-                className={`px-3 py-1 rounded text-xs font-mono transition-colors capitalize ${
-                  selectedStatus === statusKey
-                    ? "bg-[#D6B77A] text-[#08090B] font-semibold"
-                    : "text-[#B2B4BA] hover:text-[#F5F3EE] hover:bg-[#1A1F27]"
-                }`}
+                onClick={() => {
+                  setSelectedStatus(statusKey);
+                  setPage(1);
+                }}
+                className={`px-3 py-1 rounded text-xs font-mono transition-colors capitalize ${selectedStatus === statusKey
+                  ? "bg-[#D6B77A] text-[#08090B] font-semibold"
+                  : "text-[#B2B4BA] hover:text-[#F5F3EE] hover:bg-[#1A1F27]"
+                  }`}
               >
                 {statusKey === "dead_letter" ? "Dead Letter" : statusKey}
               </button>
@@ -344,9 +396,9 @@ export function AdminNotificationsClient() {
         </div>
 
         {/* Table Content */}
-        {isLoading ? (
-          <div className="p-12 text-center text-xs font-mono text-[#777D87]">
-            Loading notification outbox...
+        {showSkeleton ? (
+          <div className="p-4">
+            <SkeletonTable rows={5} columns={6} />
           </div>
         ) : jobs.length === 0 ? (
           <div className="p-12 text-center text-xs font-mono text-[#777D87]">
@@ -416,17 +468,17 @@ export function AdminNotificationsClient() {
                       <td className="py-3 px-4 text-right">
                         {(job.status === "failed" ||
                           job.status === "dead_letter") && (
-                          <button
-                            onClick={() => handleRetryJob(job.id)}
-                            disabled={retryingId === job.id}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-mono bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/20 transition-colors disabled:opacity-50"
-                          >
-                            <RefreshCw
-                              className={`w-3 h-3 ${retryingId === job.id ? "animate-spin" : ""}`}
-                            />
-                            Retry
-                          </button>
-                        )}
+                            <button
+                              onClick={() => handleRetryJob(job.id)}
+                              disabled={retryingId === job.id}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-mono bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/20 transition-colors disabled:opacity-50"
+                            >
+                              <RefreshCw
+                                className={`w-3 h-3 ${retryingId === job.id ? "animate-spin" : ""}`}
+                              />
+                              Retry
+                            </button>
+                          )}
                       </td>
                     </tr>
                   );
@@ -435,6 +487,51 @@ export function AdminNotificationsClient() {
             </table>
           </div>
         )}
+
+        {/* Pagination Footer */}
+        <div className="p-4 border-t border-[#252A32] flex flex-wrap items-center justify-between gap-4 bg-[#0E1014] text-xs font-mono text-[#777D87]">
+          <div className="flex items-center gap-2">
+            <span>Rows:</span>
+            <select
+              value={limit}
+              onChange={(e) => {
+                setLimit(Number(e.target.value));
+                setPage(1);
+              }}
+              className="bg-[#12151A] border border-[#252A32] rounded px-2 py-1 text-xs text-[#F5F3EE] focus:outline-none focus:border-[#D6B77A]"
+            >
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+            </select>
+            <span className="ml-2">
+              Showing {jobs.length > 0 ? (page - 1) * limit + 1 : 0} to{" "}
+              {Math.min(page * limit, pagination.total)} of {pagination.total} jobs
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={!pagination.hasPrevPage}
+              className="px-3 py-1 rounded border border-[#252A32] bg-[#12151A] text-[#F5F3EE] hover:bg-[#1A1F27] disabled:opacity-40 disabled:pointer-events-none transition-colors"
+            >
+              Previous
+            </button>
+            <span className="px-2">
+              Page {pagination.page} of {pagination.totalPages}
+            </span>
+            <button
+              type="button"
+              onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
+              disabled={!pagination.hasNextPage}
+              className="px-3 py-1 rounded border border-[#252A32] bg-[#12151A] text-[#F5F3EE] hover:bg-[#1A1F27] disabled:opacity-40 disabled:pointer-events-none transition-colors"
+            >
+              Next
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

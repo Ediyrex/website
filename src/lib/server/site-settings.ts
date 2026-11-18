@@ -54,22 +54,22 @@ export const DEFAULT_SOCIAL_PROFILES: SocialProfileItem[] = [
 ];
 
 export const DEFAULT_SITE_SETTINGS = {
-  siteName: "Ediyrex Studio",
+  siteName: "EDIYREX Studio",
   tagline: "Creative Technology, Media, Digital & AI",
   businessEmail: "ediyrex@gmail.com",
-  phoneNumber: "",
-  studioLocation: "India & Global",
+  phoneNumber: "+91 98765 43210",
+  studioLocation: "Mumbai & Bangalore, India · Global Clients",
   officeHours: "Mon-Fri · 10:00 AM - 7:00 PM IST",
   primaryContactNote: "Response within 1 business day for qualified inquiries.",
   availabilityEnabled: true,
   availabilityLabel: "Available for selected projects",
   footerNote:
     "Independent creative technology studio uniting commercial media production, digital experiences, and intelligent AI systems.",
-  copyrightText: "Ediyrex Studio. All rights reserved.",
+  copyrightText: "EDIYREX STUDIO®. All rights reserved.",
   defaultLanguage: "en-US",
   defaultTimezone: "Asia/Kolkata",
-  logoUrl: "",
-  faviconUrl: "",
+  logoUrl: "/images/logo/ediyrex-logo.png",
+  faviconUrl: "/favicon.ico",
   socialLinks: {
     github: "",
     linkedin: "",
@@ -125,7 +125,7 @@ export const DEFAULT_SITE_SETTINGS = {
     } as BannerItem,
     defaultOgImageUrl: "",
     defaultPlaceholderUrl: "",
-    fallbackLogoUrl: "",
+    fallbackLogoUrl: "/images/logo/ediyrex-logo.png",
     faviconUrl: "",
     defaultThumbnailUrl: "",
   },
@@ -284,8 +284,8 @@ export async function loadMergedSiteSettings(db: DbClient) {
       typeof robotsRaw.allowIndex === "boolean"
         ? robotsRaw.allowIndex
         : typeof seo.robotsAllowIndex === "boolean"
-        ? seo.robotsAllowIndex
-        : DEFAULT_SITE_SETTINGS.robotsAllowIndex,
+          ? seo.robotsAllowIndex
+          : DEFAULT_SITE_SETTINGS.robotsAllowIndex,
     autoGenerateSitemap:
       typeof seo.autoGenerateSitemap === "boolean"
         ? seo.autoGenerateSitemap
@@ -368,7 +368,7 @@ export async function loadMergedSiteSettings(db: DbClient) {
         DEFAULT_SITE_SETTINGS.integrations.gscVerificationCode,
       captchaProvider:
         integrationsRaw.captchaProvider === "turnstile" ||
-        integrationsRaw.captchaProvider === "recaptcha"
+          integrationsRaw.captchaProvider === "recaptcha"
           ? (integrationsRaw.captchaProvider as "turnstile" | "recaptcha")
           : integrationsRaw.captchaProvider === "none"
             ? ("none" as const)
@@ -383,8 +383,8 @@ export async function loadMergedSiteSettings(db: DbClient) {
     integrationStatus: {
       cloudinaryConfigured: Boolean(
         process.env.CLOUDINARY_CLOUD_NAME &&
-          process.env.CLOUDINARY_API_KEY &&
-          process.env.CLOUDINARY_API_SECRET
+        process.env.CLOUDINARY_API_KEY &&
+        process.env.CLOUDINARY_API_SECRET
       ),
       cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME || null,
       emailConfigured: Boolean(
@@ -393,8 +393,8 @@ export async function loadMergedSiteSettings(db: DbClient) {
       emailProviderLabel: process.env.RESEND_API_KEY
         ? "Resend"
         : process.env.SMTP_HOST
-        ? "SMTP"
-        : "Not Configured",
+          ? "SMTP"
+          : "Not Configured",
       captchaSecretConfigured: Boolean(
         process.env.TURNSTILE_SECRET_KEY || process.env.RECAPTCHA_SECRET_KEY
       ),

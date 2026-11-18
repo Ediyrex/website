@@ -4,14 +4,14 @@ import {
   ArrowUpRight,
   Bot,
   Database,
-  Sparkles,
+  Cpu,
   Workflow,
   Zap,
   Layers,
 } from "lucide-react";
 import type { SelectedWorkProject } from "@/data/projects";
 
-const FEATURED_PILL_ICONS = [Sparkles, Workflow, Layers] as const;
+const FEATURED_PILL_ICONS = [Cpu, Workflow, Layers] as const;
 
 interface FeaturedCaseStudyProps {
   project: SelectedWorkProject;
@@ -144,11 +144,10 @@ export function FeaturedCaseStudy({ project }: FeaturedCaseStudyProps) {
                   className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden"
                 >
                   <div
-                    className={`h-full rounded-full ${
-                      i === 0 || i === 2
-                        ? "bg-gradient-to-r from-[#F36B16] to-[#FF9A52]"
-                        : "bg-white/30"
-                    }`}
+                    className={`h-full rounded-full ${i === 0 || i === 2
+                      ? "bg-gradient-to-r from-[#F36B16] to-[#FF9A52]"
+                      : "bg-white/30"
+                      }`}
                     style={{ width: `${pct}%` }}
                   />
                 </div>
@@ -198,9 +197,9 @@ export function FeaturedCaseStudy({ project }: FeaturedCaseStudyProps) {
 
               {/* Connected System Nodes */}
               <div className="relative z-10 grid grid-cols-3 gap-3 items-center w-full h-full">
-                {/* Node 1: Orchestrator Sparkles */}
+                {/* Node 1: Orchestrator Engine */}
                 <div className="justify-self-start self-end mb-2 w-12 h-12 rounded-xl border border-white/20 bg-white/[0.06] flex items-center justify-center text-[#EAE4DD]">
-                  <Sparkles className="w-5 h-5" strokeWidth={1.6} />
+                  <Cpu className="w-5 h-5" strokeWidth={1.6} />
                 </div>
 
                 {/* Middle Stack: AI Agent + Glowing Execution Node */}
