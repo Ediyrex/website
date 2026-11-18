@@ -1,12 +1,13 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { handleApiError } from "@/lib/server/errors";
 import { requireAdminRole } from "@/lib/server/session";
 import {
-  createCloudinarySignature,
+  createSignedUploadParams,
   getCloudinaryConfig,
+  CLOUDINARY_FOLDERS,
 } from "@/lib/server/cloudinary";
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   try {
     const auth = await requireAdminRole(["admin", "editor"]);
     if (auth.errorResponse) return auth.errorResponse;
@@ -23,26 +24,33 @@ export async function POST() {
       });
     }
 
-    const folder = "ediyrex-cms";
-    const timestamp = Math.floor(Date.now() / 1000);
-    const signature = createCloudinarySignature(
-      { folder, timestamp },
-      config.apiSecret
-    );
+    let body: { folder?: string; tags?: string[]; resourceType?: "image" | "video" | "auto" } = {};
+    try {
+      body = await request.json();
+    } catch {
+      // Body is optional
+    }
+
+    const folder = body.folder || CLOUDINARY_FOLDERS.CMS;
+    const signedParams = createSignedUploadParams({
+      folder,
+      tags: body.tags,
+      resourceType: body.resourceType,
+    });
 
     return NextResponse.json({
       data: {
         configured: true,
         mode: "cloudinary",
-        cloudName: config.cloudName,
-        apiKey: config.apiKey,
-        timestamp,
-        folder,
-        signature,
+        cloudName: signedParams.cloudName,
+        apiKey: signedParams.apiKey,
+        timestamp: signedParams.timestamp,
+        folder: signedParams.folder,
+        signature: signedParams.signature,
+        uploadUrl: signedParams.uploadUrl,
       },
     });
   } catch (err) {
     return handleApiError(err, "POST /api/v1/admin/media/signature");
   }
 }
-
