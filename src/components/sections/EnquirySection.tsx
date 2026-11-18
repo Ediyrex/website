@@ -11,6 +11,7 @@ import { SITE_CONFIG } from "@/config/site";
 import { trackEvent } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 import { useBookingModal } from "@/features/bookings";
+import { TurnstileWidget, useTurnstile } from "@/features/turnstile";
 
 const BUDGET_TIERS: Record<BudgetCurrency, { value: string; label: string }[]> = {
   USD: [
@@ -79,6 +80,7 @@ export function EnquirySection() {
   const [isStored, setIsStored] = useState(false);
   const [referenceId, setReferenceId] = useState("");
   const [serverError, setServerError] = useState("");
+  const turnstile = useTurnstile();
 
   const activeCurrency: BudgetCurrency = formData.budgetCurrency || "USD";
 
@@ -110,7 +112,10 @@ export function EnquirySection() {
     setServerError("");
     setErrors({});
 
-    const result = enquirySchema.safeParse(formData);
+    const result = enquirySchema.safeParse({
+      ...formData,
+      turnstileToken: turnstile.token || undefined,
+    });
     if (!result.success) {
       const fieldErrors: Record<string, string> = {};
       result.error.issues.forEach((err) => {

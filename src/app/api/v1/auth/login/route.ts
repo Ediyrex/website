@@ -19,6 +19,10 @@ import {
   apiUnauthorized,
 } from "@/lib/server/api-response";
 import { logger } from "@/lib/server/logger";
+import {
+  verifyTurnstileToken,
+  TURNSTILE_ACTIONS,
+} from "@/lib/server/turnstile";
 
 export async function POST(request: NextRequest) {
   try {
@@ -47,6 +51,23 @@ export async function POST(request: NextRequest) {
       return apiBadRequest(
         "Invalid credentials format.",
         parsed.error.flatten().fieldErrors
+      );
+    }
+
+    // Verify Cloudflare Turnstile token for admin login bot protection
+    const turnstileCheck = await verifyTurnstileToken({
+      token: parsed.data.turnstileToken,
+      expectedAction: TURNSTILE_ACTIONS.ADMIN_LOGIN,
+      remoteIp: clientIp,
+    });
+
+    if (!turnstileCheck.success) {
+      logger.warn(
+        { ipHash, error: turnstileCheck.error },
+        "Admin login rejected by Turnstile bot protection"
+      );
+      return apiBadRequest(
+        turnstileCheck.error || "Security verification failed. Please refresh and try again."
       );
     }
 

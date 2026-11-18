@@ -6,6 +6,7 @@ import Link from "next/link";
 import { AlertCircle, Eye, EyeOff, Loader2, Lock } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { loginSchema } from "@/lib/validations/auth";
+import { TurnstileWidget, useTurnstile } from "@/features/turnstile";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -14,12 +15,17 @@ export default function AdminLoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const turnstile = useTurnstile();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage("");
 
-    const parsed = loginSchema.safeParse({ email, password });
+    const parsed = loginSchema.safeParse({
+      email,
+      password,
+      turnstileToken: turnstile.token || undefined,
+    });
     if (!parsed.success) {
       setErrorMessage(
         parsed.error.issues[0]?.message || "Please check your credentials."
@@ -38,6 +44,7 @@ export default function AdminLoginPage() {
       const json = await res.json();
       if (!res.ok) {
         setErrorMessage(json.message || "Invalid email or password.");
+        turnstile.reset();
         return;
       }
 
@@ -45,6 +52,7 @@ export default function AdminLoginPage() {
       router.refresh();
     } catch {
       setErrorMessage("Unable to reach authentication server.");
+      turnstile.reset();
     } finally {
       setIsSubmitting(false);
     }
@@ -134,6 +142,14 @@ export default function AdminLoginPage() {
                 </button>
               </div>
             </div>
+
+            <TurnstileWidget
+              action="admin_login"
+              onSuccess={turnstile.onSuccess}
+              onError={turnstile.onError}
+              onExpire={turnstile.onExpire}
+              theme="dark"
+            />
 
             <Button
               type="submit"
