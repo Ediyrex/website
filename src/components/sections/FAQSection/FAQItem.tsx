@@ -68,13 +68,12 @@ export function FAQItem({ item, isOpen, onToggle }: FAQItemProps) {
         id={panelId}
         role="region"
         aria-labelledby={buttonId}
+        style={{ gridTemplateRows: isOpen ? "1fr" : "0fr" }}
         className={`grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-          isOpen
-            ? "grid-template-rows-[1fr] opacity-100"
-            : "grid-template-rows-[0fr] opacity-0 pointer-events-none"
+          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
       >
-        <div className="overflow-hidden">
+        <div className="overflow-hidden min-h-0">
           <div className="px-4 pb-5 pl-[44px] sm:px-5 sm:pb-6 sm:pl-[62px]">
             <p className="max-w-[780px] font-[var(--font-space-grotesk)] text-[15.5px] leading-[1.65] text-[#49433E] sm:text-[17px]">
               {item.answer}

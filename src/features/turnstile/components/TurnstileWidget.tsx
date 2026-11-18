@@ -85,22 +85,28 @@ export const TurnstileWidget = forwardRef<TurnstileWidgetRef, TurnstileWidgetPro
             theme,
             size,
             callback: (token: string) => {
-              if (isMounted) {
-                setRenderError(null);
-                onSuccess(token);
-              }
+              setTimeout(() => {
+                if (isMounted) {
+                  setRenderError(null);
+                  onSuccess(token);
+                }
+              }, 0);
             },
             "error-callback": (err: any) => {
-              if (isMounted) {
-                setRenderError("Security challenge verification failed. Please retry.");
-                onError?.(err);
-              }
+              setTimeout(() => {
+                if (isMounted) {
+                  setRenderError("Security challenge verification failed. Please retry.");
+                  onError?.(err);
+                }
+              }, 0);
             },
             "expired-callback": () => {
-              if (isMounted) {
-                setRenderError("Challenge expired. Please verify again.");
-                onExpire?.();
-              }
+              setTimeout(() => {
+                if (isMounted) {
+                  setRenderError("Challenge expired. Please verify again.");
+                  onExpire?.();
+                }
+              }, 0);
             },
           });
 

@@ -42,7 +42,10 @@ export default withSentryConfig(nextConfig, {
   project: "website",
   silent: !process.env.CI,
   widenClientFileUpload: true,
-  reactComponentAnnotation: { enabled: true },
+  reactComponentAnnotation: { enabled: false },
+  _experimental: {
+    turbopackReactComponentAnnotation: { enabled: false },
+  },
   tunnelRoute: "/monitoring",
 });
 

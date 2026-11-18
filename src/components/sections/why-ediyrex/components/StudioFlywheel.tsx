@@ -10,7 +10,19 @@ import { FlywheelNode } from "./FlywheelNode";
 
 const FlywheelScene3D = dynamic(
   () => import("./FlywheelScene3D").then((m) => m.FlywheelScene3D),
-  { ssr: false }
+  {
+    ssr: false,
+    loading: () => (
+      <div
+        aria-hidden="true"
+        className="w-full h-full rounded-full opacity-40 blur-2xl pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse at center, rgba(255,101,0,0.2) 0%, rgba(214,183,122,0.1) 50%, transparent 70%)",
+        }}
+      />
+    ),
+  }
 );
 
 class FlywheelErrorBoundary extends React.Component<
@@ -106,7 +118,9 @@ export function StudioFlywheel() {
         {/* Real 3D WebGL Refractive Glass Loops */}
         <div className="absolute inset-0 z-10">
           <FlywheelErrorBoundary>
-            <FlywheelScene3D />
+            <React.Suspense fallback={null}>
+              <FlywheelScene3D />
+            </React.Suspense>
           </FlywheelErrorBoundary>
         </div>
 

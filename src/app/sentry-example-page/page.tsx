@@ -26,7 +26,6 @@ export default function SentryExamplePage() {
           <button
             type="button"
             onClick={() => {
-              setHasError(true);
               // Trigger client test error
               Sentry.captureMessage("Sentry test message from /sentry-example-page");
               try {
@@ -34,7 +33,7 @@ export default function SentryExamplePage() {
                 myUndefinedFunction();
               } catch (error) {
                 Sentry.captureException(error);
-                throw error;
+                setHasError(true);
               }
             }}
             className="w-full py-3 px-4 rounded-xl bg-[#E85D04] hover:bg-[#F97316] text-[#07090D] font-semibold text-sm transition-all duration-200 active:scale-[0.98] shadow-lg shadow-[#E85D04]/20"

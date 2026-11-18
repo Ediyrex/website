@@ -95,13 +95,12 @@ export function DivisionAccordion({
         id={panelId}
         role="region"
         aria-labelledby={headerId}
+        style={{ gridTemplateRows: isExpanded ? "1fr" : "0fr" }}
         className={`grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-          isExpanded
-            ? "grid-template-rows-[1fr] opacity-100"
-            : "grid-template-rows-[0fr] opacity-0 pointer-events-none"
+          isExpanded ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
       >
-        <div className="overflow-hidden">
+        <div className="overflow-hidden min-h-0">
           <ExpandedCapabilities division={division} onCollapse={onToggle} />
         </div>
       </div>

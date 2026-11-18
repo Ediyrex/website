@@ -1,9 +1,52 @@
 "use client";
 
-import React, { useMemo, useRef, useEffect, useState } from "react";
+import React, { useMemo, useRef, useEffect, useState, Suspense } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { ContactShadows, Environment, Lightformer } from "@react-three/drei";
 import * as THREE from "three";
+
+// Sentry & Tooling JSX annotation compatibility safeguard:
+// Sentry Turbopack loader injects data-sentry-source-file / data-sentry-component attributes into JSX.
+// React Three Fiber treats dashed props as pierced property paths (e.g. obj["data"]["sentry"]["source"]["file"]).
+// By providing a recursive Proxy for "data" on Three.js prototypes, pierced writes resolve safely without throwing.
+if (typeof window !== "undefined") {
+  const createSafeR3FProxy = (): any => {
+    return new Proxy(
+      {},
+      {
+        get: (_target, prop) => {
+          if (prop === "toJSON") return () => ({});
+          if (typeof prop === "symbol") return undefined;
+          return createSafeR3FProxy();
+        },
+        set: () => true,
+      }
+    );
+  };
+
+  const polyfillProto = (proto: any) => {
+    if (!proto || Object.prototype.hasOwnProperty.call(proto, "data")) return;
+    try {
+      Object.defineProperty(proto, "data", {
+        get() {
+          if (!this._r3fSafeData) {
+            this._r3fSafeData = createSafeR3FProxy();
+          }
+          return this._r3fSafeData;
+        },
+        set() {},
+        configurable: true,
+        enumerable: false,
+      });
+    } catch {
+      // Ignore in non-extensible environments
+    }
+  };
+
+  polyfillProto(THREE.Object3D.prototype);
+  polyfillProto(THREE.Material.prototype);
+  polyfillProto(THREE.BufferGeometry.prototype);
+}
 
 interface InfinityRingsProps {
   reduceMotion: boolean;
@@ -255,15 +298,30 @@ function FlywheelGyroscope({ reduceMotion }: InfinityRingsProps) {
 }
 
 export function FlywheelScene3D() {
+  const [mounted, setMounted] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduceMotion(mq.matches);
     const update = () => setReduceMotion(mq.matches);
-    update();
     mq.addEventListener("change", update);
     return () => mq.removeEventListener("change", update);
   }, []);
+
+  if (!mounted) {
+    return (
+      <div
+        aria-hidden="true"
+        className="w-full h-full rounded-full opacity-40 blur-2xl pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse at center, rgba(255,101,0,0.2) 0%, rgba(214,183,122,0.1) 50%, transparent 70%)",
+        }}
+      />
+    );
+  }
 
   return (
     <div className="w-full h-full pointer-events-auto">
@@ -285,50 +343,52 @@ export function FlywheelScene3D() {
         <pointLight position={[-2.4, -1.2, 1.8]} intensity={2.2} color="#ff9642" distance={6} />
         <pointLight position={[2.4, 1.2, 1.8]} intensity={2.0} color="#ff9642" distance={6} />
 
-        {/* Procedural Studio Reflection Lightformers for Real Glass Speculars */}
-        <Environment resolution={256}>
-          <group rotation={[-Math.PI / 4, 0, 0]}>
-            <Lightformer
-              form="rect"
-              intensity={4.5}
-              color="#ffffff"
-              scale={[8, 2.5, 1]}
-              position={[0, 4, 3]}
-            />
-            <Lightformer
-              form="rect"
-              intensity={3.8}
-              color="#ff8a30"
-              scale={[7, 2, 1]}
-              position={[-4, -3, 2]}
-            />
-            <Lightformer
-              form="rect"
-              intensity={3.5}
-              color="#ffb470"
-              scale={[6, 2, 1]}
-              position={[4, 2, 2]}
-            />
-            <Lightformer
-              form="ring"
-              intensity={2.4}
-              color="#fff4e6"
-              scale={5}
-              position={[0, 0, -4]}
-            />
-          </group>
-        </Environment>
+        <Suspense fallback={null}>
+          {/* Procedural Studio Reflection Lightformers for Real Glass Speculars */}
+          <Environment resolution={256}>
+            <group rotation={[-Math.PI / 4, 0, 0]}>
+              <Lightformer
+                form="rect"
+                intensity={4.5}
+                color="#ffffff"
+                scale={[8, 2.5, 1]}
+                position={[0, 4, 3]}
+              />
+              <Lightformer
+                form="rect"
+                intensity={3.8}
+                color="#ff8a30"
+                scale={[7, 2, 1]}
+                position={[-4, -3, 2]}
+              />
+              <Lightformer
+                form="rect"
+                intensity={3.5}
+                color="#ffb470"
+                scale={[6, 2, 1]}
+                position={[4, 2, 2]}
+              />
+              <Lightformer
+                form="ring"
+                intensity={2.4}
+                color="#fff4e6"
+                scale={5}
+                position={[0, 0, -4]}
+              />
+            </group>
+          </Environment>
 
-        <FlywheelGyroscope reduceMotion={reduceMotion} />
+          <FlywheelGyroscope reduceMotion={reduceMotion} />
 
-        <ContactShadows
-          position={[0, -1.72, 0]}
-          opacity={0.26}
-          scale={9}
-          blur={2.4}
-          far={3.5}
-          color="#5c2b0a"
-        />
+          <ContactShadows
+            position={[0, -1.72, 0]}
+            opacity={0.26}
+            scale={9}
+            blur={2.4}
+            far={3.5}
+            color="#5c2b0a"
+          />
+        </Suspense>
       </Canvas>
     </div>
   );
