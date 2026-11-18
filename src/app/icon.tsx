@@ -1,6 +1,4 @@
 import { ImageResponse } from "next/og";
-import fs from "fs";
-import path from "path";
 
 export const size = {
   width: 32,
@@ -10,18 +8,6 @@ export const size = {
 export const contentType = "image/png";
 
 export default function Icon() {
-  const filePath = path.join(
-    process.cwd(),
-    "public/images/logo/ediyrex-emblem.png"
-  );
-  let dataUrl = "";
-  try {
-    const file = fs.readFileSync(filePath);
-    dataUrl = `data:image/png;base64,${file.toString("base64")}`;
-  } catch {
-    // Graceful fallback
-  }
-
   return new ImageResponse(
     (
       <div
@@ -31,28 +17,34 @@ export default function Icon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: "transparent",
+          backgroundColor: "#08090B",
+          borderRadius: "7px",
+          border: "1.5px solid #D6B77A",
+          position: "relative",
         }}
       >
-        {dataUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={dataUrl}
-            alt="EDYREX"
-            style={{ width: "28px", height: "28px", objectFit: "contain" }}
-          />
-        ) : (
-          <span
-            style={{
-              color: "#F5F3EE",
-              fontSize: 20,
-              fontWeight: 900,
-              fontFamily: "sans-serif",
-            }}
-          >
-            E
-          </span>
-        )}
+        <span
+          style={{
+            color: "#F5F3EE",
+            fontSize: 20,
+            fontWeight: 900,
+            fontFamily: "sans-serif",
+            letterSpacing: "-0.05em",
+          }}
+        >
+          E
+        </span>
+        <div
+          style={{
+            position: "absolute",
+            top: "5px",
+            right: "5px",
+            width: "5px",
+            height: "5px",
+            borderRadius: "50%",
+            backgroundColor: "#F06419",
+          }}
+        />
       </div>
     ),
     { ...size }

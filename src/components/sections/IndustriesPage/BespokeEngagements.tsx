@@ -34,9 +34,9 @@ export function BespokeEngagements({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
           {/* Left Column (58%): Bespoke Manifesto, Supporting Copy & Actions */}
           <div className="lg:col-span-7 xl:col-span-7 space-y-6 sm:space-y-8">
-            <h2 className="font-heading font-extrabold text-[clamp(2.4rem,4.5vw,4.5rem)] leading-[0.98] tracking-[-0.035em] text-[#F5F2EC] text-balance">
+            <h2 className="font-heading font-extrabold text-[clamp(2.4rem,4.5vw,4.5rem)] leading-[0.98] tracking-[-0.035em] text-[#F5F2EC]">
               <span className="block">{config.headlineLine1}</span>
-              <span className="block text-[#F06419] font-extrabold">
+              <span className="block italic text-[#F06419] font-extrabold">
                 {config.headlineLine2}
               </span>
             </h2>
@@ -48,7 +48,7 @@ export function BespokeEngagements({
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 sm:gap-4 pt-2 sm:pt-4">
               <Link
                 href={config.primaryCta.route}
-                className="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-xl bg-[#F06419] text-[#171717] font-bold text-xs sm:text-[13px] uppercase font-heading tracking-wide hover:bg-[#E05308] transition-colors shadow-sm shrink-0"
+                className="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-xl bg-[#F06419] text-[#171717] font-bold text-xs sm:text-[13px] uppercase font-mono tracking-wide hover:bg-[#E05308] transition-colors shadow-sm shrink-0"
               >
                 <span>{config.primaryCta.label}</span>
                 <ArrowUpRight className="w-4 h-4 shrink-0" />
@@ -57,7 +57,7 @@ export function BespokeEngagements({
               <a
                 href={`#${config.secondaryCta.targetId}`}
                 onClick={scrollToDisciplines}
-                className="inline-flex items-center justify-center gap-2 px-6 py-4 rounded-xl border border-[#444444] text-[#F5F2EC] font-semibold text-xs sm:text-[13px] uppercase font-heading tracking-wide hover:border-[#F06419] hover:text-[#F06419] hover:bg-[#F06419]/10 transition-all shrink-0"
+                className="inline-flex items-center justify-center gap-2 px-6 py-4 rounded-xl border border-[#444444] text-[#F5F2EC] font-semibold text-xs sm:text-[13px] uppercase font-mono tracking-wide hover:border-[#F06419] hover:text-[#F06419] hover:bg-[#F06419]/10 transition-all shrink-0"
               >
                 <span>{config.secondaryCta.label}</span>
                 <ArrowUpRight className="w-4 h-4 shrink-0" />

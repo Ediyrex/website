@@ -63,13 +63,14 @@ export function AboutHero() {
             <h1
               data-about-reveal
               style={{ fontFamily: "var(--font-archivo-narrow), sans-serif" }}
-              className="text-[clamp(2.75rem,5.2vw,5.25rem)] font-bold uppercase leading-[0.9] tracking-[-0.025em] text-balance"
+              className="text-[clamp(2.75rem,5.2vw,5.25rem)] font-bold uppercase leading-[0.9] tracking-[-0.025em]"
             >
               <span className="block text-[#F5F2EC]">ONE INTEGRATED</span>
               <span className="block text-[#F5F2EC]">STUDIO.</span>
-              <span className="mt-1 block text-[#F06419]">
-                FOUR CONNECTED DISCIPLINES.
+              <span className="mt-1 block italic text-[#F06419]">
+                FOUR CONNECTED
               </span>
+              <span className="block italic text-[#F06419]">DISCIPLINES.</span>
             </h1>
 
             <p

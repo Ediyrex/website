@@ -151,7 +151,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             setSearchResults(json.data);
           }
         })
-        .catch(() => {})
+        .catch(() => { })
         .finally(() => {
           if (!ignore) setSearching(false);
         });

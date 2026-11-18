@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { AlertCircle, Eye, EyeOff, Loader2, Lock } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { loginSchema } from "@/lib/validations/auth";
@@ -62,28 +61,13 @@ export default function AdminLoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#08090B] px-5 py-12">
       <div className="w-full max-w-md space-y-6">
-        <div className="text-center space-y-3">
+        <div className="text-center space-y-2">
           <Link
             href="/"
-            aria-label="EDIYREX Studio - Home"
-            className="inline-flex flex-col items-center gap-2.5 group"
+            className="inline-flex items-center gap-2 font-heading font-bold text-2xl text-[#F5F3EE]"
           >
-            <Image
-              src="/images/logo/ediyrex-emblem.png"
-              alt=""
-              width={56}
-              height={56}
-              priority
-              className="h-14 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
-            />
-            <Image
-              src="/images/logo/ediyrex-wordmark.png"
-              alt="EDIYREX"
-              width={140}
-              height={24}
-              priority
-              className="h-5 w-auto object-contain"
-            />
+            <span>Ediyrex</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#D6B77A]" />
           </Link>
           <p className="text-xs font-mono uppercase tracking-[0.16em] text-[#777D87]">
             Studio Administration

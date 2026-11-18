@@ -8,7 +8,6 @@ import {
   ArrowRight,
   ArrowLeft,
   Mail,
-  Phone,
   Link2,
   Calendar,
   Info,
@@ -24,7 +23,6 @@ import { TurnstileWidget, useTurnstile } from "@/features/turnstile";
 import { useWaitExplanation } from "@/hooks/ui-speed";
 import { startProgressBar, finishProgressBar } from "@/components/ui/OptimisticProgressBar";
 import { LinkPreview } from "@/components/ui/LinkPreview";
-import { SITE_CONFIG } from "@/config/site";
 
 export type EngagementModel =
   | "Project-Based"
@@ -520,17 +518,16 @@ export function ProjectBriefDesk() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <span className="font-heading font-extrabold text-[13px] uppercase tracking-wider text-[#F5F2EC] block leading-snug">
-                    STUDIO INBOX
+                    EDYREX STUDIO
                   </span>
                   <a
-                    href={`mailto:${SITE_CONFIG.contact.email}`}
+                    href="mailto:ediyrex@gmail.com"
                     className="font-mono text-sm text-[#F06419] hover:underline block my-0.5 truncate font-medium"
-                    aria-label={`Email ${SITE_CONFIG.contact.email}`}
                   >
-                    {SITE_CONFIG.contact.email}
+                    ediyrex@gmail.com
                   </a>
                   <span className="font-mono text-xs text-[#898D94] block">
-                    Response within 24h
+                    India &amp; Global
                   </span>
                 </div>
                 <button
@@ -542,28 +539,6 @@ export function ProjectBriefDesk() {
                 >
                   {emailCopied ? <Check className="w-3.5 h-3.5 text-[#56C58B]" /> : <Copy className="w-3.5 h-3.5" />}
                 </button>
-              </div>
-
-              {/* Direct Phone Line */}
-              <div className="flex items-center gap-4 p-4 rounded-[14px] bg-[#121519] border border-[#292E35] hover:border-[#3D4450] transition-colors">
-                <div className="w-12 h-12 rounded-[10px] border border-[#D9B875]/60 bg-[#0E1012] flex items-center justify-center shrink-0 text-[#D9B875]">
-                  <Phone className="w-5 h-5" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <span className="font-heading font-extrabold text-[13px] uppercase tracking-wider text-[#F5F2EC] block leading-snug">
-                    DIRECT CALL / WHATSAPP
-                  </span>
-                  <a
-                    href={`tel:${SITE_CONFIG.contact.phone.replace(/[^0-9+]/g, "")}`}
-                    className="font-mono text-sm text-[#D9B875] hover:underline block my-0.5 truncate font-medium"
-                    aria-label={`Call ${SITE_CONFIG.contact.phone}`}
-                  >
-                    {SITE_CONFIG.contact.phone}
-                  </a>
-                  <span className="font-mono text-xs text-[#898D94] block">
-                    {SITE_CONFIG.contact.hours}
-                  </span>
-                </div>
               </div>
             </div>
 

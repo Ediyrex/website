@@ -37,12 +37,12 @@ export function StudioCommitmentsSection() {
       <div className="max-w-[1500px] mx-auto px-5 sm:px-8 lg:px-14">
         {/* Section Header */}
         <div className="space-y-4">
-          {/* Headline with Orange Accent */}
-          <h2 className="font-heading font-extrabold text-[clamp(2.5rem,4.5vw,4.25rem)] leading-[1.05] tracking-[-0.035em] text-[#F5F3EE] text-balance">
+          {/* Headline with Orange Italic Accent */}
+          <h2 className="font-heading font-extrabold text-[clamp(2.5rem,4.5vw,4.25rem)] leading-[1.05] tracking-[-0.035em] text-[#F5F3EE]">
             Credibility earned through
             <br />
             transparency,{" "}
-            <span className="text-[#FF6900] font-heading font-extrabold">
+            <span className="text-[#FF6900] italic font-heading font-extrabold">
               not inflated claims.
             </span>
           </h2>

@@ -67,7 +67,7 @@ export function ContactProjectIntakeHero() {
             {/* Action CTAs */}
             <div className="flex flex-wrap items-center gap-4 pt-3">
               <a
-                href="/contact"
+                href="#contact"
                 className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#FF6900] text-white text-xs sm:text-sm font-mono uppercase font-bold tracking-wider hover:bg-[#E55E00] transition-colors shadow-sm"
               >
                 <span>START YOUR PROJECT BRIEF</span>

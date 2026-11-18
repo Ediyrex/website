@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Admin Sign In | EDIYREX Studio",
-  description: "Sign in to EDIYREX Studio internal administration workspace.",
+  title: "Admin Sign In",
+  description: "Sign in to the Ediyrex Studio administration dashboard.",
+  robots: { index: false, follow: false },
 };
 
 export default function AdminLoginLayout({
@@ -12,3 +13,4 @@ export default function AdminLoginLayout({
 }) {
   return <>{children}</>;
 }
+

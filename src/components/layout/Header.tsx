@@ -2,15 +2,14 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { ArrowUpRight, Menu, X, Calendar, Phone, Mail } from "lucide-react";
+import { ArrowUpRight, Menu, X, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 import { BookCallButton } from "@/features/bookings";
-import { SITE_CONFIG } from "@/config/site";
 
 const NAV_LINKS = [
+  { label: "Home", href: "/" },
   { label: "Services", href: "/services" },
   { label: "Industries", href: "/industries" },
   { label: "Work", href: "/work" },
@@ -99,31 +98,28 @@ export function Header() {
       >
         <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-14">
           <div className="h-[68px] md:h-20 flex items-center justify-between gap-6">
-            {/* Official EDIYREX Brand Lockup */}
+            {/* Wordmark */}
             <Link
               href="/"
-              aria-label="EDIYREX Studio - Home"
-              className="flex items-center gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D6B77A] rounded-md px-1 -ml-1 group"
+              className="flex items-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D6B77A] rounded-md px-1 -ml-1"
             >
-              <Image
-                src="/images/logo/ediyrex-emblem.png"
-                alt=""
-                width={36}
-                height={36}
-                priority
-                className="h-8 sm:h-9 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
-              />
-              <Image
-                src="/images/logo/ediyrex-wordmark.png"
-                alt="EDIYREX"
-                width={124}
-                height={20}
-                priority
+              <span
+                style={{ fontFamily: "var(--font-space-grotesk)" }}
                 className={cn(
-                  "h-4 sm:h-[18px] w-auto object-contain transition-opacity",
-                  isLightHeroNav ? "brightness-0" : "brightness-100"
+                  "font-bold text-xl sm:text-2xl tracking-tight transition-colors",
+                  isLightHeroNav ? "text-[#0B0D10]" : "text-[#F5F3EE]"
                 )}
-              />
+              >
+                EDIYREX
+                {isLightHeroNav && (
+                  <sup className="text-[10px] font-medium ml-0.5 align-super">
+                    ®
+                  </sup>
+                )}
+              </span>
+              {!isLightHeroNav && (
+                <span className="hidden sm:inline-block w-1.5 h-1.5 rounded-full bg-[#F06419]" />
+              )}
             </Link>
 
             {/* Desktop Navigation */}
@@ -213,111 +209,36 @@ export function Header() {
           role="dialog"
           aria-modal="true"
           aria-label="Mobile Navigation"
-          className="fixed inset-0 z-40 md:hidden bg-[#08090B]/98 backdrop-blur-xl pt-24 pb-8 px-6 flex flex-col justify-between overflow-y-auto animate-in fade-in slide-in-from-top-4 duration-200"
+          className="fixed inset-0 z-40 md:hidden bg-[#08090B] pt-24 pb-8 px-6 flex flex-col justify-between overflow-y-auto"
         >
-          <div className="space-y-6">
-            <nav aria-label="Mobile Menu Links" className="space-y-3">
-              <div className="border-b border-[#252A32]/60 pb-2">
+          <nav aria-label="Mobile Menu Links" className="space-y-4">
+            {NAV_LINKS.map((link) => (
+              <div key={link.href} className="border-b border-[#252A32]/60 pb-3">
                 <Link
-                  href="/"
+                  href={link.href}
+                  onPointerDown={() => router.prefetch(link.href)}
+                  onTouchStart={() => router.prefetch(link.href)}
                   onClick={() => setMobileMenuOpen(false)}
                   className="block font-heading font-semibold text-2xl text-[#F5F3EE] hover:text-[#F06419] transition-colors py-1"
                 >
-                  Home
+                  {link.label}
                 </Link>
               </div>
-              {NAV_LINKS.map((link) => (
-                <div key={link.href} className="border-b border-[#252A32]/60 pb-2">
-                  <Link
-                    href={link.href}
-                    onPointerDown={() => router.prefetch(link.href)}
-                    onTouchStart={() => router.prefetch(link.href)}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="block font-heading font-semibold text-2xl text-[#F5F3EE] hover:text-[#F06419] transition-colors py-1"
-                  >
-                    {link.label}
-                  </Link>
-                </div>
-              ))}
-            </nav>
+            ))}
+          </nav>
 
-            {/* Quick Division Shortcuts on Mobile */}
-            <div className="pt-2">
-              <span className="block text-[11px] font-mono uppercase tracking-[0.16em] text-[#D6B77A] mb-2.5">
-                Our 4 Divisions
-              </span>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <Link
-                  href="/services/branding"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="p-2.5 rounded-lg bg-[#12151A] border border-[#252A32] text-[#B8B9BC] hover:text-white hover:border-[#D6B77A] transition-colors"
-                >
-                  01 · Branding
-                </Link>
-                <Link
-                  href="/services/media"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="p-2.5 rounded-lg bg-[#12151A] border border-[#252A32] text-[#B8B9BC] hover:text-white hover:border-[#F06419] transition-colors"
-                >
-                  02 · Media
-                </Link>
-                <Link
-                  href="/services/digital"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="p-2.5 rounded-lg bg-[#12151A] border border-[#252A32] text-[#B8B9BC] hover:text-white hover:border-[#7ba9f5] transition-colors"
-                >
-                  03 · Digital
-                </Link>
-                <Link
-                  href="/services/ai"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="p-2.5 rounded-lg bg-[#12151A] border border-[#252A32] text-[#B8B9BC] hover:text-white hover:border-[#b5a0f5] transition-colors"
-                >
-                  04 · AI &amp; Auto
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          <div className="pt-6 space-y-4 border-t border-[#252A32]/80 mt-6">
-            <div className="grid grid-cols-2 gap-3">
-              <Link
-                href="/contact"
-                onClick={() => setMobileMenuOpen(false)}
-                className="h-12 rounded-[10px] bg-[#F06419] hover:bg-[#D95612] text-black font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-md active:scale-[0.98] transition-transform"
-              >
-                <span>Start Project</span>
-                <ArrowUpRight className="w-4 h-4" />
-              </Link>
-              <BookCallButton
-                variant="outline"
-                onClick={() => setMobileMenuOpen(false)}
-                className="h-12 rounded-[10px] border border-[#383838] bg-[#12151A] text-[#F5F2EC] hover:bg-[#1A1D24] text-xs font-semibold flex items-center justify-center gap-1.5"
-              >
-                <Calendar className="w-3.5 h-3.5 text-[#D6B77A]" />
-                <span>Book Call</span>
-              </BookCallButton>
-            </div>
-
-            {/* Clickable Phone and Clickable Email in Mobile Menu */}
-            <div className="flex flex-col items-center gap-2 pt-2 text-xs font-mono">
-              <a
-                href={`mailto:${SITE_CONFIG.contact.email}`}
-                className="text-[#F06419] hover:underline inline-flex items-center gap-2 py-1 transition-colors"
-                aria-label={`Email EDYREX at ${SITE_CONFIG.contact.email}`}
-              >
-                <Mail className="w-3.5 h-3.5 shrink-0" />
-                <span>{SITE_CONFIG.contact.email}</span>
-              </a>
-              <a
-                href={`tel:${SITE_CONFIG.contact.phone.replace(/[^0-9+]/g, "")}`}
-                className="text-[#B8B9BC] hover:text-[#F5F2EC] inline-flex items-center gap-2 py-1 transition-colors"
-                aria-label={`Call EDYREX at ${SITE_CONFIG.contact.phone}`}
-              >
-                <Phone className="w-3.5 h-3.5 shrink-0 text-[#D6B77A]" />
-                <span>{SITE_CONFIG.contact.phone}</span>
-              </a>
-            </div>
+          <div className="pt-8 space-y-4">
+            <BookCallButton
+              variant="primary"
+              onClick={() => setMobileMenuOpen(false)}
+              className="w-full h-12 rounded-[8px] bg-[#F06419] hover:bg-[#D95612] text-black font-mono font-bold text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-md"
+            >
+              <Calendar className="w-4 h-4" />
+              <span>Book a Call ↗</span>
+            </BookCallButton>
+            <p className="text-center text-xs font-mono text-[#777D87]">
+              ediyrex@gmail.com
+            </p>
           </div>
         </div>
       )}

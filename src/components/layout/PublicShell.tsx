@@ -74,7 +74,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
           </div>
         )}
         <Header />
-        <main id="main-content" className="flex-1 w-full overflow-x-hidden min-w-0">
+        <main id="main-content" className="flex-1">
           {children}
         </main>
         <Footer />

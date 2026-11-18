@@ -125,11 +125,11 @@ export function FinalCtaSection() {
           <div className="lg:col-span-6 space-y-6">
             <h2
               data-next-reveal
-              className="font-heading font-bold tracking-[-0.035em] text-[#141414] text-[clamp(2.35rem,4.5vw,4.15rem)] leading-[0.98] text-balance"
+              className="font-heading font-bold tracking-[-0.035em] text-[#141414] text-[clamp(2.35rem,4.5vw,4.15rem)] leading-[0.98]"
             >
               <span className="block">Have an idea</span>
               <span className="block">worth building?</span>
-              <span className="relative inline-block text-[#FF640A] mt-1">
+              <span className="relative inline-block italic text-[#FF640A] mt-1">
                 Let&apos;s make it happen.
                 {/* Subtle hand-drawn orange underline accent */}
                 <svg

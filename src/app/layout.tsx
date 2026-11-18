@@ -126,14 +126,6 @@ export const metadata: Metadata = {
       "One integrated partner for visual storytelling, full-stack digital products, and intelligent AI systems.",
     images: ["/twitter-image"],
   },
-  icons: {
-    icon: [
-      { url: "/favicon.ico" },
-      { url: "/images/logo/ediyrex-emblem-192.png", sizes: "192x192", type: "image/png" },
-      { url: "/images/logo/ediyrex-emblem-512.png", sizes: "512x512", type: "image/png" },
-    ],
-    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
-  },
 };
 
 export default function RootLayout({
@@ -146,7 +138,6 @@ export default function RootLayout({
     "@type": "Organization",
     name: SITE_CONFIG.name,
     url: SITE_CONFIG.url,
-    logo: `${SITE_CONFIG.url}/images/logo/ediyrex-logo.png`,
     email: SITE_CONFIG.contact.email,
     telephone: SITE_CONFIG.contact.phone,
     address: {

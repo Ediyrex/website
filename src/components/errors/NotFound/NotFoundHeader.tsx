@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { ArrowUpRight, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -25,28 +24,20 @@ export function NotFoundHeader() {
   return (
     <header className="relative w-full z-20">
       <div className="max-w-[1700px] mx-auto px-5 sm:px-8 lg:px-14 py-6 md:py-8 flex items-center justify-between gap-6">
-        {/* Official EDIYREX Brand Lockup */}
+        {/* Wordmark */}
         <Link
           href="/"
-          aria-label="EDIYREX Studio - Return to Home"
-          className="flex items-center gap-2.5 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F06419] rounded-md px-1 -ml-1 transition-opacity hover:opacity-90"
+          className="flex items-center gap-1 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F06419] rounded-md px-1 -ml-1 transition-opacity hover:opacity-90"
         >
-          <Image
-            src="/images/logo/ediyrex-emblem.png"
-            alt=""
-            width={36}
-            height={36}
-            priority
-            className="h-8 sm:h-9 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
-          />
-          <Image
-            src="/images/logo/ediyrex-wordmark.png"
-            alt="EDIYREX"
-            width={124}
-            height={20}
-            priority
-            className="h-4 sm:h-[18px] w-auto object-contain"
-          />
+          <span
+            style={{ fontFamily: "var(--font-space-grotesk)" }}
+            className="font-bold text-2xl sm:text-3xl tracking-tight text-[#F5F2EC]"
+          >
+            EDYREX
+            <sup className="text-xs font-semibold ml-0.5 text-[#F06419] align-super">
+              ®
+            </sup>
+          </span>
         </Link>
 
         {/* Desktop Navigation */}

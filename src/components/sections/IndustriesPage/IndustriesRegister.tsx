@@ -23,9 +23,9 @@ export function IndustriesRegister({
       <div className="max-w-[1450px] mx-auto px-5 sm:px-8 lg:px-12 space-y-8 sm:space-y-10">
         {/* Main Editorial Headline */}
         <div className="space-y-4">
-          <h2 className="font-heading font-extrabold text-[clamp(2.35rem,4.4vw,4.25rem)] leading-[0.98] tracking-[-0.035em] text-[#F5F2EC] text-balance">
+          <h2 className="font-heading font-extrabold text-[clamp(2.35rem,4.4vw,4.25rem)] leading-[0.98] tracking-[-0.035em] text-[#F5F2EC]">
             <span>Domain-specific systems. </span>
-            <span className="text-[#F06419] font-extrabold">
+            <span className="italic text-[#F06419] font-extrabold">
               Proven across {String(publishedSectors.length).padStart(2, "0")} sectors.
             </span>
           </h2>

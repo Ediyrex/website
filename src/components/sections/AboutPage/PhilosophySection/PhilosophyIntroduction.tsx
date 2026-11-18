@@ -3,12 +3,12 @@ export function PhilosophyIntroduction() {
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-[54%_1px_1fr] lg:items-center lg:gap-10">
       <h2
         style={{ fontFamily: "var(--font-space-grotesk), system-ui, sans-serif" }}
-        className="text-[clamp(2.25rem,4.2vw,3.9rem)] font-bold leading-[0.98] tracking-[-0.03em] text-[#F5F2EC] text-balance"
+        className="text-[clamp(2.25rem,4.2vw,3.9rem)] font-bold leading-[0.98] tracking-[-0.03em] text-[#F5F2EC]"
       >
         Why four disciplines
         <br />
         work better{" "}
-        <span className="text-[#F06419]">together.</span>
+        <span className="italic text-[#F06419]">together.</span>
       </h2>
 
       <div

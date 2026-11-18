@@ -169,9 +169,9 @@ export function RelevantBlueprints({
       <div className="max-w-[1450px] mx-auto px-5 sm:px-8 lg:px-12 space-y-8 sm:space-y-10">
         {/* Main Editorial Headline & Description */}
         <div className="space-y-4 pt-1 sm:pt-2">
-          <h2 className="font-heading font-extrabold text-[clamp(2.4rem,4.5vw,4.25rem)] leading-[0.98] tracking-[-0.035em] text-[#F5F2EC] text-balance">
+          <h2 className="font-heading font-extrabold text-[clamp(2.4rem,4.5vw,4.25rem)] leading-[0.98] tracking-[-0.035em] text-[#F5F2EC]">
             <span>{BLUEPRINTS_SECTION_DATA.headlineLine1} </span>
-            <span className="text-[#F06419] font-extrabold">
+            <span className="italic text-[#F06419] font-extrabold">
               {BLUEPRINTS_SECTION_DATA.headlineLine2}
             </span>
           </h2>

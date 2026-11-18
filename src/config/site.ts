@@ -1,9 +1,6 @@
 export const SITE_CONFIG = {
   name: "EDYREX Studio",
   shortName: "EDYREX",
-  logo: "/images/logo/ediyrex-logo.png",
-  emblem: "/images/logo/ediyrex-emblem.png",
-  wordmark: "/images/logo/ediyrex-wordmark.png",
   tagline: "Creative Technology, Commercial Media, Digital & AI Systems",
   url: process.env.NEXT_PUBLIC_SITE_URL || "https://ediyrex.com",
   contact: {

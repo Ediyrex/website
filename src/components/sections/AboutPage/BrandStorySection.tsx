@@ -64,10 +64,10 @@ export function BrandStorySection() {
       <div className="max-w-[1450px] mx-auto px-5 sm:px-8 lg:px-12 space-y-10 lg:space-y-12">
         {/* 02. SECTION INTRODUCTION */}
         <div className="space-y-4">
-          <h2 className="font-heading font-extrabold text-[clamp(2.35rem,4.4vw,4.25rem)] leading-[0.98] tracking-[-0.035em] text-[#0B0D10] text-balance">
+          <h2 className="font-heading font-extrabold text-[clamp(2.35rem,4.4vw,4.25rem)] leading-[0.98] tracking-[-0.035em] text-[#0B0D10]">
             Great ideas shouldn&apos;t get lost between teams.
             <br />
-            <span className="text-[#F06419] font-heading font-extrabold">
+            <span className="text-[#F06419] italic font-heading font-extrabold">
               We built a better way to work.
             </span>
           </h2>

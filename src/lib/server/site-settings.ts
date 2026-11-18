@@ -54,22 +54,22 @@ export const DEFAULT_SOCIAL_PROFILES: SocialProfileItem[] = [
 ];
 
 export const DEFAULT_SITE_SETTINGS = {
-  siteName: "EDIYREX Studio",
+  siteName: "Ediyrex Studio",
   tagline: "Creative Technology, Media, Digital & AI",
   businessEmail: "ediyrex@gmail.com",
-  phoneNumber: "+91 98765 43210",
-  studioLocation: "Mumbai & Bangalore, India · Global Clients",
+  phoneNumber: "",
+  studioLocation: "India & Global",
   officeHours: "Mon-Fri · 10:00 AM - 7:00 PM IST",
   primaryContactNote: "Response within 1 business day for qualified inquiries.",
   availabilityEnabled: true,
   availabilityLabel: "Available for selected projects",
   footerNote:
     "Independent creative technology studio uniting commercial media production, digital experiences, and intelligent AI systems.",
-  copyrightText: "EDIYREX STUDIO®. All rights reserved.",
+  copyrightText: "Ediyrex Studio. All rights reserved.",
   defaultLanguage: "en-US",
   defaultTimezone: "Asia/Kolkata",
-  logoUrl: "/images/logo/ediyrex-logo.png",
-  faviconUrl: "/favicon.ico",
+  logoUrl: "",
+  faviconUrl: "",
   socialLinks: {
     github: "",
     linkedin: "",
@@ -125,7 +125,7 @@ export const DEFAULT_SITE_SETTINGS = {
     } as BannerItem,
     defaultOgImageUrl: "",
     defaultPlaceholderUrl: "",
-    fallbackLogoUrl: "/images/logo/ediyrex-logo.png",
+    fallbackLogoUrl: "",
     faviconUrl: "",
     defaultThumbnailUrl: "",
   },

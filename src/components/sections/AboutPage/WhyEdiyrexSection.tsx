@@ -125,9 +125,8 @@ export function WhyEdiyrexSection() {
               {PRINCIPLES.map((principle, idx) => (
                 <div
                   key={principle.index}
-                  className={`flex flex-col justify-between space-y-4 ${
-                    idx === 0 ? "sm:pr-5 xl:pr-6" : "sm:px-5 xl:px-6"
-                  } ${idx > 0 ? "pt-5 sm:pt-0" : ""}`}
+                  className={`flex flex-col justify-between space-y-4 ${idx === 0 ? "sm:pr-5 xl:pr-6" : "sm:px-5 xl:px-6"
+                    } ${idx > 0 ? "pt-5 sm:pt-0" : ""}`}
                 >
                   <div className="space-y-2.5">
                     {/* Clean editorial index */}

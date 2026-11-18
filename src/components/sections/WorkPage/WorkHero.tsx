@@ -72,10 +72,10 @@ export function WorkHero({ projects }: { projects?: ProjectItem[] }) {
             <h1
               data-work-hero
               style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
-              className="text-[clamp(2.75rem,5.2vw,5rem)] font-bold leading-[0.95] tracking-[-0.03em] text-[#F5EFE5] text-balance"
+              className="text-[clamp(2.75rem,5.2vw,5rem)] font-bold leading-[0.95] tracking-[-0.03em] text-[#F5EFE5]"
             >
               Selected work &amp; studio{" "}
-              <span className="text-[#F06419]">explorations.</span>
+              <span className="italic text-[#F06419]">explorations.</span>
             </h1>
 
             <p

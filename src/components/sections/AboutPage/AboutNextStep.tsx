@@ -50,7 +50,7 @@ export function AboutNextStep() {
                 <br />
                 next direction.
               </h2>
-              <p className="text-[#FF6900] font-heading font-extrabold text-[clamp(2.5rem,4.5vw,4.5rem)] leading-[0.98] tracking-[-0.035em] mt-2 mb-6 text-balance">
+              <p className="text-[#FF6900] italic font-heading font-extrabold text-[clamp(2.5rem,4.5vw,4.5rem)] leading-[0.98] tracking-[-0.035em] mt-2 mb-6">
                 See what we do.
                 <br />
                 See what we build.
