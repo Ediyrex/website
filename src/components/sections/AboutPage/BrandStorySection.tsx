@@ -211,10 +211,13 @@ export function BrandStorySection() {
               ))}
             </div>
 
-            {/* Clean Minimal Editorial Signature */}
-            <div className="flex items-center justify-between pt-8 mt-3 border-t border-[#090A0D]/20 text-[11px] sm:text-xs font-mono font-medium uppercase tracking-[0.16em] text-[#090A0D]/75">
-              <span>EDIYREX STUDIO</span>
-              <span>ONE CONNECTED TEAM</span>
+            {/* Centered Pill Badge Signature with Flanking Lines */}
+            <div className="flex items-center justify-center pt-8 mt-3">
+              <span aria-hidden="true" className="h-px bg-[#090A0D]/35 flex-1" />
+              <div className="px-5 py-2 rounded-full bg-[#090A0D] text-[#F5F2EC] text-[11px] sm:text-xs font-mono font-bold uppercase tracking-[0.16em] mx-4 shrink-0 shadow-sm">
+                EDIYREX / ONE CONNECTED TEAM
+              </div>
+              <span aria-hidden="true" className="h-px bg-[#090A0D]/35 flex-1" />
             </div>
           </div>
         </div>

@@ -27,30 +27,12 @@ export async function GET(request: NextRequest) {
       listOutboxJobs({ limit, offset, status }),
     ]);
 
-    const totalForStatus = status
-      ? status === "pending"
-        ? stats.pending
-        : status === "sent"
-        ? stats.sent
-        : status === "failed"
-        ? stats.failed
-        : status === "dead_letter"
-        ? stats.deadLetter
-        : stats.total
-      : stats.total;
-
-    const totalPages = Math.max(1, Math.ceil(totalForStatus / limit));
-
     return apiOk({
       stats,
       jobs,
       pagination: {
         page,
         limit,
-        total: totalForStatus,
-        totalPages,
-        hasNextPage: page < totalPages,
-        hasPrevPage: page > 1,
       },
     });
   } catch (error) {

@@ -16,7 +16,7 @@ import {
   Play,
   Rocket,
   ShieldCheck,
-  Palette,
+  Sparkles,
   Terminal,
   Zap,
 } from "lucide-react";
@@ -133,7 +133,7 @@ function BlueprintVisual() {
         <div className="flex items-center justify-between rounded-[12px] bg-white/[0.05] border border-white/12 p-3">
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-lg bg-[#FF6900]/20 border border-[#FF6900]/40 flex items-center justify-center text-[#FF9A48]">
-              <Palette className="w-3.5 h-3.5" />
+              <Sparkles className="w-3.5 h-3.5" />
             </div>
             <div>
               <div className="font-heading text-[12px] font-bold text-white leading-tight">

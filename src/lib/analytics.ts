@@ -23,10 +23,6 @@ export function setConsentChoice(choice: ConsentLevel): void {
   }
 }
 
-/**
- * Dispatch an analytics event with privacy-first consent enforcement.
- * Supported backends: Plausible Analytics and Google Analytics (GA4).
- */
 export function trackEvent(
   eventName: string,
   props?: Record<string, string | number | boolean>
@@ -34,7 +30,6 @@ export function trackEvent(
   if (typeof window === "undefined") return;
   if (getConsentChoice() !== "analytics") return;
 
-  // 1. Plausible Analytics
   const plausible = (
     window as unknown as {
       plausible?: (
@@ -47,19 +42,5 @@ export function trackEvent(
   if (typeof plausible === "function") {
     plausible(eventName, props ? { props } : undefined);
   }
-
-  // 2. Google Analytics (GA4 gtag)
-  const gtag = (
-    window as unknown as {
-      gtag?: (
-        command: string,
-        eventName: string,
-        params?: Record<string, string | number | boolean>
-      ) => void;
-    }
-  ).gtag;
-
-  if (typeof gtag === "function") {
-    gtag("event", eventName, props);
-  }
 }
+

@@ -8,7 +8,6 @@ import {
   Space_Mono,
   Playfair_Display,
   Archivo_Narrow,
-  Archivo_Black,
 } from "next/font/google";
 import "./globals.css";
 import { PublicShell } from "@/components/layout/PublicShell";
@@ -73,13 +72,6 @@ const archivoNarrow = Archivo_Narrow({
   display: "swap",
 });
 
-const archivoBlack = Archivo_Black({
-  variable: "--font-archivo-black",
-  subsets: ["latin"],
-  weight: ["400"],
-  display: "swap",
-});
-
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
@@ -89,13 +81,13 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_CONFIG.url),
   title: {
-    default: "EDYREX Studio — Creative Technology, Media, Digital & AI",
-    template: "%s | EDYREX Studio",
+    default: "Ediyrex Studio — Creative Technology, Media, Digital & AI",
+    template: "%s | Ediyrex Studio",
   },
   description:
     "Independent creative technology studio uniting commercial media production, digital experiences, and intelligent AI systems. Serving clients in India and internationally.",
   keywords: [
-    "EDYREX Studio",
+    "Ediyrex Studio",
     "Creative Technology Studio",
     "Media Production",
     "Brand Films",
@@ -106,22 +98,22 @@ export const metadata: Metadata = {
     "AI Voice Receptionist",
     "RAG Systems",
   ],
-  authors: [{ name: "EDYREX Studio" }],
+  authors: [{ name: "Ediyrex Studio" }],
   verification: SITE_CONFIG.verification.google
     ? { google: SITE_CONFIG.verification.google }
     : undefined,
   openGraph: {
     type: "website",
     locale: "en_US",
-    siteName: "EDYREX Studio",
-    title: "EDYREX Studio — Creative Technology, Media, Digital & AI",
+    siteName: "Ediyrex Studio",
+    title: "Ediyrex Studio — Creative Technology, Media, Digital & AI",
     description:
-      "From visual storytelling and digital products to intelligent automation, EDYREX brings creativity and technology together to build what comes next.",
+      "From visual storytelling and digital products to intelligent automation, Ediyrex brings creativity and technology together to build what comes next.",
     images: ["/opengraph-image"],
   },
   twitter: {
     card: "summary_large_image",
-    title: "EDYREX Studio — Creative Technology, Media, Digital & AI",
+    title: "Ediyrex Studio — Creative Technology, Media, Digital & AI",
     description:
       "One integrated partner for visual storytelling, full-stack digital products, and intelligent AI systems.",
     images: ["/twitter-image"],
@@ -139,12 +131,6 @@ export default function RootLayout({
     name: SITE_CONFIG.name,
     url: SITE_CONFIG.url,
     email: SITE_CONFIG.contact.email,
-    telephone: SITE_CONFIG.contact.phone,
-    address: {
-      "@type": "PostalAddress",
-      addressCountry: "IN",
-      addressLocality: "Mumbai & Bangalore",
-    },
     areaServed: "Global",
     description:
       "Independent creative technology studio uniting branding & marketing, media production, web dev & DADV, and AI agents & n8n automation.",
@@ -159,7 +145,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${manrope.variable} ${inter.variable} ${ibmPlexMono.variable} ${spaceGrotesk.variable} ${instrumentSerif.variable} ${spaceMono.variable} ${playfairDisplay.variable} ${archivoNarrow.variable} ${archivoBlack.variable} h-full antialiased dark scroll-smooth`}
+      className={`${manrope.variable} ${inter.variable} ${ibmPlexMono.variable} ${spaceGrotesk.variable} ${instrumentSerif.variable} ${spaceMono.variable} ${playfairDisplay.variable} ${archivoNarrow.variable} h-full antialiased dark scroll-smooth`}
     >
       <body className="min-h-full flex flex-col bg-[#08090B] text-[#F5F3EE] selection:bg-[#D6B77A]/25 selection:text-[#F5F3EE]">
         <script

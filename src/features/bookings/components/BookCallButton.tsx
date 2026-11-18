@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from "react";
+import React from "react";
 import { Calendar, ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useBookingModal } from "../context/BookingContext";
@@ -15,11 +15,6 @@ export interface BookCallButtonProps
   showIcon?: boolean;
 }
 
-/**
- * High-speed booking trigger button:
- * - "Replay in 100 ms": duration-75 active:scale-[0.97]
- * - "Press before the lift": opens modal on pointerdown, eliminating tap-release delay
- */
 export function BookCallButton({
   variant = "primary",
   size = "md",
@@ -29,30 +24,19 @@ export function BookCallButton({
   children,
   className,
   onClick,
-  onPointerDown,
   ...props
 }: BookCallButtonProps) {
   const { openBookingModal } = useBookingModal();
-  const openedOnPressRef = useRef(false);
-
-  const handlePointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
-    onPointerDown?.(e);
-    if (e.button === 0) {
-      openedOnPressRef.current = true;
-      openBookingModal({ calLink, prefill });
-    }
-  };
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     onClick?.(e);
-    if (!e.defaultPrevented && !openedOnPressRef.current) {
+    if (!e.defaultPrevented) {
       openBookingModal({ calLink, prefill });
     }
-    openedOnPressRef.current = false;
   };
 
   const baseStyles =
-    "inline-flex items-center justify-center font-semibold transition-all duration-75 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D6B77A] disabled:opacity-50 disabled:pointer-events-none cursor-pointer";
+    "inline-flex items-center justify-center font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D6B77A] disabled:opacity-50 disabled:pointer-events-none cursor-pointer";
 
   const sizeStyles = {
     sm: "h-9 px-3.5 text-xs rounded-lg gap-1.5",
@@ -62,7 +46,7 @@ export function BookCallButton({
 
   const variantStyles = {
     primary:
-      "bg-[#E85D04] hover:bg-[#F97316] text-[#07090D] shadow-lg shadow-[#E85D04]/20",
+      "bg-[#E85D04] hover:bg-[#F97316] text-[#07090D] shadow-lg shadow-[#E85D04]/20 active:scale-[0.98]",
     navbar:
       "border border-[#F06419] bg-transparent text-[#F5F2EC] hover:bg-[#F06419]/10 hover:border-[#FF7A29]",
     "navbar-light":
@@ -76,7 +60,6 @@ export function BookCallButton({
   return (
     <button
       type="button"
-      onPointerDown={handlePointerDown}
       onClick={handleClick}
       className={cn(baseStyles, sizeStyles[size], variantStyles[variant], className)}
       {...props}

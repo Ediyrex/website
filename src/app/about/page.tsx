@@ -9,9 +9,9 @@ import { StudioCommitmentsSection } from "@/components/sections/AboutPage/Studio
 import { AboutNextStep } from "@/components/sections/AboutPage/AboutNextStep";
 
 export const metadata: Metadata = {
-  title: "About Us — Studio Vision, Leadership & Philosophy",
+  title: "About",
   description:
-    "Learn about EDYREX Studio: an independent creative technology studio uniting commercial media, digital products, and intelligent AI automation.",
+    "About Ediyrex Studio: an independent creative technology studio uniting Media, Digital, and Artificial Intelligence.",
   alternates: {
     canonical: "/about",
   },

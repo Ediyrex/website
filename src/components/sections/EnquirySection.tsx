@@ -141,9 +141,9 @@ export function EnquirySection() {
 
     const enrichedPayload = engagementModel
       ? {
-          ...result.data,
-          goals: `[Engagement Model: ${engagementModel}]\n${result.data.goals}`,
-        }
+        ...result.data,
+        goals: `[Engagement Model: ${engagementModel}]\n${result.data.goals}`,
+      }
       : result.data;
 
     try {

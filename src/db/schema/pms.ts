@@ -74,9 +74,6 @@ export const pmsProjects = pgTable(
       sql`${table.progressPercent} >= 0 AND ${table.progressPercent} <= 100`
     ),
     index("idx_pms_projects_status").on(table.status, table.createdAt),
-    index("idx_pms_projects_title").on(table.title),
-    index("idx_pms_projects_ref_code").on(table.referenceCode),
-    index("idx_pms_projects_client").on(table.clientId),
   ]
 );
 
@@ -212,8 +209,6 @@ export const studioTasks = pgTable(
       table.workflowStatus,
       table.position
     ),
-    index("idx_studio_tasks_title").on(table.title),
-    index("idx_studio_tasks_due_date").on(table.dueDate),
   ]
 );
 

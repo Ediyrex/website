@@ -8,6 +8,7 @@ import {
   ArrowRight,
   ArrowLeft,
   Mail,
+  Phone,
   Link2,
   Calendar,
   Info,
@@ -23,6 +24,7 @@ import { TurnstileWidget, useTurnstile } from "@/features/turnstile";
 import { useWaitExplanation } from "@/hooks/ui-speed";
 import { startProgressBar, finishProgressBar } from "@/components/ui/OptimisticProgressBar";
 import { LinkPreview } from "@/components/ui/LinkPreview";
+import { SITE_CONFIG } from "@/config/site";
 
 export type EngagementModel =
   | "Project-Based"
@@ -348,9 +350,9 @@ export function ProjectBriefDesk() {
     const primaryDivisionNames = isNotSureDivision
       ? "Exploring / Not Sure"
       : selectedDivisions
-          .map((id) => DIVISIONS.find((d) => d.id === id)?.title)
-          .filter(Boolean)
-          .join(", ") || "General Project";
+        .map((id) => DIVISIONS.find((d) => d.id === id)?.title)
+        .filter(Boolean)
+        .join(", ") || "General Project";
 
     // Formatted structured goals string
     const enrichedGoals = [
@@ -363,10 +365,10 @@ export function ProjectBriefDesk() {
       budgetSpecial === "prefer_not_to_say"
         ? "Budget Preference: Prefer not to say"
         : budgetSpecial === "not_sure"
-        ? "Budget Preference: Exploring / Not sure"
-        : budgetTier
-        ? `Budget Tier: ${budgetTier}`
-        : null,
+          ? "Budget Preference: Exploring / Not sure"
+          : budgetTier
+            ? `Budget Tier: ${budgetTier}`
+            : null,
     ]
       .filter(Boolean)
       .join("\n\n");
@@ -518,16 +520,17 @@ export function ProjectBriefDesk() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <span className="font-heading font-extrabold text-[13px] uppercase tracking-wider text-[#F5F2EC] block leading-snug">
-                    EDYREX STUDIO
+                    STUDIO INBOX
                   </span>
                   <a
-                    href="mailto:ediyrex@gmail.com"
+                    href={`mailto:${SITE_CONFIG.contact.email}`}
                     className="font-mono text-sm text-[#F06419] hover:underline block my-0.5 truncate font-medium"
+                    aria-label={`Email ${SITE_CONFIG.contact.email}`}
                   >
-                    ediyrex@gmail.com
+                    {SITE_CONFIG.contact.email}
                   </a>
                   <span className="font-mono text-xs text-[#898D94] block">
-                    India &amp; Global
+                    Response within 24h
                   </span>
                 </div>
                 <button
@@ -539,6 +542,28 @@ export function ProjectBriefDesk() {
                 >
                   {emailCopied ? <Check className="w-3.5 h-3.5 text-[#56C58B]" /> : <Copy className="w-3.5 h-3.5" />}
                 </button>
+              </div>
+
+              {/* Direct Phone Line */}
+              <div className="flex items-center gap-4 p-4 rounded-[14px] bg-[#121519] border border-[#292E35] hover:border-[#3D4450] transition-colors">
+                <div className="w-12 h-12 rounded-[10px] border border-[#D9B875]/60 bg-[#0E1012] flex items-center justify-center shrink-0 text-[#D9B875]">
+                  <Phone className="w-5 h-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <span className="font-heading font-extrabold text-[13px] uppercase tracking-wider text-[#F5F2EC] block leading-snug">
+                    DIRECT CALL / WHATSAPP
+                  </span>
+                  <a
+                    href={`tel:${SITE_CONFIG.contact.phone.replace(/[^0-9+]/g, "")}`}
+                    className="font-mono text-sm text-[#D9B875] hover:underline block my-0.5 truncate font-medium"
+                    aria-label={`Call ${SITE_CONFIG.contact.phone}`}
+                  >
+                    {SITE_CONFIG.contact.phone}
+                  </a>
+                  <span className="font-mono text-xs text-[#898D94] block">
+                    {SITE_CONFIG.contact.hours}
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -600,24 +625,22 @@ export function ProjectBriefDesk() {
                     {/* Step 1 Indicator */}
                     <div className="flex items-center gap-2 shrink-0">
                       <span
-                        className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center font-mono text-[11px] sm:text-xs font-bold ${
-                          currentStep === 1
-                            ? "bg-[#F06419] text-black"
-                            : currentStep > 1
+                        className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center font-mono text-[11px] sm:text-xs font-bold ${currentStep === 1
+                          ? "bg-[#F06419] text-black"
+                          : currentStep > 1
                             ? "bg-[#D9B875] text-black"
                             : "bg-[#0E1012] border border-[#292E35] text-[#898D94]"
-                        }`}
+                          }`}
                       >
                         {currentStep > 1 ? <Check className="w-3.5 h-3.5 stroke-[2.5]" /> : "01"}
                       </span>
                       <span
-                        className={`text-[10px] sm:text-xs font-mono font-bold uppercase tracking-wider ${
-                          currentStep === 1
-                            ? "text-[#F06419]"
-                            : currentStep > 1
+                        className={`text-[10px] sm:text-xs font-mono font-bold uppercase tracking-wider ${currentStep === 1
+                          ? "text-[#F06419]"
+                          : currentStep > 1
                             ? "text-[#D9B875]"
                             : "text-[#898D94]"
-                        }`}
+                          }`}
                       >
                         PROJECT DIRECTION
                       </span>
@@ -632,24 +655,22 @@ export function ProjectBriefDesk() {
                     {/* Step 2 Indicator */}
                     <div className="flex items-center gap-2 shrink-0">
                       <span
-                        className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center font-mono text-[11px] sm:text-xs font-bold ${
-                          currentStep === 2
-                            ? "bg-[#F06419] text-black"
-                            : currentStep > 2
+                        className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center font-mono text-[11px] sm:text-xs font-bold ${currentStep === 2
+                          ? "bg-[#F06419] text-black"
+                          : currentStep > 2
                             ? "bg-[#D9B875] text-black"
                             : "bg-[#0E1012] border border-[#292E35] text-[#898D94]"
-                        }`}
+                          }`}
                       >
                         {currentStep > 2 ? <Check className="w-3.5 h-3.5 stroke-[2.5]" /> : "02"}
                       </span>
                       <span
-                        className={`text-[10px] sm:text-xs font-mono font-bold uppercase tracking-wider ${
-                          currentStep === 2
-                            ? "text-[#F06419]"
-                            : currentStep > 2
+                        className={`text-[10px] sm:text-xs font-mono font-bold uppercase tracking-wider ${currentStep === 2
+                          ? "text-[#F06419]"
+                          : currentStep > 2
                             ? "text-[#D9B875]"
                             : "text-[#898D94]"
-                        }`}
+                          }`}
                       >
                         SCOPE &amp; EXPECTATIONS
                       </span>
@@ -664,18 +685,16 @@ export function ProjectBriefDesk() {
                     {/* Step 3 Indicator */}
                     <div className="flex items-center gap-2 shrink-0">
                       <span
-                        className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center font-mono text-[11px] sm:text-xs font-bold ${
-                          currentStep === 3
-                            ? "bg-[#F06419] text-black"
-                            : "bg-[#0E1012] border border-[#292E35] text-[#898D94]"
-                        }`}
+                        className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center font-mono text-[11px] sm:text-xs font-bold ${currentStep === 3
+                          ? "bg-[#F06419] text-black"
+                          : "bg-[#0E1012] border border-[#292E35] text-[#898D94]"
+                          }`}
                       >
                         03
                       </span>
                       <span
-                        className={`text-[10px] sm:text-xs font-mono font-bold uppercase tracking-wider ${
-                          currentStep === 3 ? "text-[#F06419]" : "text-[#898D94]"
-                        }`}
+                        className={`text-[10px] sm:text-xs font-mono font-bold uppercase tracking-wider ${currentStep === 3 ? "text-[#F06419]" : "text-[#898D94]"
+                          }`}
                       >
                         YOUR DETAILS
                       </span>
@@ -709,22 +728,20 @@ export function ProjectBriefDesk() {
                         <div
                           key={division.id}
                           onClick={() => toggleDivision(division.id)}
-                          className={`p-5 rounded-[14px] border cursor-pointer transition-all flex flex-col justify-between min-h-[135px] select-none ${
-                            isSelected
-                              ? "border-[#F06419] bg-[#F06419]/[0.08]"
-                              : "border-[#292E35] bg-[#0E1012] hover:border-[#3D4450]"
-                          }`}
+                          className={`p-5 rounded-[14px] border cursor-pointer transition-all flex flex-col justify-between min-h-[135px] select-none ${isSelected
+                            ? "border-[#F06419] bg-[#F06419]/[0.08]"
+                            : "border-[#292E35] bg-[#0E1012] hover:border-[#3D4450]"
+                            }`}
                         >
                           <div className="flex items-start justify-between gap-2">
                             <span className="font-mono text-base font-bold text-[#F06419]">
                               {division.number}
                             </span>
                             <div
-                              className={`w-5 h-5 rounded-[4px] border flex items-center justify-center transition-colors ${
-                                isSelected
-                                  ? "bg-[#F06419] border-[#F06419] text-black"
-                                  : "border-[#444C58] bg-transparent"
-                              }`}
+                              className={`w-5 h-5 rounded-[4px] border flex items-center justify-center transition-colors ${isSelected
+                                ? "bg-[#F06419] border-[#F06419] text-black"
+                                : "border-[#444C58] bg-transparent"
+                                }`}
                             >
                               {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                             </div>
@@ -746,18 +763,16 @@ export function ProjectBriefDesk() {
                   {/* 5th Option: Not Sure Yet */}
                   <div
                     onClick={handleToggleNotSure}
-                    className={`p-4 rounded-[14px] border cursor-pointer transition-all flex items-center gap-3.5 select-none ${
-                      isNotSureDivision
-                        ? "border-[#F06419] bg-[#F06419]/[0.08]"
-                        : "border-[#292E35] bg-[#0E1012] hover:border-[#3D4450]"
-                    }`}
+                    className={`p-4 rounded-[14px] border cursor-pointer transition-all flex items-center gap-3.5 select-none ${isNotSureDivision
+                      ? "border-[#F06419] bg-[#F06419]/[0.08]"
+                      : "border-[#292E35] bg-[#0E1012] hover:border-[#3D4450]"
+                      }`}
                   >
                     <div
-                      className={`w-5 h-5 rounded-[4px] border flex items-center justify-center transition-colors shrink-0 ${
-                        isNotSureDivision
-                          ? "bg-[#F06419] border-[#F06419] text-black"
-                          : "border-[#444C58] bg-transparent"
-                      }`}
+                      className={`w-5 h-5 rounded-[4px] border flex items-center justify-center transition-colors shrink-0 ${isNotSureDivision
+                        ? "bg-[#F06419] border-[#F06419] text-black"
+                        : "border-[#444C58] bg-transparent"
+                        }`}
                     >
                       {isNotSureDivision && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                     </div>
@@ -791,11 +806,10 @@ export function ProjectBriefDesk() {
                             key={model}
                             type="button"
                             onClick={() => setEngagementModel(model)}
-                            className={`py-3 px-3 rounded-[8px] text-xs font-mono font-medium text-center border transition-all cursor-pointer ${
-                              isSelected
-                                ? "border-[#F06419] bg-[#F06419]/[0.12] text-[#F5F2EC]"
-                                : "border-[#292E35] bg-[#0E1012] text-[#898D94] hover:text-[#F5F2EC] hover:border-[#3D4450]"
-                            }`}
+                            className={`py-3 px-3 rounded-[8px] text-xs font-mono font-medium text-center border transition-all cursor-pointer ${isSelected
+                              ? "border-[#F06419] bg-[#F06419]/[0.12] text-[#F5F2EC]"
+                              : "border-[#292E35] bg-[#0E1012] text-[#898D94] hover:text-[#F5F2EC] hover:border-[#3D4450]"
+                              }`}
                           >
                             {model}
                           </button>
@@ -858,11 +872,10 @@ export function ProjectBriefDesk() {
                         }
                       }}
                       placeholder="Describe what you want to build or produce, the problem you're trying to solve, important features or deliverables, and the outcome you're looking for..."
-                      className={`w-full bg-[#0E1012] border rounded-[10px] p-4 text-[#F5F2EC] placeholder:text-[#5A606A] text-sm focus:outline-none transition-colors ${
-                        stepErrors.projectOverview
-                          ? "border-[#EF6B6B] focus:border-[#EF6B6B]"
-                          : "border-[#292E35] focus:border-[#F06419]"
-                      }`}
+                      className={`w-full bg-[#0E1012] border rounded-[10px] p-4 text-[#F5F2EC] placeholder:text-[#5A606A] text-sm focus:outline-none transition-colors ${stepErrors.projectOverview
+                        ? "border-[#EF6B6B] focus:border-[#EF6B6B]"
+                        : "border-[#292E35] focus:border-[#F06419]"
+                        }`}
                     />
                     {stepErrors.projectOverview && (
                       <span className="text-xs text-[#EF6B6B] font-mono block">
@@ -896,11 +909,10 @@ export function ProjectBriefDesk() {
                           }
                         }}
                         placeholder="https://yourwebsite.com (optional)"
-                        className={`w-full bg-[#0E1012] border rounded-[10px] pl-11 pr-4 py-3.5 text-[#F5F2EC] placeholder:text-[#5A606A] text-sm focus:outline-none transition-colors ${
-                          stepErrors.referenceUrl
-                            ? "border-[#EF6B6B] focus:border-[#EF6B6B]"
-                            : "border-[#292E35] focus:border-[#F06419]"
-                        }`}
+                        className={`w-full bg-[#0E1012] border rounded-[10px] pl-11 pr-4 py-3.5 text-[#F5F2EC] placeholder:text-[#5A606A] text-sm focus:outline-none transition-colors ${stepErrors.referenceUrl
+                          ? "border-[#EF6B6B] focus:border-[#EF6B6B]"
+                          : "border-[#292E35] focus:border-[#F06419]"
+                          }`}
                       />
                     </div>
                     {stepErrors.referenceUrl && (
@@ -932,11 +944,10 @@ export function ProjectBriefDesk() {
                               setBudgetCurrency("USD");
                               setBudgetTier("");
                             }}
-                            className={`px-2.5 py-0.5 rounded text-[11px] font-mono font-bold uppercase tracking-wider transition-colors ${
-                              budgetCurrency === "USD"
-                                ? "bg-[#D9B875] text-black"
-                                : "text-[#898D94] hover:text-[#F5F2EC]"
-                            }`}
+                            className={`px-2.5 py-0.5 rounded text-[11px] font-mono font-bold uppercase tracking-wider transition-colors ${budgetCurrency === "USD"
+                              ? "bg-[#D9B875] text-black"
+                              : "text-[#898D94] hover:text-[#F5F2EC]"
+                              }`}
                           >
                             USD
                           </button>
@@ -946,11 +957,10 @@ export function ProjectBriefDesk() {
                               setBudgetCurrency("INR");
                               setBudgetTier("");
                             }}
-                            className={`px-2.5 py-0.5 rounded text-[11px] font-mono font-bold uppercase tracking-wider transition-colors ${
-                              budgetCurrency === "INR"
-                                ? "bg-[#D9B875] text-black"
-                                : "text-[#898D94] hover:text-[#F5F2EC]"
-                            }`}
+                            className={`px-2.5 py-0.5 rounded text-[11px] font-mono font-bold uppercase tracking-wider transition-colors ${budgetCurrency === "INR"
+                              ? "bg-[#D9B875] text-black"
+                              : "text-[#898D94] hover:text-[#F5F2EC]"
+                              }`}
                           >
                             INR
                           </button>
@@ -985,18 +995,16 @@ export function ProjectBriefDesk() {
                             setBudgetSpecial(budgetSpecial === "not_sure" ? "" : "not_sure");
                             setBudgetTier("");
                           }}
-                          className={`py-2 px-3 rounded-[8px] text-xs font-mono text-center border transition-colors flex items-center justify-center gap-2 cursor-pointer ${
-                            budgetSpecial === "not_sure"
-                              ? "border-[#F06419] bg-[#F06419]/[0.12] text-[#F5F2EC]"
-                              : "border-[#292E35] bg-[#0E1012] text-[#898D94] hover:text-[#F5F2EC] hover:border-[#3D4450]"
-                          }`}
+                          className={`py-2 px-3 rounded-[8px] text-xs font-mono text-center border transition-colors flex items-center justify-center gap-2 cursor-pointer ${budgetSpecial === "not_sure"
+                            ? "border-[#F06419] bg-[#F06419]/[0.12] text-[#F5F2EC]"
+                            : "border-[#292E35] bg-[#0E1012] text-[#898D94] hover:text-[#F5F2EC] hover:border-[#3D4450]"
+                            }`}
                         >
                           <span
-                            className={`w-2.5 h-2.5 rounded-full border ${
-                              budgetSpecial === "not_sure"
-                                ? "border-[#F06419] bg-[#F06419]"
-                                : "border-[#898D94]"
-                            }`}
+                            className={`w-2.5 h-2.5 rounded-full border ${budgetSpecial === "not_sure"
+                              ? "border-[#F06419] bg-[#F06419]"
+                              : "border-[#898D94]"
+                              }`}
                           />
                           <span>Not sure yet</span>
                         </button>
@@ -1007,18 +1015,16 @@ export function ProjectBriefDesk() {
                             setBudgetSpecial(budgetSpecial === "prefer_not_to_say" ? "" : "prefer_not_to_say");
                             setBudgetTier("");
                           }}
-                          className={`py-2 px-3 rounded-[8px] text-xs font-mono text-center border transition-colors flex items-center justify-center gap-2 cursor-pointer ${
-                            budgetSpecial === "prefer_not_to_say"
-                              ? "border-[#F06419] bg-[#F06419]/[0.12] text-[#F5F2EC]"
-                              : "border-[#292E35] bg-[#0E1012] text-[#898D94] hover:text-[#F5F2EC] hover:border-[#3D4450]"
-                          }`}
+                          className={`py-2 px-3 rounded-[8px] text-xs font-mono text-center border transition-colors flex items-center justify-center gap-2 cursor-pointer ${budgetSpecial === "prefer_not_to_say"
+                            ? "border-[#F06419] bg-[#F06419]/[0.12] text-[#F5F2EC]"
+                            : "border-[#292E35] bg-[#0E1012] text-[#898D94] hover:text-[#F5F2EC] hover:border-[#3D4450]"
+                            }`}
                         >
                           <span
-                            className={`w-2.5 h-2.5 rounded-full border ${
-                              budgetSpecial === "prefer_not_to_say"
-                                ? "border-[#F06419] bg-[#F06419]"
-                                : "border-[#898D94]"
-                            }`}
+                            className={`w-2.5 h-2.5 rounded-full border ${budgetSpecial === "prefer_not_to_say"
+                              ? "border-[#F06419] bg-[#F06419]"
+                              : "border-[#898D94]"
+                              }`}
                           />
                           <span>Prefer not to say</span>
                         </button>
@@ -1057,11 +1063,10 @@ export function ProjectBriefDesk() {
                               key={t.id}
                               type="button"
                               onClick={() => setTimeline(t.id)}
-                              className={`py-2 px-2.5 rounded-[8px] text-[11px] sm:text-xs font-mono text-center border transition-colors cursor-pointer truncate ${
-                                isSelected
-                                  ? "border-[#F06419] bg-[#F06419]/[0.12] text-[#F5F2EC] font-bold"
-                                  : "border-[#292E35] bg-[#0E1012] text-[#898D94] hover:text-[#F5F2EC] hover:border-[#3D4450]"
-                              }`}
+                              className={`py-2 px-2.5 rounded-[8px] text-[11px] sm:text-xs font-mono text-center border transition-colors cursor-pointer truncate ${isSelected
+                                ? "border-[#F06419] bg-[#F06419]/[0.12] text-[#F5F2EC] font-bold"
+                                : "border-[#292E35] bg-[#0E1012] text-[#898D94] hover:text-[#F5F2EC] hover:border-[#3D4450]"
+                                }`}
                             >
                               {t.label}
                             </button>
@@ -1139,11 +1144,10 @@ export function ProjectBriefDesk() {
                           }
                         }}
                         placeholder="Your full name"
-                        className={`w-full bg-[#0E1012] border rounded-[10px] px-4 py-3.5 text-[#F5F2EC] placeholder:text-[#5A606A] text-sm focus:outline-none transition-colors ${
-                          stepErrors.fullName
-                            ? "border-[#EF6B6B] focus:border-[#EF6B6B]"
-                            : "border-[#292E35] focus:border-[#F06419]"
-                        }`}
+                        className={`w-full bg-[#0E1012] border rounded-[10px] px-4 py-3.5 text-[#F5F2EC] placeholder:text-[#5A606A] text-sm focus:outline-none transition-colors ${stepErrors.fullName
+                          ? "border-[#EF6B6B] focus:border-[#EF6B6B]"
+                          : "border-[#292E35] focus:border-[#F06419]"
+                          }`}
                       />
                       {stepErrors.fullName && (
                         <span className="text-xs text-[#EF6B6B] font-mono block">
@@ -1175,11 +1179,10 @@ export function ProjectBriefDesk() {
                           }
                         }}
                         placeholder="you@company.com"
-                        className={`w-full bg-[#0E1012] border rounded-[10px] px-4 py-3.5 text-[#F5F2EC] placeholder:text-[#5A606A] text-sm focus:outline-none transition-colors ${
-                          stepErrors.workEmail
-                            ? "border-[#EF6B6B] focus:border-[#EF6B6B]"
-                            : "border-[#292E35] focus:border-[#F06419]"
-                        }`}
+                        className={`w-full bg-[#0E1012] border rounded-[10px] px-4 py-3.5 text-[#F5F2EC] placeholder:text-[#5A606A] text-sm focus:outline-none transition-colors ${stepErrors.workEmail
+                          ? "border-[#EF6B6B] focus:border-[#EF6B6B]"
+                          : "border-[#292E35] focus:border-[#F06419]"
+                          }`}
                       />
                       {stepErrors.workEmail && (
                         <span className="text-xs text-[#EF6B6B] font-mono block">
@@ -1250,11 +1253,10 @@ export function ProjectBriefDesk() {
                     className="flex items-start gap-3 pt-2 cursor-pointer select-none group"
                   >
                     <div
-                      className={`w-5 h-5 rounded-[4px] border flex items-center justify-center transition-colors shrink-0 mt-0.5 ${
-                        wantsDiscoveryCall
-                          ? "bg-[#F06419] border-[#F06419] text-black"
-                          : "border-[#444C58] bg-[#0E1012]"
-                      }`}
+                      className={`w-5 h-5 rounded-[4px] border flex items-center justify-center transition-colors shrink-0 mt-0.5 ${wantsDiscoveryCall
+                        ? "bg-[#F06419] border-[#F06419] text-black"
+                        : "border-[#444C58] bg-[#0E1012]"
+                        }`}
                     >
                       {wantsDiscoveryCall && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                     </div>
@@ -1279,11 +1281,10 @@ export function ProjectBriefDesk() {
                     className="flex items-start gap-3 cursor-pointer select-none group"
                   >
                     <div
-                      className={`w-5 h-5 rounded-[4px] border flex items-center justify-center transition-colors shrink-0 mt-0.5 ${
-                        privacyConsent
-                          ? "bg-[#F06419] border-[#F06419] text-black"
-                          : "border-[#444C58] bg-[#0E1012]"
-                      }`}
+                      className={`w-5 h-5 rounded-[4px] border flex items-center justify-center transition-colors shrink-0 mt-0.5 ${privacyConsent
+                        ? "bg-[#F06419] border-[#F06419] text-black"
+                        : "border-[#444C58] bg-[#0E1012]"
+                        }`}
                     >
                       {privacyConsent && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                     </div>

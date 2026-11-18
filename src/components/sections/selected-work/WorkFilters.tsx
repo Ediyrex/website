@@ -1,6 +1,6 @@
 import React from "react";
 import {
-  LayoutGrid,
+  Sparkles,
   Bot,
   ShieldCheck,
   Film,
@@ -24,7 +24,7 @@ function FilterIcon({
 
   switch (filterKey) {
     case "all":
-      return <LayoutGrid strokeWidth={1.7} className={className} />;
+      return <Sparkles strokeWidth={1.7} className={className} />;
     case "ai-agents":
       return <Bot strokeWidth={1.7} className={className} />;
     case "brand-identity":

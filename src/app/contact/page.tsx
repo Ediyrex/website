@@ -3,9 +3,9 @@ import type { Metadata } from "next";
 import { ProjectBriefDesk } from "@/components/sections/ContactPage/ProjectBriefDesk";
 
 export const metadata: Metadata = {
-  title: "Contact & Project Intake — Start a Project",
+  title: "Contact & Project Intake",
   description:
-    "Have something worth building? Submit your project brief or book a 30-min discovery consultation with EDYREX studio leads.",
+    "Have something worth building? Let's start a conversation. Submit your project brief or contact Ediyrex Studio directly.",
   alternates: {
     canonical: "/contact",
   },

@@ -13,8 +13,7 @@
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "tsx src/db/seed.ts",
     "db:seed-admin": "tsx src/db/seed-admin.ts",
-    "db:studio": "drizzle-kit studio",
-    "db:backup": "tsx src/scripts/backup-db.ts"
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "@calcom/embed-react": "^1.5.3",

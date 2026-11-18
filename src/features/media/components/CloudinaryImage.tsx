@@ -44,10 +44,8 @@ export function CloudinaryImage({
         width={width || 800}
         height={height || 600}
         priority={priority}
-        className={`w-full h-full object-cover transition-all duration-350 ease-out ${
-          isLoading
-            ? "blur-md scale-[1.04] opacity-50"
-            : "blur-0 scale-100 opacity-100"
+        className={`w-full h-full object-cover transition-opacity duration-300 ${
+          isLoading ? "opacity-0 scale-[1.02]" : "opacity-100 scale-100"
         }`}
         onLoad={() => setIsLoading(false)}
         {...rest}

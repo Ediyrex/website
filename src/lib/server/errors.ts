@@ -1,6 +1,5 @@
 import { unstable_rethrow } from "next/navigation";
 import { NextResponse } from "next/server";
-import * as Sentry from "@sentry/nextjs";
 import { logger } from "./logger";
 
 export class AppError extends Error {
@@ -25,11 +24,6 @@ export function handleApiError(err: unknown, context: string): NextResponse {
   unstable_rethrow(err);
 
   if (err instanceof AppError) {
-    if (err.statusCode >= 500) {
-      Sentry.captureException(err, {
-        extra: { context, code: err.code, details: err.details },
-      });
-    }
     return NextResponse.json(
       err.details
         ? { error: err.code, message: err.message, details: err.details }
@@ -39,9 +33,6 @@ export function handleApiError(err: unknown, context: string): NextResponse {
   }
 
   logger.error({ err, context }, "Unhandled API exception");
-  Sentry.captureException(err, {
-    extra: { context },
-  });
   return NextResponse.json(
     {
       error: "Internal Server Error",

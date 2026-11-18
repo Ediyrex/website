@@ -4,14 +4,14 @@ import {
   ArrowUpRight,
   Bot,
   Database,
-  Cpu,
+  Sparkles,
   Workflow,
   Zap,
   Layers,
 } from "lucide-react";
 import type { SelectedWorkProject } from "@/data/projects";
 
-const FEATURED_PILL_ICONS = [Cpu, Workflow, Layers] as const;
+const FEATURED_PILL_ICONS = [Sparkles, Workflow, Layers] as const;
 
 interface FeaturedCaseStudyProps {
   project: SelectedWorkProject;
@@ -198,9 +198,9 @@ export function FeaturedCaseStudy({ project }: FeaturedCaseStudyProps) {
 
               {/* Connected System Nodes */}
               <div className="relative z-10 grid grid-cols-3 gap-3 items-center w-full h-full">
-                {/* Node 1: Orchestrator Engine */}
+                {/* Node 1: Orchestrator Sparkles */}
                 <div className="justify-self-start self-end mb-2 w-12 h-12 rounded-xl border border-white/20 bg-white/[0.06] flex items-center justify-center text-[#EAE4DD]">
-                  <Cpu className="w-5 h-5" strokeWidth={1.6} />
+                  <Sparkles className="w-5 h-5" strokeWidth={1.6} />
                 </div>
 
                 {/* Middle Stack: AI Agent + Glowing Execution Node */}

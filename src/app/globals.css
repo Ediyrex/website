@@ -62,7 +62,6 @@
   --font-instrument-serif: var(--font-instrument-serif), Georgia, serif;
   --font-space-mono: var(--font-space-mono), monospace;
   --font-playfair: var(--font-playfair), Georgia, serif;
-  --font-archivo-black: var(--font-archivo-black), var(--font-manrope), sans-serif;
 }
 
 html {
@@ -92,38 +91,6 @@ h4 {
   background-size: 48px 48px;
 }
 
-/* Shimmer animation for editorial skeletons */
-@keyframes shimmer {
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-.animate-shimmer {
-  position: relative;
-  overflow: hidden;
-}
-
-.animate-shimmer::after {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  transform: translateX(-100%);
-  background-image: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0) 0,
-    rgba(255, 255, 255, 0.04) 20%,
-    rgba(214, 183, 122, 0.08) 50%,
-    rgba(255, 255, 255, 0.04) 80%,
-    rgba(255, 255, 255, 0)
-  );
-  animation: shimmer 1.8s infinite;
-  content: "";
-  pointer-events: none;
-}
-
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -131,47 +98,6 @@ h4 {
 
 .no-scrollbar::-webkit-scrollbar {
   display: none;
-}
-
-/* ========================================================================= */
-/* UX & ANIMATION PRINCIPLES                                                 */
-/* ========================================================================= */
-
-/* 1. Squash & Stretch + 2. Anticipation: Elastic physical reaction on press */
-.tactile-squash {
-  transition: transform 140ms cubic-bezier(0.16, 1, 0.3, 1), background-color 140ms ease-out;
-}
-.tactile-squash:hover {
-  transform: translateY(-1.5px);
-}
-.tactile-squash:active {
-  transform: translateY(0.5px) scale(0.97) scaleY(0.95);
-}
-
-/* 5. Follow Through & Secondary Action: Icon displacement with trailing spring */
-.hover-follow-through .icon-follow {
-  transition: transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-.hover-follow-through:hover .icon-follow {
-  transform: translate(3px, -3px);
-}
-
-/* 13. Fitts's Law & 14. Bigger Hit Areas: Expands touch bounding box */
-.touch-target-expansion {
-  position: relative;
-  min-height: 44px;
-}
-.touch-target-expansion::before {
-  content: "";
-  position: absolute;
-  inset: -6px;
-  pointer-events: auto;
-}
-
-/* 3. Staging the Focus: High-contrast focus spotlight */
-.focus-stage:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 2px #08090B, 0 0 0 4px #F06419;
 }
 
 @media (prefers-reduced-motion: reduce) {

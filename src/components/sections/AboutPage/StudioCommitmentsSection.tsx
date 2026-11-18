@@ -61,8 +61,8 @@ export function StudioCommitmentsSection() {
               className="py-8 md:py-2 md:px-8 first:pl-0 last:pr-0 flex flex-col justify-between space-y-5"
             >
               <div className="space-y-3">
-                {/* Clean editorial index */}
-                <span className="font-mono text-xs font-bold text-[#FF6900] tracking-wider block">
+                {/* Orange-bordered pill badge */}
+                <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded border border-[#FF6900] text-[#FF6900] font-mono text-[11px] font-bold tracking-wider">
                   {item.index}
                 </span>
                 <h3 className="font-heading font-extrabold text-[17px] sm:text-[18px] text-[#F5F3EE] tracking-tight uppercase leading-snug">

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { ArrowUpRight, Menu, X, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
@@ -18,7 +18,6 @@ const NAV_LINKS = [
 ];
 
 export function Header() {
-  const router = useRouter();
   const [isScrolled, setIsScrolled] = useState(false);
   const [pastHero, setPastHero] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -142,9 +141,6 @@ export function Header() {
                   <Link
                     key={link.href}
                     href={link.href}
-                    onPointerEnter={() => router.prefetch(link.href)}
-                    onPointerDown={() => router.prefetch(link.href)}
-                    onTouchStart={() => router.prefetch(link.href)}
                     className={cn(
                       "text-sm font-medium transition-colors py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F06419] rounded",
                       isLightHeroNav
@@ -216,8 +212,6 @@ export function Header() {
               <div key={link.href} className="border-b border-[#252A32]/60 pb-3">
                 <Link
                   href={link.href}
-                  onPointerDown={() => router.prefetch(link.href)}
-                  onTouchStart={() => router.prefetch(link.href)}
                   onClick={() => setMobileMenuOpen(false)}
                   className="block font-heading font-semibold text-2xl text-[#F5F3EE] hover:text-[#F06419] transition-colors py-1"
                 >

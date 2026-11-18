@@ -4,9 +4,9 @@ import { ArrowLeft } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — Data Protection & Client Confidentiality",
+  title: "Privacy Policy",
   description:
-    "How EDYREX Studio collects, processes, and protects project enquiry information and client data.",
+    "How Ediyrex Studio collects, processes, and protects project enquiry information.",
   alternates: {
     canonical: "/privacy",
   },

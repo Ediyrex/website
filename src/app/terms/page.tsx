@@ -4,9 +4,9 @@ import { ArrowLeft } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 
 export const metadata: Metadata = {
-  title: "Terms of Service — Informational & Engagement Terms",
+  title: "Terms of Service",
   description:
-    "Terms governing use of the EDYREX Studio website, concept explorations, and client engagement protocols.",
+    "Terms governing use of the Ediyrex Studio website and informational materials.",
   alternates: {
     canonical: "/terms",
   },

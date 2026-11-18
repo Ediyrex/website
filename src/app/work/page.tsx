@@ -8,9 +8,9 @@ import { WorkCTA } from "@/components/sections/WorkPage/WorkCTA";
 export const instant = false;
 
 export const metadata: Metadata = {
-  title: "Selected Work — Commercial Media, Software & AI Systems",
+  title: "Work & Case Studies",
   description:
-    "Explore case studies and live projects delivered by EDYREX Studio across visual storytelling, digital platforms, and intelligent automation systems.",
+    "An evolving collection of digital products, creative work, and intelligent systems by Ediyrex Studio.",
   alternates: {
     canonical: "/work",
   },

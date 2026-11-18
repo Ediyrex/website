@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Code2, PlayCircle, Bot } from "lucide-react";
+import { Code2, PlayCircle, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function IntegrationDiagram() {
@@ -151,7 +151,7 @@ export function IntegrationDiagram() {
           className="cursor-pointer"
         >
           <div className="venn-counter-node flex flex-col items-center justify-center text-[#111111]">
-            <Bot
+            <Sparkles
               className={cn(
                 "h-4 w-4 stroke-[1.85] transition-all duration-200",
                 activeCircle === "ai" ? "text-[#FF6900] scale-110" : "text-[#111111]"

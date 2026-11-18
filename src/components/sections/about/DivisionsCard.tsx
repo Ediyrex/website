@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { Play, Layers, Bot, Workflow } from "lucide-react";
+import { Play, Layers, Sparkles, Workflow } from "lucide-react";
 
 interface DivisionPillar {
   number: string;
@@ -30,7 +30,7 @@ const DIVISION_PILLARS: readonly DivisionPillar[] = [
     title: "AI",
     description: "Intelligent systems that scale work.",
     href: "/services/ai",
-    Icon: Bot,
+    Icon: Sparkles,
   },
   {
     number: "04",
