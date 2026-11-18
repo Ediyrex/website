@@ -273,6 +273,20 @@ export function EnquirySection() {
                       directly to reach the studio.
                     </p>
                   )}
+                  {formData.wantsDiscoveryCall && (
+                    <div className="pt-2">
+                      <a
+                        href={`https://cal.com/${process.env.NEXT_PUBLIC_CAL_LINK || "ediyrex-pbxgua"}?name=${encodeURIComponent(formData.name || "")}&email=${encodeURIComponent(formData.email || "")}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#E85D04] hover:bg-[#F97316] text-[#07090D] font-semibold text-sm transition-all shadow-lg shadow-[#E85D04]/20 active:scale-[0.98]"
+                      >
+                        <Calendar className="w-4 h-4" />
+                        <span>Book Discovery Slot on Cal.com</span>
+                      </a>
+                    </div>
+                  )}
+
                   <Button
                     onClick={() => {
                       setIsSuccess(false);

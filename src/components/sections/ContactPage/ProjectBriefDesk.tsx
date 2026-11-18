@@ -1371,6 +1371,28 @@ export function ProjectBriefDesk() {
                     </div>
                   </div>
 
+                  {wantsDiscoveryCall && (
+                    <div className="p-4 rounded-[12px] bg-[#F06419]/10 border border-[#F06419]/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+                      <div className="space-y-1 text-center sm:text-left">
+                        <h4 className="font-heading font-bold text-sm text-[#F5F2EC]">
+                          Lock In Your Discovery Session
+                        </h4>
+                        <p className="text-xs text-[#898D94]">
+                          Select a convenient slot on our live Cal.com calendar right now.
+                        </p>
+                      </div>
+                      <a
+                        href={`https://cal.com/${process.env.NEXT_PUBLIC_CAL_LINK || "ediyrex-pbxgua"}?name=${encodeURIComponent(fullName)}&email=${encodeURIComponent(workEmail)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full sm:w-auto px-5 py-2.5 rounded-[8px] bg-[#F06419] hover:bg-[#FF7A2E] text-white font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shrink-0 transition-colors shadow-md shadow-[#F06419]/20"
+                      >
+                        <Calendar className="w-3.5 h-3.5" />
+                        <span>Schedule on Cal.com</span>
+                      </a>
+                    </div>
+                  )}
+
                   {/* Success CTAs */}
                   <div className="flex flex-col sm:flex-row items-center gap-3 pt-4 border-t border-[#292E35]">
                     <Link

@@ -133,8 +133,15 @@ export const DEFAULT_SITE_SETTINGS = {
     gaMeasurementId: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "",
     gtmContainerId: "",
     gscVerificationCode: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || "",
-    captchaProvider: "none" as "none" | "turnstile" | "recaptcha",
-    captchaSiteKey: "",
+    captchaProvider: (process.env.TURNSTILE_SECRET_KEY
+      ? "turnstile"
+      : process.env.RECAPTCHA_SECRET_KEY
+        ? "recaptcha"
+        : "none") as "none" | "turnstile" | "recaptcha",
+    captchaSiteKey:
+      process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ||
+      process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ||
+      "",
     emailFromName: "Ediyrex Studio",
   },
   advanced: {
@@ -363,8 +370,12 @@ export async function loadMergedSiteSettings(db: DbClient) {
         integrationsRaw.captchaProvider === "turnstile" ||
         integrationsRaw.captchaProvider === "recaptcha"
           ? (integrationsRaw.captchaProvider as "turnstile" | "recaptcha")
-          : ("none" as const),
-      captchaSiteKey: (integrationsRaw.captchaSiteKey as string) || "",
+          : integrationsRaw.captchaProvider === "none"
+            ? ("none" as const)
+            : DEFAULT_SITE_SETTINGS.integrations.captchaProvider,
+      captchaSiteKey:
+        (integrationsRaw.captchaSiteKey as string) ||
+        DEFAULT_SITE_SETTINGS.integrations.captchaSiteKey,
       emailFromName:
         (integrationsRaw.emailFromName as string) ||
         DEFAULT_SITE_SETTINGS.integrations.emailFromName,
