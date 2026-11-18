@@ -9,7 +9,7 @@ export const SITE_CONFIG = {
   contact: {
     email: process.env.NEXT_PUBLIC_CONTACT_EMAIL || "ediyrex@gmail.com",
     secondaryEmail: "hello@ediyrex.com",
-    phone: process.env.NEXT_PUBLIC_CONTACT_PHONE || "+91 98765 43210",
+    phone: process.env.NEXT_PUBLIC_CONTACT_PHONE || "+91 94147 85590",
     location: process.env.NEXT_PUBLIC_STUDIO_LOCATION || "Mumbai & Bangalore, India · Global Clients",
     hours: "Mon–Fri · 10:00 AM – 7:00 PM IST",
     responseTime: "Within 24 business hours",

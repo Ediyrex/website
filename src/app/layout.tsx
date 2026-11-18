@@ -142,6 +142,7 @@ export default function RootLayout({
     name: SITE_CONFIG.name,
     url: SITE_CONFIG.url,
     email: SITE_CONFIG.contact.email,
+    telephone: SITE_CONFIG.contact.phone,
     areaServed: "Global",
     description:
       "Independent creative technology studio uniting branding & marketing, media production, web dev & DADV, and AI agents & n8n automation.",

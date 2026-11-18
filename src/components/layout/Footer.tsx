@@ -75,6 +75,7 @@ export function Footer() {
     live?.businessEmail && live.businessEmail !== "hello@ediyrex.com"
       ? live.businessEmail
       : SITE_CONFIG.contact.email;
+  const phone = live?.phoneNumber || SITE_CONFIG.contact.phone;
   const footerNote =
     live?.footerNote ||
     "A creative and technology studio that helps businesses build websites, digital products and intelligent systems that work in the real world.";
@@ -268,12 +269,12 @@ export function Footer() {
             {/* Clickable Phone Number */}
             <div className="flex items-center gap-2 text-[13.5px]">
               <a
-                href={`tel:${SITE_CONFIG.contact.phone.replace(/[^0-9+]/g, "")}`}
+                href={`tel:${phone.replace(/[^0-9+]/g, "")}`}
                 className="font-mono text-[#C8C2B9] hover:text-[#FF640A] transition-colors inline-flex items-center gap-2"
-                aria-label={`Call EDYREX at ${SITE_CONFIG.contact.phone}`}
+                aria-label={`Call EDYREX at ${phone}`}
               >
                 <Phone className="h-3.5 w-3.5 text-[#FF640A]" aria-hidden="true" />
-                <span>{SITE_CONFIG.contact.phone}</span>
+                <span>{phone}</span>
               </a>
             </div>
 

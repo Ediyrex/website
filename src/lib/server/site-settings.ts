@@ -57,7 +57,7 @@ export const DEFAULT_SITE_SETTINGS = {
   siteName: "EDIYREX Studio",
   tagline: "Creative Technology, Media, Digital & AI",
   businessEmail: "ediyrex@gmail.com",
-  phoneNumber: "+91 98765 43210",
+  phoneNumber: "+91 94147 85590",
   studioLocation: "Mumbai & Bangalore, India · Global Clients",
   officeHours: "Mon-Fri · 10:00 AM - 7:00 PM IST",
   primaryContactNote: "Response within 1 business day for qualified inquiries.",

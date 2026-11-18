@@ -1,7 +1,12 @@
+"use client";
+
+import { useState } from "react";
 import { AdvantageCard } from "./AdvantageCard";
 import { KEY_ADVANTAGES } from "./comparison.data";
 
 export function AdvantageGrid() {
+  const [activeId, setActiveId] = useState<string>("adv-disciplines");
+
   return (
     <div className="space-y-7 pt-2">
       {/* Centered editorial divider */}
@@ -19,13 +24,18 @@ export function AdvantageGrid() {
         />
       </div>
 
-      {/* Responsive 5-card grid (1 col mobile -> 2 col sm -> 3+2 tablet -> 5 col desktop) */}
+      {/* Responsive 5-card grid with interactive spotlight effects */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 lg:gap-5">
-        {KEY_ADVANTAGES.map((advantage) => (
-          <AdvantageCard key={advantage.id} advantage={advantage} />
+        {KEY_ADVANTAGES.map((advantage, index) => (
+          <AdvantageCard
+            key={advantage.id}
+            advantage={advantage}
+            index={index}
+            isActive={activeId === advantage.id}
+            onSelect={() => setActiveId(advantage.id)}
+          />
         ))}
       </div>
     </div>
   );
 }
-
