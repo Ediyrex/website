@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { ArrowUpRight, Menu, X, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/Button";
@@ -97,28 +98,31 @@ export function Header() {
       >
         <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-14">
           <div className="h-[68px] md:h-20 flex items-center justify-between gap-6">
-            {/* Wordmark */}
+            {/* Official Brand Lockup */}
             <Link
               href="/"
-              className="flex items-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D6B77A] rounded-md px-1 -ml-1"
+              aria-label="EDIYREX Studio - Home"
+              className="group flex items-center gap-2.5 sm:gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF640A] rounded-md px-1 -ml-1 transition-transform"
             >
-              <span
-                style={{ fontFamily: "var(--font-space-grotesk)" }}
+              <Image
+                src="/images/logo/ediyrex-emblem.png"
+                alt=""
+                width={36}
+                height={36}
+                priority
+                className="h-8 sm:h-9 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+              />
+              <Image
+                src="/images/logo/ediyrex-wordmark.png"
+                alt="EDIYREX STUDIO"
+                width={124}
+                height={20}
+                priority
                 className={cn(
-                  "font-bold text-xl sm:text-2xl tracking-tight transition-colors",
-                  isLightHeroNav ? "text-[#0B0D10]" : "text-[#F5F3EE]"
+                  "h-4 sm:h-[18px] w-auto object-contain transition-all duration-200",
+                  isLightHeroNav ? "brightness-0" : ""
                 )}
-              >
-                EDIYREX
-                {isLightHeroNav && (
-                  <sup className="text-[10px] font-medium ml-0.5 align-super">
-                    ®
-                  </sup>
-                )}
-              </span>
-              {!isLightHeroNav && (
-                <span className="hidden sm:inline-block w-1.5 h-1.5 rounded-full bg-[#F06419]" />
-              )}
+              />
             </Link>
 
             {/* Desktop Navigation */}
@@ -207,7 +211,31 @@ export function Header() {
           aria-label="Mobile Navigation"
           className="fixed inset-0 z-40 md:hidden bg-[#08090B] pt-24 pb-8 px-6 flex flex-col justify-between overflow-y-auto"
         >
-          <nav aria-label="Mobile Menu Links" className="space-y-4">
+          <div>
+            <div className="flex items-center pb-5 mb-4 border-b border-[#252A32]/60">
+              <Link
+                href="/"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-2.5"
+              >
+                <Image
+                  src="/images/logo/ediyrex-emblem.png"
+                  alt=""
+                  width={32}
+                  height={32}
+                  className="h-7 w-auto object-contain"
+                />
+                <Image
+                  src="/images/logo/ediyrex-wordmark.png"
+                  alt="EDIYREX STUDIO"
+                  width={110}
+                  height={18}
+                  className="h-3.5 w-auto object-contain"
+                />
+              </Link>
+            </div>
+
+            <nav aria-label="Mobile Menu Links" className="space-y-4">
             {NAV_LINKS.map((link) => (
               <div key={link.href} className="border-b border-[#252A32]/60 pb-3">
                 <Link
@@ -219,7 +247,8 @@ export function Header() {
                 </Link>
               </div>
             ))}
-          </nav>
+            </nav>
+          </div>
 
           <div className="pt-8 space-y-4">
             <BookCallButton

@@ -24,80 +24,157 @@ import type { WorkflowStageId } from "./workflow.data";
 
 function DiscoverVisual() {
   return (
-    <div className="relative w-full h-full min-h-[320px] rounded-[20px] bg-[#121110] border border-white/10 p-5 sm:p-6 overflow-hidden flex flex-col justify-between text-white shadow-2xl">
+    <div className="relative w-full h-full min-h-[360px] rounded-[20px] bg-[#121110] border border-white/10 p-5 sm:p-6 overflow-hidden flex flex-col justify-between text-white shadow-2xl">
       {/* Background Amber/Orange Radar Bloom */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -right-10 -bottom-10 w-64 h-64 rounded-full bg-[#FF6900]/15 blur-3xl"
+        className="pointer-events-none absolute -right-10 -bottom-10 w-72 h-72 rounded-full bg-[#FF6900]/15 blur-3xl"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -left-10 -top-10 w-48 h-48 rounded-full bg-[#FF9A48]/10 blur-2xl"
       />
 
       {/* Top Console Bar */}
-      <div className="flex items-center justify-between border-b border-white/10 pb-3 z-10">
+      <div className="flex items-center justify-between border-b border-white/10 pb-3 z-10 shrink-0">
         <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-[#FF6900] animate-pulse" />
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF6900] opacity-75" />
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#FF6900]" />
+          </span>
           <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-[#FF9A48]">
             Intelligence Radar · Active
           </span>
         </div>
-        <span className="font-mono text-[10px] text-white/50 uppercase">
+        <span className="font-mono text-[10px] text-white/60 uppercase tracking-wider bg-white/[0.06] border border-white/10 rounded px-2 py-0.5">
           Signal: 99.4% Clarity
         </span>
       </div>
 
-      {/* Center Radar & Constellation Graph */}
-      <div className="relative z-10 my-4 flex-1 flex items-center justify-center min-h-[170px]">
-        {/* Radar Rings */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-30">
-          <div className="w-48 h-48 rounded-full border border-dashed border-[#FF6900]/40 animate-[spin_30s_linear_infinite]" />
-          <div className="absolute w-32 h-32 rounded-full border border-white/20" />
-          <div className="absolute w-16 h-16 rounded-full border border-[#FF6900]/50" />
+      {/* Center Radar Scope & Telemetry Signals */}
+      <div className="relative z-10 my-auto py-2 flex flex-col items-center justify-center gap-4 sm:gap-5">
+        {/* Radar Scanning Arena */}
+        <div className="relative w-44 h-44 sm:w-48 sm:h-48 flex items-center justify-center shrink-0">
+          {/* Outer Compass Degree Ring */}
+          <div className="absolute inset-0 rounded-full border border-white/15" />
+          <div className="absolute inset-1 rounded-full border border-dashed border-[#FF6900]/30 animate-[spin_40s_linear_infinite]" />
+
+          {/* Range Circles */}
+          <div className="absolute w-32 h-32 sm:w-36 sm:h-36 rounded-full border border-white/10" />
+          <div className="absolute w-20 h-20 sm:w-24 sm:h-24 rounded-full border border-[#FF6900]/25" />
+          <div className="absolute w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-white/15" />
+
+          {/* Crosshair Axes */}
+          <div className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+          <div className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-white/20 to-transparent" />
+
+          {/* Rotating Radar Sweep Cone */}
+          <div
+            className="absolute inset-0 rounded-full animate-[spin_4s_linear_infinite] pointer-events-none"
+            style={{
+              background:
+                "conic-gradient(from 0deg, rgba(255, 105, 0, 0.35) 0deg, rgba(255, 105, 0, 0.08) 45deg, transparent 90deg, transparent 360deg)",
+            }}
+          />
+
+          {/* Center Origin Reticle */}
+          <div className="relative z-10 w-3 h-3 rounded-full bg-[#FF6900] shadow-[0_0_12px_#FF6900] flex items-center justify-center">
+            <div className="w-1 h-1 rounded-full bg-white" />
+          </div>
+
+          {/* Target Blip 1: Market Opportunity */}
+          <div className="absolute top-6 right-6 flex items-center gap-1.5 pointer-events-none">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF9A48] opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#FF9A48]" />
+            </span>
+            <span className="font-mono text-[8.5px] text-[#FF9A48] tracking-widest uppercase bg-black/70 px-1 rounded border border-[#FF9A48]/30">
+              TGT·01
+            </span>
+          </div>
+
+          {/* Target Blip 2: Technical Feasibility */}
+          <div className="absolute bottom-9 left-5 flex items-center gap-1.5 pointer-events-none">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+            </span>
+            <span className="font-mono text-[8.5px] text-emerald-400 tracking-widest uppercase bg-black/70 px-1 rounded border border-emerald-500/30">
+              TGT·02
+            </span>
+          </div>
+
+          {/* Target Blip 3: Domain Variables */}
+          <div className="absolute bottom-5 right-8 flex items-center gap-1.5 pointer-events-none">
+            <span className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_8px_white]" />
+            <span className="font-mono text-[8.5px] text-white/80 tracking-widest uppercase bg-black/70 px-1 rounded border border-white/20">
+              TGT·03
+            </span>
+          </div>
+
+          {/* Constellation Vector Lines */}
+          <svg
+            viewBox="0 0 200 200"
+            className="absolute inset-0 w-full h-full pointer-events-none"
+            fill="none"
+          >
+            <path
+              d="M 148 38 L 100 100 L 42 142 M 100 100 L 142 154"
+              stroke="rgba(255, 154, 72, 0.4)"
+              strokeWidth="1"
+              strokeDasharray="3 3"
+            />
+          </svg>
         </div>
 
-        {/* Constellation Nodes */}
-        <svg
-          viewBox="0 0 320 180"
-          className="absolute inset-0 w-full h-full pointer-events-none"
-          fill="none"
-        >
-          <path
-            d="M 60 90 L 120 45 L 160 100 L 220 55 L 270 120 L 200 140 L 120 135 Z"
-            stroke="rgba(255, 105, 0, 0.35)"
-            strokeWidth="1.2"
-            strokeDasharray="4 3"
-          />
-          <path
-            d="M 120 45 L 220 55 M 160 100 L 200 140"
-            stroke="rgba(255, 255, 255, 0.2)"
-            strokeWidth="1"
-          />
-          <circle cx="60" cy="90" r="4" fill="#FF9A48" />
-          <circle cx="120" cy="45" r="5" fill="#FF6900" />
-          <circle cx="160" cy="100" r="6" fill="#FFFFFF" />
-          <circle cx="220" cy="55" r="4.5" fill="#FF6900" />
-          <circle cx="270" cy="120" r="5" fill="#FF9A48" />
-          <circle cx="200" cy="140" r="4" fill="#FFFFFF" />
-          <circle cx="120" cy="135" r="3.5" fill="#FF6900" />
-        </svg>
+        {/* Intelligence Telemetry Feed Cards (Organized Cleanly Below Radar) */}
+        <div className="w-full space-y-2 z-10">
+          <div className="flex items-center justify-between rounded-xl bg-white/[0.04] border border-white/10 px-3 py-2 transition-colors hover:border-[#FF6900]/40">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-6 h-6 rounded-md bg-[#FF6900]/15 border border-[#FF6900]/30 flex items-center justify-center text-[#FF9A48] shrink-0">
+                <Compass className="w-3.5 h-3.5" />
+              </div>
+              <span className="font-mono text-[11px] text-white truncate">
+                Market Opportunity
+              </span>
+            </div>
+            <span className="shrink-0 font-mono text-[9.5px] uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 rounded px-2 py-0.5 font-medium">
+              Identified · High Alpha
+            </span>
+          </div>
 
-        {/* Floating Intelligence Signals */}
-        <div className="relative z-20 flex flex-wrap gap-2 justify-center max-w-[280px]">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.08] backdrop-blur-md border border-white/15 px-3 py-1 font-mono text-[10.5px] text-white">
-            <Compass className="w-3.5 h-3.5 text-[#FF9A48]" />
-            <span>Market Opportunity Identified</span>
-          </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FF6900]/15 backdrop-blur-md border border-[#FF6900]/40 px-3 py-1 font-mono text-[10.5px] text-[#FF9A48]">
-            <Activity className="w-3.5 h-3.5 text-[#FF6900]" />
-            <span>Technical Feasibility: Optimal</span>
-          </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.08] backdrop-blur-md border border-white/15 px-3 py-1 font-mono text-[10.5px] text-white">
-            <Eye className="w-3.5 h-3.5 text-[#FF9A48]" />
-            <span>48 Domain Variables Audited</span>
-          </span>
+          <div className="flex items-center justify-between rounded-xl bg-white/[0.04] border border-[#FF6900]/40 px-3 py-2 shadow-[0_0_16px_rgba(255,105,0,0.08)]">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-6 h-6 rounded-md bg-[#FF6900] text-black flex items-center justify-center shrink-0">
+                <Activity className="w-3.5 h-3.5 stroke-[2.2]" />
+              </div>
+              <span className="font-mono text-[11px] text-[#FF9A48] font-medium truncate">
+                Technical Feasibility
+              </span>
+            </div>
+            <span className="shrink-0 font-mono text-[9.5px] uppercase tracking-wider text-[#FF9A48] bg-[#FF6900]/15 border border-[#FF6900]/40 rounded px-2 py-0.5 font-medium">
+              Optimal · 0 Blockers
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between rounded-xl bg-white/[0.04] border border-white/10 px-3 py-2 transition-colors hover:border-white/20">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-6 h-6 rounded-md bg-white/10 border border-white/20 flex items-center justify-center text-white shrink-0">
+                <Eye className="w-3.5 h-3.5" />
+              </div>
+              <span className="font-mono text-[11px] text-white truncate">
+                Domain Audit
+              </span>
+            </div>
+            <span className="shrink-0 font-mono text-[9.5px] uppercase tracking-wider text-white/80 bg-white/10 border border-white/20 rounded px-2 py-0.5 font-medium">
+              48 Variables Audited
+            </span>
+          </div>
         </div>
       </div>
 
       {/* Bottom Telemetry Bar */}
-      <div className="flex items-center justify-between z-10 pt-3 border-t border-white/10 font-mono text-[11px] text-white/70">
+      <div className="flex items-center justify-between z-10 pt-3 border-t border-white/10 font-mono text-[11px] text-white/70 shrink-0">
         <span>DELIVERABLE: INTELLIGENCE DOSSIER</span>
         <span className="text-[#FF9A48] font-bold">READY TO ARCHITECT</span>
       </div>

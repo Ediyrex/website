@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
@@ -179,15 +180,22 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         <div className="flex flex-col flex-1 min-h-0">
           {/* Brand Header */}
           <div className="h-16 px-4 border-b border-[#1C2027] flex items-center justify-between shrink-0">
-            <Link href="/admin" className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-[#1A160E] border border-[#D6B77A]/40 flex items-center justify-center text-[#D6B77A]">
-                <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current">
-                  <path d="M5 4h14v3.2H8.6v3.2h8.8v3.1H8.6v3.3H19V20H5V4z" />
-                </svg>
+            <Link href="/admin" className="flex items-center gap-2.5 group">
+              <Image
+                src="/images/logo/ediyrex-emblem.png"
+                alt="EDIYREX"
+                width={32}
+                height={32}
+                className="h-8 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
+              />
+              <div className="flex flex-col">
+                <span className="font-heading font-bold text-sm tracking-tight text-[#F5F3EE] leading-tight">
+                  EDIYREX
+                </span>
+                <span className="text-[10px] font-mono text-[#D6B77A] tracking-wider uppercase">
+                  Studio Admin
+                </span>
               </div>
-              <span className="font-heading font-bold text-sm tracking-tight text-[#F5F3EE]">
-                Ediyrex Studio
-              </span>
             </Link>
             <button
               type="button"
