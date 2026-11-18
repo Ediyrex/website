@@ -11,6 +11,7 @@ import { StickyMobileCta } from "./StickyMobileCta";
 import { CookieBanner } from "./CookieBanner";
 import { AnalyticsProvider } from "@/components/analytics/AnalyticsProvider";
 import { BookingProvider } from "@/features/bookings";
+import { OptimisticProgressBar } from "@/components/ui/OptimisticProgressBar";
 
 interface PublicAnnouncement {
   title: string;
@@ -48,6 +49,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
 
   return (
     <MotionConfig reducedMotion="user">
+      <OptimisticProgressBar />
       <AnalyticsProvider />
       <BookingProvider>
         {announcement && !bannerDismissed && (
@@ -72,7 +74,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
           </div>
         )}
         <Header />
-        <main id="main-content" className="flex-1">
+        <main id="main-content" className="flex-1 w-full overflow-x-hidden min-w-0">
           {children}
         </main>
         <Footer />

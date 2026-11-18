@@ -102,7 +102,7 @@ export async function generateMetadata({
   if (!config) return { title: "Division Not Found" };
 
   return {
-    title: config.title,
+    title: `${config.title} — ${config.headline}`,
     description: config.description,
     alternates: {
       canonical: `/services/${division}`,

@@ -12,6 +12,8 @@ import { trackEvent } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 import { useBookingModal } from "@/features/bookings";
 import { TurnstileWidget, useTurnstile } from "@/features/turnstile";
+import { useWaitExplanation } from "@/hooks/ui-speed";
+import { startProgressBar, finishProgressBar } from "@/components/ui/OptimisticProgressBar";
 
 const BUDGET_TIERS: Record<BudgetCurrency, { value: string; label: string }[]> = {
   USD: [
@@ -82,6 +84,13 @@ export function EnquirySection() {
   const [serverError, setServerError] = useState("");
   const turnstile = useTurnstile();
 
+  // Explain waits over 1s for submission
+  const { explanation: submitExplanation } = useWaitExplanation(isSubmitting, [
+    { afterMs: 1000, message: "Securing project brief..." },
+    { afterMs: 2500, message: "Connecting with studio engineering desk..." },
+    { afterMs: 4500, message: "Finalizing reference tracking..." },
+  ]);
+
   const activeCurrency: BudgetCurrency = formData.budgetCurrency || "USD";
 
   const handleChange = (
@@ -128,6 +137,7 @@ export function EnquirySection() {
     }
 
     setIsSubmitting(true);
+    startProgressBar();
 
     const enrichedPayload = engagementModel
       ? {
@@ -173,6 +183,7 @@ export function EnquirySection() {
           : "An unexpected error occurred. Please try again.";
       setServerError(msg);
     } finally {
+      finishProgressBar();
       setIsSubmitting(false);
     }
   };
@@ -189,7 +200,6 @@ export function EnquirySection() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
           {/* Left info column */}
           <div className="lg:col-span-5 space-y-6">
-            <Badge variant="accent">Discovery &amp; Enquiry</Badge>
             <h2 className="font-heading font-semibold tracking-tight text-[#F5F3EE] text-[clamp(1.75rem,3vw,2.5rem)] leading-[1.15]">
               Tell us what you are working on.
             </h2>
@@ -725,10 +735,10 @@ export function EnquirySection() {
                       className="w-full"
                     >
                       {isSubmitting ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          <span>Submitting Enquiry...</span>
-                        </>
+                        <div className="flex items-center justify-center gap-2">
+                          <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+                          <span>{submitExplanation || "Submitting Enquiry..."}</span>
+                        </div>
                       ) : (
                         <>
                           <span>

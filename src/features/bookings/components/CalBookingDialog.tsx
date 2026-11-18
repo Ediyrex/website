@@ -2,9 +2,11 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import Cal, { getCalApi } from "@calcom/embed-react";
-import { X, Calendar, ExternalLink, Loader2 } from "lucide-react";
+import { X, Calendar, ExternalLink } from "lucide-react";
 import type { BookingPrefill } from "../types/booking.types";
 import { BOOKING_CONFIG, getFullBookingUrl } from "../config/booking.config";
+import { SkeletonCalendar } from "@/components/ui/Skeleton";
+import { useDebouncedLoading, useWaitExplanation } from "@/hooks/ui-speed";
 
 interface CalBookingDialogProps {
   isOpen: boolean;
@@ -28,8 +30,22 @@ export function CalBookingDialog({
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
-  // Initialize Cal.com Embed UI
+  // Performance & UX speed hooks
+  const showSkeleton = useDebouncedLoading(!calReady && !hasError, { delayMs: 300 });
+  const { explanation } = useWaitExplanation(!calReady && !hasError, [
+    {
+      afterMs: 1000,
+      message: "Syncing real-time Google Meet calendar slots with EDYREX Studio...",
+    },
+    {
+      afterMs: 3500,
+      message: "Connecting to calendar scheduling engine...",
+    },
+  ]);
+
+  // Initialize Cal.com Embed UI only on tap / open
   useEffect(() => {
+    if (!isOpen) return;
     let active = true;
 
     async function initCal() {
@@ -178,10 +194,19 @@ export function CalBookingDialog({
 
         {/* Embed Body Container */}
         <div className="relative flex-1 w-full overflow-y-auto min-h-[500px] sm:min-h-[580px] bg-[#08090B]">
-          {!calReady && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[#08090B] text-[#B2B4BA] z-10">
-              <Loader2 className="w-6 h-6 animate-spin text-[#D6B77A]" />
-              <span className="text-xs font-mono">Loading real-time availability...</span>
+          {!calReady && !hasError && showSkeleton && (
+            <div className="absolute inset-0 flex flex-col items-center justify-start gap-4 bg-[#08090B] text-[#B2B4BA] z-10 p-6 overflow-y-auto">
+              <SkeletonCalendar />
+              {explanation && (
+                <div className="text-center space-y-1">
+                  <p className="text-xs font-mono text-[#D6B77A] animate-pulse">
+                    {explanation}
+                  </p>
+                  <p className="text-[11px] font-mono text-[#777D87]">
+                    Preparing interactive Google Meet calendar session
+                  </p>
+                </div>
+              )}
             </div>
           )}
 

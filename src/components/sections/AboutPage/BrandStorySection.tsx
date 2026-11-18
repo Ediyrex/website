@@ -64,10 +64,10 @@ export function BrandStorySection() {
       <div className="max-w-[1450px] mx-auto px-5 sm:px-8 lg:px-12 space-y-10 lg:space-y-12">
         {/* 02. SECTION INTRODUCTION */}
         <div className="space-y-4">
-          <h2 className="font-heading font-extrabold text-[clamp(2.35rem,4.4vw,4.25rem)] leading-[0.98] tracking-[-0.035em] text-[#0B0D10]">
+          <h2 className="font-heading font-extrabold text-[clamp(2.35rem,4.4vw,4.25rem)] leading-[0.98] tracking-[-0.035em] text-[#0B0D10] text-balance">
             Great ideas shouldn&apos;t get lost between teams.
             <br />
-            <span className="text-[#F06419] italic font-heading font-extrabold">
+            <span className="text-[#F06419] font-heading font-extrabold">
               We built a better way to work.
             </span>
           </h2>
@@ -211,13 +211,10 @@ export function BrandStorySection() {
               ))}
             </div>
 
-            {/* Centered Pill Badge Signature with Flanking Lines */}
-            <div className="flex items-center justify-center pt-8 mt-3">
-              <span aria-hidden="true" className="h-px bg-[#090A0D]/35 flex-1" />
-              <div className="px-5 py-2 rounded-full bg-[#090A0D] text-[#F5F2EC] text-[11px] sm:text-xs font-mono font-bold uppercase tracking-[0.16em] mx-4 shrink-0 shadow-sm">
-                EDIYREX / ONE CONNECTED TEAM
-              </div>
-              <span aria-hidden="true" className="h-px bg-[#090A0D]/35 flex-1" />
+            {/* Clean Minimal Editorial Signature */}
+            <div className="flex items-center justify-between pt-8 mt-3 border-t border-[#090A0D]/20 text-[11px] sm:text-xs font-mono font-medium uppercase tracking-[0.16em] text-[#090A0D]/75">
+              <span>EDIYREX STUDIO</span>
+              <span>ONE CONNECTED TEAM</span>
             </div>
           </div>
         </div>

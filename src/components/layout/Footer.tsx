@@ -2,11 +2,13 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowUpRight,
   Check,
   Copy,
   Mail,
+  Phone,
 } from "lucide-react";
 import { CopyrightYear } from "./CopyrightYear";
 import { SITE_CONFIG } from "@/config/site";
@@ -106,12 +108,26 @@ export function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.4fr_0.75fr_0.95fr_1.05fr_1.15fr] gap-9 lg:gap-6 pb-12">
           {/* Column 1: Brand + Slanted Accent + Studio Updates */}
           <div className="space-y-5 lg:pr-4">
+            {/* Official EDIYREX Brand Lockup */}
             <Link
               href="/"
-              className="inline-block font-heading text-[20px] font-bold uppercase tracking-[0.02em] text-[#FFFDFC] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF640A]"
+              aria-label="EDIYREX Studio - Home"
+              className="inline-flex items-center gap-2.5 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF640A] rounded"
             >
-              {(live?.siteName || "EDIYREX STUDIO").toUpperCase()}
-              <sup className="ml-0.5 text-[10px]">®</sup>
+              <Image
+                src="/images/logo/ediyrex-emblem.png"
+                alt=""
+                width={36}
+                height={36}
+                className="h-8 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+              />
+              <Image
+                src="/images/logo/ediyrex-wordmark.png"
+                alt="EDIYREX STUDIO"
+                width={124}
+                height={20}
+                className="h-4 w-auto object-contain"
+              />
             </Link>
 
             <p className="text-[13.5px] leading-[1.65] text-[#C8C2B9] max-w-[300px]">
@@ -201,7 +217,7 @@ export function Footer() {
               {INDUSTRY_ITEMS.map((label) => (
                 <li key={label}>
                   <Link
-                    href="/services"
+                    href="/industries"
                     className="text-[#C8C2B9] hover:text-[#FF640A] transition-colors"
                   >
                     {label}
@@ -249,6 +265,18 @@ export function Footer() {
               </button>
             </div>
 
+            {/* Clickable Phone Number */}
+            <div className="flex items-center gap-2 text-[13.5px]">
+              <a
+                href={`tel:${SITE_CONFIG.contact.phone.replace(/[^0-9+]/g, "")}`}
+                className="font-mono text-[#C8C2B9] hover:text-[#FF640A] transition-colors inline-flex items-center gap-2"
+                aria-label={`Call EDYREX at ${SITE_CONFIG.contact.phone}`}
+              >
+                <Phone className="h-3.5 w-3.5 text-[#FF640A]" aria-hidden="true" />
+                <span>{SITE_CONFIG.contact.phone}</span>
+              </a>
+            </div>
+
             {/* Solid Orange Start a Project CTA */}
             <Link
               href="/contact"
@@ -278,15 +306,19 @@ export function Footer() {
                 ))
               ) : (
                 <>
-                  <Link
-                    href="/contact"
+                  <a
+                    href={SITE_CONFIG.socials.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     aria-label="LinkedIn"
                     className="flex h-9 w-9 items-center justify-center rounded-full border border-white/25 font-heading text-[12px] font-bold text-[#E5DFD6] hover:border-[#FF640A] hover:text-[#FF640A] transition-colors"
                   >
                     in
-                  </Link>
-                  <Link
-                    href="/contact"
+                  </a>
+                  <a
+                    href={SITE_CONFIG.socials.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     aria-label="Instagram"
                     className="flex h-9 w-9 items-center justify-center rounded-full border border-white/25 text-[#E5DFD6] hover:border-[#FF640A] hover:text-[#FF640A] transition-colors"
                   >
@@ -302,9 +334,11 @@ export function Footer() {
                       <circle cx="12" cy="12" r="4" />
                       <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
                     </svg>
-                  </Link>
-                  <Link
-                    href="/contact"
+                  </a>
+                  <a
+                    href="https://youtube.com/@ediyrex"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     aria-label="YouTube"
                     className="flex h-9 w-9 items-center justify-center rounded-full border border-white/25 text-[#E5DFD6] hover:border-[#FF640A] hover:text-[#FF640A] transition-colors"
                   >
@@ -319,14 +353,16 @@ export function Footer() {
                       <rect x="2.5" y="5.5" width="19" height="13" rx="4" />
                       <polygon points="10,9 16,12 10,15" fill="currentColor" stroke="none" />
                     </svg>
-                  </Link>
-                  <Link
-                    href="/contact"
-                    aria-label="X"
+                  </a>
+                  <a
+                    href={SITE_CONFIG.socials.twitter}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="X (formerly Twitter)"
                     className="flex h-9 w-9 items-center justify-center rounded-full border border-white/25 font-mono text-[12px] font-semibold text-[#E5DFD6] hover:border-[#FF640A] hover:text-[#FF640A] transition-colors"
                   >
                     𝕏
-                  </Link>
+                  </a>
                 </>
               )}
             </div>

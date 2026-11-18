@@ -48,9 +48,9 @@ export function WorkArchiveSection() {
             <p className="font-mono text-xs uppercase tracking-[0.16em] text-[#D9B875]">
               ARCHIVE / {String(filteredProjects.length).padStart(2, "0")} ENTRIES
             </p>
-            <h2 className="mt-2 font-heading text-3xl font-semibold tracking-tight text-[#F5F2EC] sm:text-4xl">
+            <h2 className="mt-2 font-heading text-3xl font-semibold tracking-tight text-[#F5F2EC] sm:text-4xl text-balance">
               Built for Real-World{" "}
-              <span className="italic text-[#F07824]">Impact.</span>
+              <span className="text-[#F07824]">Impact.</span>
             </h2>
           </div>
 

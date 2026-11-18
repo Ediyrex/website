@@ -220,20 +220,28 @@ export function Hero() {
                 delay: 0.24,
                 ease: [0.22, 1, 0.36, 1],
               }}
-              className="relative z-20 flex flex-wrap items-center gap-6 sm:gap-8 pt-1"
+              className="relative z-20 flex flex-wrap items-center gap-3.5 sm:gap-4 xl:gap-5 pt-1.5"
             >
               <Link
+                href="/contact"
+                className="inline-flex items-center gap-2 rounded-full bg-[#0B0D10] hover:bg-[#F06419] text-white px-6 py-3.5 xl:px-7 xl:py-4 text-[15px] xl:text-[16px] font-semibold transition-all duration-200 shadow-md shadow-black/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0B0D10] focus-visible:ring-offset-2 focus-visible:ring-offset-[#F8F6F2]"
+              >
+                <span>Start a project</span>
+                <ArrowUpRight className="w-4 h-4" />
+              </Link>
+
+              <Link
                 href="/work"
-                className="inline-flex items-center gap-2 rounded-full bg-[#0B0D10] text-white px-6 py-3 xl:px-7 xl:py-3.5 text-[15px] xl:text-[16px] font-semibold hover:bg-[#22262B] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0B0D10] focus-visible:ring-offset-2 focus-visible:ring-offset-[#F8F6F2]"
+                className="inline-flex items-center gap-2 rounded-full border border-[#0B0D10]/20 bg-white/60 hover:bg-white text-[#0B0D10] px-5 py-3.5 xl:px-6 xl:py-4 text-[15px] xl:text-[16px] font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0B0D10] focus-visible:ring-offset-2 focus-visible:ring-offset-[#F8F6F2]"
               >
                 <span>Explore our work</span>
-                <ArrowUpRight className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4 text-[#686B70]" />
               </Link>
 
               <button
                 type="button"
                 onClick={() => setShowreelOpen(true)}
-                className="inline-flex items-center gap-2 bg-transparent text-[#0B0D10] text-[15px] xl:text-[16px] font-medium border-b border-[#0B0D10]/55 pb-1 hover:border-[#0B0D10] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0B0D10]"
+                className="inline-flex items-center gap-2 bg-transparent text-[#0B0D10] text-[15px] xl:text-[16px] font-medium border-b border-[#0B0D10]/55 pb-1 hover:border-[#F06419] hover:text-[#F06419] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0B0D10] ml-1 sm:ml-2"
               >
                 <span>Watch showreel</span>
                 <ArrowRight className="w-4 h-4" />

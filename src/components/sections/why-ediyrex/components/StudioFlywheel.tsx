@@ -1,6 +1,8 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
+import Image from "next/image";
 import dynamic from "next/dynamic";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { FlywheelPaths } from "./FlywheelPaths";
@@ -11,11 +13,47 @@ const FlywheelScene3D = dynamic(
   { ssr: false }
 );
 
+class FlywheelErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error) {
+    console.warn("Flywheel 3D scene fallback active:", error);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div
+          aria-hidden="true"
+          className="w-full h-full rounded-full opacity-60 blur-2xl"
+          style={{
+            background:
+              "radial-gradient(ellipse at center, rgba(255,101,0,0.3) 0%, rgba(214,183,122,0.15) 50%, transparent 70%)",
+          }}
+        />
+      );
+    }
+    return this.props.children;
+  }
+}
+
 function CentralEdiyrexSquare({ compact = false }: { compact?: boolean }) {
   return (
-    <div
+    <Link
+      href="/about"
+      aria-label="Learn more about EDYREX studio model and vision"
       data-we-flywheel-core
-      className={`relative z-30 rounded-[22px] flex flex-col items-center justify-center gap-2.5 border border-[#FFE2C5]/80 shadow-[0_26px_58px_-10px_rgba(255,101,0,0.58),inset_0_1.5px_2px_rgba(255,255,255,0.8)] ${
+      className={`relative z-30 rounded-[22px] flex flex-col items-center justify-center gap-2.5 border border-[#FFE2C5]/80 shadow-[0_26px_58px_-10px_rgba(255,101,0,0.58),inset_0_1.5px_2px_rgba(255,255,255,0.8)] cursor-pointer hover:scale-[1.03] transition-transform duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${
         compact
           ? "w-36 h-36 p-4"
           : "w-36 h-36 lg:w-40 lg:h-40 xl:w-[168px] xl:h-[168px] p-5 md:[transform:perspective(900px)_rotateY(-5deg)_rotate(-2deg)]"
@@ -30,33 +68,24 @@ function CentralEdiyrexSquare({ compact = false }: { compact?: boolean }) {
         className="pointer-events-none absolute inset-0 rounded-[22px] bg-gradient-to-br from-white/25 via-transparent to-black/20"
       />
 
-      {/* Brand Emblem (Three Slanted Studio Bars) */}
-      <svg
-        aria-hidden="true"
-        viewBox="0 0 40 32"
-        fill="none"
-        className="relative z-10 w-8 h-6 text-white drop-shadow-[0_2px_8px_rgba(255,255,255,0.3)]"
-      >
-        <path d="M10 6L28 2L25 8L7 12L10 6Z" fill="currentColor" />
-        <path
-          d="M8 15L29 10L26 16L5 21L8 15Z"
-          fill="currentColor"
-          fillOpacity="0.92"
-        />
-        <path
-          d="M6 24L25 19L22 25L3 30L6 24Z"
-          fill="currentColor"
-          fillOpacity="0.82"
-        />
-      </svg>
+      {/* Official 3D Crystalline Faceted Emblem */}
+      <Image
+        src="/images/logo/ediyrex-emblem.png"
+        alt=""
+        width={48}
+        height={48}
+        className="relative z-10 w-10 h-10 object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]"
+      />
 
-      <span
-        style={{ fontFamily: "var(--font-space-grotesk)" }}
-        className="relative z-10 text-[20px] xl:text-[22px] font-bold tracking-[0.04em] text-white leading-none"
-      >
-        EDIYREX
-      </span>
-    </div>
+      {/* Official Metallic Wordmark */}
+      <Image
+        src="/images/logo/ediyrex-wordmark.png"
+        alt="EDIYREX"
+        width={100}
+        height={18}
+        className="relative z-10 h-3.5 w-auto object-contain drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)] brightness-110"
+      />
+    </Link>
   );
 }
 
@@ -77,7 +106,9 @@ export function StudioFlywheel() {
 
         {/* Real 3D WebGL Refractive Glass Loops */}
         <div className="absolute inset-0 z-10">
-          <FlywheelScene3D />
+          <FlywheelErrorBoundary>
+            <FlywheelScene3D />
+          </FlywheelErrorBoundary>
         </div>
 
         {/* Crisp Curved Directional Arrows + Labels */}

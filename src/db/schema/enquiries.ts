@@ -91,6 +91,10 @@ export const enquiries = pgTable(
       .on(table.assignedAdminUserId)
       .where(sql`${table.assignedAdminUserId} IS NOT NULL`),
     index("idx_enquiries_email").on(table.emailNormalized),
+    index("idx_enquiries_contact_name").on(table.contactName),
+    index("idx_enquiries_company_name").on(table.companyName),
+    index("idx_enquiries_project_type").on(table.projectType),
+    index("idx_enquiries_ref_code").on(table.referenceCode),
     index("idx_enquiries_dedupe_hash")
       .on(table.dedupeHash, table.submittedAt)
       .where(sql`${table.dedupeHash} IS NOT NULL`),
@@ -182,6 +186,8 @@ export const notificationOutbox = pgTable(
     index("idx_outbox_pending_poll")
       .on(table.nextRetryAt)
       .where(sql`${table.status} IN ('pending', 'failed')`),
+    index("idx_outbox_status_created").on(table.status, table.createdAt),
+    index("idx_outbox_event_type").on(table.eventType),
   ]
 );
 
@@ -219,6 +225,8 @@ export const crmClients = pgTable(
     ),
     index("idx_crm_clients_status").on(table.status, table.createdAt),
     index("idx_crm_clients_email").on(table.emailNormalized),
+    index("idx_crm_clients_company").on(table.companyName),
+    index("idx_crm_clients_name").on(table.name),
   ]
 );
 

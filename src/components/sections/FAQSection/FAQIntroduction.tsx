@@ -17,12 +17,12 @@ export function FAQIntroduction({
     <aside className="min-w-0 lg:sticky lg:top-24 lg:self-start lg:border-r lg:border-[#CFC5B9] lg:pr-10">
       <h2
         style={{ fontFamily: "var(--font-archivo-narrow), sans-serif" }}
-        className="text-[clamp(3rem,5.2vw,5.4rem)] font-bold uppercase leading-[0.86] tracking-[-0.025em]"
+        className="text-[clamp(3rem,5.2vw,5.4rem)] font-bold uppercase leading-[0.86] tracking-[-0.025em] text-balance"
       >
         <span className="block text-[#171717]">GOOD</span>
         <span className="block text-[#171717]">QUESTIONS.</span>
-        <span className="block italic text-[#F06419]">STRAIGHT</span>
-        <span className="block italic text-[#F06419]">ANSWERS.</span>
+        <span className="block text-[#F06419]">STRAIGHT</span>
+        <span className="block text-[#F06419]">ANSWERS.</span>
       </h2>
 
       <p className="mt-5 max-w-[380px] font-[var(--font-space-grotesk)] text-[17px] leading-[1.5] text-[#49433E] sm:text-[18.5px]">

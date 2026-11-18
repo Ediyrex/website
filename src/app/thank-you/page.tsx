@@ -7,9 +7,9 @@ import { Badge } from "@/components/ui/Badge";
 import { SITE_CONFIG } from "@/config/site";
 
 export const metadata: Metadata = {
-  title: "Enquiry Received",
+  title: "Enquiry Received — Submission Confirmation",
   description:
-    "Thank you for contacting Ediyrex Studio. Review your submission confirmation and next steps.",
+    "Thank you for reaching out to EDYREX Studio. Your project brief has been received. Review your confirmation and next steps.",
   alternates: {
     canonical: "/thank-you",
   },

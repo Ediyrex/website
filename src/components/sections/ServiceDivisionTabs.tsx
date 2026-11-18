@@ -20,7 +20,7 @@ import {
   PhoneCall,
   Puzzle,
   Scissors,
-  Sparkles,
+  Cpu,
   TrendingUp,
   Users,
   Video,
@@ -47,7 +47,7 @@ const ICON_MAP: Record<string, React.ElementType> = {
   PhoneCall,
   Puzzle,
   Scissors,
-  Sparkles,
+  Cpu,
   TrendingUp,
   Users,
   Video,
@@ -88,7 +88,6 @@ export function ServiceDivisionTabs() {
         {/* Section Header */}
         <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-12 gap-6">
           <div className="space-y-3 max-w-2xl">
-            <Badge variant="accent">Service Directory</Badge>
             <h2 className="font-heading font-semibold tracking-tight text-[#F5F3EE] text-[clamp(1.75rem,3.4vw,2.75rem)] leading-[1.14]">
               {SERVICES_DATA.length} capabilities across Branding, Media, Web Dev &amp; AI
             </h2>
@@ -165,7 +164,7 @@ export function ServiceDivisionTabs() {
         {/* Services Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredServices.map((service) => {
-            const Icon = ICON_MAP[service.iconName] || Sparkles;
+            const Icon = ICON_MAP[service.iconName] || Cpu;
             const accent = DIVISION_ACCENT[service.division];
 
             return (

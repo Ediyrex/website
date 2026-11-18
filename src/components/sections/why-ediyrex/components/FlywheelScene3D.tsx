@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useMemo, useRef, useEffect, useState } from "react";
+import React, { useMemo, useRef, useEffect, useState, Suspense } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { ContactShadows, Environment, Lightformer } from "@react-three/drei";
+import { ContactShadows } from "@react-three/drei";
 import * as THREE from "three";
 
 interface InfinityRingsProps {
@@ -254,6 +254,45 @@ function FlywheelGyroscope({ reduceMotion }: InfinityRingsProps) {
   );
 }
 
+function StudioLighting() {
+  const lightsGroup = useMemo(() => {
+    const group = new THREE.Group();
+
+    // 1. Ambient Warm Base Fill
+    const ambient = new THREE.AmbientLight("#fff7ef", 0.95);
+
+    // 2. Key Directional Light (Crisp Neutral White)
+    const keyDir = new THREE.DirectionalLight("#ffffff", 2.2);
+    keyDir.position.set(4, 6, 5);
+
+    // 3. Warm Fill Directional Light (Studio Amber)
+    const fillDir = new THREE.DirectionalLight("#ff852d", 1.8);
+    fillDir.position.set(-5, -3, 3);
+
+    // 4. Luminous Rim Backlight (Accentuates Glass Edge Speculars)
+    const rimDir = new THREE.DirectionalLight("#ffe2c5", 2.4);
+    rimDir.position.set(0, 4, -4);
+
+    // 5. Ambient Sky/Ground Warm Contrast
+    const hemi = new THREE.HemisphereLight("#fff5ea", "#3d1c06", 1.2);
+
+    // 6. Point Lights for Glass Internal Caustics and Glow
+    const point1 = new THREE.PointLight("#ff6500", 3.2, 7);
+    point1.position.set(0, 0, 2.5);
+
+    const point2 = new THREE.PointLight("#ff9642", 2.2, 6);
+    point2.position.set(-2.4, -1.2, 1.8);
+
+    const point3 = new THREE.PointLight("#ff9642", 2.0, 6);
+    point3.position.set(2.4, 1.2, 1.8);
+
+    group.add(ambient, keyDir, fillDir, rimDir, hemi, point1, point2, point3);
+    return group;
+  }, []);
+
+  return <primitive object={lightsGroup} />;
+}
+
 export function FlywheelScene3D() {
   const [reduceMotion, setReduceMotion] = useState(false);
 
@@ -278,57 +317,20 @@ export function FlywheelScene3D() {
           toneMappingExposure: 1.15,
         }}
       >
-        <ambientLight intensity={0.95} color="#fff7ef" />
-        <directionalLight position={[4, 6, 5]} intensity={2.1} color="#ffffff" />
-        <directionalLight position={[-5, -3, 3]} intensity={1.8} color="#ff852d" />
-        <pointLight position={[0, 0, 2.5]} intensity={3.2} color="#ff6500" distance={7} />
-        <pointLight position={[-2.4, -1.2, 1.8]} intensity={2.2} color="#ff9642" distance={6} />
-        <pointLight position={[2.4, 1.2, 1.8]} intensity={2.0} color="#ff9642" distance={6} />
+        <Suspense fallback={null}>
+          <StudioLighting />
 
-        {/* Procedural Studio Reflection Lightformers for Real Glass Speculars */}
-        <Environment resolution={256}>
-          <group rotation={[-Math.PI / 4, 0, 0]}>
-            <Lightformer
-              form="rect"
-              intensity={4.5}
-              color="#ffffff"
-              scale={[8, 2.5, 1]}
-              position={[0, 4, 3]}
-            />
-            <Lightformer
-              form="rect"
-              intensity={3.8}
-              color="#ff8a30"
-              scale={[7, 2, 1]}
-              position={[-4, -3, 2]}
-            />
-            <Lightformer
-              form="rect"
-              intensity={3.5}
-              color="#ffb470"
-              scale={[6, 2, 1]}
-              position={[4, 2, 2]}
-            />
-            <Lightformer
-              form="ring"
-              intensity={2.4}
-              color="#fff4e6"
-              scale={5}
-              position={[0, 0, -4]}
-            />
-          </group>
-        </Environment>
+          <FlywheelGyroscope reduceMotion={reduceMotion} />
 
-        <FlywheelGyroscope reduceMotion={reduceMotion} />
-
-        <ContactShadows
-          position={[0, -1.72, 0]}
-          opacity={0.26}
-          scale={9}
-          blur={2.4}
-          far={3.5}
-          color="#5c2b0a"
-        />
+          <ContactShadows
+            position={[0, -1.72, 0]}
+            opacity={0.26}
+            scale={9}
+            blur={2.4}
+            far={3.5}
+            color="#5c2b0a"
+          />
+        </Suspense>
       </Canvas>
     </div>
   );

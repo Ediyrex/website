@@ -94,6 +94,7 @@ export function CloudinaryVideo({
         >
           <button
             type="button"
+            onClick={togglePlay}
             className="w-16 h-16 rounded-full bg-[#D6B77A] text-[#08090B] flex items-center justify-center shadow-2xl hover:scale-105 hover:bg-[#E5CCA0] transition-transform cursor-pointer"
             aria-label="Play video"
           >

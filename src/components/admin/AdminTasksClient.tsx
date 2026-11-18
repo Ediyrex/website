@@ -518,14 +518,27 @@ export function AdminTasksClient() {
             canEdit={canEdit}
             onOpenTask={(tid) => updateRoute({ task: tid })}
             onToggleStatus={async (task) => {
-              await fetch(`/api/v1/admin/pms/tasks/${task.id}`, {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  workflowStatus: task.completed ? "in_progress" : "done",
-                }),
-              });
-              await refreshActive();
+              const prevTasks = [...myTasks];
+              const nextStatus = task.completed ? "in_progress" : "done";
+              setMyTasks((prev) =>
+                prev.map((t) =>
+                  t.id === task.id
+                    ? { ...t, completed: !t.completed, workflowStatus: nextStatus }
+                    : t
+                )
+              );
+              try {
+                await fetch(`/api/v1/admin/pms/tasks/${task.id}`, {
+                  method: "PATCH",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    workflowStatus: nextStatus,
+                  }),
+                });
+                await refreshActive();
+              } catch (err) {
+                setMyTasks(prevTasks);
+              }
             }}
           />
         ) : activeView === "inbox" ? (
@@ -536,12 +549,22 @@ export function AdminTasksClient() {
             onTabChange={setInboxTab}
             loading={loadingInbox}
             onMarkRead={async (notificationId, isRead) => {
-              await fetch("/api/v1/admin/pms/inbox", {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ notificationId, isRead }),
-              });
-              await loadInbox();
+              const prevNotifs = [...notifications];
+              setNotifications((prev) =>
+                prev.map((n) =>
+                  n.id === notificationId ? { ...n, isRead } : n
+                )
+              );
+              try {
+                await fetch("/api/v1/admin/pms/inbox", {
+                  method: "PATCH",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ notificationId, isRead }),
+                });
+                await loadInbox();
+              } catch (err) {
+                setNotifications(prevNotifs);
+              }
             }}
             onMarkAllRead={async () => {
               await fetch("/api/v1/admin/pms/inbox", {

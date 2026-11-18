@@ -36,10 +36,10 @@ export function HumanElementSection() {
       <div className="max-w-[1450px] mx-auto px-5 sm:px-8 lg:px-12 space-y-8 lg:space-y-10">
         {/* Display Headline */}
         <div className="space-y-3">
-          <h2 className="font-heading font-extrabold text-[clamp(2.5rem,4.5vw,4.5rem)] leading-[0.98] tracking-[-0.035em] text-[#0B0D10]">
+          <h2 className="font-heading font-extrabold text-[clamp(2.5rem,4.5vw,4.5rem)] leading-[0.98] tracking-[-0.035em] text-[#0B0D10] text-balance">
             The people you meet.
             <br />
-            <span className="text-[#FF6900] italic font-heading font-extrabold">
+            <span className="text-[#FF6900] font-heading font-extrabold">
               The people who build.
             </span>
           </h2>

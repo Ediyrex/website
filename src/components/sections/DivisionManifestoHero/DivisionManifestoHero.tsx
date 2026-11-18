@@ -90,10 +90,10 @@ export function DivisionManifestoHero({ division }: DivisionManifestoHeroProps) 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 xl:gap-16 pt-2 items-start">
           {/* Left Column: Headline, Description & CTAs */}
           <div className="lg:col-span-7 xl:col-span-7 flex flex-col space-y-6 sm:space-y-8">
-            <h1 className="font-heading font-extrabold text-[clamp(2.5rem,4.6vw,4.75rem)] leading-[0.98] tracking-[-0.035em] text-[#F5F2EC]">
+            <h1 className="font-heading font-extrabold text-[clamp(2.5rem,4.6vw,4.75rem)] leading-[0.98] tracking-[-0.035em] text-[#F5F2EC] text-balance">
               <span className="block">{data.headline.line1}</span>
               <span className="block">{data.headline.line2}</span>
-              <span className="block italic text-[#F06419] font-extrabold">
+              <span className="block text-[#F06419] font-extrabold">
                 {data.headline.line3}
               </span>
             </h1>

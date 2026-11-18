@@ -30,9 +30,9 @@ export function SectorIntelligence({
       <div className="max-w-[1450px] mx-auto px-5 sm:px-8 lg:px-12 space-y-8 sm:space-y-10">
         {/* Main Editorial Headline & Introduction */}
         <div className="space-y-4 pt-1 sm:pt-2">
-          <h2 className="font-heading font-extrabold text-[clamp(2.4rem,4.5vw,4.25rem)] leading-[0.98] tracking-[-0.035em] text-[#F5F2EC]">
+          <h2 className="font-heading font-extrabold text-[clamp(2.4rem,4.5vw,4.25rem)] leading-[0.98] tracking-[-0.035em] text-[#F5F2EC] text-balance">
             <span className="block">{SECTOR_INTELLIGENCE_CONFIG.headlineLine1}</span>
-            <span className="block italic text-[#F06419] font-extrabold">
+            <span className="block text-[#F06419] font-extrabold">
               {SECTOR_INTELLIGENCE_CONFIG.headlineLine2}
             </span>
           </h2>
@@ -150,7 +150,7 @@ export function SectorIntelligence({
               <h3 className="font-heading font-extrabold text-3xl sm:text-4xl text-[#F5F2EC] tracking-tight">
                 {SECTOR_INTELLIGENCE_CONFIG.beyondSix.title}
               </h3>
-              <p className="italic font-heading font-bold text-xl sm:text-2xl text-[#F06419]">
+              <p className="font-heading font-bold text-xl sm:text-2xl text-[#F06419]">
                 {SECTOR_INTELLIGENCE_CONFIG.beyondSix.subtitle}
               </p>
             </div>

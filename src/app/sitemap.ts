@@ -2,10 +2,11 @@ import { and, eq } from "drizzle-orm";
 import type { MetadataRoute } from "next";
 import { blogPosts, cmsPages, getDb, projects, serviceDivisions } from "@/db";
 import { PROJECTS_DATA } from "@/features/work/data";
+import { SITE_CONFIG } from "@/config/site";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-  const lastModifiedStatic = new Date("2026-11-10T00:00:00Z");
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || SITE_CONFIG.url;
+  const lastModifiedStatic = new Date("2026-11-18T00:00:00Z");
 
   const defaultStaticPaths = [
     { path: "/", changeFrequency: "weekly" as const, priority: 1.0 },
@@ -15,8 +16,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: "/services/digital", changeFrequency: "monthly" as const, priority: 0.85 },
     { path: "/services/ai", changeFrequency: "monthly" as const, priority: 0.85 },
     { path: "/work", changeFrequency: "weekly" as const, priority: 0.9 },
+    { path: "/industries", changeFrequency: "weekly" as const, priority: 0.85 },
     { path: "/about", changeFrequency: "monthly" as const, priority: 0.8 },
-    { path: "/contact", changeFrequency: "monthly" as const, priority: 0.8 },
+    { path: "/contact", changeFrequency: "monthly" as const, priority: 0.85 },
     { path: "/privacy", changeFrequency: "yearly" as const, priority: 0.3 },
     { path: "/terms", changeFrequency: "yearly" as const, priority: 0.3 },
   ];
@@ -34,7 +36,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         url: `${siteUrl}/work/${project.slug}`,
         lastModified: new Date(project.updatedAt),
         changeFrequency: "monthly" as const,
-        priority: 0.7,
+        priority: 0.75,
       })),
     ];
   }

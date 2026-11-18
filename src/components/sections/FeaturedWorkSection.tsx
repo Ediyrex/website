@@ -2,10 +2,11 @@
 
 import React, { useEffect, useRef } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { ArrowUpRight, AlertCircle } from "lucide-react";
 import { PROJECTS_DATA } from "@/features/work/data";
 import { Badge } from "@/components/ui/Badge";
+import { BlurImage } from "@/components/ui/BlurImage";
 import { gsap } from "@/lib/gsap";
 
 const CATEGORY_META: Record<string, { label: string; accent: string }> = {
@@ -16,6 +17,7 @@ const CATEGORY_META: Record<string, { label: string; accent: string }> = {
 };
 
 export function FeaturedWorkSection() {
+  const router = useRouter();
   const gridRef = useRef<HTMLDivElement>(null);
   const featuredProjects = PROJECTS_DATA.filter(
     (p) => p.featured && p.isPublished
@@ -75,8 +77,8 @@ export function FeaturedWorkSection() {
           </Link>
         </div>
 
-        {/* 2-Column Editorial Project Grid */}
-        <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 gap-7">
+        {/* 2-Column Editorial Project Grid — Broken up into distinct visual & metadata blocks */}
+        <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10">
           {featuredProjects.map((project, index) => {
             const meta = CATEGORY_META[project.category] || {
               label: project.category,
@@ -86,11 +88,11 @@ export function FeaturedWorkSection() {
             return (
               <article
                 key={project.id}
-                className="featured-project-card group rounded-2xl bg-[#12151A] border border-[#252A32] hover:border-[#3A414B] overflow-hidden flex flex-col justify-between transition-all duration-200"
+                className="featured-project-card group flex flex-col justify-between transition-all duration-200"
               >
-                {/* Clean 16:10 Visual Frame with Next/Image + Alt Text */}
-                <div className="aspect-[16/10] bg-[#08090B] border-b border-[#252A32] relative overflow-hidden">
-                  <Image
+                {/* Visual Stage Container */}
+                <div className="aspect-[16/10] bg-[#08090B] rounded-2xl border border-[#252A32] group-hover:border-[#3A414B] relative overflow-hidden shadow-lg transition-colors duration-200">
+                  <BlurImage
                     src={project.coverImage}
                     alt={project.coverAlt || project.title}
                     width={800}
@@ -116,8 +118,8 @@ export function FeaturedWorkSection() {
                   </div>
                 </div>
 
-                {/* Text Content Below Visual */}
-                <div className="p-6 md:p-7 space-y-5 flex-1 flex flex-col justify-between">
+                {/* Broken-up Editorial Content Card */}
+                <div className="mt-3 p-6 md:p-7 rounded-2xl bg-[#12151A] border border-[#252A32] group-hover:border-[#3A414B] space-y-5 flex-1 flex flex-col justify-between transition-colors duration-200 shadow-sm">
                   <div className="space-y-3">
                     <div className="flex items-center justify-between text-xs font-mono text-[#777D87]">
                       <span style={{ color: meta.accent }}>{meta.label}</span>
@@ -149,6 +151,9 @@ export function FeaturedWorkSection() {
 
                     <Link
                       href={`/work/${project.slug}`}
+                      onPointerEnter={() => router.prefetch(`/work/${project.slug}`)}
+                      onPointerDown={() => router.prefetch(`/work/${project.slug}`)}
+                      onTouchStart={() => router.prefetch(`/work/${project.slug}`)}
                       className="inline-flex items-center gap-1.5 text-sm font-medium text-[#F5F3EE] hover:text-[#D6B77A] transition-colors"
                     >
                       <span>View case study</span>

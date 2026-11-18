@@ -8,6 +8,7 @@ import {
   ArrowRight,
   ArrowLeft,
   Mail,
+  Phone,
   Link2,
   Calendar,
   Info,
@@ -20,6 +21,10 @@ import {
 import { trackEvent } from "@/lib/analytics";
 import { useBookingModal } from "@/features/bookings";
 import { TurnstileWidget, useTurnstile } from "@/features/turnstile";
+import { useWaitExplanation } from "@/hooks/ui-speed";
+import { startProgressBar, finishProgressBar } from "@/components/ui/OptimisticProgressBar";
+import { LinkPreview } from "@/components/ui/LinkPreview";
+import { SITE_CONFIG } from "@/config/site";
 
 export type EngagementModel =
   | "Project-Based"
@@ -143,6 +148,13 @@ export function ProjectBriefDesk() {
   const [serverError, setServerError] = useState("");
   const [emailCopied, setEmailCopied] = useState(false);
   const turnstile = useTurnstile();
+
+  // Explain waits over 1s for submission
+  const { explanation: submitExplanation } = useWaitExplanation(isSubmitting, [
+    { afterMs: 1000, message: "Encrypting brief details..." },
+    { afterMs: 2500, message: "Connecting with studio operations desk..." },
+    { afterMs: 4500, message: "Generating your reference code..." },
+  ]);
 
   // Read URL query params on mount
   useEffect(() => {
@@ -282,13 +294,17 @@ export function ProjectBriefDesk() {
     }
 
     if (referenceUrl.trim()) {
+      let raw = referenceUrl.trim();
+      if (!/^https?:\/\//i.test(raw)) {
+        raw = `https://${raw}`;
+      }
       try {
-        const parsed = new URL(referenceUrl.trim());
-        if (!parsed.protocol.startsWith("http")) {
-          errors.referenceUrl = "Please enter a valid website URL starting with http:// or https://";
+        const parsed = new URL(raw);
+        if (!parsed.protocol.startsWith("http") || !parsed.hostname.includes(".")) {
+          errors.referenceUrl = "Please enter a valid website address (e.g. yoursite.com).";
         }
       } catch {
-        errors.referenceUrl = "Please enter a valid website URL or leave this field empty.";
+        errors.referenceUrl = "Please enter a valid website address or leave this field empty.";
       }
     }
 
@@ -328,6 +344,7 @@ export function ProjectBriefDesk() {
 
     setStepErrors({});
     setIsSubmitting(true);
+    startProgressBar();
 
     // Prepare primary projectType label
     const primaryDivisionNames = isNotSureDivision
@@ -340,7 +357,9 @@ export function ProjectBriefDesk() {
     // Formatted structured goals string
     const enrichedGoals = [
       projectOverview.trim(),
-      referenceUrl.trim() ? `Reference URL: ${referenceUrl.trim()}` : null,
+      referenceUrl.trim()
+        ? `Reference URL: ${/^https?:\/\//i.test(referenceUrl.trim()) ? referenceUrl.trim() : `https://${referenceUrl.trim()}`}`
+        : null,
       `Engagement Model: ${engagementModel}`,
       `Selected Divisions: ${primaryDivisionNames}`,
       budgetSpecial === "prefer_not_to_say"
@@ -398,6 +417,7 @@ export function ProjectBriefDesk() {
           : "We couldn't submit your enquiry just now. Your information is preserved. Please try again."
       );
     } finally {
+      finishProgressBar();
       setIsSubmitting(false);
     }
   };
@@ -500,16 +520,17 @@ export function ProjectBriefDesk() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <span className="font-heading font-extrabold text-[13px] uppercase tracking-wider text-[#F5F2EC] block leading-snug">
-                    EDYREX STUDIO
+                    STUDIO INBOX
                   </span>
                   <a
-                    href="mailto:ediyrex@gmail.com"
+                    href={`mailto:${SITE_CONFIG.contact.email}`}
                     className="font-mono text-sm text-[#F06419] hover:underline block my-0.5 truncate font-medium"
+                    aria-label={`Email ${SITE_CONFIG.contact.email}`}
                   >
-                    ediyrex@gmail.com
+                    {SITE_CONFIG.contact.email}
                   </a>
                   <span className="font-mono text-xs text-[#898D94] block">
-                    India &amp; Global
+                    Response within 24h
                   </span>
                 </div>
                 <button
@@ -521,6 +542,28 @@ export function ProjectBriefDesk() {
                 >
                   {emailCopied ? <Check className="w-3.5 h-3.5 text-[#56C58B]" /> : <Copy className="w-3.5 h-3.5" />}
                 </button>
+              </div>
+
+              {/* Direct Phone Line */}
+              <div className="flex items-center gap-4 p-4 rounded-[14px] bg-[#121519] border border-[#292E35] hover:border-[#3D4450] transition-colors">
+                <div className="w-12 h-12 rounded-[10px] border border-[#D9B875]/60 bg-[#0E1012] flex items-center justify-center shrink-0 text-[#D9B875]">
+                  <Phone className="w-5 h-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <span className="font-heading font-extrabold text-[13px] uppercase tracking-wider text-[#F5F2EC] block leading-snug">
+                    DIRECT CALL / WHATSAPP
+                  </span>
+                  <a
+                    href={`tel:${SITE_CONFIG.contact.phone.replace(/[^0-9+]/g, "")}`}
+                    className="font-mono text-sm text-[#D9B875] hover:underline block my-0.5 truncate font-medium"
+                    aria-label={`Call ${SITE_CONFIG.contact.phone}`}
+                  >
+                    {SITE_CONFIG.contact.phone}
+                  </a>
+                  <span className="font-mono text-xs text-[#898D94] block">
+                    {SITE_CONFIG.contact.hours}
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -890,6 +933,8 @@ export function ProjectBriefDesk() {
                         {stepErrors.referenceUrl}
                       </span>
                     )}
+                    {/* Real-time SSRF-safe link preview */}
+                    <LinkPreview url={referenceUrl} className="mt-2.5" />
                   </div>
 
                   {/* 2-Column: Budget & Timeline */}
@@ -1320,13 +1365,13 @@ export function ProjectBriefDesk() {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full sm:flex-1 py-4 px-6 rounded-[8px] bg-[#F06419] text-black font-mono font-bold text-xs sm:text-sm uppercase tracking-wider hover:bg-[#D95612] transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-md disabled:opacity-60"
+                      className="w-full sm:flex-1 py-4 px-6 rounded-[8px] bg-[#F06419] text-black font-mono font-bold text-xs sm:text-sm uppercase tracking-wider hover:bg-[#D95612] transition-all duration-75 active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer shadow-md disabled:opacity-60"
                     >
                       {isSubmitting ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          <span>SUBMITTING ENQUIRY...</span>
-                        </>
+                        <div className="flex items-center gap-2">
+                          <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+                          <span>{submitExplanation || "SUBMITTING ENQUIRY..."}</span>
+                        </div>
                       ) : (
                         <>
                           <span>SUBMIT PROJECT ENQUIRY</span>
@@ -1449,18 +1494,18 @@ export function ProjectBriefDesk() {
                   {/* Success CTAs */}
                   <div className="flex flex-col sm:flex-row items-center gap-3 pt-4 border-t border-[#292E35]">
                     <Link
-                      href="/"
+                      href={`/thank-you?ref=${encodeURIComponent(referenceCode)}&stored=true&call=${wantsDiscoveryCall}`}
                       className="w-full sm:flex-1 py-4 rounded-[8px] bg-[#F06419] text-black font-mono font-bold text-xs sm:text-sm uppercase tracking-wider hover:bg-[#D95612] transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-md text-center"
                     >
-                      <span>RETURN TO HOMEPAGE</span>
+                      <span>VIEW CONFIRMATION RECEIPT</span>
                       <ArrowRight className="w-4 h-4" />
                     </Link>
 
                     <Link
-                      href="/work"
+                      href="/"
                       className="w-full sm:w-auto px-6 py-4 rounded-[8px] border border-[#292E35] bg-[#0E1012] text-[#F5F2EC] hover:bg-[#1A1E24] hover:border-[#3D4450] font-mono text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-2 cursor-pointer text-center"
                     >
-                      <span>EXPLORE OUR WORK</span>
+                      <span>RETURN HOME</span>
                       <ArrowRight className="w-4 h-4" />
                     </Link>
                   </div>

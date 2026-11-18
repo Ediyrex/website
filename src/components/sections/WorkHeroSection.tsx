@@ -79,10 +79,10 @@ export function WorkHeroSection() {
             <h1
               data-wh-reveal
               style={{ fontFamily: "var(--font-archivo-narrow), sans-serif" }}
-              className="text-[clamp(2.85rem,5.4vw,5.1rem)] font-bold uppercase leading-[0.88] tracking-[-0.025em] text-[#141414]"
+              className="text-[clamp(2.85rem,5.4vw,5.1rem)] font-bold uppercase leading-[0.88] tracking-[-0.025em] text-[#141414] text-balance"
             >
               <span className="block">Selected Work &amp;</span>
-              <span className="mt-1 block italic text-[#FF640A]">
+              <span className="mt-1 block text-[#FF640A]">
                 Studio Explorations.
               </span>
             </h1>

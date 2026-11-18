@@ -63,9 +63,9 @@ export function IndustriesHero({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 xl:gap-16 pt-2 items-start">
           {/* Left Column: Headline, Description & Action CTAs */}
           <div className="lg:col-span-7 xl:col-span-7 flex flex-col space-y-6 sm:space-y-8">
-            <h1 className="font-heading font-extrabold text-[clamp(2.5rem,4.6vw,4.75rem)] leading-[0.98] tracking-[-0.035em] text-[#F5F2EC]">
+            <h1 className="font-heading font-extrabold text-[clamp(2.5rem,4.6vw,4.75rem)] leading-[0.98] tracking-[-0.035em] text-[#F5F2EC] text-balance">
               <span className="block">{INDUSTRY_HERO_CONFIG.headline.line1}</span>
-              <span className="block italic text-[#F06419] font-extrabold">
+              <span className="block text-[#F06419] font-extrabold">
                 {INDUSTRY_HERO_CONFIG.headline.line2}
               </span>
               <span className="block">{INDUSTRY_HERO_CONFIG.headline.line3}</span>
@@ -79,7 +79,7 @@ export function IndustriesHero({
               <a
                 href={`#${INDUSTRY_HERO_CONFIG.primaryCta.targetId}`}
                 onClick={scrollToDirectory}
-                className="inline-flex items-center justify-center gap-2.5 px-6 sm:px-7 py-3.5 sm:py-4 rounded-xl bg-[#F06419] text-[#171717] font-bold text-sm sm:text-base hover:bg-[#E05308] transition-colors shadow-sm shrink-0 uppercase tracking-wide font-mono"
+                className="inline-flex items-center justify-center gap-2.5 px-6 sm:px-7 py-3.5 sm:py-4 rounded-xl bg-[#F06419] text-[#171717] font-bold text-sm sm:text-base hover:bg-[#E05308] transition-colors shadow-sm shrink-0 uppercase tracking-wide font-heading"
               >
                 <span>{INDUSTRY_HERO_CONFIG.primaryCta.label}</span>
                 <ArrowUpRight className="w-4 h-4 shrink-0" />
@@ -87,7 +87,7 @@ export function IndustriesHero({
 
               <Link
                 href={INDUSTRY_HERO_CONFIG.secondaryCta.href}
-                className="inline-flex items-center justify-center gap-2.5 px-6 sm:px-7 py-3.5 sm:py-4 rounded-xl border border-[#444444] text-[#F5F2EC] font-semibold text-sm sm:text-base hover:border-[#F06419] hover:text-[#F06419] hover:bg-[#F06419]/10 transition-colors shrink-0 uppercase tracking-wide font-mono"
+                className="inline-flex items-center justify-center gap-2.5 px-6 sm:px-7 py-3.5 sm:py-4 rounded-xl border border-[#444444] text-[#F5F2EC] font-semibold text-sm sm:text-base hover:border-[#F06419] hover:text-[#F06419] hover:bg-[#F06419]/10 transition-colors shrink-0 uppercase tracking-wide font-heading"
               >
                 <span>{INDUSTRY_HERO_CONFIG.secondaryCta.label}</span>
                 <ArrowUpRight className="w-4 h-4 shrink-0" />

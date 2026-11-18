@@ -21,6 +21,7 @@ import {
   verifyTurnstileToken,
   TURNSTILE_ACTIONS,
 } from "@/lib/server/turnstile";
+import { processOutboxJobs } from "@/lib/server/notifications";
 
 function hashValue(input: string): string {
   return createHash("sha256").update(input).digest("hex");
@@ -201,6 +202,7 @@ export async function POST(request: NextRequest) {
         reason: "Initial website submission",
       });
 
+      // 1. Studio Team Alert
       await tx.insert(notificationOutbox).values({
         eventType: "enquiry.submitted.studio_alert",
         entityType: "enquiry",
@@ -208,11 +210,45 @@ export async function POST(request: NextRequest) {
         dedupeKey: `enquiry-alert:${createdEnquiry.id}`,
         payload: {
           referenceCode: createdEnquiry.referenceCode,
+          name: validData.name,
+          email: emailNormalized,
+          company: validData.company || undefined,
+          phone: validData.phone || undefined,
           projectType: validData.projectType,
+          goals: validData.goals,
+          budgetCurrency: mappedBudget.budgetCurrency || "USD",
+          budgetRange: validData.budgetRange,
+          timeline: validData.timeline,
           wantsDiscoveryCall: validData.wantsDiscoveryCall,
         },
         status: "pending",
       });
+
+      // 2. Client Confirmation
+      await tx.insert(notificationOutbox).values({
+        eventType: "enquiry.submitted",
+        entityType: "enquiry",
+        entityId: createdEnquiry.id,
+        dedupeKey: `enquiry-confirm:${createdEnquiry.id}`,
+        payload: {
+          recipientEmail: emailNormalized,
+          name: validData.name,
+          referenceCode: createdEnquiry.referenceCode,
+          projectType: validData.projectType,
+          budgetCurrency: mappedBudget.budgetCurrency || "USD",
+          budgetRange: validData.budgetRange,
+          wantsDiscoveryCall: validData.wantsDiscoveryCall,
+        },
+        status: "pending",
+      });
+    });
+
+    // Asynchronously dispatch pending outbox notifications without blocking response
+    processOutboxJobs().catch((dispatchErr) => {
+      logger.error(
+        { dispatchErr, referenceCode },
+        "Asynchronous outbox dispatch failed"
+      );
     });
 
     logger.info(

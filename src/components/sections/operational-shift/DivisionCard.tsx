@@ -1,5 +1,5 @@
 import React from "react";
-import { Palette, Layers, PlayCircle, Sparkles } from "lucide-react";
+import { Palette, Layers, PlayCircle, Bot } from "lucide-react";
 import type {
   ConnectedDivisionData,
   ConnectedDivisionId,
@@ -26,7 +26,7 @@ function DivisionIcon({
     case "media":
       return <PlayCircle strokeWidth={1.65} className={className} />;
     case "intelligence":
-      return <Sparkles strokeWidth={1.65} className={className} />;
+      return <Bot strokeWidth={1.65} className={className} />;
   }
 }
 

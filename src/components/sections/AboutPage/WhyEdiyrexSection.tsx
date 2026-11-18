@@ -103,12 +103,12 @@ export function WhyEdiyrexSection() {
             {/* Header Block */}
             <div className="space-y-4">
               {/* Display Headline */}
-              <h2 className="font-heading font-extrabold text-[clamp(2.5rem,4.4vw,4.25rem)] leading-[1.04] tracking-[-0.035em] text-[#0B0D10]">
+              <h2 className="font-heading font-extrabold text-[clamp(2.5rem,4.4vw,4.25rem)] leading-[1.04] tracking-[-0.035em] text-[#0B0D10] text-balance">
                 Creative thinking.
                 <br />
                 Technical execution.
                 <br />
-                <span className="text-[#FF6900] italic font-heading font-extrabold">
+                <span className="text-[#FF6900] font-heading font-extrabold">
                   One connected process.
                 </span>
               </h2>
@@ -130,8 +130,8 @@ export function WhyEdiyrexSection() {
                   } ${idx > 0 ? "pt-5 sm:pt-0" : ""}`}
                 >
                   <div className="space-y-2.5">
-                    {/* Orange-bordered pill badge */}
-                    <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-[5px] border border-[#FF6900] text-[#FF6900] font-mono text-[11px] font-bold tracking-wider">
+                    {/* Clean editorial index */}
+                    <span className="font-mono text-xs font-bold text-[#FF6900] tracking-wider block">
                       {principle.index}
                     </span>
                     <h3 className="font-heading font-extrabold text-[15px] sm:text-[16px] text-[#0B0D10] tracking-tight leading-snug uppercase pt-1">
@@ -153,7 +153,7 @@ export function WhyEdiyrexSection() {
             {/* CTAs */}
             <div className="flex flex-wrap items-center gap-4 pt-4">
               <Link
-                href="#philosophy"
+                href="/about#philosophy"
                 className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#FF6900] text-white text-sm font-bold hover:bg-[#E55E00] transition-colors shadow-sm"
               >
                 <span>Explore our studio approach</span>

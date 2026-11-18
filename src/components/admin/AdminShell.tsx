@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
@@ -17,6 +18,7 @@ import {
   Users,
   Activity,
   Calendar,
+  Mail,
   Search,
   Bell,
   HelpCircle,
@@ -28,6 +30,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAdminUser } from "./AdminContext";
+import { OptimisticProgressBar } from "@/components/ui/OptimisticProgressBar";
 
 interface NavGroup {
   title: string;
@@ -79,6 +82,7 @@ const NAV_GROUPS: NavGroup[] = [
     title: "System",
     items: [
       { href: "/admin/settings", label: "Website Settings", icon: Settings },
+      { href: "/admin/notifications", label: "Email & Notifications", icon: Mail },
       { href: "/admin/team", label: "Team & Access", icon: Users },
       { href: "/admin/activity", label: "Activity Log", icon: Activity },
     ],
@@ -167,6 +171,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen flex bg-[#08090B] text-[#F5F3EE]">
+      <OptimisticProgressBar />
       {/* Desktop Sidebar + Mobile Drawer */}
       <aside
         className={cn(
@@ -177,14 +182,18 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         <div className="flex flex-col flex-1 min-h-0">
           {/* Brand Header */}
           <div className="h-16 px-4 border-b border-[#1C2027] flex items-center justify-between shrink-0">
-            <Link href="/admin" className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-[#1A160E] border border-[#D6B77A]/40 flex items-center justify-center text-[#D6B77A]">
-                <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current">
-                  <path d="M5 4h14v3.2H8.6v3.2h8.8v3.1H8.6v3.3H19V20H5V4z" />
-                </svg>
+            <Link href="/admin" className="flex items-center gap-2.5 group">
+              <div className="w-8 h-8 rounded-lg bg-[#0F1115] border border-[#252A32] flex items-center justify-center p-1 group-hover:border-[#D6B77A]/60 transition-colors">
+                <Image
+                  src="/images/logo/ediyrex-emblem.png"
+                  alt="EDIYREX"
+                  width={28}
+                  height={28}
+                  className="w-6 h-6 object-contain"
+                />
               </div>
               <span className="font-heading font-bold text-sm tracking-tight text-[#F5F3EE]">
-                Ediyrex Studio
+                EDIYREX STUDIO
               </span>
             </Link>
             <button

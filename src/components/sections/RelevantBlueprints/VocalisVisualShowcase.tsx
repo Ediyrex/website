@@ -1,9 +1,13 @@
 "use client";
 
-import React from "react";
-import { Mic, PhoneOff, Grid, CheckCircle2 } from "lucide-react";
+import React, { useState } from "react";
+import { Mic, MicOff, PhoneOff, Phone, Grid, CheckCircle2 } from "lucide-react";
 
 export function VocalisVisualShowcase() {
+  const [isMuted, setIsMuted] = useState(false);
+  const [isEnded, setIsEnded] = useState(false);
+  const [showDialpad, setShowDialpad] = useState(false);
+
   const waveformHeights = [
     14, 22, 18, 36, 48, 28, 62, 78, 92, 108, 120, 134, 115, 96, 75, 84, 96, 68, 52, 38, 44, 30, 22, 16, 12,
   ];
@@ -76,10 +80,16 @@ export function VocalisVisualShowcase() {
             {/* Operator Identifier & Subtitle */}
             <div className="text-center space-y-0.5">
               <h4 className="font-heading font-bold text-xs sm:text-sm text-[#F5F2EC] tracking-tight">
-                AI Receptionist
+                {isEnded ? "Call Completed" : "AI Receptionist"}
               </h4>
               <p className="text-[10px] sm:text-[11px] text-[#898D94] font-mono">
-                Handling customer inquiry...
+                {isEnded
+                  ? "Transcribing summary to CRM..."
+                  : isMuted
+                  ? "Microphone muted"
+                  : showDialpad
+                  ? "Dialpad ready for DTMF input"
+                  : "Handling customer inquiry..."}
               </p>
             </div>
 
@@ -87,22 +97,37 @@ export function VocalisVisualShowcase() {
             <div className="flex items-center gap-2.5 sm:gap-3 pt-1">
               <button
                 type="button"
-                aria-label="Mute microphone"
-                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#1C2026] border border-[#2B2F38] text-[#B8B9BC] flex items-center justify-center hover:text-white transition-colors"
+                onClick={() => setIsMuted(!isMuted)}
+                aria-label={isMuted ? "Unmute microphone" : "Mute microphone"}
+                className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full border transition-colors flex items-center justify-center cursor-pointer ${
+                  isMuted
+                    ? "bg-[#D6B77A] border-[#D6B77A] text-black"
+                    : "bg-[#1C2026] border-[#2B2F38] text-[#B8B9BC] hover:text-white"
+                }`}
               >
-                <Mic className="w-3.5 h-3.5" />
+                {isMuted ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
               </button>
               <button
                 type="button"
-                aria-label="End active call"
-                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#E04343] text-white flex items-center justify-center shadow-[0_0_16px_rgba(224,67,67,0.7)] hover:bg-[#C93535] transition-colors"
+                onClick={() => setIsEnded(!isEnded)}
+                aria-label={isEnded ? "Reconnect call" : "End active call"}
+                className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full text-white flex items-center justify-center transition-colors cursor-pointer ${
+                  isEnded
+                    ? "bg-[#56C58B] hover:bg-[#48b079] shadow-[0_0_16px_rgba(86,197,139,0.7)]"
+                    : "bg-[#E04343] hover:bg-[#C93535] shadow-[0_0_16px_rgba(224,67,67,0.7)]"
+                }`}
               >
-                <PhoneOff className="w-3.5 h-3.5" />
+                {isEnded ? <Phone className="w-3.5 h-3.5" /> : <PhoneOff className="w-3.5 h-3.5" />}
               </button>
               <button
                 type="button"
-                aria-label="Open dialpad"
-                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#1C2026] border border-[#2B2F38] text-[#B8B9BC] flex items-center justify-center hover:text-white transition-colors"
+                onClick={() => setShowDialpad(!showDialpad)}
+                aria-label={showDialpad ? "Close dialpad" : "Open dialpad"}
+                className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full border transition-colors flex items-center justify-center cursor-pointer ${
+                  showDialpad
+                    ? "bg-[#F06419] border-[#F06419] text-black"
+                    : "bg-[#1C2026] border-[#2B2F38] text-[#B8B9BC] hover:text-white"
+                }`}
               >
                 <Grid className="w-3.5 h-3.5" />
               </button>

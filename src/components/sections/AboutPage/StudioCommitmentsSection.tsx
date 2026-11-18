@@ -37,12 +37,12 @@ export function StudioCommitmentsSection() {
       <div className="max-w-[1500px] mx-auto px-5 sm:px-8 lg:px-14">
         {/* Section Header */}
         <div className="space-y-4">
-          {/* Headline with Orange Italic Accent */}
-          <h2 className="font-heading font-extrabold text-[clamp(2.5rem,4.5vw,4.25rem)] leading-[1.05] tracking-[-0.035em] text-[#F5F3EE]">
+          {/* Headline with Orange Accent */}
+          <h2 className="font-heading font-extrabold text-[clamp(2.5rem,4.5vw,4.25rem)] leading-[1.05] tracking-[-0.035em] text-[#F5F3EE] text-balance">
             Credibility earned through
             <br />
             transparency,{" "}
-            <span className="text-[#FF6900] italic font-heading font-extrabold">
+            <span className="text-[#FF6900] font-heading font-extrabold">
               not inflated claims.
             </span>
           </h2>
@@ -61,8 +61,8 @@ export function StudioCommitmentsSection() {
               className="py-8 md:py-2 md:px-8 first:pl-0 last:pr-0 flex flex-col justify-between space-y-5"
             >
               <div className="space-y-3">
-                {/* Orange-bordered pill badge */}
-                <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded border border-[#FF6900] text-[#FF6900] font-mono text-[11px] font-bold tracking-wider">
+                {/* Clean editorial index */}
+                <span className="font-mono text-xs font-bold text-[#FF6900] tracking-wider block">
                   {item.index}
                 </span>
                 <h3 className="font-heading font-extrabold text-[17px] sm:text-[18px] text-[#F5F3EE] tracking-tight uppercase leading-snug">

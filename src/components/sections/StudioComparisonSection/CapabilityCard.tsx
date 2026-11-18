@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { Code2, PlayCircle, Sparkles } from "lucide-react";
+import { Code2, PlayCircle, Bot } from "lucide-react";
 import type { CapabilityIconKey, StudioCapability } from "./comparison.data";
 
 interface CapabilityCardProps {
@@ -11,7 +11,7 @@ interface CapabilityCardProps {
 const CAPABILITY_ICONS: Record<CapabilityIconKey, typeof PlayCircle> = {
   play: PlayCircle,
   code: Code2,
-  sparkles: Sparkles,
+  sparkles: Bot,
 };
 
 export function CapabilityCard({ capability }: CapabilityCardProps) {

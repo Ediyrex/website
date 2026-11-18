@@ -4,9 +4,9 @@ import { ServicesDirectory } from "@/components/sections/ServicesDirectory/Servi
 import { FAQSection } from "@/components/sections/FAQSection/FAQSection";
 
 export const metadata: Metadata = {
-  title: "Services",
+  title: "Services — 35 Capabilities Across 4 Integrated Divisions",
   description:
-    "Explore Ediyrex Studio's 35 capabilities across four integrated divisions: Branding & Marketing, Media & Content Production, Web, Apps & Digital Products, and AI & Automation.",
+    "Explore EDYREX Studio's full spectrum of capabilities across Branding & Marketing, Media & Production, Web & Digital Products, and AI & Automation.",
   alternates: {
     canonical: "/services",
   },
