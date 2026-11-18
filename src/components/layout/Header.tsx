@@ -24,7 +24,8 @@ export function Header() {
     pathname === "/work" ||
     pathname === "/contact" ||
     pathname === "/industries" ||
-    pathname === "/about";
+    pathname === "/about" ||
+    Boolean(pathname?.startsWith("/services/"));
   const isLightHeroNav = !hasDarkHero && !pastHero;
 
   const mobileMenuRef = useRef<HTMLDivElement>(null);
@@ -114,7 +115,7 @@ export function Header() {
                 )}
               </span>
               {!isLightHeroNav && (
-                <span className="hidden sm:inline-block w-1.5 h-1.5 rounded-full bg-[#D6B77A]" />
+                <span className="hidden sm:inline-block w-1.5 h-1.5 rounded-full bg-[#F06419]" />
               )}
             </Link>
 
@@ -145,7 +146,7 @@ export function Header() {
                           ? "text-[#0B0D10] underline underline-offset-8 decoration-[#0B0D10] decoration-2"
                           : "text-[#0B0D10]/80 hover:text-[#0B0D10]"
                         : isActive
-                        ? "text-[#F5F3EE]"
+                        ? "text-[#F5F3EE] underline underline-offset-8 decoration-[#F06419] decoration-2"
                         : "text-[#B2B4BA] hover:text-[#F5F3EE]"
                     )}
                   >

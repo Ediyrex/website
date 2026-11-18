@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowUpRight, CheckCircle2 } from "lucide-react";
-import { SERVICES_DATA } from "@/features/services/data";
-import { PROJECTS_DATA } from "@/features/work/data";
+import { ArrowUpRight } from "lucide-react";
 import { ServiceDivision } from "@/types";
-import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
-import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
 import { FinalCtaSection } from "@/components/sections/FinalCtaSection";
+import { DivisionManifestoHero } from "@/components/sections/DivisionManifestoHero/DivisionManifestoHero";
+import { DivisionFocusAreas } from "@/components/sections/DivisionFocusAreas/DivisionFocusAreas";
+import { DivisionCapabilitiesRegister } from "@/components/sections/DivisionCapabilitiesRegister/DivisionCapabilitiesRegister";
+import { RelevantBlueprints } from "@/components/sections/RelevantBlueprints/RelevantBlueprints";
+
+export const instant = false;
 
 const DIVISION_CONFIG: Record<
   ServiceDivision,
@@ -118,197 +119,12 @@ export default async function DivisionDetailPage({ params }: DivisionPageProps) 
     notFound();
   }
 
-  const services = SERVICES_DATA.filter(
-    (s) => s.division === key && s.isPublished
-  );
-  const relatedProjects = PROJECTS_DATA.filter(
-    (p) => (p.category === key || p.category === "hybrid") && p.isPublished
-  );
-
   return (
     <div className="bg-[#08090B]">
-      {/* Division Hero */}
-      <section
-        className="pt-36 pb-20 border-b border-[#252A32]"
-        style={{ backgroundImage: config.gradient }}
-      >
-        <div className="max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-12 space-y-8">
-          <Breadcrumbs
-            items={[
-              { label: "Home", href: "/" },
-              { label: "Services", href: "/services" },
-              { label: config.title },
-            ]}
-          />
-          <Link
-            href="/services"
-            className="inline-flex items-center gap-2 text-xs font-mono text-[#B2B4BA] hover:text-[#F5F3EE] transition-colors"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>All Services</span>
-          </Link>
-
-          <div className="max-w-3xl space-y-5">
-            <span
-              className="text-xs font-mono uppercase tracking-[0.16em] block"
-              style={{ color: config.accent }}
-            >
-              {config.label} — {config.title}
-            </span>
-            <h1 className="font-heading font-bold tracking-tight text-[#F5F3EE] text-[clamp(2.5rem,5vw,4.5rem)] leading-[1.06]">
-              {config.headline}
-            </h1>
-            <p className="text-base sm:text-lg text-[#B2B4BA] leading-relaxed">
-              {config.description}
-            </p>
-            <div className="flex flex-wrap gap-4 pt-2">
-              <Button href="/contact" variant="primary" size="lg">
-                <span>Book a discovery call</span>
-                <ArrowUpRight className="w-4 h-4" />
-              </Button>
-              <Button href="/work" variant="secondary" size="lg">
-                <span>View related work</span>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Problems Addressed */}
-      <section className="py-16 md:py-24 bg-[#0D0F12] border-b border-[#252A32]">
-        <div className="max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-12 space-y-10">
-          <div className="max-w-2xl space-y-3">
-            <span className="text-[11px] font-mono uppercase tracking-[0.16em] text-[#D6B77A] block">
-              Focus Areas
-            </span>
-            <h2 className="font-heading font-semibold text-2xl sm:text-3xl text-[#F5F3EE]">
-              Challenges this division solves
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {config.problems.map((problem, idx) => (
-              <div
-                key={idx}
-                className="p-6 rounded-2xl bg-[#12151A] border border-[#252A32] space-y-3"
-              >
-                <span
-                  className="text-xs font-mono"
-                  style={{ color: config.accent }}
-                >
-                  0{idx + 1}
-                </span>
-                <p className="text-sm text-[#B2B4BA] leading-relaxed">
-                  {problem}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Specific Offerings */}
-      <section className="py-16 md:py-24 bg-[#08090B] border-b border-[#252A32]">
-        <div className="max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-12 space-y-10">
-          <div className="max-w-2xl space-y-3">
-            <span className="text-[11px] font-mono uppercase tracking-[0.16em] text-[#D6B77A] block">
-              Capabilities &amp; Deliverables
-            </span>
-            <h2 className="font-heading font-semibold text-2xl sm:text-4xl text-[#F5F3EE]">
-              {config.title} Services
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {services.map((service) => (
-              <div
-                key={service.id}
-                id={service.slug}
-                className="p-7 rounded-2xl bg-[#12151A] border border-[#252A32] hover:border-[#3A414B] transition-colors flex flex-col justify-between space-y-6"
-              >
-                <div className="space-y-3">
-                  <h3 className="font-heading font-semibold text-xl text-[#F5F3EE]">
-                    {service.title}
-                  </h3>
-                  <p className="text-sm text-[#B2B4BA] leading-relaxed">
-                    {service.description}
-                  </p>
-                </div>
-
-                <div className="pt-4 border-t border-[#252A32] space-y-3">
-                  <ul className="space-y-1.5">
-                    {service.capabilities.map((cap) => (
-                      <li
-                        key={cap}
-                        className="flex items-center gap-2 text-xs text-[#B2B4BA]"
-                      >
-                        <CheckCircle2
-                          className="w-3.5 h-3.5 shrink-0"
-                          style={{ color: config.accent }}
-                        />
-                        <span>{cap}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Link
-                    href={`/contact?service=${service.slug}`}
-                    className="inline-flex items-center gap-1.5 text-xs font-medium text-[#D6B77A] hover:text-[#E6CC99] pt-2"
-                  >
-                    <span>Enquire about {service.title}</span>
-                    <ArrowUpRight className="w-3.5 h-3.5" />
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Related Blueprints */}
-      {relatedProjects.length > 0 && (
-        <section className="py-16 md:py-24 bg-[#0D0F12] border-b border-[#252A32]">
-          <div className="max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-12 space-y-8">
-            <div className="flex items-center justify-between">
-              <h2 className="font-heading font-semibold text-2xl sm:text-3xl text-[#F5F3EE]">
-                Relevant Blueprints
-              </h2>
-              <Link
-                href="/work"
-                className="text-sm text-[#D6B77A] hover:text-[#E6CC99]"
-              >
-                All work →
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {relatedProjects.map((project) => (
-                <Link
-                  key={project.id}
-                  href={`/work/${project.slug}`}
-                  className="group p-6 rounded-2xl bg-[#12151A] border border-[#252A32] hover:border-[#3A414B] transition-colors space-y-3"
-                >
-                  <div className="flex items-center justify-between">
-                    <span
-                      className="text-xs font-mono uppercase"
-                      style={{ color: config.accent }}
-                    >
-                      {project.category}
-                    </span>
-                    {project.isConcept && (
-                      <Badge variant="concept">Concept project</Badge>
-                    )}
-                  </div>
-                  <h3 className="font-heading font-semibold text-xl text-[#F5F3EE] group-hover:text-[#D6B77A] transition-colors">
-                    {project.title}
-                  </h3>
-                  <p className="text-sm text-[#B2B4BA]">{project.summary}</p>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
+      <DivisionManifestoHero division={division} />
+      <DivisionFocusAreas division={division} />
+      <DivisionCapabilitiesRegister division={division} />
+      <RelevantBlueprints division={division} />
       <FinalCtaSection />
     </div>
   );

@@ -100,22 +100,22 @@ export function WhoWeServeSection() {
               </div>
 
               {/* Right Block: Capabilities Tags & Arrow */}
-              <div className="flex items-center justify-between lg:justify-end gap-6 sm:gap-8 shrink-0 lg:w-[320px]">
+              <div className="flex items-center gap-6 sm:gap-8 shrink-0 lg:w-[320px]">
                 <span
                   aria-hidden="true"
-                  className="hidden lg:block w-px h-12 bg-[#262A33]"
+                  className="hidden lg:block w-px h-12 bg-[#262A33] shrink-0"
                 />
-                <div className="space-y-0.5 text-left">
+                <div className="space-y-0.5 text-left min-w-0">
                   {stage.services.map((item) => (
                     <span
                       key={item}
-                      className="block font-mono text-[11px] sm:text-[12px] font-bold uppercase tracking-wider text-[#FF6900] leading-tight"
+                      className="block font-mono text-[11px] sm:text-[12px] font-bold uppercase tracking-wider text-[#FF6900] leading-tight whitespace-nowrap"
                     >
                       {item}
                     </span>
                   ))}
                 </div>
-                <ArrowUpRight className="w-6 h-6 sm:w-7 sm:h-7 text-[#FF6900] shrink-0 transition-transform duration-200 group-hover:translate-x-1 group-hover:-translate-y-1" />
+                <ArrowUpRight className="w-6 h-6 sm:w-7 sm:h-7 text-[#FF6900] shrink-0 ml-auto transition-transform duration-200 group-hover:translate-x-1 group-hover:-translate-y-1" />
               </div>
             </Link>
           ))}

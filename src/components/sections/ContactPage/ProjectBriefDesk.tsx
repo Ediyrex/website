@@ -142,18 +142,71 @@ export function ProjectBriefDesk() {
 
   // Read URL query params on mount
   useEffect(() => {
+    const divisionParam = searchParams.get("division")?.toLowerCase() || "";
     const serviceParam = searchParams.get("service")?.toLowerCase() || "";
     const engagementParam = searchParams.get("engagement")?.toLowerCase() || "";
 
+    const initial: string[] = [];
+
+    if (divisionParam) {
+      if (divisionParam.includes("brand")) initial.push("branding");
+      if (divisionParam.includes("media")) initial.push("media");
+      if (divisionParam.includes("digital") || divisionParam.includes("web")) initial.push("digital");
+      if (divisionParam.includes("ai") || divisionParam.includes("auto")) initial.push("ai");
+    }
+
     if (serviceParam) {
-      const initial: string[] = [];
-      if (serviceParam.includes("brand") || serviceParam.includes("market")) initial.push("branding");
-      if (serviceParam.includes("media") || serviceParam.includes("content") || serviceParam.includes("video")) initial.push("media");
-      if (serviceParam.includes("web") || serviceParam.includes("digital") || serviceParam.includes("app")) initial.push("digital");
-      if (serviceParam.includes("ai") || serviceParam.includes("auto")) initial.push("ai");
-      if (initial.length > 0) {
-        setSelectedDivisions(initial);
+      if (
+        serviceParam.includes("brand") ||
+        serviceParam.includes("market") ||
+        serviceParam.includes("ads") ||
+        serviceParam.includes("packaging") ||
+        serviceParam.includes("seo") ||
+        serviceParam.includes("influencer") ||
+        serviceParam.includes("email")
+      ) {
+        if (!initial.includes("branding")) initial.push("branding");
       }
+      if (
+        serviceParam.includes("media") ||
+        serviceParam.includes("content") ||
+        serviceParam.includes("video") ||
+        serviceParam.includes("motion") ||
+        serviceParam.includes("photography") ||
+        serviceParam.includes("graphics")
+      ) {
+        if (!initial.includes("media")) initial.push("media");
+      }
+      if (
+        serviceParam.includes("web") ||
+        serviceParam.includes("digital") ||
+        serviceParam.includes("app") ||
+        serviceParam.includes("extension") ||
+        serviceParam.includes("dadv")
+      ) {
+        if (!initial.includes("digital")) initial.push("digital");
+      }
+      if (
+        serviceParam.includes("ai") ||
+        serviceParam.includes("auto") ||
+        serviceParam.includes("chatbot") ||
+        serviceParam.includes("calling") ||
+        serviceParam.includes("n8n")
+      ) {
+        if (!initial.includes("ai")) initial.push("ai");
+      }
+
+      const formattedServiceName = serviceParam
+        .split("-")
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(" ");
+      setProjectOverview((current) =>
+        current ? current : `Enquiry regarding ${formattedServiceName}.`
+      );
+    }
+
+    if (initial.length > 0) {
+      setSelectedDivisions(initial);
     }
 
     if (engagementParam) {
