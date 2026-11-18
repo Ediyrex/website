@@ -90,21 +90,19 @@ export function EngagementFAQ({ onBackToWays }: EngagementFAQProps) {
                 </span>
               </button>
 
-              <AnimatePresence initial={false}>
-                {isOpen && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-                    className="overflow-hidden"
-                  >
-                    <p className="pl-7 pt-3 pr-8 text-[14px] leading-[1.6] text-[#4B4742]">
-                      {item.answer}
-                    </p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              <div
+                className={`grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                  isOpen
+                    ? "grid-template-rows-[1fr] opacity-100"
+                    : "grid-template-rows-[0fr] opacity-0 pointer-events-none"
+                }`}
+              >
+                <div className="overflow-hidden">
+                  <p className="pl-7 pt-3 pr-8 pb-3 text-[14px] leading-[1.6] text-[#4B4742]">
+                    {item.answer}
+                  </p>
+                </div>
+              </div>
             </div>
           );
         })}

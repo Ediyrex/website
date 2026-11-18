@@ -18,17 +18,15 @@ export function DivisionList() {
 
   return (
     <div className="mt-12 flex flex-col gap-4 sm:mt-14">
-      {DIRECTORY_DIVISIONS.map((division, index) => {
+      {DIRECTORY_DIVISIONS.map((division) => {
         const isExpanded = activeDivision === division.id;
-        const isHighlighted =
-          activeDivision === null ? index === 0 : isExpanded;
 
         return (
           <DivisionAccordion
             key={division.id}
             division={division}
             isExpanded={isExpanded}
-            isHighlighted={isHighlighted}
+            isHighlighted={isExpanded}
             onToggle={() => handleToggle(division.id)}
           />
         );

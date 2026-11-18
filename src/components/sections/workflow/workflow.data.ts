@@ -1,138 +1,106 @@
-export type WorkflowStageId =
-  | "intro"
-  | "discover"
-  | "define"
-  | "create"
-  | "deliver"
-  | "outro";
+export type WorkflowStageId = "discover" | "define" | "create" | "deliver";
 
 export interface WorkflowStageSpec {
   id: WorkflowStageId;
-  railIndex: string;
-  label: string;
-  rangeLabel: string;
-  minProgress: number;
-  maxProgress: number;
-  targetProgress: number;
-  railDescription: string;
-  counter?: string;
+  stepNumber: "01" | "02" | "03" | "04";
+  tabLabel: string;
+  badgeLabel: string;
   title: string;
+  subtitle: string;
+  duration: string;
   description: string;
-  keywords: readonly string[];
-  storyboardSubtitle?: string;
+  deliverables: readonly string[];
+  metrics: readonly { label: string; value: string }[];
+  tags: readonly string[];
 }
 
 export const WORKFLOW_STAGES: readonly WorkflowStageSpec[] = [
   {
-    id: "intro",
-    railIndex: "Intro",
-    label: "Intro",
-    rangeLabel: "0–10%",
-    minProgress: 0,
-    maxProgress: 0.1,
-    targetProgress: 0.04,
-    railDescription: "Editorial headline, context and scroll cue.",
-    counter: "00 / 04",
-    title: "Blueprint Evolution",
-    description:
-      "Watch a single system evolve continuously from initial points and research insights into a finished architectural solution.",
-    keywords: ["DISCOVERY", "ARCHITECTURE", "EXECUTION", "DELIVERY"],
-  },
-  {
     id: "discover",
-    railIndex: "01",
-    label: "Discover",
-    rangeLabel: "10–35%",
-    minProgress: 0.1,
-    maxProgress: 0.35,
-    targetProgress: 0.23,
-    railDescription: "Initial insights and problem space emerge as points.",
-    counter: "01 / 04",
-    title: "Discover",
+    stepNumber: "01",
+    tabLabel: "Discover",
+    badgeLabel: "01 / RESEARCH & INTELLIGENCE",
+    title: "Deconstruct the problem. Map the breakthrough.",
+    subtitle: "Research, Domain Intelligence & Feasibility",
+    duration: "Week 01 – 02",
     description:
-      "Understand the business, audience, challenges and opportunities before choosing a direction.",
-    keywords: ["RESEARCH", "INSIGHTS", "OPPORTUNITY"],
-    storyboardSubtitle: "Points & Insights",
+      "We dive deep into your operating environment, competitor landscape, and technical constraints to uncover hidden leverage before committing to code or production.",
+    deliverables: [
+      "Competitive Intelligence & Positioning Dossier",
+      "Technical Architecture Feasibility Matrix",
+      "User Journeys & Measurable Metric Alignment",
+    ],
+    metrics: [
+      { label: "Parameters Audited", value: "48+" },
+      { label: "Domain Clarity", value: "100%" },
+      { label: "Risk Mitigation", value: "High" },
+    ],
+    tags: ["DOMAIN INTEL", "AUDIT", "POSITIONING", "OPPORTUNITY MATRIX"],
   },
   {
     id: "define",
-    railIndex: "02",
-    label: "Define",
-    rangeLabel: "35–60%",
-    minProgress: 0.35,
-    maxProgress: 0.6,
-    targetProgress: 0.48,
-    railDescription: "Structure, scope and plan take shape with a blueprint.",
-    counter: "02 / 04",
-    title: "Define",
+    stepNumber: "02",
+    tabLabel: "Define",
+    badgeLabel: "02 / SYSTEM ARCHITECTURE",
+    title: "Architect the solution. Eliminate ambiguity.",
+    subtitle: "System Design, Wireframes & API Specifications",
+    duration: "Week 02 – 04",
     description:
-      "Turn insights into a clear plan, scope, architecture and measurable goals.",
-    keywords: ["PLANNING", "ARCHITECTURE", "ROADMAP"],
-    storyboardSubtitle: "Structure & Plan",
+      "We turn raw requirements into precise specifications: interactive high-fidelity prototypes, component design tokens, data models, and API orchestration contracts.",
+    deliverables: [
+      "Full-Funnel Interactive Prototypes & UI System",
+      "Database Schemas & API Integration Specs",
+      "Autonomous Workflow & Agentic Blueprints",
+    ],
+    metrics: [
+      { label: "Spec Coverage", value: "100%" },
+      { label: "Prototype Fidelity", value: "Interactive" },
+      { label: "Tech Stack", value: "Modular" },
+    ],
+    tags: ["ARCHITECTURE", "UI/UX DESIGN", "SCHEMAS", "PROTOTYPES"],
   },
   {
     id: "create",
-    railIndex: "03",
-    label: "Create",
-    rangeLabel: "60–85%",
-    minProgress: 0.6,
-    maxProgress: 0.85,
-    targetProgress: 0.73,
-    railDescription: "Modules form, gain depth and come together cleanly.",
-    counter: "03 / 04",
-    title: "Create",
+    stepNumber: "03",
+    tabLabel: "Create",
+    badgeLabel: "03 / RAPID PRODUCTION",
+    title: "Build across disciplines in synchronized sprints.",
+    subtitle: "Brand, Code, Media & AI Working in Parallel",
+    duration: "Week 04 – 08",
     description:
-      "Design, develop, produce and integrate the solution through transparent checkpoints.",
-    keywords: ["DESIGN", "DEVELOPMENT", "INTEGRATION"],
-    storyboardSubtitle: "Build & Integrate",
+      "Rather than handing off between siloed agencies, our integrated studio executes simultaneously: engineers write production code, media editors produce cinematic assets, and AI specialists tune agent runtimes.",
+    deliverables: [
+      "Production-Ready Frontend & Backend Codebases",
+      "Cinematic Media, Motion & Commercial Assets",
+      "Trained Agentic Workflows & Tool Call Integrations",
+    ],
+    metrics: [
+      { label: "Sprint Velocity", value: "2x Agility" },
+      { label: "Discipline Synergy", value: "Unified" },
+      { label: "Code Quality", value: "Type-Safe" },
+    ],
+    tags: ["FULL-STACK CODE", "MEDIA PRODUCTION", "AI AGENTS", "SPRINTS"],
   },
   {
     id: "deliver",
-    railIndex: "04",
-    label: "Deliver",
-    rangeLabel: "85–100%",
-    minProgress: 0.85,
-    maxProgress: 1.0,
-    targetProgress: 0.92,
-    railDescription: "A complete, proven solution ready for launch.",
-    counter: "04 / 04",
-    title: "Deliver",
+    stepNumber: "04",
+    tabLabel: "Deliver",
+    badgeLabel: "04 / DEPLOYMENT & OWNERSHIP",
+    title: "Deploy with confidence. Own everything.",
+    subtitle: "Production Deployment, Runbooks & Complete IP Transfer",
+    duration: "Week 08+",
     description:
-      "Launch, hand over and ensure a smooth path forward with documentation and ongoing support.",
-    keywords: ["LAUNCH", "OPTIMIZATION", "SUPPORT"],
-    storyboardSubtitle: "Complete Solution",
+      "We deploy to your production infrastructure with automated CI/CD pipelines, complete documentation, and 100% intellectual property transfer. No vendor lock-in. Built to be yours.",
+    deliverables: [
+      "Automated CI/CD Deployment & Telemetry Setup",
+      "Comprehensive Operational Runbooks & Training",
+      "100% Source Code & Intellectual Property Handover",
+    ],
+    metrics: [
+      { label: "Code Ownership", value: "100% Yours" },
+      { label: "Vendor Lock-in", value: "Zero" },
+      { label: "Launch Status", value: "Production" },
+    ],
+    tags: ["DEPLOYMENT", "CI/CD", "100% IP HANDOVER", "ZERO LOCK-IN"],
   },
-  {
-    id: "outro",
-    railIndex: "Outro",
-    label: "Transition",
-    rangeLabel: "100%",
-    minProgress: 0.96,
-    maxProgress: 1.01,
-    targetProgress: 0.98,
-    railDescription: "Final milestone leading into your studio engagement.",
-    counter: "04 / 04",
-    title: "Deliver",
-    description:
-      "Complete architectural delivery, production documentation, and ongoing evolution.",
-    keywords: ["PRODUCTION READY", "HANDOVER", "SCALE"],
-  },
-];
-
-export const CORE_STORYBOARD_STAGES = WORKFLOW_STAGES.filter(
-  (s) =>
-    s.id === "discover" ||
-    s.id === "define" ||
-    s.id === "create" ||
-    s.id === "deliver"
-);
-
-export function getStageForProgress(progress: number): WorkflowStageSpec {
-  if (progress < 0.1) return WORKFLOW_STAGES[0];
-  if (progress < 0.35) return WORKFLOW_STAGES[1];
-  if (progress < 0.6) return WORKFLOW_STAGES[2];
-  if (progress < 0.85) return WORKFLOW_STAGES[3];
-  if (progress < 0.96) return WORKFLOW_STAGES[4];
-  return WORKFLOW_STAGES[5];
-}
-
+] as const;

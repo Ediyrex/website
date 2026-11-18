@@ -41,7 +41,6 @@ export function IndustriesRegister({
         <div className="divide-y divide-[#444444]">
           {publishedSectors.map((sector, idx) => {
             const formattedNumber = String(idx + 1).padStart(2, "0");
-            const isFirst = idx === 0;
 
             return (
               <div
@@ -102,14 +101,10 @@ export function IndustriesRegister({
                 <div className="lg:col-span-3 xl:col-span-3 flex items-center justify-start lg:pl-6">
                   <Link
                     href={`/contact?industry=${sector.slug}`}
-                    className={`inline-flex items-center justify-between gap-3 px-5 py-3 rounded-xl text-xs sm:text-[13px] transition-all w-full sm:w-auto min-w-[240px] max-w-[290px] shadow-sm ${
-                      isFirst
-                        ? "bg-[#F06419] text-[#171717] font-bold hover:bg-[#E05308]"
-                        : "border border-[#444444] text-[#F5F2EC] font-semibold hover:border-[#F06419] hover:text-[#F06419] hover:bg-[#F06419]/10"
-                    }`}
+                    className="inline-flex items-center justify-between gap-3 px-5 py-3 rounded-xl text-xs sm:text-[13px] transition-all w-full sm:w-auto min-w-[240px] max-w-[290px] shadow-sm border border-[#444444] text-[#F5F2EC] font-semibold group-hover:border-[#F06419] group-hover:bg-[#F06419] group-hover:text-[#171717] group-hover:font-bold hover:!bg-[#E05308]"
                   >
                     <span>{sector.ctaLabel}</span>
-                    <ArrowUpRight className="w-4 h-4 shrink-0" />
+                    <ArrowUpRight className="w-4 h-4 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                   </Link>
                 </div>
               </div>

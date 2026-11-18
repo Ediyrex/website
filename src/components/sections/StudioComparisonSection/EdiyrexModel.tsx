@@ -20,10 +20,10 @@ export const EdiyrexModel = forwardRef<HTMLDivElement, EdiyrexModelProps>(
           mobileHighlighted && "ring-2 ring-[#FF7900]/45"
         )}
       >
-        {/* Subtle faint warm corner radial wash */}
+        {/* Warm ambient radial glows behind the glassmorphism capability cards */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_90%_12%,rgba(255,121,0,0.06),transparent_56%)]"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_90%_12%,rgba(255,121,0,0.12),transparent_56%),radial-gradient(circle_at_25%_85%,rgba(255,154,72,0.14),transparent_52%),radial-gradient(circle_at_75%_85%,rgba(255,105,0,0.12),transparent_50%)]"
         />
 
         <div className="relative z-10 space-y-4">

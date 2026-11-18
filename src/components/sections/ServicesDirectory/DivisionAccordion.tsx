@@ -1,7 +1,6 @@
 "use client";
 
 import { useId } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Minus, Plus } from "lucide-react";
 import type { DirectoryDivision } from "./services.data";
 import { DivisionNumber } from "./DivisionNumber";
@@ -25,14 +24,13 @@ export function DivisionAccordion({
   const baseId = useId();
   const headerId = `${baseId}-header`;
   const panelId = `${baseId}-panel`;
-  const prefersReducedMotion = useReducedMotion();
 
   return (
     <div
       className={`overflow-hidden rounded-[10px] border bg-[#121519] transition-colors duration-200 ${
         isExpanded
           ? "border-[#F07824]/60"
-          : "border-[#343940] hover:border-[#4A5059]"
+          : "border-[#343940] hover:border-[#F07824]/40"
       }`}
     >
       <button
@@ -68,7 +66,7 @@ export function DivisionAccordion({
             className={`inline-flex items-center rounded-full border px-3.5 py-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.14em] transition-colors ${
               isHighlighted
                 ? "border-[#F07824]/60 bg-[#F07824]/10 text-[#F07824]"
-                : "border-[#343940] bg-[#171B20] text-[#B8B9BC]"
+                : "border-[#343940] bg-[#171B20] text-[#B8B9BC] group-hover:border-[#F07824]/50 group-hover:bg-[#F07824]/10 group-hover:text-[#F07824]"
             }`}
           >
             {division.capabilityCountLabel}
@@ -80,7 +78,7 @@ export function DivisionAccordion({
             className={`flex h-9 w-9 items-center justify-center rounded-md border transition-colors ${
               isExpanded
                 ? "border-[#F07824]/60 bg-[#F07824]/15 text-[#F07824]"
-                : "border-[#292E35] bg-[#171B20] text-[#B8B9BC] group-hover:border-[#343940] group-hover:text-[#F5F2EC]"
+                : "border-[#292E35] bg-[#171B20] text-[#B8B9BC] group-hover:border-[#F07824]/60 group-hover:text-[#F07824]"
             }`}
             aria-hidden="true"
           >
@@ -93,37 +91,20 @@ export function DivisionAccordion({
         </div>
       </button>
 
-      <AnimatePresence initial={false}>
-        {isExpanded && (
-          <motion.div
-            id={panelId}
-            role="region"
-            aria-labelledby={headerId}
-            initial={
-              prefersReducedMotion
-                ? { opacity: 1 }
-                : { height: 0, opacity: 0 }
-            }
-            animate={
-              prefersReducedMotion
-                ? { opacity: 1 }
-                : { height: "auto", opacity: 1 }
-            }
-            exit={
-              prefersReducedMotion
-                ? { opacity: 0 }
-                : { height: 0, opacity: 0 }
-            }
-            transition={{
-              duration: prefersReducedMotion ? 0 : 0.28,
-              ease: [0.22, 1, 0.36, 1],
-            }}
-            className="overflow-hidden"
-          >
-            <ExpandedCapabilities division={division} />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <div
+        id={panelId}
+        role="region"
+        aria-labelledby={headerId}
+        className={`grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+          isExpanded
+            ? "grid-template-rows-[1fr] opacity-100"
+            : "grid-template-rows-[0fr] opacity-0 pointer-events-none"
+        }`}
+      >
+        <div className="overflow-hidden">
+          <ExpandedCapabilities division={division} onCollapse={onToggle} />
+        </div>
+      </div>
     </div>
   );
 }

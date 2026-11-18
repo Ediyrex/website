@@ -50,7 +50,7 @@ export const FEATURED_SECTOR_ARCHITECTURES: readonly SectorArchitecture[] = [
     industryIds: ["healthcare-clinics", "finance-fintech", "agencies-white-label"],
     published: true,
     featured: true,
-    highlighted: true,
+    highlighted: false,
     displayOrder: 1,
     detailRoute: "/contact?sector=ai-devtools",
   },

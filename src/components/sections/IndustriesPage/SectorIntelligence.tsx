@@ -45,7 +45,7 @@ export function SectorIntelligence({
         <div className="space-y-3.5">
           {publishedSectors.map((sector, idx) => {
             const displayNumber = String(idx + 1).padStart(2, "0");
-            const isHighlighted = sector.highlighted ?? idx === 0;
+            const isHighlighted = Boolean(sector.highlighted);
 
             return (
               <div
@@ -98,7 +98,7 @@ export function SectorIntelligence({
                       {sector.capabilities.slice(0, 4).map((tag) => (
                         <span
                           key={tag}
-                          className="inline-flex items-center justify-center px-2.5 py-1.5 rounded-full border border-[#444444] text-[10px] xl:text-[11px] font-mono uppercase tracking-wider text-[#B8B9BC] text-center whitespace-nowrap bg-transparent"
+                          className="inline-flex items-center justify-center px-2.5 py-1.5 rounded-full border border-[#444444] text-[10px] xl:text-[11px] font-mono uppercase tracking-wider text-[#B8B9BC] text-center whitespace-nowrap bg-transparent group-hover:border-[#F06419]/40 group-hover:text-[#E2DFD8] transition-colors"
                         >
                           {tag}
                         </span>
@@ -117,11 +117,11 @@ export function SectorIntelligence({
                       className={`inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-[13px] transition-all w-full sm:w-auto min-w-[155px] shadow-sm ${
                         isHighlighted
                           ? "bg-[#F06419] text-[#171717] font-bold hover:bg-[#E05308]"
-                          : "border border-[#444444] text-[#F5F2EC] font-semibold hover:border-[#F06419] hover:text-[#F06419] hover:bg-[#F06419]/10"
+                          : "border border-[#444444] text-[#F5F2EC] font-semibold group-hover:border-[#F06419] group-hover:bg-[#F06419] group-hover:text-[#171717] group-hover:font-bold hover:!bg-[#E05308]"
                       }`}
                     >
                       <span>Explore Sector</span>
-                      <ArrowUpRight className="w-3.5 h-3.5 shrink-0" />
+                      <ArrowUpRight className="w-3.5 h-3.5 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                     </Link>
                   </div>
                 </div>

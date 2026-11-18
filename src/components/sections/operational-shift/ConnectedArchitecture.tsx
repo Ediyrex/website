@@ -6,6 +6,7 @@ import {
   type ConnectedDivisionId,
 } from "./operational.data";
 import { ArchitectureConnections } from "./ArchitectureConnections";
+import { CoreOrbitRings } from "./CoreOrbitRings";
 import { EdiYrexCore } from "./EdiYrexCore";
 import { DivisionCard } from "./DivisionCard";
 
@@ -27,59 +28,54 @@ export function ConnectedArchitecture() {
       </div>
 
       {/* Desktop Connected Radial Architecture */}
-      <div className="hidden lg:block relative w-full min-h-[410px] xl:min-h-[425px]">
-        {/* Soft Warm Center Ambient Bloom */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] h-[340px] rounded-full blur-3xl opacity-45"
-          style={{
-            background:
-              "radial-gradient(circle, rgba(243,107,22,0.38) 0%, rgba(255,154,82,0.12) 48%, transparent 72%)",
-          }}
-        />
-
+      <div className="hidden lg:block relative w-full min-h-[420px] xl:min-h-[440px]">
+        {/* Active Animated SVG Flow Wires Connecting Transition Node, Divisions & Hub */}
         <ArchitectureConnections hoveredId={hoveredId} />
 
-        {/* Quadrant Grid + Central Core Overlay */}
-        <div className="relative z-20 grid grid-cols-[195px_1fr_195px] xl:grid-cols-[210px_1fr_210px] grid-rows-[auto_auto] gap-y-10 items-center justify-between h-full py-2">
-          {/* Top-Left: Creative */}
-          <DivisionCard
-            division={creative}
-            isHighlighted={hoveredId === creative.id}
-            onHoverChange={setHoveredId}
-          />
+        {/* 3-Column Symmetrical Architecture Layout */}
+        <div className="relative z-20 grid grid-cols-[195px_1fr_195px] xl:grid-cols-[210px_1fr_210px] items-center h-full min-h-[420px] xl:min-h-[440px] py-2">
+          {/* Left Column: Creative (Top) & Media (Bottom) */}
+          <div className="flex flex-col justify-between h-full min-h-[360px] gap-8">
+            <DivisionCard
+              division={creative}
+              isHighlighted={hoveredId === creative.id}
+              onHoverChange={setHoveredId}
+            />
+            <DivisionCard
+              division={media}
+              isHighlighted={hoveredId === media.id}
+              onHoverChange={setHoveredId}
+            />
+          </div>
 
-          {/* Center Core Spans Both Rows Visually */}
-          <div className="row-span-2 flex items-center justify-center">
+          {/* Center Column: EDIYREX Engine Perfectly Centered in Concentric Circles */}
+          <div className="relative flex items-center justify-center h-full min-h-[380px]">
+            <CoreOrbitRings />
             <EdiYrexCore />
           </div>
 
-          {/* Top-Right: Digital */}
-          <DivisionCard
-            division={digital}
-            isHighlighted={hoveredId === digital.id}
-            onHoverChange={setHoveredId}
-          />
-
-          {/* Bottom-Left: Media */}
-          <DivisionCard
-            division={media}
-            isHighlighted={hoveredId === media.id}
-            onHoverChange={setHoveredId}
-          />
-
-          {/* Bottom-Right: Intelligence */}
-          <DivisionCard
-            division={intelligence}
-            isHighlighted={hoveredId === intelligence.id}
-            onHoverChange={setHoveredId}
-          />
+          {/* Right Column: Digital (Top) & Intelligence (Bottom) */}
+          <div className="flex flex-col justify-between h-full min-h-[360px] gap-8">
+            <DivisionCard
+              division={digital}
+              isHighlighted={hoveredId === digital.id}
+              onHoverChange={setHoveredId}
+            />
+            <DivisionCard
+              division={intelligence}
+              isHighlighted={hoveredId === intelligence.id}
+              onHoverChange={setHoveredId}
+            />
+          </div>
         </div>
       </div>
 
       {/* Tablet & Mobile Reorganized Vertical Architecture */}
       <div className="lg:hidden w-full flex flex-col items-center gap-6">
-        <EdiYrexCore />
+        <div className="relative flex items-center justify-center my-2">
+          <CoreOrbitRings compact />
+          <EdiYrexCore />
+        </div>
 
         <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-3.5 max-w-[520px]">
           {CONNECTED_DIVISIONS.map((division) => (

@@ -15,7 +15,7 @@ export function DivisionNumber({
         "flex h-[68px] sm:h-[82px] w-[88px] sm:w-[116px] shrink-0 items-center pl-4 sm:pl-5 pr-5 transition-colors duration-300",
         isHighlighted
           ? "bg-[#F07824] text-[#0B0D0F]"
-          : "bg-[#F5F2EC] text-[#0B0D0F] group-hover:bg-[#FFF9F2]"
+          : "bg-[#F5F2EC] text-[#0B0D0F] group-hover:bg-[#F07824] group-hover:text-[#0B0D0F]"
       )}
       style={{
         clipPath: "polygon(0 0, 100% 0, 78% 100%, 0 100%)",

@@ -9,10 +9,11 @@ interface InfinityRingsProps {
   reduceMotion: boolean;
 }
 
-function GlassInfinityRings({ reduceMotion }: InfinityRingsProps) {
-  const groupRef = useRef<THREE.Group>(null);
-  const leftOrbRef = useRef<THREE.Mesh>(null);
-  const rightOrbRef = useRef<THREE.Mesh>(null);
+function FlywheelGyroscope({ reduceMotion }: InfinityRingsProps) {
+  const masterGroupRef = useRef<THREE.Group>(null);
+  const outerRingRef = useRef<THREE.Group>(null);
+  const innerRingRef = useRef<THREE.Group>(null);
+  const beadsRef = useRef<(THREE.Mesh | null)[]>([]);
 
   const glassMaterial = useMemo(
     () =>
@@ -24,133 +25,230 @@ function GlassInfinityRings({ reduceMotion }: InfinityRingsProps) {
         roughness: 0.08,
         metalness: 0.02,
         ior: 1.5,
-        thickness: 1.65,
+        thickness: 1.4,
         specularIntensity: 1.25,
         specularColor: new THREE.Color("#ffffff"),
         clearcoat: 1,
-        clearcoatRoughness: 0.05,
+        clearcoatRoughness: 0.06,
         attenuationColor: new THREE.Color("#ff7b1c"),
-        attenuationDistance: 2.3,
-        envMapIntensity: 2.35,
+        attenuationDistance: 2.6,
+        envMapIntensity: 2.2,
       }),
     []
   );
 
-  const orangeRimMaterial = useMemo(
+  const innerGlassMaterial = useMemo(
+    () =>
+      new THREE.MeshPhysicalMaterial({
+        color: new THREE.Color("#ffffff"),
+        transmission: 0.92,
+        opacity: 0.95,
+        transparent: true,
+        roughness: 0.12,
+        metalness: 0.05,
+        ior: 1.48,
+        thickness: 1.1,
+        specularIntensity: 1.1,
+        clearcoat: 0.8,
+        attenuationColor: new THREE.Color("#ffa65e"),
+        attenuationDistance: 3.0,
+      }),
+    []
+  );
+
+  const luminousOrangeMaterial = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
         color: new THREE.Color("#ff7a1f"),
         emissive: new THREE.Color("#ff5900"),
-        emissiveIntensity: 2.1,
-        roughness: 0.25,
+        emissiveIntensity: 2.4,
+        roughness: 0.2,
         metalness: 0.1,
         transparent: true,
-        opacity: 0.88,
+        opacity: 0.92,
       }),
     []
   );
 
-  const ribbonGeo = useMemo(
-    () => new THREE.TorusGeometry(1.48, 0.32, 48, 140),
+  const beadMaterial = useMemo(
+    () =>
+      new THREE.MeshBasicMaterial({
+        color: new THREE.Color("#ff9436"),
+        transparent: true,
+        opacity: 0.95,
+      }),
     []
   );
-  const filamentGeo = useMemo(
-    () => new THREE.TorusGeometry(1.56, 0.028, 16, 120),
+
+  // Concentric architectural flywheel ring geometries
+  const outerTorusGeo = useMemo(
+    () => new THREE.TorusGeometry(2.35, 0.13, 44, 160),
     []
   );
+  const outerFilamentGeo = useMemo(
+    () => new THREE.TorusGeometry(2.35, 0.022, 16, 140),
+    []
+  );
+  const innerTorusGeo = useMemo(
+    () => new THREE.TorusGeometry(1.82, 0.065, 32, 120),
+    []
+  );
+  const innerFilamentGeo = useMemo(
+    () => new THREE.TorusGeometry(1.82, 0.016, 16, 100),
+    []
+  );
+  const beadGeo = useMemo(() => new THREE.SphereGeometry(0.068, 16, 16), []);
 
   useEffect(() => {
     return () => {
       glassMaterial.dispose();
-      orangeRimMaterial.dispose();
-      ribbonGeo.dispose();
-      filamentGeo.dispose();
+      innerGlassMaterial.dispose();
+      luminousOrangeMaterial.dispose();
+      beadMaterial.dispose();
+      outerTorusGeo.dispose();
+      outerFilamentGeo.dispose();
+      innerTorusGeo.dispose();
+      innerFilamentGeo.dispose();
+      beadGeo.dispose();
     };
-  }, [glassMaterial, orangeRimMaterial, ribbonGeo, filamentGeo]);
+  }, [
+    glassMaterial,
+    innerGlassMaterial,
+    luminousOrangeMaterial,
+    beadMaterial,
+    outerTorusGeo,
+    outerFilamentGeo,
+    innerTorusGeo,
+    innerFilamentGeo,
+    beadGeo,
+  ]);
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
 
-    if (groupRef.current) {
-      const targetRotX = reduceMotion ? 0 : state.pointer.y * 0.07;
-      const targetRotY = reduceMotion ? 0 : state.pointer.x * 0.09;
-      groupRef.current.rotation.x = THREE.MathUtils.lerp(
-        groupRef.current.rotation.x,
+    if (masterGroupRef.current) {
+      const targetRotX = reduceMotion ? 0.35 : 0.35 + state.pointer.y * 0.08;
+      const targetRotY = reduceMotion ? 0 : state.pointer.x * 0.1;
+      masterGroupRef.current.rotation.x = THREE.MathUtils.lerp(
+        masterGroupRef.current.rotation.x,
         targetRotX,
         0.05
       );
-      groupRef.current.rotation.y = THREE.MathUtils.lerp(
-        groupRef.current.rotation.y,
+      masterGroupRef.current.rotation.y = THREE.MathUtils.lerp(
+        masterGroupRef.current.rotation.y,
         targetRotY,
         0.05
       );
       if (!reduceMotion) {
-        groupRef.current.position.y = Math.sin(t * 0.8) * 0.045;
+        masterGroupRef.current.position.y = Math.sin(t * 0.8) * 0.035;
       }
     }
 
     if (!reduceMotion) {
-      if (leftOrbRef.current) {
-        const a = t * 0.65;
-        leftOrbRef.current.position.set(
-          Math.cos(a) * 1.48,
-          Math.sin(a) * 1.12,
-          0
+      if (outerRingRef.current) {
+        outerRingRef.current.rotation.z = t * 0.18;
+      }
+      if (innerRingRef.current) {
+        innerRingRef.current.rotation.z = -t * 0.22;
+      }
+
+      // Smoothly animate traveling energy beads along the elliptical orbit tracks
+      // Outer ring beads (clockwise)
+      const outerR = 2.35;
+      const bead0Angle = t * 0.42;
+      const bead1Angle = t * 0.42 + Math.PI;
+
+      if (beadsRef.current[0]) {
+        beadsRef.current[0].position.set(
+          Math.cos(bead0Angle) * outerR,
+          Math.sin(bead0Angle) * outerR,
+          Math.sin(bead0Angle * 2) * 0.04
         );
       }
-      if (rightOrbRef.current) {
-        const b = -t * 0.65 + Math.PI;
-        rightOrbRef.current.position.set(
-          Math.cos(b) * 1.48,
-          Math.sin(b) * 1.12,
-          0
+      if (beadsRef.current[1]) {
+        beadsRef.current[1].position.set(
+          Math.cos(bead1Angle) * outerR,
+          Math.sin(bead1Angle) * outerR,
+          Math.sin(bead1Angle * 2) * 0.04
+        );
+      }
+
+      // Inner ring beads (counter-clockwise)
+      const innerR = 1.82;
+      const bead2Angle = -t * 0.5 + Math.PI * 0.5;
+      const bead3Angle = -t * 0.5 + Math.PI * 1.5;
+
+      if (beadsRef.current[2]) {
+        beadsRef.current[2].position.set(
+          Math.cos(bead2Angle) * innerR,
+          Math.sin(bead2Angle) * innerR,
+          Math.cos(bead2Angle * 2) * 0.03
+        );
+      }
+      if (beadsRef.current[3]) {
+        beadsRef.current[3].position.set(
+          Math.cos(bead3Angle) * innerR,
+          Math.sin(bead3Angle) * innerR,
+          Math.cos(bead3Angle * 2) * 0.03
         );
       }
     }
   });
 
   return (
-    <group ref={groupRef} position={[0, 0.05, 0]}>
-      {/* Left 3D Volumetric Glass Ribbon Loop */}
-      <group position={[-1.42, 0.02, -0.05]} rotation={[0.42, 0.28, 0.14]}>
+    <group ref={masterGroupRef} position={[0, 0, 0]} rotation={[0.35, 0, 0]}>
+      {/* Primary Outer Precision Flywheel Ring (Glass + Core Luminous Filament) */}
+      <group scale={[1.18, 0.74, 1.0]}>
+        <group ref={outerRingRef}>
+          {/* Main Refractive Glass Flywheel Ring */}
+          <mesh geometry={outerTorusGeo} material={glassMaterial} />
+
+          {/* Embedded Luminous Amber Accelerator Filament */}
+          <mesh geometry={outerFilamentGeo} material={luminousOrangeMaterial} />
+        </group>
+
+        {/* Outer Orbiting Data Pulse Beads */}
         <mesh
-          geometry={ribbonGeo}
-          scale={[1.15, 0.86, 0.42]}
-          material={glassMaterial}
+          ref={(el) => {
+            beadsRef.current[0] = el;
+          }}
+          geometry={beadGeo}
+          material={beadMaterial}
         />
-        {/* Inner Embedded Luminous Amber Core Filament */}
         <mesh
-          geometry={filamentGeo}
-          scale={[1.15, 0.86, 0.45]}
-          position={[0, 0, -0.02]}
-          material={orangeRimMaterial}
+          ref={(el) => {
+            beadsRef.current[1] = el;
+          }}
+          geometry={beadGeo}
+          material={beadMaterial}
         />
-        {/* Travelling Warm Highlight Orb */}
-        <mesh ref={leftOrbRef} scale={[1.15, 0.86, 1]}>
-          <sphereGeometry args={[0.09, 16, 16]} />
-          <meshBasicMaterial color="#ff8c2e" transparent opacity={0.85} />
-        </mesh>
       </group>
 
-      {/* Right 3D Volumetric Glass Ribbon Loop */}
-      <group position={[1.42, -0.02, 0.05]} rotation={[-0.36, -0.26, -0.14]}>
+      {/* Inner Concentric Kinetic Gyro Ring (Counter-rotates) */}
+      <group scale={[1.14, 0.72, 1.0]} rotation={[-0.12, 0.08, 0]}>
+        <group ref={innerRingRef}>
+          {/* Secondary Refractive Glass Ring */}
+          <mesh geometry={innerTorusGeo} material={innerGlassMaterial} />
+
+          {/* Core Fine Filament */}
+          <mesh geometry={innerFilamentGeo} material={luminousOrangeMaterial} />
+        </group>
+
+        {/* Inner Orbiting Feedback Pulse Beads */}
         <mesh
-          geometry={ribbonGeo}
-          scale={[1.15, 0.86, 0.42]}
-          material={glassMaterial}
+          ref={(el) => {
+            beadsRef.current[2] = el;
+          }}
+          geometry={beadGeo}
+          material={beadMaterial}
         />
-        {/* Inner Embedded Luminous Amber Core Filament */}
         <mesh
-          geometry={filamentGeo}
-          scale={[1.15, 0.86, 0.45]}
-          position={[0, 0, 0.02]}
-          material={orangeRimMaterial}
+          ref={(el) => {
+            beadsRef.current[3] = el;
+          }}
+          geometry={beadGeo}
+          material={beadMaterial}
         />
-        {/* Travelling Warm Highlight Orb */}
-        <mesh ref={rightOrbRef} scale={[1.15, 0.86, 1]}>
-          <sphereGeometry args={[0.09, 16, 16]} />
-          <meshBasicMaterial color="#ff8c2e" transparent opacity={0.85} />
-        </mesh>
       </group>
     </group>
   );
@@ -221,7 +319,7 @@ export function FlywheelScene3D() {
           </group>
         </Environment>
 
-        <GlassInfinityRings reduceMotion={reduceMotion} />
+        <FlywheelGyroscope reduceMotion={reduceMotion} />
 
         <ContactShadows
           position={[0, -1.72, 0]}
