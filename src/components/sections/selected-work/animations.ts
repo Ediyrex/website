@@ -108,10 +108,9 @@ export function initSelectedWorkAnimations(rootEl: HTMLElement): () => void {
           glow,
           {
             opacity: 0,
-            scale: 0.9,
             duration: 0.9,
             ease: "power2.out",
-            clearProps: "opacity,scale",
+            clearProps: "opacity",
           },
           0.1
         );
@@ -123,10 +122,9 @@ export function initSelectedWorkAnimations(rootEl: HTMLElement): () => void {
           mainPanel,
           {
             opacity: 0,
-            y: 20,
             duration: 0.75,
             ease: "power3.out",
-            clearProps: "opacity,y",
+            clearProps: "opacity",
           },
           0.18
         );
@@ -138,11 +136,10 @@ export function initSelectedWorkAnimations(rootEl: HTMLElement): () => void {
           subPanels,
           {
             opacity: 0,
-            y: 16,
             stagger: 0.1,
             duration: 0.65,
             ease: "power3.out",
-            clearProps: "opacity,y",
+            clearProps: "opacity",
           },
           0.26
         );
@@ -165,23 +162,8 @@ export function initSelectedWorkAnimations(rootEl: HTMLElement): () => void {
       });
     }
 
-    // 3. Supporting Project Gallery Stagger (100ms apart)
-    const cards = rootEl.querySelectorAll("[data-sw-card]");
-    if (cards.length > 0) {
-      gsap.from(cards, {
-        opacity: 0,
-        y: 20,
-        duration: 0.65,
-        stagger: 0.1,
-        ease: "power3.out",
-        clearProps: "transform,opacity",
-        scrollTrigger: {
-          trigger: cards[0],
-          start: "top 86%",
-          once: true,
-        },
-      });
-    }
+    // 3. Supporting Project Gallery cards are handled via Framer Motion whileInView
+    // in ProjectCard.tsx to avoid conflicting double animations during scroll and filter transitions.
 
     // 4. Impact Statistics Count-Up
     const statsStrip = rootEl.querySelector("[data-sw-stats]");
@@ -189,6 +171,12 @@ export function initSelectedWorkAnimations(rootEl: HTMLElement): () => void {
       const counters = statsStrip.querySelectorAll<HTMLElement>(
         "[data-sw-counter-target]"
       );
+
+      // Pre-set counters to 0 so they count up smoothly without jumping from target back to 0
+      counters.forEach((el) => {
+        const suffix = el.dataset.swCounterSuffix || "";
+        el.textContent = `0${suffix}`;
+      });
 
       gsap.from(statsStrip, {
         opacity: 0,

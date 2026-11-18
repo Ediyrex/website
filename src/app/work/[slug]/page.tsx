@@ -9,6 +9,8 @@ import { CaseStudyVisual } from "@/components/sections/CaseStudy/CaseStudyVisual
 import { CaseStudyDocumentation } from "@/components/sections/CaseStudy/CaseStudyDocumentation";
 import { CaseStudyRelated } from "@/components/sections/CaseStudy/CaseStudyRelated";
 
+export const instant = false;
+
 type CaseStudyPageProps = {
   params: Promise<{ slug: string }>;
 };

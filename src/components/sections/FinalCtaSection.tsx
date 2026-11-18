@@ -50,7 +50,7 @@ const BUILD_OPTIONS = [
 
 export function FinalCtaSection() {
   const sectionRef = useRef<HTMLElement>(null);
-  const [selectedService, setSelectedService] = useState<string>("branding");
+  const [selectedService, setSelectedService] = useState<string | null>(null);
 
   useEffect(() => {
     const container = sectionRef.current;
@@ -176,13 +176,17 @@ export function FinalCtaSection() {
                   <button
                     key={option.id}
                     type="button"
-                    onClick={() => setSelectedService(option.id)}
+                    onClick={() =>
+                      setSelectedService((prev) =>
+                        prev === option.id ? null : option.id
+                      )
+                    }
                     aria-pressed={isSelected}
                     className={cn(
-                      "group flex w-full items-center justify-between gap-4 rounded-[8px] border px-4 py-3 text-left transition-colors duration-200 cursor-pointer",
+                      "group flex w-full items-center justify-between gap-4 rounded-[8px] border px-4 py-3 text-left transition-all duration-200 cursor-pointer",
                       isSelected
-                        ? "border-[#FF7A2F] bg-[#FFEADC]"
-                        : "border-[#CFC5B9] bg-[#FAF6F0]/80 hover:border-[#141414]/60 hover:bg-[#FFFDFC]"
+                        ? "border-[#FF7A2F] bg-[#FFEADC] shadow-[0_4px_16px_rgba(255,122,47,0.14)]"
+                        : "border-[#CFC5B9] bg-[#FAF6F0]/80 hover:border-[#FF7A2F] hover:bg-[#FFEADC] hover:shadow-[0_4px_16px_rgba(255,122,47,0.1)] hover:-translate-y-0.5"
                     )}
                   >
                     <div className="flex items-center gap-3.5 min-w-0">
@@ -190,8 +194,8 @@ export function FinalCtaSection() {
                         className={cn(
                           "flex h-9 w-9 shrink-0 items-center justify-center rounded-[6px] transition-colors",
                           isSelected
-                            ? "text-[#141414]"
-                            : "text-[#45413E] group-hover:text-[#141414]"
+                            ? "text-[#141414] bg-[#FF7A2F]/15"
+                            : "text-[#45413E] group-hover:text-[#141414] group-hover:bg-[#FF7A2F]/15"
                         )}
                       >
                         <Icon className="h-5 w-5 stroke-[1.6]" aria-hidden="true" />
@@ -207,7 +211,7 @@ export function FinalCtaSection() {
                       </div>
                     </div>
 
-                    <span className="shrink-0 font-mono text-[13px] font-medium text-[#FF640A]">
+                    <span className="shrink-0 font-mono text-[13px] font-medium text-[#FF640A] transition-transform duration-200 group-hover:scale-105">
                       {option.number}
                     </span>
                   </button>
@@ -220,7 +224,11 @@ export function FinalCtaSection() {
         {/* Full-Width Dark "START A CONVERSATION" Banner */}
         <div data-next-reveal>
           <Link
-            href={`/contact?service=${encodeURIComponent(selectedService)}`}
+            href={
+              selectedService
+                ? `/contact?service=${encodeURIComponent(selectedService)}`
+                : "/contact"
+            }
             className="group relative flex min-h-[76px] sm:min-h-[86px] items-center justify-between gap-4 overflow-hidden rounded-[6px] bg-[#121110] px-5 sm:px-8 py-3.5 text-[#F6F1EA] shadow-[0_20px_48px_-24px_rgba(17,17,17,0.45)] transition-transform duration-250 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF640A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#F6F1EA]"
           >
             {/* Warm burnt-orange ambient wave inside dark bar */}

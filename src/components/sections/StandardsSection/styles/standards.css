@@ -2,3 +2,56 @@
 .standards-canvas {
   background-color: #f7f2ec;
 }
+
+/* Orbiting Venn Diagram Animation */
+@keyframes vennOrbit {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes vennCounterOrbit {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(-360deg);
+  }
+}
+
+@keyframes vennCorePulse {
+  0%, 100% {
+    transform: scale(0.92);
+    opacity: 0.2;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 0.45;
+  }
+}
+
+.venn-orbit-container {
+  animation: vennOrbit 20s linear infinite;
+  will-change: transform;
+}
+
+.venn-counter-node {
+  animation: vennCounterOrbit 20s linear infinite;
+  will-change: transform;
+}
+
+.venn-core-pulse {
+  transform-origin: 92px 96px;
+  animation: vennCorePulse 3.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .venn-orbit-container,
+  .venn-counter-node,
+  .venn-core-pulse {
+    animation: none;
+  }
+}

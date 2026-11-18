@@ -15,11 +15,11 @@ export function ProjectCard({ project }: ProjectCardProps) {
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, y: 14 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y: 18 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.15 }}
       exit={{ opacity: 0, scale: 0.97 }}
-      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-      data-sw-card
+      transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
       className="h-full"
     >
       <Link

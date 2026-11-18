@@ -5,6 +5,8 @@ import { WorkShowcase } from "@/components/sections/WorkPage/WorkShowcase";
 import { StudioExplorations } from "@/components/sections/WorkPage/StudioExplorations";
 import { WorkCTA } from "@/components/sections/WorkPage/WorkCTA";
 
+export const instant = false;
+
 export const metadata: Metadata = {
   title: "Work & Case Studies",
   description:
