@@ -131,8 +131,8 @@ export function CalBookingDialog({
         <div className="flex items-center justify-between px-5 sm:px-7 py-4 sm:py-5 border-b border-[#252A32] bg-[#12151A]/80 backdrop-blur-sm shrink-0">
           <div className="space-y-1 pr-4 min-w-0">
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#D6B77A] inline-block animate-pulse" />
-              <span className="text-[11px] font-mono font-bold uppercase tracking-[0.18em] text-[#D6B77A]">
+              <span className="w-2 h-2 rounded-full bg-[#F06419] inline-block animate-pulse" />
+              <span className="text-[11px] font-mono font-bold uppercase tracking-[0.18em] text-[#F06419]">
                 DISCOVERY CALL · 30 MIN
               </span>
             </div>
@@ -169,7 +169,7 @@ export function CalBookingDialog({
               type="button"
               onClick={onClose}
               aria-label="Close booking modal"
-              className="w-9 h-9 rounded-lg border border-[#252A32] bg-[#12151A] hover:bg-[#1E232B] text-[#B2B4BA] hover:text-[#F5F3EE] flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D6B77A]"
+              className="w-9 h-9 rounded-lg border border-[#252A32] bg-[#12151A] hover:bg-[#1E232B] text-[#B2B4BA] hover:text-[#F5F3EE] flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F06419]"
             >
               <X className="w-4 h-4" />
             </button>
@@ -180,7 +180,7 @@ export function CalBookingDialog({
         <div className="relative flex-1 w-full overflow-y-auto min-h-[500px] sm:min-h-[580px] bg-[#08090B]">
           {!calReady && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[#08090B] text-[#B2B4BA] z-10">
-              <Loader2 className="w-6 h-6 animate-spin text-[#D6B77A]" />
+              <Loader2 className="w-6 h-6 animate-spin text-[#F06419]" />
               <span className="text-xs font-mono">Loading real-time availability...</span>
             </div>
           )}

@@ -13,7 +13,7 @@ export default function NotFound() {
   return (
     <div className="min-h-[80vh] flex items-center justify-center bg-[#08090B] px-5 py-32">
       <div className="max-w-lg text-center space-y-6">
-        <span className="text-xs font-mono uppercase tracking-[0.2em] text-[#D6B77A]">
+        <span className="text-xs font-mono uppercase tracking-[0.2em] text-[#F06419]">
           Error 404
         </span>
         <h1 className="font-heading font-bold text-4xl sm:text-5xl text-[#F5F3EE]">
@@ -41,7 +41,7 @@ export default function NotFound() {
           </Link>
           <Link
             href="/contact"
-            className="text-sm font-medium text-[#D6B77A] hover:text-[#E6CC99] px-3 py-2 transition-colors"
+            className="text-sm font-medium text-[#F06419] hover:text-[#FF7828] px-3 py-2 transition-colors"
           >
             Book a Call
           </Link>

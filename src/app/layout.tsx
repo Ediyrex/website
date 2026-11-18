@@ -159,7 +159,7 @@ export default function RootLayout({
       lang="en"
       className={`${manrope.variable} ${inter.variable} ${ibmPlexMono.variable} ${spaceGrotesk.variable} ${instrumentSerif.variable} ${spaceMono.variable} ${playfairDisplay.variable} ${archivoNarrow.variable} h-full antialiased dark scroll-smooth`}
     >
-      <body className="min-h-full flex flex-col bg-[#08090B] text-[#F5F3EE] selection:bg-[#D6B77A]/25 selection:text-[#F5F3EE]">
+      <body className="min-h-full flex flex-col bg-[#08090B] text-[#F5F3EE] selection:bg-[#F06419]/30 selection:text-[#F5F3EE]">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

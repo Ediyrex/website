@@ -25,7 +25,7 @@ export default function ErrorBoundary({
         </div>
 
         <div className="space-y-2">
-          <span className="text-xs font-mono uppercase tracking-widest text-[#D6B77A]">
+          <span className="text-xs font-mono uppercase tracking-widest text-[#F06419]">
             Application Interruption
           </span>
           <h1 className="text-2xl font-bold tracking-tight text-[#F5F3EE]">
@@ -45,7 +45,7 @@ export default function ErrorBoundary({
           <button
             type="button"
             onClick={() => reset()}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-xs font-mono font-medium bg-[#D6B77A] text-[#08090B] hover:bg-[#E2C790] transition-colors"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-xs font-mono font-medium bg-[#F06419] text-black font-semibold hover:bg-[#FF7828] transition-colors"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             Try Again

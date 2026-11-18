@@ -42,12 +42,13 @@ export default function OpenGraphImage() {
                 height: "40px",
                 borderRadius: "8px",
                 backgroundColor: "#12151A",
-                border: "2px solid #D6B77A",
+                border: "2px solid #F06419",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 fontSize: "22px",
                 fontWeight: 700,
+                color: "#F06419",
               }}
             >
               E
@@ -57,7 +58,7 @@ export default function OpenGraphImage() {
           <span
             style={{
               fontSize: "16px",
-              color: "#D6B77A",
+              color: "#F06419",
               letterSpacing: "0.14em",
             }}
           >
@@ -100,7 +101,7 @@ export default function OpenGraphImage() {
           }}
         >
           <span>ediyrex@gmail.com</span>
-          <span style={{ color: "#D6B77A" }}>India &amp; Global</span>
+          <span style={{ color: "#F06419" }}>India &amp; Global</span>
         </div>
       </div>
     ),

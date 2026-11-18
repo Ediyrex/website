@@ -468,7 +468,7 @@ export function ProjectBriefDesk() {
 
             {/* 03. What to Expect */}
             <div className="space-y-5">
-              <span className="text-xs font-mono font-bold uppercase tracking-[0.18em] text-[#D9B875] block">
+              <span className="text-xs font-mono font-bold uppercase tracking-[0.18em] text-[#F06419] block">
                 WHAT TO EXPECT
               </span>
 
@@ -510,7 +510,7 @@ export function ProjectBriefDesk() {
 
             {/* 04. Direct Contact */}
             <div className="space-y-4">
-              <span className="text-xs font-mono font-bold uppercase tracking-[0.18em] text-[#D9B875] block">
+              <span className="text-xs font-mono font-bold uppercase tracking-[0.18em] text-[#F06419] block">
                 DIRECT CONTACT
               </span>
 
@@ -546,7 +546,7 @@ export function ProjectBriefDesk() {
 
               {/* Direct Phone Line */}
               <div className="flex items-center gap-4 p-4 rounded-[14px] bg-[#121519] border border-[#292E35] hover:border-[#3D4450] transition-colors">
-                <div className="w-12 h-12 rounded-[10px] border border-[#D9B875]/60 bg-[#0E1012] flex items-center justify-center shrink-0 text-[#D9B875]">
+                <div className="w-12 h-12 rounded-[10px] border border-[#F06419]/60 bg-[#0E1012] flex items-center justify-center shrink-0 text-[#F06419]">
                   <Phone className="w-5 h-5" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -555,7 +555,7 @@ export function ProjectBriefDesk() {
                   </span>
                   <a
                     href={`tel:${SITE_CONFIG.contact.phone.replace(/[^0-9+]/g, "")}`}
-                    className="font-mono text-sm text-[#D9B875] hover:underline block my-0.5 truncate font-medium"
+                    className="font-mono text-sm text-[#F06419] hover:underline block my-0.5 truncate font-medium"
                     aria-label={`Call ${SITE_CONFIG.contact.phone}`}
                   >
                     {SITE_CONFIG.contact.phone}
@@ -572,13 +572,13 @@ export function ProjectBriefDesk() {
 
             {/* 05. Direct Meeting Scheduling */}
             <div className="space-y-4">
-              <span className="text-xs font-mono font-bold uppercase tracking-[0.18em] text-[#D9B875] block">
+              <span className="text-xs font-mono font-bold uppercase tracking-[0.18em] text-[#F06419] block">
                 DIRECT CALENDAR
               </span>
 
               <div className="p-4 sm:p-5 rounded-[14px] bg-[#121519] border border-[#292E35] space-y-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-[10px] border border-[#D6B77A]/40 bg-[#0E1012] flex items-center justify-center shrink-0 text-[#D6B77A]">
+                  <div className="w-10 h-10 rounded-[10px] border border-[#F06419]/50 bg-[#0E1012] flex items-center justify-center shrink-0 text-[#F06419]">
                     <Calendar className="w-5 h-5" />
                   </div>
                   <div>
@@ -594,7 +594,7 @@ export function ProjectBriefDesk() {
                 <button
                   type="button"
                   onClick={() => openBookingModal()}
-                  className="w-full py-3 px-4 rounded-[8px] bg-[#D6B77A] hover:bg-[#E2C78E] text-[#08090B] font-mono font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                  className="w-full py-3.5 px-4 rounded-[8px] bg-[#F06419] hover:bg-[#FF7828] text-black font-mono font-bold text-xs uppercase tracking-wider transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer shadow-[0_4px_20px_-4px_rgba(240,100,25,0.4)] active:scale-[0.99]"
                 >
                   <Calendar className="w-4 h-4" />
                   <span>Schedule a Meeting</span>
@@ -628,7 +628,7 @@ export function ProjectBriefDesk() {
                         className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center font-mono text-[11px] sm:text-xs font-bold ${currentStep === 1
                           ? "bg-[#F06419] text-black"
                           : currentStep > 1
-                            ? "bg-[#D9B875] text-black"
+                            ? "bg-[#F06419] text-black"
                             : "bg-[#0E1012] border border-[#292E35] text-[#898D94]"
                           }`}
                       >
@@ -638,7 +638,7 @@ export function ProjectBriefDesk() {
                         className={`text-[10px] sm:text-xs font-mono font-bold uppercase tracking-wider ${currentStep === 1
                           ? "text-[#F06419]"
                           : currentStep > 1
-                            ? "text-[#D9B875]"
+                            ? "text-[#F06419]"
                             : "text-[#898D94]"
                           }`}
                       >
@@ -649,7 +649,7 @@ export function ProjectBriefDesk() {
                     {/* Connecting Bar 1 -> 2 */}
                     <span
                       aria-hidden="true"
-                      className={`h-px flex-1 ${currentStep > 1 ? "bg-[#D9B875]" : "bg-[#292E35]"}`}
+                      className={`h-px flex-1 ${currentStep > 1 ? "bg-[#F06419]" : "bg-[#292E35]"}`}
                     />
 
                     {/* Step 2 Indicator */}
@@ -658,7 +658,7 @@ export function ProjectBriefDesk() {
                         className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center font-mono text-[11px] sm:text-xs font-bold ${currentStep === 2
                           ? "bg-[#F06419] text-black"
                           : currentStep > 2
-                            ? "bg-[#D9B875] text-black"
+                            ? "bg-[#F06419] text-black"
                             : "bg-[#0E1012] border border-[#292E35] text-[#898D94]"
                           }`}
                       >
@@ -668,7 +668,7 @@ export function ProjectBriefDesk() {
                         className={`text-[10px] sm:text-xs font-mono font-bold uppercase tracking-wider ${currentStep === 2
                           ? "text-[#F06419]"
                           : currentStep > 2
-                            ? "text-[#D9B875]"
+                            ? "text-[#F06419]"
                             : "text-[#898D94]"
                           }`}
                       >
@@ -679,7 +679,7 @@ export function ProjectBriefDesk() {
                     {/* Connecting Bar 2 -> 3 */}
                     <span
                       aria-hidden="true"
-                      className={`h-px flex-1 ${currentStep > 2 ? "bg-[#D9B875]" : "bg-[#292E35]"}`}
+                      className={`h-px flex-1 ${currentStep > 2 ? "bg-[#F06419]" : "bg-[#292E35]"}`}
                     />
 
                     {/* Step 3 Indicator */}
@@ -709,7 +709,7 @@ export function ProjectBriefDesk() {
               {currentStep === 1 && !isSuccess && (
                 <div className="pt-7 space-y-7">
                   <div className="space-y-2">
-                    <span className="text-xs font-mono font-bold uppercase tracking-[0.18em] text-[#D9B875] block">
+                    <span className="text-xs font-mono font-bold uppercase tracking-[0.18em] text-[#F06419] block">
                       01 / PROJECT DIRECTION
                     </span>
                     <h2 className="font-heading font-extrabold text-[clamp(1.75rem,2.8vw,2.4rem)] text-[#F5F2EC] leading-[1.08] tracking-tight">
@@ -795,7 +795,7 @@ export function ProjectBriefDesk() {
 
                   {/* Preferred Engagement Model */}
                   <div className="space-y-3 pt-2">
-                    <span className="text-xs font-mono font-bold uppercase tracking-[0.18em] text-[#D9B875] block">
+                    <span className="text-xs font-mono font-bold uppercase tracking-[0.18em] text-[#F06419] block">
                       PREFERRED ENGAGEMENT MODEL
                     </span>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
@@ -838,7 +838,7 @@ export function ProjectBriefDesk() {
               {currentStep === 2 && !isSuccess && (
                 <div className="pt-7 space-y-6">
                   <div className="space-y-2">
-                    <span className="text-xs font-mono font-bold uppercase tracking-[0.18em] text-[#D9B875] block">
+                    <span className="text-xs font-mono font-bold uppercase tracking-[0.18em] text-[#F06419] block">
                       02 / SCOPE &amp; EXPECTATIONS
                     </span>
                     <h2 className="font-heading font-extrabold text-[clamp(1.75rem,2.8vw,2.4rem)] text-[#F5F2EC] leading-[1.08] tracking-tight">
@@ -945,7 +945,7 @@ export function ProjectBriefDesk() {
                               setBudgetTier("");
                             }}
                             className={`px-2.5 py-0.5 rounded text-[11px] font-mono font-bold uppercase tracking-wider transition-colors ${budgetCurrency === "USD"
-                              ? "bg-[#D9B875] text-black"
+                              ? "bg-[#F06419] text-black"
                               : "text-[#898D94] hover:text-[#F5F2EC]"
                               }`}
                           >
@@ -958,7 +958,7 @@ export function ProjectBriefDesk() {
                               setBudgetTier("");
                             }}
                             className={`px-2.5 py-0.5 rounded text-[11px] font-mono font-bold uppercase tracking-wider transition-colors ${budgetCurrency === "INR"
-                              ? "bg-[#D9B875] text-black"
+                              ? "bg-[#F06419] text-black"
                               : "text-[#898D94] hover:text-[#F5F2EC]"
                               }`}
                           >
@@ -1108,7 +1108,7 @@ export function ProjectBriefDesk() {
               {currentStep === 3 && !isSuccess && (
                 <form onSubmit={handleSubmitEnquiry} className="pt-7 space-y-6">
                   <div className="space-y-2">
-                    <span className="text-xs font-mono font-bold uppercase tracking-[0.18em] text-[#D9B875] block">
+                    <span className="text-xs font-mono font-bold uppercase tracking-[0.18em] text-[#F06419] block">
                       03 / YOUR DETAILS
                     </span>
                     <h2 className="font-heading font-extrabold text-[clamp(1.75rem,2.8vw,2.4rem)] text-[#F5F2EC] leading-[1.08] tracking-tight">
@@ -1261,7 +1261,7 @@ export function ProjectBriefDesk() {
                       {wantsDiscoveryCall && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                     </div>
                     <div className="flex items-center gap-2 text-xs sm:text-sm text-[#B8B9BC] group-hover:text-[#F5F2EC] transition-colors leading-snug">
-                      <Calendar className="w-4 h-4 text-[#D9B875] shrink-0" />
+                      <Calendar className="w-4 h-4 text-[#F06419] shrink-0" />
                       <span>I&apos;d like to arrange a 30-minute discovery call to discuss the project.</span>
                     </div>
                   </div>
@@ -1393,7 +1393,7 @@ export function ProjectBriefDesk() {
 
                   {/* What happens next? */}
                   <div className="space-y-4 pt-2">
-                    <span className="text-xs font-mono font-bold uppercase tracking-[0.18em] text-[#D9B875] block">
+                    <span className="text-xs font-mono font-bold uppercase tracking-[0.18em] text-[#F06419] block">
                       WHAT HAPPENS NEXT?
                     </span>
 
