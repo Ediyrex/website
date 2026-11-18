@@ -214,10 +214,10 @@ export function CalBookingDialog({
                 config={{
                   layout: BOOKING_CONFIG.layout,
                   theme: BOOKING_CONFIG.theme,
-                  name: prefill?.name,
-                  email: prefill?.email,
-                  notes: prefill?.notes,
-                  guests: prefill?.guests,
+                  ...(prefill?.name ? { name: prefill.name } : {}),
+                  ...(prefill?.email ? { email: prefill.email } : {}),
+                  ...(prefill?.notes ? { notes: prefill.notes } : {}),
+                  ...(prefill?.guests && prefill.guests.length > 0 ? { guests: prefill.guests } : {}),
                 }}
               />
             </div>
