@@ -166,6 +166,7 @@ export function EnquirySection() {
         `/thank-you?ref=${encodeURIComponent(ref)}&stored=${String(storedFlag)}&call=${String(callFlag)}`
       );
     } catch (err: unknown) {
+      turnstile.reset();
       const msg =
         err instanceof Error
           ? err.message
@@ -706,6 +707,14 @@ export function EnquirySection() {
                       )}
                     </div>
                   </div>
+
+                  <TurnstileWidget
+                    action="project_enquiry"
+                    onSuccess={turnstile.onSuccess}
+                    onError={turnstile.onError}
+                    onExpire={turnstile.onExpire}
+                    theme="dark"
+                  />
 
                   <div className="pt-2">
                     <Button

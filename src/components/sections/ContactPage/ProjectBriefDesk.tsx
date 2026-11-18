@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import { useBookingModal } from "@/features/bookings";
+import { TurnstileWidget, useTurnstile } from "@/features/turnstile";
 
 export type EngagementModel =
   | "Project-Based"
@@ -141,6 +142,7 @@ export function ProjectBriefDesk() {
   const [referenceCode, setReferenceCode] = useState("");
   const [serverError, setServerError] = useState("");
   const [emailCopied, setEmailCopied] = useState(false);
+  const turnstile = useTurnstile();
 
   // Read URL query params on mount
   useEffect(() => {
@@ -364,6 +366,7 @@ export function ProjectBriefDesk() {
       timeline: timeline,
       wantsDiscoveryCall: wantsDiscoveryCall,
       consentAccepted: privacyConsent,
+      turnstileToken: turnstile.token || undefined,
     };
 
     try {
@@ -388,6 +391,7 @@ export function ProjectBriefDesk() {
         wantsDiscoveryCall,
       });
     } catch (err) {
+      turnstile.reset();
       setServerError(
         err instanceof Error
           ? err.message
@@ -1289,6 +1293,15 @@ export function ProjectBriefDesk() {
                       <span>{serverError}</span>
                     </div>
                   )}
+
+                  {/* Cloudflare Turnstile Bot Protection */}
+                  <TurnstileWidget
+                    action="project_enquiry"
+                    onSuccess={turnstile.onSuccess}
+                    onError={turnstile.onError}
+                    onExpire={turnstile.onExpire}
+                    theme="dark"
+                  />
 
                   {/* Step 03 Navigation Actions */}
                   <div className="flex flex-col sm:flex-row items-center gap-3 pt-4 border-t border-[#292E35]">
