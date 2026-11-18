@@ -10,6 +10,7 @@ import { BudgetCurrency } from "@/types";
 import { SITE_CONFIG } from "@/config/site";
 import { trackEvent } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
+import { useBookingModal } from "@/features/bookings";
 
 const BUDGET_TIERS: Record<BudgetCurrency, { value: string; label: string }[]> = {
   USD: [
@@ -48,6 +49,7 @@ function normalizeEngagementParam(raw: string): string {
 export function EnquirySection() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { openBookingModal } = useBookingModal();
   const preselectedService = searchParams.get("service") || "";
   const preselectedEngagement = normalizeEngagementParam(
     searchParams.get("engagement") || ""
@@ -275,15 +277,21 @@ export function EnquirySection() {
                   )}
                   {formData.wantsDiscoveryCall && (
                     <div className="pt-2">
-                      <a
-                        href={`https://cal.com/${process.env.NEXT_PUBLIC_CAL_LINK || "ediyrex-pbxgua"}?name=${encodeURIComponent(formData.name || "")}&email=${encodeURIComponent(formData.email || "")}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#E85D04] hover:bg-[#F97316] text-[#07090D] font-semibold text-sm transition-all shadow-lg shadow-[#E85D04]/20 active:scale-[0.98]"
+                      <button
+                        type="button"
+                        onClick={() =>
+                          openBookingModal({
+                            prefill: {
+                              name: formData.name,
+                              email: formData.email,
+                            },
+                          })
+                        }
+                        className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#E85D04] hover:bg-[#F97316] text-[#07090D] font-semibold text-sm transition-all shadow-lg shadow-[#E85D04]/20 active:scale-[0.98] cursor-pointer"
                       >
                         <Calendar className="w-4 h-4" />
                         <span>Book Discovery Slot on Cal.com</span>
-                      </a>
+                      </button>
                     </div>
                   )}
 

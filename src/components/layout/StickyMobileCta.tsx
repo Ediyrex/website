@@ -2,8 +2,8 @@
 
 import React from "react";
 import { usePathname } from "next/navigation";
-import { ArrowUpRight } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { ArrowUpRight, Calendar } from "lucide-react";
+import { BookCallButton } from "@/features/bookings";
 
 export function StickyMobileCta() {
   const pathname = usePathname();
@@ -19,11 +19,12 @@ export function StickyMobileCta() {
       aria-label="Quick Contact Action"
       className="fixed bottom-0 left-0 right-0 z-30 md:hidden bg-[#08090B]/95 backdrop-blur-md border-t border-[#252A32] px-4 py-3"
     >
-      <Button href="/contact" size="md" variant="primary" className="w-full">
-        <span>Book a discovery call</span>
-        <ArrowUpRight className="w-4 h-4" />
-      </Button>
+      <BookCallButton size="md" variant="primary" className="w-full">
+        <Calendar className="w-4 h-4 mr-1 text-[#07090D]" />
+        <span>Book a Call ↗</span>
+      </BookCallButton>
     </div>
   );
 }
+
 

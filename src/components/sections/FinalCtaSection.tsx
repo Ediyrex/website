@@ -8,10 +8,12 @@ import {
   AppWindow,
   ArrowUpRight,
   Box,
+  Calendar,
   Layers,
   PlayCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useBookingModal } from "@/features/bookings";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -51,6 +53,7 @@ const BUILD_OPTIONS = [
 export function FinalCtaSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const [selectedService, setSelectedService] = useState<string | null>(null);
+  const { openBookingModal } = useBookingModal();
 
   useEffect(() => {
     const container = sectionRef.current;
@@ -221,15 +224,20 @@ export function FinalCtaSection() {
           </div>
         </div>
 
-        {/* Full-Width Dark "START A CONVERSATION" Banner */}
-        <div data-next-reveal>
-          <Link
-            href={
-              selectedService
-                ? `/contact?service=${encodeURIComponent(selectedService)}`
-                : "/contact"
+        {/* Full-Width Dark "BOOK A DISCOVERY CALL" Banner */}
+        <div data-next-reveal className="space-y-3">
+          <button
+            type="button"
+            onClick={() =>
+              openBookingModal({
+                prefill: {
+                  notes: selectedService
+                    ? `Interested in service: ${selectedService}`
+                    : undefined,
+                },
+              })
             }
-            className="group relative flex min-h-[76px] sm:min-h-[86px] items-center justify-between gap-4 overflow-hidden rounded-[6px] bg-[#121110] px-5 sm:px-8 py-3.5 text-[#F6F1EA] shadow-[0_20px_48px_-24px_rgba(17,17,17,0.45)] transition-transform duration-250 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF640A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#F6F1EA]"
+            className="w-full group relative flex min-h-[76px] sm:min-h-[86px] items-center justify-between gap-4 overflow-hidden rounded-[6px] bg-[#121110] px-5 sm:px-8 py-3.5 text-[#F6F1EA] shadow-[0_20px_48px_-24px_rgba(17,17,17,0.45)] transition-transform duration-250 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF640A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#F6F1EA] cursor-pointer"
           >
             {/* Warm burnt-orange ambient wave inside dark bar */}
             <div
@@ -250,9 +258,12 @@ export function FinalCtaSection() {
               }}
             />
 
-            <span className="relative z-10 font-mono sm:font-heading text-[15px] sm:text-[21px] font-medium uppercase tracking-[0.18em] text-[#F6F1EA]">
-              START A CONVERSATION
-            </span>
+            <div className="relative z-10 flex items-center gap-3">
+              <Calendar className="w-5 h-5 text-[#FF640A] shrink-0" />
+              <span className="font-mono sm:font-heading text-[15px] sm:text-[21px] font-medium uppercase tracking-[0.18em] text-[#F6F1EA]">
+                BOOK A DISCOVERY CALL
+              </span>
+            </div>
 
             <span
               aria-hidden="true"
@@ -260,7 +271,21 @@ export function FinalCtaSection() {
             >
               <ArrowUpRight className="h-5 w-5 stroke-[2.2] transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </span>
-          </Link>
+          </button>
+
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-[#5B554E] px-1 font-mono">
+            <span>Direct 30-minute Google Meet discovery call</span>
+            <Link
+              href={
+                selectedService
+                  ? `/contact?service=${encodeURIComponent(selectedService)}`
+                  : "/contact"
+              }
+              className="text-[#141414] hover:text-[#FF640A] underline underline-offset-4 font-sans font-medium transition-colors"
+            >
+              Prefer sending a written project brief? Fill intake form →
+            </Link>
+          </div>
         </div>
       </div>
     </section>

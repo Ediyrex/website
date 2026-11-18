@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { ArrowUpRight, Menu, X, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
+import { BookCallButton } from "@/features/bookings";
 
 const NAV_LINKS = [
   { label: "Home", href: "/" },
@@ -161,21 +162,13 @@ export function Header() {
             <div className="flex items-center gap-3">
               <div className="hidden md:block">
                 {isLightHeroNav ? (
-                  <Link
-                    href="/contact"
-                    className="inline-flex items-center gap-1.5 h-10 px-5 rounded-[8px] bg-[#0B0D10] text-white text-sm font-semibold hover:bg-[#1F242B] transition-colors"
-                  >
-                    <span>Book a discovery call</span>
-                    <ArrowUpRight className="w-3.5 h-3.5" />
-                  </Link>
+                  <BookCallButton variant="navbar-light">
+                    <span>Book a Call ↗</span>
+                  </BookCallButton>
                 ) : (
-                  <Link
-                    href="/contact"
-                    className="inline-flex items-center gap-2 h-10 px-4 rounded-[8px] border border-[#F06419] bg-transparent text-[#F5F2EC] text-xs sm:text-sm font-medium hover:bg-[#F06419]/10 hover:border-[#FF7A29] transition-all"
-                  >
-                    <Calendar className="w-4 h-4 text-[#F06419]" />
-                    <span>Book a discovery call</span>
-                  </Link>
+                  <BookCallButton variant="navbar">
+                    <span>Book a Call ↗</span>
+                  </BookCallButton>
                 )}
               </div>
 
@@ -229,14 +222,14 @@ export function Header() {
           </nav>
 
           <div className="pt-8 space-y-4">
-            <Link
-              href="/contact"
+            <BookCallButton
+              variant="primary"
               onClick={() => setMobileMenuOpen(false)}
-              className="w-full h-12 rounded-[8px] bg-[#F06419] text-black font-mono font-bold text-xs sm:text-sm uppercase tracking-wider hover:bg-[#D95612] transition-colors flex items-center justify-center gap-2 shadow-md"
+              className="w-full h-12 rounded-[8px] bg-[#F06419] hover:bg-[#D95612] text-black font-mono font-bold text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-md"
             >
               <Calendar className="w-4 h-4" />
-              <span>Book a discovery call</span>
-            </Link>
+              <span>Book a Call ↗</span>
+            </BookCallButton>
             <p className="text-center text-xs font-mono text-[#777D87]">
               ediyrex@gmail.com
             </p>

@@ -18,6 +18,7 @@ import {
   Copy,
 } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
+import { useBookingModal } from "@/features/bookings";
 
 export type EngagementModel =
   | "Project-Based"
@@ -106,6 +107,7 @@ export const COUNTRY_CODES = [
 
 export function ProjectBriefDesk() {
   const searchParams = useSearchParams();
+  const { openBookingModal } = useBookingModal();
 
   // Step state
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
@@ -514,6 +516,41 @@ export function ProjectBriefDesk() {
                   aria-label="Copy email address"
                 >
                   {emailCopied ? <Check className="w-3.5 h-3.5 text-[#56C58B]" /> : <Copy className="w-3.5 h-3.5" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Divider */}
+            <div className="h-px bg-[#292E35] w-full" />
+
+            {/* 05. Direct Meeting Scheduling */}
+            <div className="space-y-4">
+              <span className="text-xs font-mono font-bold uppercase tracking-[0.18em] text-[#D9B875] block">
+                DIRECT CALENDAR
+              </span>
+
+              <div className="p-4 sm:p-5 rounded-[14px] bg-[#121519] border border-[#292E35] space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-[10px] border border-[#D6B77A]/40 bg-[#0E1012] flex items-center justify-center shrink-0 text-[#D6B77A]">
+                    <Calendar className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-heading font-extrabold text-[14px] uppercase tracking-wider text-[#F5F2EC]">
+                      SCHEDULE A MEETING
+                    </h4>
+                    <p className="text-xs text-[#898D94] mt-0.5">
+                      30-min Google Meet consultation with EDYREX studio leads.
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => openBookingModal()}
+                  className="w-full py-3 px-4 rounded-[8px] bg-[#D6B77A] hover:bg-[#E2C78E] text-[#08090B] font-mono font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                >
+                  <Calendar className="w-4 h-4" />
+                  <span>Schedule a Meeting</span>
                 </button>
               </div>
             </div>
@@ -1381,15 +1418,18 @@ export function ProjectBriefDesk() {
                           Select a convenient slot on our live Cal.com calendar right now.
                         </p>
                       </div>
-                      <a
-                        href={`https://cal.com/${process.env.NEXT_PUBLIC_CAL_LINK || "ediyrex-pbxgua"}?name=${encodeURIComponent(fullName)}&email=${encodeURIComponent(workEmail)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-full sm:w-auto px-5 py-2.5 rounded-[8px] bg-[#F06419] hover:bg-[#FF7A2E] text-white font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shrink-0 transition-colors shadow-md shadow-[#F06419]/20"
+                      <button
+                        type="button"
+                        onClick={() =>
+                          openBookingModal({
+                            prefill: { name: fullName, email: workEmail },
+                          })
+                        }
+                        className="w-full sm:w-auto px-5 py-2.5 rounded-[8px] bg-[#F06419] hover:bg-[#FF7A2E] text-white font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shrink-0 transition-colors shadow-md shadow-[#F06419]/20 cursor-pointer"
                       >
                         <Calendar className="w-3.5 h-3.5" />
-                        <span>Schedule on Cal.com</span>
-                      </a>
+                        <span>Schedule Discovery Call</span>
+                      </button>
                     </div>
                   )}
 
