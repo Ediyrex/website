@@ -7,10 +7,7 @@ export function RetainerModels() {
     <div className="mt-16 border-t border-[#292E35] pt-12">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#D9B875]">
-            CROSS-DIVISION ENGAGEMENT MODEL
-          </p>
-          <h3 className="mt-2 font-heading text-2xl font-semibold tracking-tight text-[#F5F2EC] sm:text-3xl">
+          <h3 className="font-heading text-2xl font-semibold tracking-tight text-[#F5F2EC] sm:text-3xl">
             Ongoing Support &amp; Studio Retainers
           </h3>
           <p className="mt-2 max-w-[680px] text-sm leading-relaxed text-[#858991]">

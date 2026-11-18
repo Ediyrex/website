@@ -210,7 +210,7 @@ export function Footer() {
               ))}
               <li>
                 <Link
-                  href="/services"
+                  href="/industries"
                   className="inline-flex items-center gap-1.5 text-[#FFFDFC] hover:text-[#FF640A] font-medium transition-colors"
                 >
                   <span>More Industries</span>

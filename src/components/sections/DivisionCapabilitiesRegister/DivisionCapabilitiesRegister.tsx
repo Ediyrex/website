@@ -58,13 +58,13 @@ export function DivisionCapabilitiesRegister({
                   </span>
                   <span
                     aria-hidden="true"
-                    className="w-px h-16 sm:h-20 bg-[#444444] hidden lg:block shrink-0"
+                    className="w-px h-16 bg-[#444444] hidden lg:block shrink-0"
                   />
                 </div>
 
                 {/* Column 2: Service Identity + Divider */}
                 <div className="lg:col-span-4 xl:col-span-4 flex items-center justify-between lg:px-6">
-                  <div className="space-y-1.5 min-w-0 pr-4">
+                  <div className="space-y-1.5 min-w-0 pr-6">
                     <h3 className="font-heading font-bold text-xl sm:text-2xl lg:text-[23px] text-[#F5F2EC] tracking-tight leading-snug group-hover:text-[#F06419] transition-colors">
                       {service.title}
                     </h3>
@@ -74,13 +74,13 @@ export function DivisionCapabilitiesRegister({
                   </div>
                   <span
                     aria-hidden="true"
-                    className="w-px h-16 sm:h-20 bg-[#444444] hidden lg:block shrink-0"
+                    className="w-px h-16 bg-[#444444] hidden lg:block shrink-0"
                   />
                 </div>
 
                 {/* Column 3: Deliverables (2 columns) + Divider */}
-                <div className="lg:col-span-4 xl:col-span-4 flex items-center justify-between lg:px-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 lg:gap-x-6 gap-y-2.5 w-full">
+                <div className="lg:col-span-4 xl:col-span-4 flex items-center justify-between lg:pl-6 lg:pr-0">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 lg:gap-x-6 gap-y-2.5 flex-1 pr-6">
                     {service.deliverables.map((deliv) => (
                       <div
                         key={deliv}
@@ -93,12 +93,12 @@ export function DivisionCapabilitiesRegister({
                   </div>
                   <span
                     aria-hidden="true"
-                    className="w-px h-16 sm:h-20 bg-[#444444] hidden lg:block shrink-0"
+                    className="w-px h-16 bg-[#444444] hidden lg:block shrink-0"
                   />
                 </div>
 
                 {/* Column 4: Enquiry Action */}
-                <div className="lg:col-span-3 xl:col-span-3 flex items-center lg:justify-end lg:pl-6">
+                <div className="lg:col-span-3 xl:col-span-3 flex items-center justify-start lg:pl-6">
                   <Link
                     href={`/contact?division=${division}&service=${service.slug}`}
                     className={`inline-flex items-center justify-between gap-3 px-5 py-3 rounded-xl text-xs sm:text-[13px] transition-all w-full sm:w-auto min-w-[240px] max-w-[290px] shadow-sm ${

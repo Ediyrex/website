@@ -31,10 +31,11 @@ export function RelevantBlueprints({
   division,
   displayLimit = 3,
 }: RelevantBlueprintsProps) {
-  // Filter projects relevant to the current division
-  const filteredProjects = BLUEPRINT_PROJECTS.filter((p) =>
-    p.divisionIds.includes(division)
-  );
+  // Filter projects relevant to the current division (or all projects for portfolio / industries overview)
+  const filteredProjects =
+    division === "all" || division === "industries"
+      ? BLUEPRINT_PROJECTS
+      : BLUEPRINT_PROJECTS.filter((p) => p.divisionIds.includes(division));
 
   const displayedProjects = filteredProjects.slice(0, displayLimit);
 
@@ -46,22 +47,6 @@ export function RelevantBlueprints({
         className="relative w-full bg-[#0C0D0F] text-[#F5F2EC] py-16 sm:py-20 lg:py-24 border-b border-[#252A32]"
       >
         <div className="max-w-[1450px] mx-auto px-5 sm:px-8 lg:px-12 space-y-8">
-          <div className="flex items-center justify-between gap-4">
-            <span className="font-mono text-xs sm:text-[13px] uppercase tracking-[0.16em] text-[#D9B875] font-semibold shrink-0">
-              {BLUEPRINTS_SECTION_DATA.headerLeft}
-            </span>
-            <span
-              aria-hidden="true"
-              className="h-px bg-[#444444] flex-1 mx-4 sm:mx-6 hidden sm:block"
-            />
-            <Link
-              href="/work"
-              className="font-mono text-xs sm:text-[13px] uppercase tracking-[0.18em] text-[#F06419] font-bold hover:text-[#FF762F] transition-colors shrink-0 inline-flex items-center gap-1.5"
-            >
-              <span>{BLUEPRINTS_SECTION_DATA.headerRight}</span>
-            </Link>
-          </div>
-
           <div className="space-y-4 py-8">
             <h2 className="font-heading font-extrabold text-3xl sm:text-4xl text-[#F5F2EC]">
               The next blueprint starts here.
@@ -95,25 +80,8 @@ export function RelevantBlueprints({
       className="relative w-full bg-[#0C0D0F] text-[#F5F2EC] py-16 sm:py-20 lg:py-24 border-b border-[#252A32]"
     >
       <div className="max-w-[1450px] mx-auto px-5 sm:px-8 lg:px-12 space-y-8 sm:space-y-10">
-        {/* Editorial Section Header */}
-        <div className="flex items-center justify-between gap-4">
-          <span className="font-mono text-xs sm:text-[13px] uppercase tracking-[0.16em] text-[#D9B875] font-semibold shrink-0">
-            {BLUEPRINTS_SECTION_DATA.headerLeft}
-          </span>
-          <span
-            aria-hidden="true"
-            className="h-px bg-[#444444] flex-1 mx-4 sm:mx-6 hidden sm:block"
-          />
-          <Link
-            href="/work"
-            className="font-mono text-xs sm:text-[13px] uppercase tracking-[0.18em] text-[#F06419] font-bold hover:text-[#FF762F] transition-colors shrink-0 inline-flex items-center gap-1.5"
-          >
-            <span>{BLUEPRINTS_SECTION_DATA.headerRight}</span>
-          </Link>
-        </div>
-
         {/* Main Editorial Headline */}
-        <div className="space-y-4 pt-2 sm:pt-4">
+        <div className="space-y-4">
           <h2 className="font-heading font-extrabold text-[clamp(2.35rem,4.4vw,4.25rem)] leading-[0.98] tracking-[-0.035em] text-[#F5F2EC]">
             <span>{BLUEPRINTS_SECTION_DATA.headlineLine1} </span>
             <span className="italic text-[#F06419] font-extrabold">
@@ -151,13 +119,13 @@ export function RelevantBlueprints({
                   </div>
                   <span
                     aria-hidden="true"
-                    className="w-px h-16 sm:h-20 bg-[#444444] hidden lg:block shrink-0"
+                    className="w-px h-16 bg-[#444444] hidden lg:block shrink-0"
                   />
                 </div>
 
                 {/* Column 2: Title & Description + Divider */}
-                <div className="lg:col-span-5 xl:col-span-5 flex items-center justify-between lg:px-6">
-                  <div className="space-y-1.5 min-w-0 pr-4">
+                <div className="lg:col-span-4 xl:col-span-4 flex items-center justify-between lg:px-6">
+                  <div className="space-y-1.5 min-w-0 pr-6">
                     <h3 className="font-heading font-bold text-xl sm:text-2xl lg:text-[23px] text-[#F5F2EC] tracking-tight leading-snug group-hover:text-[#F06419] transition-colors">
                       {project.title}
                     </h3>
@@ -167,17 +135,17 @@ export function RelevantBlueprints({
                   </div>
                   <span
                     aria-hidden="true"
-                    className="w-px h-16 sm:h-20 bg-[#444444] hidden lg:block shrink-0"
+                    className="w-px h-16 bg-[#444444] hidden lg:block shrink-0"
                   />
                 </div>
 
                 {/* Column 3: Capability Tags (2x2 grid) + Divider */}
-                <div className="lg:col-span-3 xl:col-span-3 flex items-center justify-between lg:px-6">
-                  <div className="grid grid-cols-2 gap-2 w-full">
+                <div className="lg:col-span-3 xl:col-span-3 flex items-center justify-between lg:pl-6 lg:pr-0">
+                  <div className="grid grid-cols-2 gap-2 flex-1 pr-6">
                     {project.capabilities.slice(0, 4).map((tag) => (
                       <span
                         key={tag}
-                        className="inline-flex items-center justify-center px-2.5 py-1.5 rounded-full border border-[#444444] text-[10px] sm:text-[11px] font-mono uppercase tracking-wider text-[#B8B9BC] text-center"
+                        className="inline-flex items-center justify-center px-2 py-1.5 rounded-full border border-[#444444] text-[10px] xl:text-[11px] font-mono uppercase tracking-wide text-[#B8B9BC] text-center whitespace-nowrap"
                       >
                         {tag}
                       </span>
@@ -185,12 +153,12 @@ export function RelevantBlueprints({
                   </div>
                   <span
                     aria-hidden="true"
-                    className="w-px h-16 sm:h-20 bg-[#444444] hidden lg:block shrink-0"
+                    className="w-px h-16 bg-[#444444] hidden lg:block shrink-0"
                   />
                 </div>
 
                 {/* Column 4: Status Badge & Explore Action */}
-                <div className="lg:col-span-2 xl:col-span-2 flex flex-col items-start lg:items-end justify-center space-y-3 lg:pl-6">
+                <div className="lg:col-span-3 xl:col-span-3 flex flex-col items-start justify-center space-y-3 lg:pl-6">
                   <span
                     className={`inline-flex items-center px-3 py-1 rounded-full border text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-wider ${getStatusBadgeClass(
                       project.status

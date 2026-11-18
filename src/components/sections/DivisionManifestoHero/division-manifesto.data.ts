@@ -63,7 +63,7 @@ export const DIVISION_MANIFESTO_MAP: Record<string, DivisionManifestoData> = {
     slug: "media",
     number: "02",
     divisionTitle: "MEDIA & CONTENT PRODUCTION",
-    studioIdentifier: "EDYREX / DIVISION 02",
+    studioIdentifier: "DIVISION 02",
     headline: {
       line1: "Give your ideas a voice.",
       line2: "Give your stories",
@@ -98,7 +98,7 @@ export const DIVISION_MANIFESTO_MAP: Record<string, DivisionManifestoData> = {
     slug: "digital",
     number: "03",
     divisionTitle: "WEB, APPS & DIGITAL PRODUCTS",
-    studioIdentifier: "EDYREX / DIVISION 03",
+    studioIdentifier: "DIVISION 03",
     headline: {
       line1: "From ambitious ideas",
       line2: "to software people",
@@ -133,7 +133,7 @@ export const DIVISION_MANIFESTO_MAP: Record<string, DivisionManifestoData> = {
     slug: "ai",
     number: "04",
     divisionTitle: "AI & AUTOMATION",
-    studioIdentifier: "EDYREX / DIVISION 04",
+    studioIdentifier: "DIVISION 04",
     headline: {
       line1: "Less repetitive work.",
       line2: "More intelligent",
