@@ -66,6 +66,7 @@ export const enquirySchema = z.object({
   consentAccepted: z.boolean().refine((val) => val === true, {
     message: "Please confirm consent so we can respond to your enquiry",
   }),
+  turnstileToken: z.string().optional(),
 });
 
 export type EnquiryFormData = z.infer<typeof enquirySchema>;

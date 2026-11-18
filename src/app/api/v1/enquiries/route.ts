@@ -17,6 +17,10 @@ import {
   apiTooManyRequests,
 } from "@/lib/server/api-response";
 import { logger } from "@/lib/server/logger";
+import {
+  verifyTurnstileToken,
+  TURNSTILE_ACTIONS,
+} from "@/lib/server/turnstile";
 
 function hashValue(input: string): string {
   return createHash("sha256").update(input).digest("hex");
@@ -59,6 +63,24 @@ export async function POST(request: NextRequest) {
     }
 
     const validData = parseResult.data;
+
+    // Verify Cloudflare Turnstile token for public enquiry / contact form bot protection
+    const turnstileCheck = await verifyTurnstileToken({
+      token: validData.turnstileToken,
+      expectedAction: TURNSTILE_ACTIONS.PROJECT_ENQUIRY,
+      remoteIp: clientIp,
+    });
+
+    if (!turnstileCheck.success) {
+      logger.warn(
+        { ipHash, error: turnstileCheck.error, errorCodes: turnstileCheck.errorCodes },
+        "Enquiry rejected by Turnstile bot protection"
+      );
+      return apiBadRequest(
+        turnstileCheck.error || "Security verification failed. Please refresh and try again."
+      );
+    }
+
     const emailNormalized = validData.email.toLowerCase();
     const mappedBudget = mapBudgetTierToNumeric(
       validData.budgetCurrency,

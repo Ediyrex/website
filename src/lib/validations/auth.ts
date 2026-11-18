@@ -6,6 +6,7 @@ export const loginSchema = z.object({
     .string()
     .min(8, "Password must be at least 8 characters")
     .max(200, "Password is too long"),
+  turnstileToken: z.string().optional(),
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;

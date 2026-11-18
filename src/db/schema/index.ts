@@ -7,8 +7,14 @@ export * from "./catalog";
 export * from "./enquiries";
 export * from "./content";
 export * from "./pms";
+export * from "./calendar";
 
 import { users, roles, userRoles, sessions } from "./auth";
+import {
+  googleCalendarAccounts,
+  googleCalendars,
+  calendarEvents,
+} from "./calendar";
 import {
   serviceDivisions,
   services,
@@ -126,4 +132,34 @@ export const blogPostCategoriesRelations = relations(
     }),
   })
 );
+
+export const googleCalendarAccountsRelations = relations(
+  googleCalendarAccounts,
+  ({ one, many }) => ({
+    user: one(users, {
+      fields: [googleCalendarAccounts.userId],
+      references: [users.id],
+    }),
+    calendars: many(googleCalendars),
+  })
+);
+
+export const googleCalendarsRelations = relations(
+  googleCalendars,
+  ({ one, many }) => ({
+    account: one(googleCalendarAccounts, {
+      fields: [googleCalendars.accountId],
+      references: [googleCalendarAccounts.id],
+    }),
+    events: many(calendarEvents),
+  })
+);
+
+export const calendarEventsRelations = relations(calendarEvents, ({ one }) => ({
+  calendar: one(googleCalendars, {
+    fields: [calendarEvents.calendarId],
+    references: [googleCalendars.id],
+  }),
+}));
+
 

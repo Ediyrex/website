@@ -16,6 +16,7 @@ import {
   Settings,
   Users,
   Activity,
+  Calendar,
   Search,
   Bell,
   HelpCircle,
@@ -71,6 +72,7 @@ const NAV_GROUPS: NavGroup[] = [
         ],
       },
       { href: "/admin/tasks", label: "Projects & Tasks", icon: CheckSquare },
+      { href: "/admin/calendar", label: "Calendar & Schedule", icon: Calendar },
     ],
   },
   {
