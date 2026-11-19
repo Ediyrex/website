@@ -732,10 +732,8 @@ export function AdminInquiriesClient() {
             <button
               type="button"
               onClick={() => setShowAddInquiry(true)}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#F06419] hover:bg-[#d95510] text-[#F5F2EC] text-xs font-semibold shadow-[0_4px_16px_rgb(240_100_25_/_20%)] transition-colors cursor-pointer"
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#F06419] hover:bg-[#d95510] text-[#0C0E10] text-xs font-bold shadow-[0_4px_16px_rgb(240_100_25_/_20%)] transition-colors cursor-pointer"
             >
-              <Plus className="w-3.5 h-3.5" />
               <Plus className="w-3.5 h-3.5 text-[#0C0E10] stroke-[2.5]" />
               <span>Add Inquiry</span>
             </button>
