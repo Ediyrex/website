@@ -389,24 +389,18 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               }}
               className="flex items-center gap-2.5 pl-1.5 pr-2.5 py-1 rounded-xl hover:bg-[#111419] border border-transparent hover:border-[#1E222A] transition-colors cursor-pointer"
             >
-              <div className="w-8 h-8 rounded-full bg-[#161A1F] border border-[#292E35] flex items-center justify-center overflow-hidden shrink-0 relative p-1 shadow-inner">
-                <Image
-                  src="/images/logo/ediyrex-emblem.png"
-                  alt="Ediyrex Admin"
-                  width={24}
-                  height={24}
-                  className="h-5 w-auto object-contain"
-                />
+              <div className="w-8 h-8 rounded-full bg-[#D9B875] text-[#0C0E10] font-heading font-bold text-xs flex items-center justify-center shrink-0">
+                {initials || "EA"}
               </div>
               <div className="hidden sm:block text-left leading-tight">
-                <div className="text-xs font-semibold text-[#F5F2EC]">
-                  Ediyrex Admin
+                <div className="text-xs font-semibold text-[#F5F2EC] flex items-center gap-1">
+                  <span>Ediyrex Admin</span>
+                  <ChevronDown className="w-3 h-3 text-[#898D94]" />
                 </div>
-                <div className="text-[10px] text-[#898D94] capitalize">
+                <div className="text-[10px] text-[#898D94]">
                   Administrator
                 </div>
               </div>
-              <ChevronDown className="w-3.5 h-3.5 text-[#898D94] hidden sm:block" />
             </button>
 
             {helpOpen && (
@@ -467,7 +461,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Page Body */}
-        <main className="flex-1 p-5 sm:p-7 lg:p-8 max-w-[1440px] w-full mx-auto">
+        <main className="flex-1 p-5 sm:p-7 lg:p-8 w-full max-w-[1680px] mx-auto">
           {children}
         </main>
       </div>

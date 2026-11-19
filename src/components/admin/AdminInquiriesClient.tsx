@@ -70,8 +70,8 @@ export function AdminInquiriesClient() {
     viewParam === "clients"
       ? "clients"
       : viewParam === "followups"
-      ? "followups"
-      : "leads";
+        ? "followups"
+        : "leads";
 
   const switchView = (next: CrmView) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -400,7 +400,13 @@ export function AdminInquiriesClient() {
 
   // Fallback demo rows matching the desktop specification visual
   const fallbackRows: Array<
-    EnquirySummary & { priority: "High" | "Medium" | "Low"; ownerInitials: string; nextFollowup: string; receivedDate: string }
+    EnquirySummary & {
+      priority: "High" | "Medium" | "Low";
+      ownerInitials: string;
+      nextFollowup: string;
+      receivedDate: string;
+      avatarBg: string;
+    }
   > = [
     {
       id: "demo-1",
@@ -425,6 +431,7 @@ export function AdminInquiriesClient() {
       ownerInitials: "EA",
       nextFollowup: "—",
       receivedDate: "Today",
+      avatarBg: "bg-[#2D1F3D] text-[#C084FC]",
     },
     {
       id: "demo-2",
@@ -449,6 +456,7 @@ export function AdminInquiriesClient() {
       ownerInitials: "RK",
       nextFollowup: "Nov 21",
       receivedDate: "Yesterday",
+      avatarBg: "bg-[#162738] text-[#38BDF8]",
     },
     {
       id: "demo-3",
@@ -473,6 +481,7 @@ export function AdminInquiriesClient() {
       ownerInitials: "EA",
       nextFollowup: "Nov 22",
       receivedDate: "Nov 17",
+      avatarBg: "bg-[#153226] text-[#34D399]",
     },
     {
       id: "demo-4",
@@ -497,6 +506,7 @@ export function AdminInquiriesClient() {
       ownerInitials: "PS",
       nextFollowup: "Nov 20",
       receivedDate: "Nov 16",
+      avatarBg: "bg-[#281D3B] text-[#A78BFA]",
     },
     {
       id: "demo-5",
@@ -521,6 +531,7 @@ export function AdminInquiriesClient() {
       ownerInitials: "RK",
       nextFollowup: "Nov 25",
       receivedDate: "Nov 15",
+      avatarBg: "bg-[#162B3D] text-[#60A5FA]",
     },
   ];
 
@@ -532,6 +543,13 @@ export function AdminInquiriesClient() {
         ownerInitials: idx % 2 === 0 ? "EA" : "RK",
         nextFollowup: idx === 0 ? "—" : `Nov ${20 + idx}`,
         receivedDate: formatRelativeDate(row.submittedAt),
+        avatarBg: [
+          "bg-[#2D1F3D] text-[#C084FC]",
+          "bg-[#162738] text-[#38BDF8]",
+          "bg-[#153226] text-[#34D399]",
+          "bg-[#281D3B] text-[#A78BFA]",
+          "bg-[#162B3D] text-[#60A5FA]",
+        ][idx % 5],
       }))
     : fallbackRows;
 
@@ -587,64 +605,64 @@ export function AdminInquiriesClient() {
   const displayFollowups =
     dashboard.upcomingFollowups.length > 0
       ? dashboard.upcomingFollowups.map((f, idx) => ({
-          ...f,
-          badge: idx === 0 ? "Overdue" : idx === 1 ? "Today" : undefined,
-          dueLabel: formatDueBadge(f.dueAt, f.completed).label,
-        }))
+        ...f,
+        badge: idx === 0 ? "Overdue" : idx === 1 ? "Today" : undefined,
+        dueLabel: formatDueBadge(f.dueAt, f.completed).label,
+      }))
       : [
-          {
-            id: "fu-1",
-            enquiryId: "demo-2",
-            clientId: null,
-            title: "Follow up with Northstar Digital",
-            notes: "Discuss project scope and timeline",
-            channel: "call" as const,
-            dueAt: new Date().toISOString(),
-            completed: false,
-            contactName: "Northstar Digital",
-            badge: "Overdue",
-            dueLabel: "Overdue",
-          },
-          {
-            id: "fu-2",
-            enquiryId: "demo-3",
-            clientId: null,
-            title: "Client meeting — Meridian Health",
-            notes: "Proposal review and next steps",
-            channel: "meeting" as const,
-            dueAt: new Date().toISOString(),
-            completed: false,
-            contactName: "Meridian Health",
-            badge: "Today",
-            dueLabel: "Today",
-          },
-          {
-            id: "fu-3",
-            enquiryId: "demo-4",
-            clientId: null,
-            title: "Send revised proposal — Vocalis Labs",
-            notes: "Updated scope and estimations",
-            channel: "email" as const,
-            dueAt: new Date(Date.now() + 48 * 3600 * 1000).toISOString(),
-            completed: false,
-            contactName: "Vocalis Labs",
-            badge: undefined,
-            dueLabel: "Nov 21",
-          },
-          {
-            id: "fu-4",
-            enquiryId: "demo-5",
-            clientId: null,
-            title: "Discovery call — Bluemine Studio",
-            notes: "Initial requirements discussion",
-            channel: "call" as const,
-            dueAt: new Date(Date.now() + 120 * 3600 * 1000).toISOString(),
-            completed: false,
-            contactName: "Bluemine Studio",
-            badge: undefined,
-            dueLabel: "Nov 25",
-          },
-        ];
+        {
+          id: "fu-1",
+          enquiryId: "demo-2",
+          clientId: null,
+          title: "Follow up with Northstar Digital",
+          notes: "Discuss project scope and timeline",
+          channel: "call" as const,
+          dueAt: new Date().toISOString(),
+          completed: false,
+          contactName: "Northstar Digital",
+          badge: "Overdue",
+          dueLabel: "Overdue",
+        },
+        {
+          id: "fu-2",
+          enquiryId: "demo-3",
+          clientId: null,
+          title: "Client meeting — Meridian Health",
+          notes: "Proposal review and next steps",
+          channel: "meeting" as const,
+          dueAt: new Date().toISOString(),
+          completed: false,
+          contactName: "Meridian Health",
+          badge: "Today",
+          dueLabel: "Today",
+        },
+        {
+          id: "fu-3",
+          enquiryId: "demo-4",
+          clientId: null,
+          title: "Send revised proposal — Vocalis Labs",
+          notes: "Updated scope and estimations",
+          channel: "email" as const,
+          dueAt: new Date(Date.now() + 48 * 3600 * 1000).toISOString(),
+          completed: false,
+          contactName: "Vocalis Labs",
+          badge: undefined,
+          dueLabel: "Nov 21",
+        },
+        {
+          id: "fu-4",
+          enquiryId: "demo-5",
+          clientId: null,
+          title: "Discovery call — Bluemine Studio",
+          notes: "Initial requirements discussion",
+          channel: "call" as const,
+          dueAt: new Date(Date.now() + 120 * 3600 * 1000).toISOString(),
+          completed: false,
+          contactName: "Bluemine Studio",
+          badge: undefined,
+          dueLabel: "Nov 25",
+        },
+      ];
 
   return (
     <div className="space-y-6 pb-12">
@@ -714,8 +732,10 @@ export function AdminInquiriesClient() {
             <button
               type="button"
               onClick={() => setShowAddInquiry(true)}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#F06419] hover:bg-[#d95510] text-[#F5F2EC] text-xs font-semibold shadow-[0_4px_16px_rgb(240_100_25_/_20%)] transition-colors cursor-pointer"
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#F06419] hover:bg-[#d95510] text-[#0C0E10] text-xs font-bold shadow-[0_4px_16px_rgb(240_100_25_/_20%)] transition-colors cursor-pointer"
             >
+              <Plus className="w-3.5 h-3.5" />
               <Plus className="w-3.5 h-3.5 text-[#0C0E10] stroke-[2.5]" />
               <span>Add Inquiry</span>
             </button>
@@ -813,6 +833,7 @@ export function AdminInquiriesClient() {
             </span>
           </div>
           <p className="text-[11.5px] text-[#898D94]">Awaiting initial review</p>
+          <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-[#F06419]/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
           <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-[#F06419]/70 to-transparent opacity-100 transition-opacity" />
         </div>
 
@@ -833,6 +854,7 @@ export function AdminInquiriesClient() {
             </span>
           </div>
           <p className="text-[11.5px] text-[#898D94]">Open opportunities</p>
+          <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-[#E9B45A]/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
           <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-[#E9B45A]/70 to-transparent opacity-100 transition-opacity" />
         </div>
 
@@ -853,6 +875,7 @@ export function AdminInquiriesClient() {
             </span>
           </div>
           <p className="text-[11.5px] text-[#898D94]">Current client relationships</p>
+          <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-[#D9B875]/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
           <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-[#D9B875]/70 to-transparent opacity-100 transition-opacity" />
         </div>
 
@@ -937,10 +960,12 @@ export function AdminInquiriesClient() {
         />
       ) : (
         <>
-          {/* 4. Middle Row: Lead Pipeline (~72%) + Upcoming Follow-ups (~28%) */}
+          {/* 4. CRM Main Workspace: 2-Column Responsive Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-            {/* Lead Pipeline */}
-            <div className="lg:col-span-8 xl:col-span-9 p-6 rounded-2xl bg-[#121519] border border-[#292E35] space-y-4">
+            {/* Left Primary Column: Lead Pipeline + Inquiries & Leads Table */}
+            <div className="lg:col-span-8 xl:col-span-9 space-y-5">
+              {/* Lead Pipeline */}
+              <div className="p-6 rounded-2xl bg-[#121519] border border-[#292E35] space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <Filter className="w-4 h-4 text-[#F06419]" />
@@ -983,8 +1008,8 @@ export function AdminInquiriesClient() {
                           isActive
                             ? stage.activeRing
                             : isWon
-                            ? "bg-[#13291E]/60 border-[#56C58B]/35 hover:border-[#56C58B]/60 text-[#56C58B]"
-                            : "bg-[#161A1F] border border-[#292E35] hover:border-[#363B43]"
+                              ? "bg-[#13291E]/60 border-[#56C58B]/35 hover:border-[#56C58B]/60 text-[#56C58B]"
+                              : "bg-[#161A1F] border border-[#292E35] hover:border-[#363B43]"
                         )}
                       >
                         <div
@@ -993,8 +1018,8 @@ export function AdminInquiriesClient() {
                             isActive
                               ? "text-[#F5F2EC]"
                               : isWon
-                              ? "text-[#56C58B]"
-                              : "text-[#898D94]"
+                                ? "text-[#56C58B]"
+                                : "text-[#898D94]"
                           )}
                         >
                           {stage.label}
@@ -1017,87 +1042,12 @@ export function AdminInquiriesClient() {
               </div>
             </div>
 
-            {/* Upcoming Follow-ups Panel */}
-            <div className="lg:col-span-4 xl:col-span-3 p-6 rounded-2xl bg-[#121519] border border-[#292E35] space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-[#898D94]" />
-                  <h2 className="font-heading font-semibold text-sm text-[#F5F2EC]">
-                    Upcoming Follow-ups
-                  </h2>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => switchView("followups")}
-                  className="inline-flex items-center gap-1 text-xs font-mono font-medium text-[#F06419] hover:underline cursor-pointer"
-                >
-                  <span>View All</span>
-                  <ArrowUpRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
-
-              <div className="space-y-3">
-                {displayFollowups.map((item) => {
-                  const Icon =
-                    item.channel === "call"
-                      ? Phone
-                      : item.channel === "meeting"
-                      ? Calendar
-                      : Mail;
-                  return (
-                    <div
-                      key={item.id}
-                      onClick={() => {
-                        if (item.enquiryId) openEnquiryDetail(item.enquiryId);
-                      }}
-                      className="p-2 -mx-2 rounded-xl hover:bg-[#161A1F] transition-colors cursor-pointer flex items-start justify-between gap-2.5"
-                    >
-                      <div className="flex items-start gap-2.5 min-w-0">
-                        <span className="w-7 h-7 rounded-lg bg-[#161A1F] border border-[#292E35] flex items-center justify-center text-[#D9B875] shrink-0 mt-0.5">
-                          <Icon className="w-3.5 h-3.5" />
-                        </span>
-                        <div className="min-w-0">
-                          <div className="text-xs font-medium text-[#F5F2EC] truncate">
-                            {item.title}
-                          </div>
-                          <div className="text-[11px] text-[#898D94] truncate">
-                            {item.notes || "Follow-up discussion"}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="shrink-0 text-right">
-                        {item.badge ? (
-                          <span
-                            className={cn(
-                              "px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold border",
-                              item.badge === "Overdue"
-                                ? "bg-[#E36B68]/15 text-[#E36B68] border-[#E36B68]/30"
-                                : "bg-[#E9B45A]/15 text-[#E9B45A] border-[#E9B45A]/30"
-                            )}
-                          >
-                            {item.badge}
-                          </span>
-                        ) : (
-                          <span className="text-[11px] font-mono text-[#898D94]">
-                            {item.dueLabel}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          {/* 5. Lower Row: Inquiries & Leads Table (~72%) + Quick Actions (~28%) */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
             {/* Inquiries & Leads Table Container */}
-            <div className="lg:col-span-8 xl:col-span-9 rounded-2xl bg-[#121519] border border-[#292E35] overflow-hidden space-y-0">
+            <div className="rounded-2xl bg-[#121519] border border-[#292E35] overflow-hidden space-y-0">
               {/* Header Bar */}
               <div className="p-5 border-b border-[#292E35] flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5">
-                  <Users className="w-4 h-4 text-[#898D94]" />
+                  <Users className="w-4 h-4 text-[#F06419]" />
                   <h2 className="font-heading font-semibold text-base text-[#F5F2EC]">
                     Inquiries &amp; Leads ({paginationMeta.total || 24})
                   </h2>
@@ -1123,9 +1073,9 @@ export function AdminInquiriesClient() {
                           setPage(1);
                         }}
                         className={cn(
-                          "px-3 py-1 rounded-xl font-medium transition-colors cursor-pointer",
+                          "px-3 py-1 rounded-full font-medium transition-colors cursor-pointer",
                           active
-                            ? "bg-[#F5F2EC] text-[#121519] font-semibold"
+                            ? "bg-[#F0E6D2] text-[#0C0E10] font-semibold shadow-sm"
                             : "text-[#898D94] hover:text-[#F5F2EC]"
                         )}
                       >
@@ -1262,7 +1212,7 @@ export function AdminInquiriesClient() {
                       <th className="py-3.5 px-3 font-normal">Owner</th>
                       <th className="py-3.5 px-3 font-normal">Next Follow-up</th>
                       <th className="py-3.5 px-3 font-normal">Received</th>
-                      <th className="py-3.5 pl-3 pr-5 font-normal text-right">Actions</th>
+                      <th className="py-3.5 pl-3 pr-5 font-normal text-right">···</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#292E35]/60 text-xs">
@@ -1319,7 +1269,12 @@ export function AdminInquiriesClient() {
                                 onClick={() => openEnquiryDetail(item.id)}
                                 className="flex items-center gap-3 text-left cursor-pointer group"
                               >
-                                <span className="w-8 h-8 rounded-full bg-[#161A1F] border border-[#292E35] text-[#F5F2EC] text-[11px] font-semibold flex items-center justify-center shrink-0">
+                                <span
+                                  className={cn(
+                                    "w-8 h-8 rounded-full text-xs font-bold flex items-center justify-center shrink-0",
+                                    (item as any).avatarBg || "bg-[#161A1F] border border-[#292E35] text-[#F5F2EC]"
+                                  )}
+                                >
                                   {getInitials(item.contactName)}
                                 </span>
                                 <div className="min-w-0">
@@ -1334,7 +1289,7 @@ export function AdminInquiriesClient() {
                             </td>
 
                             {/* Service Interest */}
-                            <td className="py-3.5 px-3 text-xs text-[#F5F2EC]">
+                            <td className="py-3.5 px-3 text-xs text-[#B8B9BC]">
                               {item.projectType}
                             </td>
 
@@ -1342,19 +1297,19 @@ export function AdminInquiriesClient() {
                             <td className="py-3.5 px-3">
                               <span
                                 className={cn(
-                                  "inline-block px-2 py-0.5 rounded-md text-[10.5px] font-mono font-semibold uppercase border",
+                                  "inline-block px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase border",
                                   isNew
-                                    ? "bg-[#F06419]/15 text-[#F06419] border-[#F06419]/35"
+                                    ? "bg-[#2D160E] text-[#F06419] border-[#F06419]/40"
                                     : isInDiscussion
-                                    ? "bg-[#1E293B] text-[#68A9FF] border-[#68A9FF]/35"
+                                    ? "bg-[#132338] text-[#60A5FA] border-[#3B82F6]/40"
                                     : isProposal
-                                    ? "bg-[#2E2415] text-[#D9B875] border-[#D9B875]/35"
+                                    ? "bg-[#2E2413] text-[#E9B45A] border-[#E9B45A]/40"
                                     : isContacted
-                                    ? "bg-[#132A24] text-[#56C58B] border-[#56C58B]/35"
+                                    ? "bg-[#142A1E] text-[#56C58B] border-[#56C58B]/40"
                                     : isWon
-                                    ? "bg-[#13291E] text-[#56C58B] border-[#56C58B]/35"
+                                    ? "bg-[#142A1E] text-[#56C58B] border-[#56C58B]/40"
                                     : isLost
-                                    ? "bg-[#2A1517] text-[#E36B68] border-[#E36B68]/35"
+                                    ? "bg-[#2E1618] text-[#E36B68] border-[#E36B68]/40"
                                     : "bg-[#161A1F] text-[#898D94] border-[#292E35]"
                                 )}
                               >
@@ -1369,10 +1324,10 @@ export function AdminInquiriesClient() {
                                   className={cn(
                                     "w-1.5 h-1.5 rounded-full shrink-0",
                                     item.priority === "High"
-                                      ? "bg-[#E36B68]"
+                                      ? "bg-[#EF4444]"
                                       : item.priority === "Medium"
-                                      ? "bg-[#E9B45A]"
-                                      : "bg-[#56C58B]"
+                                      ? "bg-[#F59E0B]"
+                                      : "bg-[#10B981]"
                                   )}
                                 />
                                 <span>{item.priority}</span>
@@ -1381,7 +1336,14 @@ export function AdminInquiriesClient() {
 
                             {/* Owner */}
                             <td className="py-3.5 px-3">
-                              <div className="w-6 h-6 rounded-full bg-[#161A1F] border border-[#292E35] text-[10px] font-mono font-semibold text-[#D9B875] flex items-center justify-center">
+                              <div
+                                className={cn(
+                                  "w-6 h-6 rounded-full text-[10px] font-mono font-semibold flex items-center justify-center shrink-0",
+                                  item.ownerInitials === "EA"
+                                    ? "bg-[#D9B875] text-[#0C0E10] font-bold"
+                                    : "bg-[#252A32] text-[#B8B9BC]"
+                                )}
+                              >
                                 {item.ownerInitials || "EA"}
                               </div>
                             </td>
@@ -1405,15 +1367,7 @@ export function AdminInquiriesClient() {
 
                             {/* Row Actions */}
                             <td className="py-3.5 pl-3 pr-5 text-right relative">
-                              <div className="inline-flex items-center gap-1">
-                                <button
-                                  type="button"
-                                  onClick={() => openEnquiryDetail(item.id)}
-                                  title="Notes & Follow-up"
-                                  className="p-1.5 rounded-lg bg-[#161A1F] border border-[#292E35] text-[#898D94] hover:text-[#F5F2EC] hover:border-[#363B43] cursor-pointer"
-                                >
-                                  <MessageSquare className="w-3.5 h-3.5" />
-                                </button>
+                              <div className="inline-flex items-center justify-end">
                                 {canEdit && (
                                   <div className="relative">
                                     <button
@@ -1424,9 +1378,9 @@ export function AdminInquiriesClient() {
                                         )
                                       }
                                       title="More actions"
-                                      className="p-1.5 rounded-lg bg-[#161A1F] border border-[#292E35] text-[#898D94] hover:text-[#F5F2EC] hover:border-[#363B43] cursor-pointer"
+                                      className="p-1 text-[#898D94] hover:text-[#F5F2EC] transition-colors cursor-pointer"
                                     >
-                                      <MoreHorizontal className="w-3.5 h-3.5" />
+                                      <MoreHorizontal className="w-4 h-4" />
                                     </button>
                                     {openMenuId === item.id && (
                                       <div className="absolute right-0 mt-1.5 w-48 rounded-xl bg-[#161A1F] border border-[#292E35] shadow-2xl py-1.5 z-30 text-left">
@@ -1526,12 +1480,13 @@ export function AdminInquiriesClient() {
                     </select>
                   </div>
 
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1.5">
                     <button
                       type="button"
                       disabled={page <= 1}
                       onClick={() => setPage((p) => Math.max(1, p - 1))}
-                      className="w-7 h-7 rounded-lg bg-[#161A1F] border border-[#292E35] flex items-center justify-center text-[#898D94] disabled:opacity-30 cursor-pointer"
+                      aria-label="Previous page"
+                      className="p-1 text-[#898D94] hover:text-[#F5F2EC] disabled:opacity-20 cursor-pointer transition-colors"
                     >
                       <ChevronLeft className="w-3.5 h-3.5" />
                     </button>
@@ -1541,10 +1496,10 @@ export function AdminInquiriesClient() {
                         type="button"
                         onClick={() => setPage(num)}
                         className={cn(
-                          "w-7 h-7 rounded-lg text-xs font-medium cursor-pointer transition-colors",
+                          "w-6 h-6 rounded-md text-xs font-medium cursor-pointer transition-colors flex items-center justify-center",
                           num === page
-                            ? "bg-[#F06419] text-[#F5F2EC] font-semibold"
-                            : "bg-[#161A1F] border border-[#292E35] text-[#898D94] hover:text-[#F5F2EC]"
+                            ? "bg-[#F06419] text-[#0C0E10] font-bold shadow-sm"
+                            : "text-[#898D94] hover:text-[#F5F2EC]"
                         )}
                       >
                         {num}
@@ -1556,7 +1511,8 @@ export function AdminInquiriesClient() {
                       onClick={() =>
                         setPage((p) => Math.min(paginationMeta.totalPages, p + 1))
                       }
-                      className="w-7 h-7 rounded-lg bg-[#161A1F] border border-[#292E35] flex items-center justify-center text-[#898D94] disabled:opacity-30 cursor-pointer"
+                      aria-label="Next page"
+                      className="p-1 text-[#898D94] hover:text-[#F5F2EC] disabled:opacity-20 cursor-pointer transition-colors"
                     >
                       <ChevronRight className="w-3.5 h-3.5" />
                     </button>
@@ -1564,64 +1520,141 @@ export function AdminInquiriesClient() {
                 </div>
               </div>
             </div>
+            {/* End Left Primary Column */}
+          </div>
 
-            {/* Quick Actions Panel */}
-            <div className="lg:col-span-4 xl:col-span-3 p-6 rounded-2xl bg-[#121519] border border-[#292E35] space-y-4">
-              <div className="flex items-center gap-2">
-                <Zap className="w-4 h-4 text-[#F06419]" />
-                <h2 className="font-heading font-semibold text-base text-[#F5F2EC]">
-                  Quick Actions
-                </h2>
+          {/* Right Contextual Column: Upcoming Follow-ups + Quick Actions */}
+            <div className="lg:col-span-4 xl:col-span-3 space-y-5">
+              {/* Upcoming Follow-ups Panel */}
+              <div className="p-6 rounded-2xl bg-[#121519] border border-[#292E35] space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-[#F06419]" />
+                    <h2 className="font-heading font-semibold text-sm text-[#F5F2EC]">
+                      Upcoming Follow-ups
+                    </h2>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => switchView("followups")}
+                    className="inline-flex items-center gap-1 text-xs font-mono font-medium text-[#F06419] hover:underline cursor-pointer"
+                  >
+                    <span>View All</span>
+                    <ArrowUpRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                <div className="space-y-3">
+                  {displayFollowups.map((item) => {
+                    const Icon =
+                      item.channel === "call"
+                        ? Phone
+                        : item.channel === "meeting"
+                        ? Calendar
+                        : Mail;
+                    return (
+                      <div
+                        key={item.id}
+                        onClick={() => {
+                          if (item.enquiryId) openEnquiryDetail(item.enquiryId);
+                        }}
+                        className="p-2 -mx-2 rounded-xl hover:bg-[#161A1F] transition-colors cursor-pointer flex items-start justify-between gap-2.5"
+                      >
+                        <div className="flex items-start gap-2.5 min-w-0">
+                          <span className="w-7 h-7 rounded-lg bg-[#161A1F] border border-[#292E35] flex items-center justify-center text-[#F06419] shrink-0 mt-0.5">
+                            <Icon className="w-3.5 h-3.5" />
+                          </span>
+                          <div className="min-w-0">
+                            <div className="text-xs font-medium text-[#F5F2EC] truncate">
+                              {item.title}
+                            </div>
+                            <div className="text-[11px] text-[#898D94] truncate">
+                              {item.notes || "Follow-up discussion"}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="shrink-0 text-right">
+                          {item.badge ? (
+                            <span
+                              className={cn(
+                                "px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold border",
+                                item.badge === "Overdue"
+                                  ? "bg-[#2D1615] text-[#E36B68] border-[#E36B68]/30"
+                                  : "bg-[#2E2214] text-[#E9B45A] border-[#E9B45A]/30"
+                              )}
+                            >
+                              {item.badge}
+                            </span>
+                          ) : (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-medium bg-[#161A1F] text-[#898D94] border border-[#292E35]">
+                              {item.dueLabel}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                {/* + Add Inquiry */}
-                <button
-                  type="button"
-                  onClick={() => setShowAddInquiry(true)}
-                  className="p-3.5 rounded-xl bg-[#F06419] hover:bg-[#d95510] text-[#0C0E10] font-bold text-xs flex flex-col items-center justify-center text-center shadow-[0_4px_16px_rgb(240_100_25_/_20%)] transition-colors min-h-[76px] cursor-pointer"
-                >
-                  <span className="text-base leading-none mb-1 font-bold">+</span>
-                  <span>Add Inquiry</span>
-                </button>
+              {/* Quick Actions Panel */}
+              <div className="p-6 rounded-2xl bg-[#121519] border border-[#292E35] space-y-4">
+                <div className="flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-[#F06419]" />
+                  <h2 className="font-heading font-semibold text-base text-[#F5F2EC]">
+                    Quick Actions
+                  </h2>
+                </div>
 
-                {/* + Add Client */}
-                <button
-                  type="button"
-                  onClick={() => setShowAddClient(true)}
-                  className="p-3.5 rounded-xl bg-[#161A1F] border border-[#292E35] hover:border-[#F06419] text-[#F5F2EC] text-xs font-medium flex flex-col items-center justify-center text-center hover:shadow-[0_0_16px_rgba(240,100,25,0.15)] transition-all duration-200 min-h-[76px] cursor-pointer group"
-                >
-                  <span className="text-base leading-none mb-1 text-[#898D94] group-hover:text-[#F06419] transition-colors">
-                    +
-                  </span>
-                  <span className="transition-all">Add Client</span>
-                </button>
+                <div className="grid grid-cols-2 gap-3">
+                  {/* + Add Inquiry */}
+                  <button
+                    type="button"
+                    onClick={() => setShowAddInquiry(true)}
+                    className="p-3.5 rounded-xl bg-[#F06419] hover:bg-[#d95510] text-[#0C0E10] font-bold text-xs flex flex-col items-center justify-center text-center shadow-[0_4px_16px_rgb(240_100_25_/_20%)] transition-colors min-h-[76px] cursor-pointer"
+                  >
+                    <span className="text-base leading-none mb-1 font-bold">+</span>
+                    <span>Add Inquiry</span>
+                  </button>
 
-                {/* Schedule Follow-up */}
-                <button
-                  type="button"
-                  onClick={() =>
-                    setFollowupModalTarget({
-                      open: true,
-                      enquiryId: null,
-                      clientId: null,
-                    })
-                  }
-                  className="p-3.5 rounded-xl bg-[#161A1F] border border-[#292E35] hover:border-[#F06419] text-[#B8B9BC] hover:text-[#F5F2EC] text-xs font-medium flex flex-col items-center justify-center gap-1.5 text-center hover:shadow-[0_0_16px_rgba(240,100,25,0.15)] transition-all duration-200 min-h-[76px] cursor-pointer group"
-                >
-                  <Calendar className="w-4 h-4 text-[#898D94] group-hover:text-[#F06419] transition-colors" />
-                  <span className="truncate">Schedule Follow-up</span>
-                </button>
+                  {/* + Add Client */}
+                  <button
+                    type="button"
+                    onClick={() => setShowAddClient(true)}
+                    className="p-3.5 rounded-xl bg-[#161A1F] border border-[#292E35] hover:border-[#F06419] text-[#F5F2EC] text-xs font-medium flex flex-col items-center justify-center text-center hover:shadow-[0_0_16px_rgba(240,100,25,0.15)] transition-all duration-200 min-h-[76px] cursor-pointer group"
+                  >
+                    <span className="text-base leading-none mb-1 text-[#898D94] group-hover:text-[#F06419] transition-colors">
+                      +
+                    </span>
+                    <span className="transition-all">Add Client</span>
+                  </button>
 
-                {/* Export Records */}
-                <button
-                  type="button"
-                  onClick={handleExport}
-                  className="p-3.5 rounded-xl bg-[#161A1F] border border-[#292E35] hover:border-[#F06419] text-[#B8B9BC] hover:text-[#F5F2EC] text-xs font-medium flex flex-col items-center justify-center gap-1.5 text-center hover:shadow-[0_0_16px_rgba(240,100,25,0.15)] transition-all duration-200 min-h-[76px] cursor-pointer group"
-                >
-                  <Download className="w-4 h-4 text-[#898D94] group-hover:text-[#F06419] transition-colors" />
-                  <span className="truncate">Export Records</span>
-                </button>
+                  {/* Schedule Follow-up */}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFollowupModalTarget({
+                        open: true,
+                        enquiryId: null,
+                        clientId: null,
+                      })
+                    }
+                    className="p-3.5 rounded-xl bg-[#161A1F] border border-[#292E35] hover:border-[#F06419] text-[#B8B9BC] hover:text-[#F5F2EC] text-xs font-medium flex flex-col items-center justify-center gap-1.5 text-center hover:shadow-[0_0_16px_rgba(240,100,25,0.15)] transition-all duration-200 min-h-[76px] cursor-pointer group"
+                  >
+                    <Calendar className="w-4 h-4 text-[#898D94] group-hover:text-[#F06419] transition-colors" />
+                    <span className="truncate">Schedule Follow-up</span>
+                  </button>
+
+                  {/* Export Records */}
+                  <button
+                    type="button"
+                    onClick={handleExport}
+                    className="p-3.5 rounded-xl bg-[#161A1F] border border-[#292E35] hover:border-[#F06419] text-[#B8B9BC] hover:text-[#F5F2EC] text-xs font-medium flex flex-col items-center justify-center gap-1.5 text-center hover:shadow-[0_0_16px_rgba(240,100,25,0.15)] transition-all duration-200 min-h-[76px] cursor-pointer group"
+                  >
+                    <Download className="w-4 h-4 text-[#898D94] group-hover:text-[#F06419] transition-colors" />
+                    <span className="truncate">Export Records</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
