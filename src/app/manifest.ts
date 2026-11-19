@@ -12,16 +12,20 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: "#08090B",
     icons: [
       {
-        src: "/icon",
+        src: "/images/logo/ediyrex-emblem-32.png",
         sizes: "32x32",
         type: "image/png",
       },
       {
-        src: "/apple-icon",
-        sizes: "180x180",
+        src: "/images/logo/ediyrex-emblem-192.png",
+        sizes: "192x192",
+        type: "image/png",
+      },
+      {
+        src: "/images/logo/ediyrex-emblem-512.png",
+        sizes: "512x512",
         type: "image/png",
       },
     ],
   };
 }
-
