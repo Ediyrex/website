@@ -961,7 +961,7 @@ export function AdminInquiriesClient() {
           {/* 4. CRM Main Workspace: 2-Column Responsive Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
             {/* Left Primary Column: Lead Pipeline + Inquiries & Leads Table */}
-            <div className="lg:col-span-8 xl:col-span-9 space-y-5">
+            <div className="lg:col-span-8 xl:col-span-8 2xl:col-span-9 space-y-5">
               {/* Lead Pipeline */}
               <div className="p-6 rounded-2xl bg-[#121519] border border-[#292E35] space-y-4">
               <div className="flex items-center justify-between">
@@ -1521,10 +1521,10 @@ export function AdminInquiriesClient() {
             {/* End Left Primary Column */}
           </div>
 
-          {/* Right Contextual Column: Upcoming Follow-ups + Quick Actions */}
-            <div className="lg:col-span-4 xl:col-span-3 space-y-5">
+            {/* Right Contextual Column: Upcoming Follow-ups + Quick Actions */}
+            <div className="lg:col-span-4 xl:col-span-4 2xl:col-span-3 space-y-5">
               {/* Upcoming Follow-ups Panel */}
-              <div className="p-6 rounded-2xl bg-[#121519] border border-[#292E35] space-y-4">
+              <div className="p-5 rounded-2xl bg-[#121519] border border-[#292E35] space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-[#F06419]" />
@@ -1596,7 +1596,7 @@ export function AdminInquiriesClient() {
               </div>
 
               {/* Quick Actions Panel */}
-              <div className="p-6 rounded-2xl bg-[#121519] border border-[#292E35] space-y-4">
+              <div className="p-5 rounded-2xl bg-[#121519] border border-[#292E35] space-y-4">
                 <div className="flex items-center gap-2">
                   <Zap className="w-4 h-4 text-[#F06419]" />
                   <h2 className="font-heading font-semibold text-base text-[#F5F2EC]">
@@ -1604,27 +1604,27 @@ export function AdminInquiriesClient() {
                   </h2>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-2.5">
                   {/* + Add Inquiry */}
                   <button
                     type="button"
                     onClick={() => setShowAddInquiry(true)}
-                    className="p-3.5 rounded-xl bg-[#F06419] hover:bg-[#d95510] text-[#0C0E10] font-bold text-xs flex flex-col items-center justify-center text-center shadow-[0_4px_16px_rgb(240_100_25_/_20%)] transition-colors min-h-[76px] cursor-pointer"
+                    className="p-2.5 rounded-xl bg-[#F06419] hover:bg-[#d95510] text-[#0C0E10] font-bold text-[11px] flex flex-col items-center justify-center text-center shadow-[0_4px_16px_rgb(240_100_25_/_20%)] transition-colors min-h-[74px] cursor-pointer"
                   >
-                    <span className="text-base leading-none mb-1 font-bold">+</span>
-                    <span>Add Inquiry</span>
+                    <span className="text-sm leading-none mb-1 font-bold">+</span>
+                    <span className="leading-tight">Add Inquiry</span>
                   </button>
 
                   {/* + Add Client */}
                   <button
                     type="button"
                     onClick={() => setShowAddClient(true)}
-                    className="p-3.5 rounded-xl bg-[#161A1F] border border-[#292E35] hover:border-[#F06419] text-[#F5F2EC] text-xs font-medium flex flex-col items-center justify-center text-center hover:shadow-[0_0_16px_rgba(240,100,25,0.15)] transition-all duration-200 min-h-[76px] cursor-pointer group"
+                    className="p-2.5 rounded-xl bg-[#161A1F] border border-[#292E35] hover:border-[#F06419] text-[#F5F2EC] text-[11px] font-medium flex flex-col items-center justify-center text-center hover:shadow-[0_0_16px_rgba(240,100,25,0.15)] transition-all duration-200 min-h-[74px] cursor-pointer group"
                   >
-                    <span className="text-base leading-none mb-1 text-[#898D94] group-hover:text-[#F06419] transition-colors">
+                    <span className="text-sm leading-none mb-1 text-[#898D94] group-hover:text-[#F06419] transition-colors">
                       +
                     </span>
-                    <span className="transition-all">Add Client</span>
+                    <span className="leading-tight">Add Client</span>
                   </button>
 
                   {/* Schedule Follow-up */}
@@ -1637,20 +1637,20 @@ export function AdminInquiriesClient() {
                         clientId: null,
                       })
                     }
-                    className="p-3.5 rounded-xl bg-[#161A1F] border border-[#292E35] hover:border-[#F06419] text-[#B8B9BC] hover:text-[#F5F2EC] text-xs font-medium flex flex-col items-center justify-center gap-1.5 text-center hover:shadow-[0_0_16px_rgba(240,100,25,0.15)] transition-all duration-200 min-h-[76px] cursor-pointer group"
+                    className="p-2.5 rounded-xl bg-[#161A1F] border border-[#292E35] hover:border-[#F06419] text-[#B8B9BC] hover:text-[#F5F2EC] text-[11px] font-medium flex flex-col items-center justify-center gap-1.5 text-center hover:shadow-[0_0_16px_rgba(240,100,25,0.15)] transition-all duration-200 min-h-[74px] cursor-pointer group"
                   >
                     <Calendar className="w-4 h-4 text-[#898D94] group-hover:text-[#F06419] transition-colors" />
-                    <span className="truncate">Schedule Follow-up</span>
+                    <span className="leading-tight text-center">Schedule Follow-up</span>
                   </button>
 
                   {/* Export Records */}
                   <button
                     type="button"
                     onClick={handleExport}
-                    className="p-3.5 rounded-xl bg-[#161A1F] border border-[#292E35] hover:border-[#F06419] text-[#B8B9BC] hover:text-[#F5F2EC] text-xs font-medium flex flex-col items-center justify-center gap-1.5 text-center hover:shadow-[0_0_16px_rgba(240,100,25,0.15)] transition-all duration-200 min-h-[76px] cursor-pointer group"
+                    className="p-2.5 rounded-xl bg-[#161A1F] border border-[#292E35] hover:border-[#F06419] text-[#B8B9BC] hover:text-[#F5F2EC] text-[11px] font-medium flex flex-col items-center justify-center gap-1.5 text-center hover:shadow-[0_0_16px_rgba(240,100,25,0.15)] transition-all duration-200 min-h-[74px] cursor-pointer group"
                   >
                     <Download className="w-4 h-4 text-[#898D94] group-hover:text-[#F06419] transition-colors" />
-                    <span className="truncate">Export Records</span>
+                    <span className="leading-tight text-center">Export Records</span>
                   </button>
                 </div>
               </div>
