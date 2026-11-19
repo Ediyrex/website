@@ -532,12 +532,12 @@ export function AdminOverviewClient() {
           </div>
 
           <div className="grid grid-cols-3 gap-3">
-            {/* New Project: Dark by default, turns orange on hover */}
+            {/* New Project */}
             <Link
               href="/admin/projects?create=1"
-              className="p-3.5 rounded-xl bg-[#161A1F] border border-[#292E35] hover:bg-[#F06419] hover:border-[#F06419] text-[#F5F2EC] hover:text-white text-xs font-medium flex flex-col items-center justify-center text-center hover:shadow-[0_4px_20px_rgb(240_100_25_/_25%)] transition-all duration-200 min-h-[82px] group"
+              className="p-3.5 rounded-xl bg-[#161A1F] border border-[#292E35] hover:border-[#F06419] hover:bg-[#1A1F26] text-[#F5F2EC] hover:text-white text-xs font-medium flex flex-col items-center justify-center text-center hover:shadow-[0_0_16px_rgba(240,100,25,0.15)] transition-all duration-200 min-h-[82px] group"
             >
-              <span className="text-base leading-none mb-1 text-[#898D94] group-hover:text-white transition-colors">
+              <span className="text-base leading-none mb-1 text-[#898D94] group-hover:text-[#F06419] transition-colors">
                 +
               </span>
               <span className="transition-all">New Project</span>
@@ -546,9 +546,9 @@ export function AdminOverviewClient() {
             {/* Create Content */}
             <Link
               href="/admin/pages?create=1"
-              className="p-3.5 rounded-xl bg-[#161A1F] border border-[#292E35] hover:bg-[#F06419] hover:border-[#F06419] text-[#F5F2EC] hover:text-white text-xs font-medium flex flex-col items-center justify-center text-center hover:shadow-[0_4px_20px_rgb(240_100_25_/_25%)] transition-all duration-200 min-h-[82px] group"
+              className="p-3.5 rounded-xl bg-[#161A1F] border border-[#292E35] hover:border-[#F06419] hover:bg-[#1A1F26] text-[#F5F2EC] hover:text-white text-xs font-medium flex flex-col items-center justify-center text-center hover:shadow-[0_0_16px_rgba(240,100,25,0.15)] transition-all duration-200 min-h-[82px] group"
             >
-              <span className="text-base leading-none mb-1 text-[#898D94] group-hover:text-white transition-colors">
+              <span className="text-base leading-none mb-1 text-[#898D94] group-hover:text-[#F06419] transition-colors">
                 +
               </span>
               <span className="transition-all">Create Content</span>
@@ -557,9 +557,9 @@ export function AdminOverviewClient() {
             {/* Add Enquiry */}
             <Link
               href="/admin/inquiries?create=1"
-              className="p-3.5 rounded-xl bg-[#161A1F] border border-[#292E35] hover:bg-[#F06419] hover:border-[#F06419] text-[#F5F2EC] hover:text-white text-xs font-medium flex flex-col items-center justify-center text-center hover:shadow-[0_4px_20px_rgb(240_100_25_/_25%)] transition-all duration-200 min-h-[82px] group"
+              className="p-3.5 rounded-xl bg-[#161A1F] border border-[#292E35] hover:border-[#F06419] hover:bg-[#1A1F26] text-[#F5F2EC] hover:text-white text-xs font-medium flex flex-col items-center justify-center text-center hover:shadow-[0_0_16px_rgba(240,100,25,0.15)] transition-all duration-200 min-h-[82px] group"
             >
-              <span className="text-base leading-none mb-1 text-[#898D94] group-hover:text-white transition-colors">
+              <span className="text-base leading-none mb-1 text-[#898D94] group-hover:text-[#F06419] transition-colors">
                 +
               </span>
               <span className="transition-all">Add Enquiry</span>
@@ -568,7 +568,7 @@ export function AdminOverviewClient() {
             {/* Manage Services */}
             <Link
               href="/admin/services"
-              className="p-3.5 rounded-xl bg-[#161A1F] border border-[#292E35] hover:border-[#F06419]/50 hover:bg-[#1E232B] text-[#B8B9BC] hover:text-[#F5F2EC] text-xs font-medium flex flex-col items-center justify-center gap-1.5 text-center transition-all duration-200 min-h-[82px] group"
+              className="p-3.5 rounded-xl bg-[#161A1F] border border-[#292E35] hover:border-[#F06419] hover:bg-[#1A1F26] text-[#B8B9BC] hover:text-[#F5F2EC] text-xs font-medium flex flex-col items-center justify-center gap-1.5 text-center hover:shadow-[0_0_16px_rgba(240,100,25,0.15)] transition-all duration-200 min-h-[82px] group"
             >
               <Layers className="w-4 h-4 text-[#898D94] group-hover:text-[#F06419] transition-colors" />
               <span className="truncate">Manage Services</span>
@@ -577,7 +577,7 @@ export function AdminOverviewClient() {
             {/* Manage Industries */}
             <Link
               href="/admin/services?view=industries"
-              className="p-3.5 rounded-xl bg-[#161A1F] border border-[#292E35] hover:border-[#F06419]/50 hover:bg-[#1E232B] text-[#B8B9BC] hover:text-[#F5F2EC] text-xs font-medium flex flex-col items-center justify-center gap-1.5 text-center transition-all duration-200 min-h-[82px] group"
+              className="p-3.5 rounded-xl bg-[#161A1F] border border-[#292E35] hover:border-[#F06419] hover:bg-[#1A1F26] text-[#B8B9BC] hover:text-[#F5F2EC] text-xs font-medium flex flex-col items-center justify-center gap-1.5 text-center hover:shadow-[0_0_16px_rgba(240,100,25,0.15)] transition-all duration-200 min-h-[82px] group"
             >
               <LayoutGrid className="w-4 h-4 text-[#898D94] group-hover:text-[#F06419] transition-colors" />
               <span className="truncate">Manage Industries</span>
@@ -586,7 +586,7 @@ export function AdminOverviewClient() {
             {/* Upload Media */}
             <Link
               href="/admin/media"
-              className="p-3.5 rounded-xl bg-[#161A1F] border border-[#292E35] hover:border-[#F06419]/50 hover:bg-[#1E232B] text-[#B8B9BC] hover:text-[#F5F2EC] text-xs font-medium flex flex-col items-center justify-center gap-1.5 text-center transition-all duration-200 min-h-[82px] group"
+              className="p-3.5 rounded-xl bg-[#161A1F] border border-[#292E35] hover:border-[#F06419] hover:bg-[#1A1F26] text-[#B8B9BC] hover:text-[#F5F2EC] text-xs font-medium flex flex-col items-center justify-center gap-1.5 text-center hover:shadow-[0_0_16px_rgba(240,100,25,0.15)] transition-all duration-200 min-h-[82px] group"
             >
               <ImageIcon className="w-4 h-4 text-[#898D94] group-hover:text-[#F06419] transition-colors" />
               <span className="truncate">Upload Media</span>
