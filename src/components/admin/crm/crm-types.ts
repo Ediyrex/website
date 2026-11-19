@@ -186,6 +186,12 @@ export interface EnquirySummary {
   source: string;
   convertedClientId: string | null;
   wantsDiscoveryCall: boolean;
+  assignedAdminUserId?: string | null;
+  assignedAdminName?: string | null;
+  nextFollowupAt?: string | null;
+  priority?: "High" | "Medium" | "Low";
+  ownerInitials?: string;
+  ownerName?: string;
   submittedAt: string;
   updatedAt: string;
 }
@@ -270,6 +276,7 @@ export interface CrmDashboardPayload {
     avgResponseHours: number | null;
     respondedCount: number;
     overdueFollowupsCount: number;
+    inquiryTrendPercentage?: number | null;
   };
   statusCounts: Record<string, number>;
   pipelineCounts: Record<string, number>;

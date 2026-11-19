@@ -362,7 +362,11 @@ export function AdminInquiriesClient() {
 
   // CSV Export
   const handleExport = () => {
-    const enquiriesToExport = dashboard.enquiries.length > 0 ? dashboard.enquiries : fallbackRows;
+    const enquiriesToExport = dashboard.enquiries;
+    if (enquiriesToExport.length === 0) {
+      setBannerError("No records available to export.");
+      return;
+    }
     const headers = [
       "Reference",
       "Contact Name",
@@ -398,163 +402,66 @@ export function AdminInquiriesClient() {
     document.body.removeChild(link);
   };
 
-  // Fallback demo rows matching the desktop specification visual
-  const fallbackRows: Array<
-    EnquirySummary & {
-      priority: "High" | "Medium" | "Low";
-      ownerInitials: string;
-      nextFollowup: string;
-      receivedDate: string;
-      avatarBg: string;
-    }
-  > = [
-    {
-      id: "demo-1",
-      referenceCode: "ENQ-9421",
-      contactName: "Aarav Sharma",
-      companyName: "Apex Innovations",
-      emailNormalized: "aarav@apexinnovations.com",
-      phone: "+91 98200 12345",
-      projectType: "Web Development",
-      goalsAndRequirements: "Full re-architecture of company marketing platform",
-      budgetMin: 15000,
-      budgetMax: 25000,
-      budgetCurrency: "USD",
-      expectedTimeline: "6 weeks",
-      status: "new",
-      source: "website",
-      convertedClientId: null,
-      wantsDiscoveryCall: true,
-      submittedAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      priority: "High",
-      ownerInitials: "EA",
-      nextFollowup: "—",
-      receivedDate: "Today",
-      avatarBg: "bg-[#2D1F3D] text-[#C084FC]",
-    },
-    {
-      id: "demo-2",
-      referenceCode: "ENQ-9420",
-      contactName: "Northstar Digital",
-      companyName: "Northstar Digital",
-      emailNormalized: "contact@northstar.ai",
-      phone: "+1 415 555 0192",
-      projectType: "AI & Automation",
-      goalsAndRequirements: "Multi-agent workflow orchestration and document parsing",
-      budgetMin: 20000,
-      budgetMax: 35000,
-      budgetCurrency: "USD",
-      expectedTimeline: "8 weeks",
-      status: "qualified",
-      source: "referral",
-      convertedClientId: null,
-      wantsDiscoveryCall: true,
-      submittedAt: new Date(Date.now() - 24 * 3600 * 1000).toISOString(),
-      updatedAt: new Date().toISOString(),
-      priority: "Medium",
-      ownerInitials: "RK",
-      nextFollowup: "Nov 21",
-      receivedDate: "Yesterday",
-      avatarBg: "bg-[#162738] text-[#38BDF8]",
-    },
-    {
-      id: "demo-3",
-      referenceCode: "ENQ-9419",
-      contactName: "Meridian Health",
-      companyName: "Meridian Health",
-      emailNormalized: "info@meridianhealth.co",
-      phone: "+44 20 7946 0912",
-      projectType: "Branding & Marketing",
-      goalsAndRequirements: "Complete healthcare SaaS brand identity and design system",
-      budgetMin: 30000,
-      budgetMax: 50000,
-      budgetCurrency: "USD",
-      expectedTimeline: "12 weeks",
-      status: "proposal_sent",
-      source: "linkedin",
-      convertedClientId: null,
-      wantsDiscoveryCall: false,
-      submittedAt: new Date(Date.now() - 48 * 3600 * 1000).toISOString(),
-      updatedAt: new Date().toISOString(),
-      priority: "High",
-      ownerInitials: "EA",
-      nextFollowup: "Nov 22",
-      receivedDate: "Nov 17",
-      avatarBg: "bg-[#153226] text-[#34D399]",
-    },
-    {
-      id: "demo-4",
-      referenceCode: "ENQ-9418",
-      contactName: "Vocalis Labs",
-      companyName: "Vocalis Labs",
-      emailNormalized: "team@vocalis.io",
-      phone: "+1 650 555 0144",
-      projectType: "Product & Platform",
-      goalsAndRequirements: "Voice AI interface and real-time audio pipeline integration",
-      budgetMin: 25000,
-      budgetMax: 40000,
-      budgetCurrency: "USD",
-      expectedTimeline: "10 weeks",
-      status: "reviewing",
-      source: "website",
-      convertedClientId: null,
-      wantsDiscoveryCall: true,
-      submittedAt: new Date(Date.now() - 72 * 3600 * 1000).toISOString(),
-      updatedAt: new Date().toISOString(),
-      priority: "Medium",
-      ownerInitials: "PS",
-      nextFollowup: "Nov 20",
-      receivedDate: "Nov 16",
-      avatarBg: "bg-[#281D3B] text-[#A78BFA]",
-    },
-    {
-      id: "demo-5",
-      referenceCode: "ENQ-9417",
-      contactName: "Bluemine Studio",
-      companyName: "Bluemine Studio",
-      emailNormalized: "hello@bluemine.cc",
-      phone: "+65 6789 0123",
-      projectType: "Web Development",
-      goalsAndRequirements: "Interactive 3D WebGL showcase and portfolio design",
-      budgetMin: 12000,
-      budgetMax: 18000,
-      budgetCurrency: "USD",
-      expectedTimeline: "4 weeks",
-      status: "qualified",
-      source: "outbound",
-      convertedClientId: null,
-      wantsDiscoveryCall: true,
-      submittedAt: new Date(Date.now() - 96 * 3600 * 1000).toISOString(),
-      updatedAt: new Date().toISOString(),
-      priority: "Low",
-      ownerInitials: "RK",
-      nextFollowup: "Nov 25",
-      receivedDate: "Nov 15",
-      avatarBg: "bg-[#162B3D] text-[#60A5FA]",
-    },
+  const AVATAR_PALETTE = [
+    "bg-[#2D1F3D] text-[#C084FC]",
+    "bg-[#162738] text-[#38BDF8]",
+    "bg-[#153226] text-[#34D399]",
+    "bg-[#281D3B] text-[#A78BFA]",
+    "bg-[#162B3D] text-[#60A5FA]",
   ];
 
-  const visibleEnquiries = dashboard.enquiries;
-  const displayRows = visibleEnquiries.length > 0
-    ? visibleEnquiries.map((row, idx) => ({
-        ...row,
-        priority: (idx % 3 === 0 ? "High" : idx % 3 === 1 ? "Medium" : "Low") as "High" | "Medium" | "Low",
-        ownerInitials: idx % 2 === 0 ? "EA" : "RK",
-        nextFollowup: idx === 0 ? "—" : `Nov ${20 + idx}`,
-        receivedDate: formatRelativeDate(row.submittedAt),
-        avatarBg: [
-          "bg-[#2D1F3D] text-[#C084FC]",
-          "bg-[#162738] text-[#38BDF8]",
-          "bg-[#153226] text-[#34D399]",
-          "bg-[#281D3B] text-[#A78BFA]",
-          "bg-[#162B3D] text-[#60A5FA]",
-        ][idx % 5],
-      }))
-    : fallbackRows;
+  const getAvatarBg = (seed: string): string => {
+    let hash = 0;
+    for (let i = 0; i < seed.length; i++) {
+      hash = (hash << 5) - hash + seed.charCodeAt(i);
+      hash |= 0;
+    }
+    return AVATAR_PALETTE[Math.abs(hash) % AVATAR_PALETTE.length];
+  };
 
-  const startRow = paginationMeta.total === 0 ? 1 : (page - 1) * limit + 1;
-  const endRow = paginationMeta.total === 0 ? displayRows.length : Math.min(page * limit, paginationMeta.total);
+  const formatShortDate = (isoString?: string | null): string => {
+    if (!isoString) return "—";
+    try {
+      const d = new Date(isoString);
+      if (isNaN(d.getTime())) return "—";
+      return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    } catch {
+      return "—";
+    }
+  };
+
+  const displayRows = useMemo(() => {
+    return dashboard.enquiries.map((row) => {
+      const priority =
+        (row as any).priority ||
+        ((row.budgetMax && row.budgetMax >= 25000) || row.wantsDiscoveryCall
+          ? "High"
+          : (row.budgetMax && row.budgetMax >= 10000) ||
+            row.status === "qualified" ||
+            row.status === "proposal_sent"
+          ? "Medium"
+          : "Low");
+
+      const ownerInitials = (row as any).ownerInitials || "EA";
+      const nextFollowup = (row as any).nextFollowupAt
+        ? formatShortDate((row as any).nextFollowupAt)
+        : "—";
+      const receivedDate = formatRelativeDate(row.submittedAt);
+      const avatarBg = getAvatarBg(row.contactName || row.emailNormalized);
+
+      return {
+        ...row,
+        priority,
+        ownerInitials,
+        nextFollowup,
+        receivedDate,
+        avatarBg,
+      };
+    });
+  }, [dashboard.enquiries]);
+
+  const startRow = paginationMeta.total === 0 ? 0 : (page - 1) * limit + 1;
+  const endRow = paginationMeta.total === 0 ? 0 : Math.min(page * limit, paginationMeta.total);
 
   const pageNumbers = useMemo(() => {
     const total = Math.max(1, paginationMeta.totalPages);
@@ -581,88 +488,29 @@ export function AdminInquiriesClient() {
     );
   };
 
-  // KPI Calculations matching the visual reference
-  const newInquiriesVal = dashboard.kpis.inquiriesLast30Days || dashboard.kpis.totalInquiries || 8;
-  const activeLeadsVal = dashboard.kpis.activeLeads || 12;
-  const activeClientsVal = dashboard.kpis.activeClients || dashboard.kpis.totalClients || 6;
-  const followupsDueVal = dashboard.kpis.overdueFollowupsCount || 4;
+  // Real data-driven KPI values
+  const newInquiriesVal = dashboard.kpis.inquiriesLast30Days ?? dashboard.kpis.totalInquiries ?? 0;
+  const activeLeadsVal = dashboard.kpis.activeLeads ?? 0;
+  const activeClientsVal = dashboard.kpis.activeClients ?? dashboard.kpis.totalClients ?? 0;
+  const followupsDueVal = dashboard.kpis.overdueFollowupsCount ?? 0;
   const avgResponseTimeVal =
-    dashboard.kpis.avgResponseHours !== null
+    dashboard.kpis.avgResponseHours !== null && dashboard.kpis.avgResponseHours !== undefined
       ? `${dashboard.kpis.avgResponseHours}h`
-      : "2h 15m";
+      : "—";
 
-  // Stage counts matching visual reference
-  const fallbackStageCounts: Record<string, number> = {
-    new: 8,
-    reviewing: 5,
-    qualified: 4,
-    proposal_sent: 3,
-    won: 6,
-    lost: 2,
-  };
+  const inquiryTrend = (dashboard.kpis as any).inquiryTrendPercentage as number | null | undefined;
 
-  // Upcoming follow-ups items matching visual reference
-  const displayFollowups =
-    dashboard.upcomingFollowups.length > 0
-      ? dashboard.upcomingFollowups.map((f, idx) => ({
+  // Real data-driven upcoming follow-ups
+  const displayFollowups = useMemo(() => {
+    return dashboard.upcomingFollowups.map((f) => {
+      const dueInfo = formatDueBadge(f.dueAt, f.completed);
+      return {
         ...f,
-        badge: idx === 0 ? "Overdue" : idx === 1 ? "Today" : undefined,
-        dueLabel: formatDueBadge(f.dueAt, f.completed).label,
-      }))
-      : [
-        {
-          id: "fu-1",
-          enquiryId: "demo-2",
-          clientId: null,
-          title: "Follow up with Northstar Digital",
-          notes: "Discuss project scope and timeline",
-          channel: "call" as const,
-          dueAt: new Date().toISOString(),
-          completed: false,
-          contactName: "Northstar Digital",
-          badge: "Overdue",
-          dueLabel: "Overdue",
-        },
-        {
-          id: "fu-2",
-          enquiryId: "demo-3",
-          clientId: null,
-          title: "Client meeting — Meridian Health",
-          notes: "Proposal review and next steps",
-          channel: "meeting" as const,
-          dueAt: new Date().toISOString(),
-          completed: false,
-          contactName: "Meridian Health",
-          badge: "Today",
-          dueLabel: "Today",
-        },
-        {
-          id: "fu-3",
-          enquiryId: "demo-4",
-          clientId: null,
-          title: "Send revised proposal — Vocalis Labs",
-          notes: "Updated scope and estimations",
-          channel: "email" as const,
-          dueAt: new Date(Date.now() + 48 * 3600 * 1000).toISOString(),
-          completed: false,
-          contactName: "Vocalis Labs",
-          badge: undefined,
-          dueLabel: "Nov 21",
-        },
-        {
-          id: "fu-4",
-          enquiryId: "demo-5",
-          clientId: null,
-          title: "Discovery call — Bluemine Studio",
-          notes: "Initial requirements discussion",
-          channel: "call" as const,
-          dueAt: new Date(Date.now() + 120 * 3600 * 1000).toISOString(),
-          completed: false,
-          contactName: "Bluemine Studio",
-          badge: undefined,
-          dueLabel: "Nov 25",
-        },
-      ];
+        badge: dueInfo.isUrgent ? dueInfo.label : undefined,
+        dueLabel: dueInfo.label,
+      };
+    });
+  }, [dashboard.upcomingFollowups]);
 
   return (
     <div className="space-y-6 pb-12">
@@ -826,12 +674,25 @@ export function AdminInquiriesClient() {
             <span className="font-heading font-bold text-3xl sm:text-4xl text-[#F5F2EC] tracking-tight">
               {String(newInquiriesVal).padStart(2, "0")}
             </span>
-            <span className="px-2 py-0.5 rounded-full text-[11px] font-mono font-medium bg-[#56C58B]/15 text-[#56C58B] border border-[#56C58B]/25">
-              ↑ +33%
-            </span>
+            {inquiryTrend !== null && inquiryTrend !== undefined ? (
+              <span
+                className={cn(
+                  "px-2 py-0.5 rounded-full text-[11px] font-mono font-medium border",
+                  inquiryTrend >= 0
+                    ? "bg-[#56C58B]/15 text-[#56C58B] border-[#56C58B]/25"
+                    : "bg-[#E36B68]/15 text-[#E36B68] border-[#E36B68]/25"
+                )}
+              >
+                {inquiryTrend >= 0 ? "↑ +" : "↓ "}
+                {Math.abs(inquiryTrend)}%
+              </span>
+            ) : newInquiriesVal > 0 ? (
+              <span className="px-2 py-0.5 rounded-full text-[11px] font-mono font-medium bg-[#56C58B]/15 text-[#56C58B] border border-[#56C58B]/25">
+                Active
+              </span>
+            ) : null}
           </div>
           <p className="text-[11.5px] text-[#898D94]">Awaiting initial review</p>
-          <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-[#F06419]/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
           <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-[#F06419]/70 to-transparent opacity-100 transition-opacity" />
         </div>
 
@@ -847,12 +708,13 @@ export function AdminInquiriesClient() {
             <span className="font-heading font-bold text-3xl sm:text-4xl text-[#F5F2EC] tracking-tight">
               {String(activeLeadsVal).padStart(2, "0")}
             </span>
-            <span className="px-2 py-0.5 rounded-full text-[11px] font-mono font-medium bg-[#56C58B]/15 text-[#56C58B] border border-[#56C58B]/25">
-              ↑ +20%
-            </span>
+            {activeLeadsVal > 0 ? (
+              <span className="px-2 py-0.5 rounded-full text-[11px] font-mono font-medium bg-[#56C58B]/15 text-[#56C58B] border border-[#56C58B]/25">
+                Pipeline
+              </span>
+            ) : null}
           </div>
           <p className="text-[11.5px] text-[#898D94]">Open opportunities</p>
-          <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-[#E9B45A]/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
           <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-[#E9B45A]/70 to-transparent opacity-100 transition-opacity" />
         </div>
 
@@ -868,12 +730,13 @@ export function AdminInquiriesClient() {
             <span className="font-heading font-bold text-3xl sm:text-4xl text-[#F5F2EC] tracking-tight">
               {String(activeClientsVal).padStart(2, "0")}
             </span>
-            <span className="px-2 py-0.5 rounded-full text-[11px] font-mono font-medium bg-[#56C58B]/15 text-[#56C58B] border border-[#56C58B]/25">
-              ↑ +50%
-            </span>
+            {activeClientsVal > 0 ? (
+              <span className="px-2 py-0.5 rounded-full text-[11px] font-mono font-medium bg-[#56C58B]/15 text-[#56C58B] border border-[#56C58B]/25">
+                Active
+              </span>
+            ) : null}
           </div>
           <p className="text-[11.5px] text-[#898D94]">Current client relationships</p>
-          <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-[#D9B875]/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
           <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-[#D9B875]/70 to-transparent opacity-100 transition-opacity" />
         </div>
 
@@ -889,9 +752,11 @@ export function AdminInquiriesClient() {
             <span className="font-heading font-bold text-3xl sm:text-4xl text-[#F5F2EC] tracking-tight">
               {String(followupsDueVal).padStart(2, "0")}
             </span>
-            <span className="px-2 py-0.5 rounded-full text-[11px] font-mono font-medium bg-[#E36B68]/15 text-[#E36B68] border border-[#E36B68]/25">
-              ↑ +100%
-            </span>
+            {followupsDueVal > 0 ? (
+              <span className="px-2 py-0.5 rounded-full text-[11px] font-mono font-medium bg-[#E36B68]/15 text-[#E36B68] border border-[#E36B68]/25">
+                Action Due
+              </span>
+            ) : null}
           </div>
           <p className="text-[11.5px] text-[#898D94]">Overdue and due today</p>
           <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-[#F06419]/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -989,9 +854,7 @@ export function AdminInquiriesClient() {
                 {PIPELINE_STAGES.map((stage, idx) => {
                   const isActive = statusFilter === stage.status;
                   const count =
-                    dashboard.pipelineCounts[stage.status] ??
-                    fallbackStageCounts[stage.status] ??
-                    0;
+                    dashboard.pipelineCounts[stage.status] ?? 0;
                   const isWon = stage.status === "won";
                   return (
                     <div key={stage.status} className="relative flex items-center">
@@ -1047,7 +910,7 @@ export function AdminInquiriesClient() {
                 <div className="flex items-center gap-2.5">
                   <Users className="w-4 h-4 text-[#F06419]" />
                   <h2 className="font-heading font-semibold text-base text-[#F5F2EC]">
-                    Inquiries &amp; Leads ({paginationMeta.total || 24})
+                    Inquiries &amp; Leads ({paginationMeta.total})
                   </h2>
                 </div>
 
@@ -1458,7 +1321,7 @@ export function AdminInquiriesClient() {
               {/* Pagination Footer */}
               <div className="p-4 border-t border-[#292E35] flex flex-wrap items-center justify-between gap-3 text-xs text-[#898D94]">
                 <div>
-                  Showing {startRow}–{endRow} of {paginationMeta.total || 24} records
+                  Showing {startRow}–{endRow} of {paginationMeta.total} records
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -1543,7 +1406,25 @@ export function AdminInquiriesClient() {
                 </div>
 
                 <div className="space-y-3">
-                  {displayFollowups.map((item) => {
+                  {displayFollowups.length === 0 ? (
+                    <div className="py-6 text-center text-xs text-[#898D94] space-y-2">
+                      <p>No upcoming follow-ups scheduled.</p>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setFollowupModalTarget({
+                            open: true,
+                            enquiryId: null,
+                            clientId: null,
+                          })
+                        }
+                        className="inline-flex items-center gap-1 text-[#F06419] hover:underline font-mono text-[11px] cursor-pointer"
+                      >
+                        <span>+ Schedule Follow-up</span>
+                      </button>
+                    </div>
+                  ) : (
+                    displayFollowups.map((item) => {
                     const Icon =
                       item.channel === "call"
                         ? Phone
@@ -1591,7 +1472,8 @@ export function AdminInquiriesClient() {
                         </div>
                       </div>
                     );
-                  })}
+                  })
+                )}
                 </div>
               </div>
 
@@ -1684,7 +1566,7 @@ export function AdminInquiriesClient() {
 
       {followupModalTarget.open && (
         <CreateFollowupModal
-          enquiriesList={visibleEnquiries}
+          enquiriesList={dashboard.enquiries}
           clientsList={clientsData}
           initialEnquiryId={followupModalTarget.enquiryId}
           initialClientId={followupModalTarget.clientId}
@@ -1702,7 +1584,7 @@ export function AdminInquiriesClient() {
 
       {convertModal.open && (
         <ConvertToClientModal
-          enquiriesList={visibleEnquiries}
+          enquiriesList={dashboard.enquiries}
           initialEnquiry={convertModal.enquiry}
           onClose={() => setConvertModal({ open: false, enquiry: null })}
           onSuccess={() => {

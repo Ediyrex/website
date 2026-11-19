@@ -9,6 +9,7 @@ import {
   enquiryNotes,
   enquiryStatusHistory,
   getDb,
+  users,
 } from "@/db";
 import { requireAdminRole } from "@/lib/server/session";
 import {
@@ -66,6 +67,7 @@ export async function GET(request: NextRequest) {
 
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
     const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
     const conditions = [];
@@ -114,6 +116,7 @@ export async function GET(request: NextRequest) {
       allTimeStatusRows,
       pipelineStatusRows,
       [{ inquiriesLast30Days }],
+      [{ inquiriesPrev30Days }],
       clientStatsRows,
       upcomingFollowups,
       serviceRows,
@@ -139,10 +142,13 @@ export async function GET(request: NextRequest) {
           source: enquiries.source,
           convertedClientId: enquiries.convertedClientId,
           wantsDiscoveryCall: enquiries.wantsDiscoveryCall,
+          assignedAdminUserId: enquiries.assignedAdminUserId,
+          assignedAdminName: users.displayName,
           submittedAt: enquiries.submittedAt,
           updatedAt: enquiries.updatedAt,
         })
         .from(enquiries)
+        .leftJoin(users, eq(enquiries.assignedAdminUserId, users.id))
         .where(whereClause)
         .orderBy(desc(enquiries.submittedAt))
         .limit(limit)
@@ -171,6 +177,15 @@ export async function GET(request: NextRequest) {
         .from(enquiries)
         .where(gte(enquiries.submittedAt, thirtyDaysAgo)),
       db
+        .select({ inquiriesPrev30Days: sql<number>`count(*)::int` })
+        .from(enquiries)
+        .where(
+          and(
+            gte(enquiries.submittedAt, sixtyDaysAgo),
+            lt(enquiries.submittedAt, thirtyDaysAgo)
+          )
+        ),
+      db
         .select({
           status: crmClients.status,
           count: sql<number>`count(*)::int`,
@@ -183,6 +198,7 @@ export async function GET(request: NextRequest) {
           enquiryId: crmFollowups.enquiryId,
           clientId: crmFollowups.clientId,
           title: crmFollowups.title,
+          notes: crmFollowups.notes,
           channel: crmFollowups.channel,
           dueAt: crmFollowups.dueAt,
           completed: crmFollowups.completed,
@@ -296,6 +312,68 @@ export async function GET(request: NextRequest) {
         )
       );
 
+    let inquiryTrendPercentage: number | null = null;
+    if (inquiriesPrev30Days > 0) {
+      inquiryTrendPercentage = Math.round(
+        ((inquiriesLast30Days - inquiriesPrev30Days) / inquiriesPrev30Days) * 100
+      );
+    } else if (inquiriesLast30Days > 0) {
+      inquiryTrendPercentage = 100;
+    }
+
+    // Query next follow-up date for enquiries on page
+    const enquiryIds = rows.map((r) => r.id);
+    const followupMap: Record<string, string> = {};
+    if (enquiryIds.length > 0) {
+      const pendingFollowups = await db
+        .select({
+          enquiryId: crmFollowups.enquiryId,
+          nextDueAt: sql<Date>`min(${crmFollowups.dueAt})`,
+        })
+        .from(crmFollowups)
+        .where(
+          and(
+            inArray(crmFollowups.enquiryId, enquiryIds),
+            eq(crmFollowups.completed, false)
+          )
+        )
+        .groupBy(crmFollowups.enquiryId);
+
+      for (const f of pendingFollowups) {
+        if (f.enquiryId && f.nextDueAt) {
+          followupMap[f.enquiryId] = new Date(f.nextDueAt).toISOString();
+        }
+      }
+    }
+
+    const enrichedRows = rows.map((r) => {
+      const hasHighBudget = Boolean(r.budgetMax && r.budgetMax >= 25000);
+      const hasMedBudget = Boolean(r.budgetMax && r.budgetMax >= 10000);
+      const priority: "High" | "Medium" | "Low" =
+        hasHighBudget || r.wantsDiscoveryCall
+          ? "High"
+          : hasMedBudget || r.status === "qualified" || r.status === "proposal_sent"
+          ? "Medium"
+          : "Low";
+
+      const ownerInitials = (r as any).assignedAdminName
+        ? (r as any).assignedAdminName
+            .split(" ")
+            .map((w: string) => w[0])
+            .join("")
+            .slice(0, 2)
+            .toUpperCase()
+        : "EA";
+
+      return {
+        ...r,
+        priority,
+        ownerInitials,
+        ownerName: (r as any).assignedAdminName || "Ediyrex Admin",
+        nextFollowupAt: followupMap[r.id] ?? null,
+      };
+    });
+
     // Count linked PMS projects per converted client if any
     const clientIdsOnPage = rows
       .map((r) => r.convertedClientId)
@@ -314,7 +392,7 @@ export async function GET(request: NextRequest) {
 
     return apiOk(
       {
-        enquiries: rows,
+        enquiries: enrichedRows,
         kpis: {
           totalInquiries,
           inquiriesLast30Days,
@@ -326,6 +404,7 @@ export async function GET(request: NextRequest) {
           avgResponseHours,
           respondedCount: responseHoursList.length,
           overdueFollowupsCount,
+          inquiryTrendPercentage,
         },
         statusCounts,
         pipelineCounts,
