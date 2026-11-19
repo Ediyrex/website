@@ -714,9 +714,9 @@ export function AdminInquiriesClient() {
             <button
               type="button"
               onClick={() => setShowAddInquiry(true)}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#F06419] hover:bg-[#d95510] text-[#F5F2EC] text-xs font-semibold shadow-[0_4px_16px_rgb(240_100_25_/_20%)] transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#F06419] hover:bg-[#d95510] text-[#0C0E10] text-xs font-bold shadow-[0_4px_16px_rgb(240_100_25_/_20%)] transition-colors cursor-pointer"
             >
-              <Plus className="w-3.5 h-3.5" />
+              <Plus className="w-3.5 h-3.5 text-[#0C0E10] stroke-[2.5]" />
               <span>Add Inquiry</span>
             </button>
           )}
@@ -813,7 +813,7 @@ export function AdminInquiriesClient() {
             </span>
           </div>
           <p className="text-[11.5px] text-[#898D94]">Awaiting initial review</p>
-          <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-[#F06419]/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-[#F06419]/70 to-transparent opacity-100 transition-opacity" />
         </div>
 
         {/* Active Leads */}
@@ -833,7 +833,7 @@ export function AdminInquiriesClient() {
             </span>
           </div>
           <p className="text-[11.5px] text-[#898D94]">Open opportunities</p>
-          <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-[#E9B45A]/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-[#E9B45A]/70 to-transparent opacity-100 transition-opacity" />
         </div>
 
         {/* Active Clients */}
@@ -853,7 +853,7 @@ export function AdminInquiriesClient() {
             </span>
           </div>
           <p className="text-[11.5px] text-[#898D94]">Current client relationships</p>
-          <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-[#D9B875]/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-[#D9B875]/70 to-transparent opacity-100 transition-opacity" />
         </div>
 
         {/* Follow-ups Due */}
@@ -1125,7 +1125,7 @@ export function AdminInquiriesClient() {
                         className={cn(
                           "px-3 py-1 rounded-xl font-medium transition-colors cursor-pointer",
                           active
-                            ? "bg-[#161A1F] border border-[#292E35] text-[#F5F2EC]"
+                            ? "bg-[#F5F2EC] text-[#121519] font-semibold"
                             : "text-[#898D94] hover:text-[#F5F2EC]"
                         )}
                       >
@@ -1579,12 +1579,10 @@ export function AdminInquiriesClient() {
                 <button
                   type="button"
                   onClick={() => setShowAddInquiry(true)}
-                  className="p-3.5 rounded-xl bg-[#161A1F] border border-[#292E35] hover:border-[#F06419] hover:bg-[#1A1F26] text-[#F5F2EC] hover:text-white text-xs font-medium flex flex-col items-center justify-center text-center hover:shadow-[0_0_16px_rgba(240,100,25,0.15)] transition-all duration-200 min-h-[76px] cursor-pointer group"
+                  className="p-3.5 rounded-xl bg-[#F06419] hover:bg-[#d95510] text-[#0C0E10] font-bold text-xs flex flex-col items-center justify-center text-center shadow-[0_4px_16px_rgb(240_100_25_/_20%)] transition-colors min-h-[76px] cursor-pointer"
                 >
-                  <span className="text-base leading-none mb-1 text-[#898D94] group-hover:text-[#F06419] transition-colors">
-                    +
-                  </span>
-                  <span className="transition-all">Add Inquiry</span>
+                  <span className="text-base leading-none mb-1 font-bold">+</span>
+                  <span>Add Inquiry</span>
                 </button>
 
                 {/* + Add Client */}
