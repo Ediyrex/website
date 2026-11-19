@@ -167,11 +167,11 @@ export function Header() {
               <div className="hidden md:block">
                 {isLightHeroNav ? (
                   <BookCallButton variant="navbar-light">
-                    <span>Book a Call ↗</span>
+                    <span>Book a Call</span>
                   </BookCallButton>
                 ) : (
                   <BookCallButton variant="navbar">
-                    <span>Book a Call ↗</span>
+                    <span>Book a Call</span>
                   </BookCallButton>
                 )}
               </div>
@@ -257,7 +257,7 @@ export function Header() {
               className="w-full h-12 rounded-[8px] bg-[#F06419] hover:bg-[#D95612] text-black font-mono font-bold text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-md"
             >
               <Calendar className="w-4 h-4" />
-              <span>Book a Call ↗</span>
+              <span>Book a Call</span>
             </BookCallButton>
             <p className="text-center text-xs font-mono text-[#777D87]">
               ediyrex@gmail.com

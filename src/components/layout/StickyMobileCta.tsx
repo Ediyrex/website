@@ -21,7 +21,7 @@ export function StickyMobileCta() {
     >
       <BookCallButton size="md" variant="primary" className="w-full">
         <Calendar className="w-4 h-4 mr-1 text-[#07090D]" />
-        <span>Book a Call ↗</span>
+        <span>Book a Call</span>
       </BookCallButton>
     </div>
   );

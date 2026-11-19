@@ -36,7 +36,7 @@ export function BookCallButton({
   };
 
   const baseStyles =
-    "inline-flex items-center justify-center font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D6B77A] disabled:opacity-50 disabled:pointer-events-none cursor-pointer";
+    "inline-flex items-center justify-center font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F06419] disabled:opacity-50 disabled:pointer-events-none cursor-pointer";
 
   const sizeStyles = {
     sm: "h-9 px-3.5 text-xs rounded-lg gap-1.5",
@@ -54,7 +54,7 @@ export function BookCallButton({
     outline:
       "border border-[#252A32] bg-[#12151A] hover:bg-[#1C2028] text-[#F5F3EE] hover:border-[#3D4450]",
     editorial:
-      "border border-[#D6B77A]/40 bg-[#D6B77A]/10 hover:bg-[#D6B77A]/20 text-[#D6B77A] font-mono text-xs uppercase tracking-wider",
+      "border border-[#F06419]/40 bg-[#F06419]/10 hover:bg-[#F06419]/20 text-[#F06419] font-mono text-xs uppercase tracking-wider",
   };
 
   return (
@@ -64,11 +64,8 @@ export function BookCallButton({
       className={cn(baseStyles, sizeStyles[size], variantStyles[variant], className)}
       {...props}
     >
-      {showIcon && variant === "navbar" && (
-        <Calendar className="w-4 h-4 text-[#F06419] shrink-0" />
-      )}
-      {children || <span>Book a Call ↗</span>}
-      {showIcon && variant === "navbar-light" && (
+      {children || <span>Book a Call</span>}
+      {showIcon && (variant === "navbar" || variant === "navbar-light") && (
         <ArrowUpRight className="w-3.5 h-3.5 shrink-0" />
       )}
     </button>
