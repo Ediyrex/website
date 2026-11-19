@@ -1,10 +1,35 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getAllowedOrigins } from "./env";
 
-export function isOriginAllowed(origin: string | null): boolean {
+export function isOriginAllowed(
+  origin: string | null,
+  host?: string | null
+): boolean {
   if (!origin) return true; // Same-origin or non-browser server requests without Origin
   const normalized = origin.replace(/\/$/, "");
-  if (normalized.endsWith(".vercel.app") || normalized.includes("localhost")) return true;
+
+  // 1. Same-origin validation (e.g., origin matches Host or X-Forwarded-Host header)
+  if (host) {
+    const cleanHost = host.replace(/\/$/, "");
+    if (
+      normalized === `https://${cleanHost}` ||
+      normalized === `http://${cleanHost}` ||
+      normalized.endsWith(`://${cleanHost}`)
+    ) {
+      return true;
+    }
+  }
+
+  // 2. Automatically permit all Vercel domains and local dev environments
+  if (
+    normalized.endsWith(".vercel.app") ||
+    normalized.includes("localhost") ||
+    normalized.includes("127.0.0.1")
+  ) {
+    return true;
+  }
+
+  // 3. User-configured explicit origins
   const allowed = getAllowedOrigins();
   return allowed.includes(normalized);
 }
@@ -33,7 +58,9 @@ export function applySecurityAndCorsHeaders(
   // Strict CORS on /api/*
   if (request.nextUrl.pathname.startsWith("/api/")) {
     const origin = request.headers.get("origin");
-    if (origin && isOriginAllowed(origin)) {
+    const host =
+      request.headers.get("x-forwarded-host") || request.headers.get("host");
+    if (origin && isOriginAllowed(origin, host)) {
       response.headers.set("Access-Control-Allow-Origin", origin);
       response.headers.set("Access-Control-Allow-Credentials", "true");
       response.headers.set(

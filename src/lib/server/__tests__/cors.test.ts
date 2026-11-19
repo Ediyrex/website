@@ -27,6 +27,8 @@ describe("CORS & security headers", () => {
     expect(isOriginAllowed("https://ediyrex.com")).toBe(true);
     expect(isOriginAllowed("https://ediyrex.com/")).toBe(true);
     expect(isOriginAllowed("http://localhost:3000")).toBe(true);
+    expect(isOriginAllowed("https://website-9u5dhnxzu-team-ediyrex.vercel.app")).toBe(true);
+    expect(isOriginAllowed("https://preview.domain.com", "preview.domain.com")).toBe(true);
   });
 
   it("rejects origins outside the allowlist", () => {

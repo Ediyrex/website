@@ -50,7 +50,9 @@ export async function proxy(request: NextRequest) {
   // Enforce strict origin allowlist on API routes
   if (pathname.startsWith("/api/")) {
     const origin = request.headers.get("origin");
-    if (origin && !isOriginAllowed(origin)) {
+    const host =
+      request.headers.get("x-forwarded-host") || request.headers.get("host");
+    if (origin && !isOriginAllowed(origin, host)) {
       return NextResponse.json(
         { error: "Forbidden", message: "Origin not allowed by CORS policy." },
         { status: 403 }
