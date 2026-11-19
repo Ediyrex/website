@@ -38,52 +38,55 @@ interface NavGroup {
     label: string;
     icon: React.ElementType;
     exact?: boolean;
+    badge?: string | number;
     children?: { href: string; label: string }[];
   }[];
 }
 
 const NAV_GROUPS: NavGroup[] = [
   {
-    title: "Workspace",
+    title: "OVERVIEW",
     items: [
       { href: "/admin", label: "Overview", icon: LayoutDashboard, exact: true },
     ],
   },
   {
-    title: "Content Management (CMS)",
+    title: "WORKSPACE",
     items: [
-      { href: "/admin/pages", label: "Pages", icon: FileText },
-      { href: "/admin/projects", label: "Portfolio", icon: FolderKanban },
-      { href: "/admin/services", label: "Services", icon: Layers },
-      { href: "/admin/blog", label: "Blog & Insights", icon: BookOpen },
+      { href: "/admin/inquiries", label: "Enquiries", icon: Mail, badge: 8 },
+      { href: "/admin/projects", label: "Projects", icon: FolderKanban },
+      { href: "/admin/tasks", label: "Tasks", icon: CheckSquare },
+    ],
+  },
+  {
+    title: "CONTENT",
+    items: [
+      { href: "/admin/pages", label: "Pages & CMS", icon: FileText },
+      { href: "/admin/projects", label: "Work & Case Studies", icon: BookOpen },
       { href: "/admin/media", label: "Media Library", icon: ImageIcon },
+    ],
+  },
+  {
+    title: "BUSINESS",
+    items: [
+      { href: "/admin/services", label: "Services", icon: Layers },
+      { href: "/admin/services?view=industries", label: "Industries", icon: LayoutDashboard },
+      { href: "/admin/inquiries?view=clients", label: "CRM / Leads", icon: Users },
+    ],
+  },
+  {
+    title: "GROWTH",
+    items: [
       { href: "/admin/seo", label: "SEO & Metadata", icon: SearchCheck },
+      { href: "/admin", label: "Analytics", icon: Activity, exact: true },
     ],
   },
   {
-    title: "Business Management",
+    title: "SYSTEM",
     items: [
-      {
-        href: "/admin/inquiries",
-        label: "CRM",
-        icon: Inbox,
-        children: [
-          { href: "/admin/inquiries", label: "Leads & Inquiries" },
-          { href: "/admin/inquiries?view=clients", label: "Clients" },
-          { href: "/admin/inquiries?view=followups", label: "Follow-ups" },
-        ],
-      },
-      { href: "/admin/tasks", label: "Projects & Tasks", icon: CheckSquare },
-      { href: "/admin/calendar", label: "Calendar & Schedule", icon: Calendar },
-    ],
-  },
-  {
-    title: "System",
-    items: [
-      { href: "/admin/settings", label: "Website Settings", icon: Settings },
-      { href: "/admin/notifications", label: "Email & Notifications", icon: Mail },
-      { href: "/admin/team", label: "Team & Access", icon: Users },
-      { href: "/admin/activity", label: "Activity Log", icon: Activity },
+      { href: "/admin/settings?tab=integrations", label: "Integrations", icon: Settings },
+      { href: "/admin/team", label: "Team & Roles", icon: Users },
+      { href: "/admin/settings", label: "Settings", icon: Settings },
     ],
   },
 ];
@@ -189,10 +192,10 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                 className="h-8 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
               />
               <div className="flex flex-col">
-                <span className="font-heading font-bold text-sm tracking-tight text-[#F5F3EE] leading-tight">
-                  EDIYREX
+                <span className="font-heading font-bold text-sm tracking-tight text-[#F5F2EC] leading-tight flex items-center gap-0.5">
+                  EDIYREX<span className="text-[10px] font-normal text-[#898D94]">®</span>
                 </span>
-                <span className="text-[10px] font-mono text-[#D6B77A] tracking-wider uppercase">
+                <span className="text-[9.5px] font-mono text-[#898D94] tracking-wider uppercase">
                   Studio Admin
                 </span>
               </div>
@@ -231,19 +234,24 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                         className={cn(
                           "flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors",
                           isActive
-                            ? "bg-[#D6B77A]/12 text-[#F5E7C8] border border-[#D6B77A]/25"
-                            : "text-[#9CA3AF] hover:text-[#F5F3EE] hover:bg-[#13161C] border border-transparent"
+                            ? "bg-[#F06419]/15 text-[#F5F2EC] border border-[#F06419]/35"
+                            : "text-[#B8B9BC] hover:text-[#F5F2EC] hover:bg-[#161A1F] border border-transparent"
                         )}
                       >
                         <span className="flex items-center gap-2.5 min-w-0">
                           <Icon
                             className={cn(
                               "w-4 h-4 shrink-0",
-                              isActive ? "text-[#D6B77A]" : "text-[#6D7480]"
+                              isActive ? "text-[#F06419]" : "text-[#6D7480]"
                             )}
                           />
                           <span className="truncate">{item.label}</span>
                         </span>
+                        {item.badge !== undefined && (
+                          <span className="w-5 h-5 rounded-full bg-[#F06419] text-[#090A0C] font-mono font-bold text-[10px] flex items-center justify-center shrink-0">
+                            {item.badge}
+                          </span>
+                        )}
                       </Link>
                       {item.children && (
                         <div className="pl-7 space-y-0.5">
@@ -252,7 +260,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                               key={sub.href}
                               href={sub.href}
                               onClick={() => setMobileMenuOpen(false)}
-                              className="flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs text-[#8D939E] hover:text-[#F5F3EE] hover:bg-[#13161C] transition-colors"
+                              className="flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs text-[#8D939E] hover:text-[#F5F2EC] hover:bg-[#13161C] transition-colors"
                             >
                               <span className="w-1 h-1 rounded-full bg-[#6D7480]" />
                               <span>{sub.label}</span>
@@ -318,12 +326,12 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
-              className="flex-1 h-9 px-3.5 rounded-lg bg-[#111419] border border-[#1E222A] hover:border-[#2C323D] flex items-center justify-between gap-2 text-xs text-[#6D7480] transition-colors cursor-pointer"
+              className="flex-1 h-9 px-3.5 rounded-lg bg-[#111419] border border-[#1E222A] hover:border-[#2C323D] flex items-center justify-between gap-2 text-xs text-[#898D94] transition-colors cursor-pointer"
             >
               <span className="flex items-center gap-2 truncate">
-                <Search className="w-3.5 h-3.5 shrink-0" />
+                <Search className="w-3.5 h-3.5 shrink-0 text-[#898D94]" />
                 <span className="truncate">
-                  Search projects, services, inquiries, posts...
+                  Search projects, enquiries, content...
                 </span>
               </span>
               <kbd className="hidden sm:inline-block px-1.5 py-0.5 rounded bg-[#181C23] border border-[#252A32] font-mono text-[10px] text-[#9CA3AF]">
@@ -335,10 +343,11 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-2 sm:gap-3 relative">
             <Link
               href="/admin/inquiries"
-              aria-label="View recent inquiries"
-              className="p-2 rounded-lg bg-[#111419] border border-[#1E222A] text-[#9CA3AF] hover:text-[#F5F3EE] hover:border-[#2C323D] transition-colors"
+              aria-label="View recent enquiries"
+              className="relative p-2 rounded-lg bg-[#111419] border border-[#1E222A] text-[#9CA3AF] hover:text-[#F5F2EC] hover:border-[#2C323D] transition-colors"
             >
               <Bell className="w-4 h-4" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#F06419] ring-2 ring-[#0B0D10]" />
             </Link>
 
             <button
@@ -348,7 +357,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                 setUserMenuOpen(false);
               }}
               aria-label="CMS help"
-              className="p-2 rounded-lg bg-[#111419] border border-[#1E222A] text-[#9CA3AF] hover:text-[#F5F3EE] hover:border-[#2C323D] transition-colors cursor-pointer"
+              className="p-2 rounded-lg bg-[#111419] border border-[#1E222A] text-[#9CA3AF] hover:text-[#F5F2EC] hover:border-[#2C323D] transition-colors cursor-pointer"
             >
               <HelpCircle className="w-4 h-4" />
             </button>
@@ -361,18 +370,24 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               }}
               className="flex items-center gap-2.5 pl-1.5 pr-2.5 py-1 rounded-xl hover:bg-[#111419] border border-transparent hover:border-[#1E222A] transition-colors cursor-pointer"
             >
-              <div className="w-8 h-8 rounded-full bg-[#D6B77A] text-[#08090B] font-heading font-bold text-xs flex items-center justify-center shrink-0">
-                {initials || "AD"}
+              <div className="w-8 h-8 rounded-full bg-[#161A1F] border border-[#292E35] flex items-center justify-center overflow-hidden shrink-0 relative p-1 shadow-inner">
+                <Image
+                  src="/images/logo/ediyrex-emblem.png"
+                  alt="Ediyrex Admin"
+                  width={24}
+                  height={24}
+                  className="h-5 w-auto object-contain"
+                />
               </div>
               <div className="hidden sm:block text-left leading-tight">
-                <div className="text-xs font-semibold text-[#F5F3EE]">
-                  {user.displayName}
+                <div className="text-xs font-semibold text-[#F5F2EC]">
+                  Ediyrex Admin
                 </div>
-                <div className="text-[10px] text-[#777D87] capitalize">
-                  {user.roles[0] === "admin" ? "Administrator" : user.roles[0] || "Staff"}
+                <div className="text-[10px] text-[#898D94] capitalize">
+                  Administrator
                 </div>
               </div>
-              <ChevronDown className="w-3.5 h-3.5 text-[#777D87] hidden sm:block" />
+              <ChevronDown className="w-3.5 h-3.5 text-[#898D94] hidden sm:block" />
             </button>
 
             {helpOpen && (
