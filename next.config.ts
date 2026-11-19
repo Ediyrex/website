@@ -15,6 +15,10 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      { source: "/apple-icon", destination: "/images/logo/ediyrex-emblem-192.png", statusCode: 301 },
+      { source: "/apple-touch-icon.png", destination: "/images/logo/ediyrex-emblem-192.png", statusCode: 301 },
+      { source: "/apple-touch-icon-precomposed.png", destination: "/images/logo/ediyrex-emblem-192.png", statusCode: 301 },
+      { source: "/icon", destination: "/images/logo/ediyrex-emblem-32.png", statusCode: 301 },
       { source: "/home", destination: "/", statusCode: 301 },
       { source: "/portfolio", destination: "/work", statusCode: 301 },
       { source: "/projects", destination: "/work", statusCode: 301 },

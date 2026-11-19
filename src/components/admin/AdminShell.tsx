@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   LayoutDashboard,
   FileText,
@@ -23,6 +23,8 @@ import {
   Bell,
   HelpCircle,
   ChevronDown,
+  Building,
+  LayoutGrid,
   LogOut,
   ExternalLink,
   X,
@@ -53,9 +55,16 @@ const NAV_GROUPS: NavGroup[] = [
   {
     title: "WORKSPACE",
     items: [
-      { href: "/admin/inquiries", label: "Enquiries", icon: Mail, badge: 8 },
       { href: "/admin/projects", label: "Projects", icon: FolderKanban },
       { href: "/admin/tasks", label: "Tasks", icon: CheckSquare },
+    ],
+  },
+  {
+    title: "CRM",
+    items: [
+      { href: "/admin/inquiries", label: "CRM / Leads", icon: Users },
+      { href: "/admin/inquiries?view=clients", label: "Clients", icon: Building },
+      { href: "/admin/inquiries?view=followups", label: "Follow-ups", icon: Calendar, badge: 4 },
     ],
   },
   {
@@ -70,8 +79,7 @@ const NAV_GROUPS: NavGroup[] = [
     title: "BUSINESS",
     items: [
       { href: "/admin/services", label: "Services", icon: Layers },
-      { href: "/admin/services?view=industries", label: "Industries", icon: LayoutDashboard },
-      { href: "/admin/inquiries?view=clients", label: "CRM / Leads", icon: Users },
+      { href: "/admin/services?view=industries", label: "Industries", icon: LayoutGrid },
     ],
   },
   {
@@ -106,8 +114,10 @@ interface SearchResults {
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const { user } = useAdminUser();
+  const currentView = searchParams.get("view");
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -222,9 +232,18 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                 </div>
                 {group.items.map((item) => {
                   const Icon = item.icon;
-                  const isActive = item.exact
-                    ? pathname === "/admin" || pathname === "/admin/dashboard"
-                    : pathname.startsWith(item.href);
+                  let isActive = false;
+                  if (item.href === "/admin/inquiries") {
+                    isActive = pathname === "/admin/inquiries" && !currentView;
+                  } else if (item.href === "/admin/inquiries?view=clients") {
+                    isActive = pathname === "/admin/inquiries" && currentView === "clients";
+                  } else if (item.href === "/admin/inquiries?view=followups") {
+                    isActive = pathname === "/admin/inquiries" && currentView === "followups";
+                  } else if (item.exact) {
+                    isActive = pathname === "/admin" || pathname === "/admin/dashboard";
+                  } else {
+                    isActive = pathname.startsWith(item.href.split("?")[0]);
+                  }
 
                   return (
                     <div key={item.href} className="space-y-1">
@@ -331,7 +350,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               <span className="flex items-center gap-2 truncate">
                 <Search className="w-3.5 h-3.5 shrink-0 text-[#898D94]" />
                 <span className="truncate">
-                  Search projects, enquiries, content...
+                  Search leads, clients, projects, enquiries...
                 </span>
               </span>
               <kbd className="hidden sm:inline-block px-1.5 py-0.5 rounded bg-[#181C23] border border-[#252A32] font-mono text-[10px] text-[#9CA3AF]">
