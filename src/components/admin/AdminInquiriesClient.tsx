@@ -1203,14 +1203,14 @@ export function AdminInquiriesClient() {
                           className="rounded border-[#292E35] bg-[#161A1F] accent-[#F06419]"
                         />
                       </th>
-                      <th className="py-3.5 px-3 font-normal">Contact / Organisation</th>
-                      <th className="py-3.5 px-3 font-normal">Service Interest</th>
-                      <th className="py-3.5 px-3 font-normal">Stage</th>
-                      <th className="py-3.5 px-3 font-normal">Priority</th>
-                      <th className="py-3.5 px-3 font-normal">Owner</th>
-                      <th className="py-3.5 px-3 font-normal">Next Follow-up</th>
-                      <th className="py-3.5 px-3 font-normal">Received</th>
-                      <th className="py-3.5 pl-3 pr-5 font-normal text-right">···</th>
+                      <th className="py-3.5 px-3 font-normal min-w-[180px]">Contact / Organisation</th>
+                      <th className="py-3.5 px-3 font-normal whitespace-nowrap">Service Interest</th>
+                      <th className="py-3.5 px-3 font-normal whitespace-nowrap">Stage</th>
+                      <th className="py-3.5 px-3 font-normal whitespace-nowrap">Priority</th>
+                      <th className="py-3.5 px-3 font-normal whitespace-nowrap">Owner</th>
+                      <th className="py-3.5 px-3 font-normal whitespace-nowrap">Next Follow-up</th>
+                      <th className="py-3.5 px-3 font-normal whitespace-nowrap">Received</th>
+                      <th className="py-3.5 pl-3 pr-5 font-normal text-right w-10">···</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#292E35]/60 text-xs">
@@ -1287,15 +1287,15 @@ export function AdminInquiriesClient() {
                             </td>
 
                             {/* Service Interest */}
-                            <td className="py-3.5 px-3 text-xs text-[#B8B9BC]">
+                            <td className="py-3.5 px-3 text-xs text-[#B8B9BC] whitespace-nowrap">
                               {item.projectType}
                             </td>
 
                             {/* Stage */}
-                            <td className="py-3.5 px-3">
+                            <td className="py-3.5 px-3 whitespace-nowrap">
                               <span
                                 className={cn(
-                                  "inline-block px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase border",
+                                  "inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold uppercase tracking-wider border whitespace-nowrap",
                                   isNew
                                     ? "bg-[#2D160E] text-[#F06419] border-[#F06419]/40"
                                     : isInDiscussion
@@ -1316,7 +1316,7 @@ export function AdminInquiriesClient() {
                             </td>
 
                             {/* Priority */}
-                            <td className="py-3.5 px-3">
+                            <td className="py-3.5 px-3 whitespace-nowrap">
                               <div className="flex items-center gap-1.5 text-xs text-[#F5F2EC]">
                                 <span
                                   className={cn(
@@ -1333,7 +1333,7 @@ export function AdminInquiriesClient() {
                             </td>
 
                             {/* Owner */}
-                            <td className="py-3.5 px-3">
+                            <td className="py-3.5 px-3 whitespace-nowrap">
                               <div
                                 className={cn(
                                   "w-6 h-6 rounded-full text-[10px] font-mono font-semibold flex items-center justify-center shrink-0",
@@ -1347,7 +1347,7 @@ export function AdminInquiriesClient() {
                             </td>
 
                             {/* Next Follow-up */}
-                            <td className="py-3.5 px-3 text-xs text-[#898D94] font-mono">
+                            <td className="py-3.5 px-3 text-xs text-[#898D94] font-mono whitespace-nowrap">
                               {item.nextFollowup === "—" ? (
                                 "—"
                               ) : (
@@ -1359,7 +1359,7 @@ export function AdminInquiriesClient() {
                             </td>
 
                             {/* Received */}
-                            <td className="py-3.5 px-3 text-xs text-[#898D94] font-mono">
+                            <td className="py-3.5 px-3 text-xs text-[#898D94] font-mono whitespace-nowrap">
                               {item.receivedDate}
                             </td>
 
