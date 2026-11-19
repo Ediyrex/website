@@ -4,6 +4,7 @@ import { getAllowedOrigins } from "./env";
 export function isOriginAllowed(origin: string | null): boolean {
   if (!origin) return true; // Same-origin or non-browser server requests without Origin
   const normalized = origin.replace(/\/$/, "");
+  if (normalized.endsWith(".vercel.app") || normalized.includes("localhost")) return true;
   const allowed = getAllowedOrigins();
   return allowed.includes(normalized);
 }
