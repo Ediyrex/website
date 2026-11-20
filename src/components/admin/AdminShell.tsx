@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -112,6 +112,39 @@ interface SearchResults {
   tasks: { id: string; title: string; category: string; completed: boolean }[];
 }
 
+interface NotificationItem {
+  id: string;
+  category: string;
+  title: string;
+  body: string | null;
+  isRead: boolean;
+  projectId: string | null;
+  projectTitle: string | null;
+  taskId: string | null;
+  taskTitle: string | null;
+  actorName: string | null;
+  createdAt: string;
+}
+
+function formatRelativeTime(dateStr: string): string {
+  try {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const minutes = Math.floor(diff / 60000);
+    if (minutes < 1) return "Just now";
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `${days}d ago`;
+    return new Date(dateStr).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
+  } catch {
+    return "";
+  }
+}
+
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -126,6 +159,57 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<SearchResults | null>(null);
   const [searching, setSearching] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [unreadCount, setUnreadCount] = useState<number>(0);
+
+  const fetchNotifications = useCallback(async () => {
+    try {
+      const res = await fetch("/api/v1/admin/pms/inbox");
+      if (!res.ok) return;
+      const json = await res.json();
+      if (json?.data) {
+        setNotifications(json.data.notifications || []);
+        setUnreadCount(Number(json.data.unreadCounts?.all ?? 0));
+      }
+    } catch {
+      // Graceful fallback
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 45000);
+    return () => clearInterval(interval);
+  }, [fetchNotifications]);
+
+  const handleMarkAllRead = async () => {
+    try {
+      const res = await fetch("/api/v1/admin/pms/inbox", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ markAllRead: true }),
+      });
+      if (res.ok) {
+        setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+        setUnreadCount(0);
+      }
+    } catch {}
+  };
+
+  const handleMarkAsRead = async (id: string) => {
+    try {
+      await fetch("/api/v1/admin/pms/inbox", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ notificationId: id, isRead: true }),
+      });
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
+      );
+      setUnreadCount((c) => Math.max(0, c - 1));
+    } catch {}
+  };
 
   const initials = user.displayName
     .split(" ")
@@ -143,6 +227,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         setSearchOpen(false);
         setUserMenuOpen(false);
         setHelpOpen(false);
+        setNotificationsOpen(false);
       }
     };
     window.addEventListener("keydown", onKeyDown);
@@ -360,14 +445,166 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3 relative">
-            <Link
-              href="/admin/inquiries"
-              aria-label="View recent enquiries"
-              className="relative p-2 rounded-lg bg-[#111419] border border-[#1E222A] text-[#9CA3AF] hover:text-[#F5F2EC] hover:border-[#2C323D] transition-colors"
-            >
-              <Bell className="w-4 h-4" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#F06419] ring-2 ring-[#0B0D10]" />
-            </Link>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => {
+                  const nextState = !notificationsOpen;
+                  setNotificationsOpen(nextState);
+                  setUserMenuOpen(false);
+                  setHelpOpen(false);
+                  if (nextState) {
+                    fetchNotifications();
+                  }
+                }}
+                aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ""}`}
+                className={cn(
+                  "relative p-2 rounded-lg bg-[#111419] border border-[#1E222A] text-[#9CA3AF] hover:text-[#F5F2EC] hover:border-[#2C323D] transition-colors cursor-pointer",
+                  notificationsOpen && "bg-[#181C23] border-[#292E35] text-[#F5F2EC]"
+                )}
+              >
+                <Bell className="w-4 h-4" />
+                {unreadCount > 0 && (
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#F06419] ring-2 ring-[#0B0D10] animate-pulse" />
+                )}
+              </button>
+
+              {notificationsOpen && (
+                <div className="absolute right-0 sm:right-auto sm:left-0 md:right-0 md:left-auto top-12 w-[310px] sm:w-[380px] rounded-xl bg-[#121519] border border-[#292E35] shadow-2xl z-50 overflow-hidden text-xs">
+                  {/* Header */}
+                  <div className="px-4 py-3 border-b border-[#1E222A] flex items-center justify-between bg-[#0E1013]">
+                    <div className="flex items-center gap-2">
+                      <span className="font-heading font-semibold text-xs text-[#F5F2EC]">
+                        Notifications
+                      </span>
+                      {unreadCount > 0 ? (
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-[#F06419]/15 text-[#F06419] border border-[#F06419]/30 font-medium">
+                          {unreadCount} new
+                        </span>
+                      ) : (
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-[#1C2027] text-[#898D94] border border-[#292E35]">
+                          0 unread
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {unreadCount > 0 && (
+                        <button
+                          type="button"
+                          onClick={handleMarkAllRead}
+                          className="text-[11px] font-mono text-[#D9B875] hover:underline cursor-pointer"
+                        >
+                          Mark all read
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setNotificationsOpen(false)}
+                        className="p-1 rounded text-[#898D94] hover:text-[#F5F2EC] cursor-pointer"
+                        aria-label="Close notifications"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Body */}
+                  <div className="max-h-80 overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <div className="py-9 px-6 text-center">
+                        <div className="w-10 h-10 rounded-full bg-[#161A1F] border border-[#292E35] flex items-center justify-center text-[#898D94] mx-auto mb-3">
+                          <Bell className="w-4 h-4 text-[#898D94]" />
+                        </div>
+                        <div className="text-xs font-semibold text-[#F5F2EC] mb-1">
+                          No new notifications
+                        </div>
+                        <p className="text-[11px] text-[#898D94] leading-relaxed max-w-[240px] mx-auto">
+                          You&apos;re all caught up! Realtime updates, task assignments, and mentions will appear here.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="divide-y divide-[#1E222A]">
+                        {notifications.map((item) => (
+                          <div
+                            key={item.id}
+                            className={cn(
+                              "p-3.5 hover:bg-[#161A1F] transition-colors flex items-start gap-3",
+                              !item.isRead && "bg-[#F06419]/5"
+                            )}
+                          >
+                            <span
+                              className={cn(
+                                "mt-1 w-2 h-2 rounded-full shrink-0",
+                                !item.isRead ? "bg-[#F06419]" : "bg-transparent"
+                              )}
+                            />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between gap-2 mb-0.5">
+                                <span className="text-xs font-semibold text-[#F5F2EC] truncate">
+                                  {item.title}
+                                </span>
+                                <span className="text-[10px] font-mono text-[#898D94] shrink-0">
+                                  {formatRelativeTime(item.createdAt)}
+                                </span>
+                              </div>
+                              {item.body && (
+                                <p className="text-[11px] text-[#898D94] line-clamp-2 mb-1.5">
+                                  {item.body}
+                                </p>
+                              )}
+                              <div className="flex items-center gap-2 text-[10px] text-[#898D94] flex-wrap">
+                                {item.actorName && (
+                                  <span className="text-[#B8B9BC]">
+                                    by {item.actorName}
+                                  </span>
+                                )}
+                                {item.projectTitle && (
+                                  <span className="px-1.5 py-0.5 rounded bg-[#181C23] border border-[#252A32] truncate max-w-[120px]">
+                                    {item.projectTitle}
+                                  </span>
+                                )}
+                                {item.taskTitle && (
+                                  <span className="px-1.5 py-0.5 rounded bg-[#181C23] border border-[#252A32] truncate max-w-[120px]">
+                                    {item.taskTitle}
+                                  </span>
+                                )}
+                                {!item.isRead && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleMarkAsRead(item.id)}
+                                    className="ml-auto text-[#D9B875] hover:underline cursor-pointer"
+                                  >
+                                    Mark read
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Footer */}
+                  <div className="border-t border-[#1E222A] bg-[#0E1013] px-3.5 py-2 flex items-center justify-between">
+                    <Link
+                      href="/admin/tasks"
+                      onClick={() => setNotificationsOpen(false)}
+                      className="text-[11px] font-mono text-[#898D94] hover:text-[#F5F2EC] transition-colors"
+                    >
+                      Studio Tasks →
+                    </Link>
+                    <Link
+                      href="/admin/inquiries"
+                      onClick={() => setNotificationsOpen(false)}
+                      className="text-[11px] font-mono text-[#898D94] hover:text-[#F5F2EC] transition-colors"
+                    >
+                      CRM Inquiries →
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
 
             <button
               type="button"
