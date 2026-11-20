@@ -28,6 +28,7 @@ import {
   Loader2,
   Monitor,
   PieChart,
+  Radio,
   RefreshCw,
   Search,
   Smartphone,
@@ -49,6 +50,13 @@ interface DeltaMetric {
 }
 
 interface AnalyticsPayload {
+  mode?: "realtime" | "benchmark";
+  realtime?: {
+    activeUsersNow: number;
+    activePages: Array<{ path: string; activeCount: number }>;
+    isListening: boolean;
+    lastUpdated: string;
+  };
   reportingPeriod: {
     range: string;
     label: string;
@@ -153,11 +161,11 @@ interface AnalyticsPayload {
 }
 
 const RANGES = [
+  { id: "today", label: "Today" },
   { id: "7d", label: "Last 7 Days" },
   { id: "30d", label: "Last 30 Days" },
   { id: "90d", label: "Last 90 Days" },
   { id: "this_month", label: "This Month" },
-  { id: "last_month", label: "Previous Month" },
   { id: "this_quarter", label: "This Quarter" },
   { id: "this_year", label: "This Year" },
 ];
@@ -166,9 +174,12 @@ export function AdminAnalyticsClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  const [mode, setMode] = useState<"realtime" | "benchmark">("realtime");
   const [range, setRange] = useState(searchParams.get("range") || "30d");
   const [divisionFilter, setDivisionFilter] = useState<string>("all");
   const [channelFilter, setChannelFilter] = useState<string>("all");
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [pingStatus, setPingStatus] = useState<string | null>(null);
 
   const [data, setData] = useState<AnalyticsPayload | null>(null);
   const [loading, setLoading] = useState(true);
@@ -176,7 +187,7 @@ export function AdminAnalyticsClient() {
   const [error, setError] = useState("");
 
   const fetchAnalytics = useCallback(async () => {
-    const params = new URLSearchParams({ range });
+    const params = new URLSearchParams({ range, mode });
     if (divisionFilter !== "all") params.set("divisionId", divisionFilter);
     if (channelFilter !== "all") params.set("channel", channelFilter);
 
@@ -190,7 +201,7 @@ export function AdminAnalyticsClient() {
       throw new Error(json.message || "Failed to load business intelligence.");
     }
     return json.data as AnalyticsPayload;
-  }, [range, divisionFilter, channelFilter, router]);
+  }, [range, mode, divisionFilter, channelFilter, router]);
 
   useEffect(() => {
     let ignore = false;
@@ -213,6 +224,17 @@ export function AdminAnalyticsClient() {
     };
   }, [fetchAnalytics]);
 
+  // Real-time background auto-refresh every 12 seconds
+  useEffect(() => {
+    if (!autoRefresh) return;
+    const timer = setInterval(() => {
+      fetchAnalytics().then((payload) => {
+        if (payload) setData(payload);
+      });
+    }, 12000);
+    return () => clearInterval(timer);
+  }, [autoRefresh, fetchAnalytics]);
+
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
@@ -225,27 +247,106 @@ export function AdminAnalyticsClient() {
     }
   };
 
+  // Trigger test live visit ping to verify tracking live
+  const handleTestPing = async () => {
+    setPingStatus("Sending test visit ping...");
+    try {
+      await fetch("/api/v1/analytics/track", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          path: "/",
+          referrer: "https://google.com",
+          device: "Desktop",
+        }),
+      });
+      setPingStatus("Test visit recorded! Refreshing metrics...");
+      setTimeout(async () => {
+        await handleRefresh();
+        setPingStatus(null);
+      }, 600);
+    } catch {
+      setPingStatus("Ping failed.");
+      setTimeout(() => setPingStatus(null), 2000);
+    }
+  };
+
   const kpis = data?.kpis;
+  const isZeroTraffic = (data?.website?.visitors ?? 0) === 0 && mode === "realtime";
+  const activeUsers = data?.realtime?.activeUsersNow ?? 0;
 
   return (
     <div className="space-y-6 pb-14">
-      {/* A. Header: Analytics & Performance */}
+      {/* ----------------------------------------------------
+          A. HEADER: ANALYTICS & REALTIME STATUS
+      ---------------------------------------------------- */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1 border-b border-[#1E222A] pb-5">
         <div>
-          <div className="flex items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2.5">
             <h1 className="font-heading font-bold text-2xl sm:text-3xl text-[#F5F2EC] tracking-tight">
               Analytics &amp; Performance
             </h1>
             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-medium bg-[#D6B77A]/15 border border-[#D6B77A]/30 text-[#D6B77A]">
               Business Intelligence
             </span>
+            {mode === "realtime" ? (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-[#56C58B]/15 border border-[#56C58B]/30 text-[#56C58B]">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#56C58B] animate-pulse" />
+                <span>LIVE REAL-TIME</span>
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-[#A78BFA]/15 border border-[#A78BFA]/30 text-[#A78BFA]">
+                <span>BENCHMARK SIMULATION</span>
+              </span>
+            )}
           </div>
           <p className="text-sm text-[#8F96A3] mt-1 max-w-2xl">
-            Understand business performance, measure growth, analyse customer behaviour and identify opportunities across EDYREX.
+            Live real-time visitor tracking, conversion velocity, enquiry volume, and business intelligence.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
+          {/* Data Mode Switcher */}
+          <div className="flex items-center p-1 rounded-xl bg-[#12151A] border border-[#252A32] text-xs">
+            <button
+              type="button"
+              onClick={() => setMode("realtime")}
+              className={cn(
+                "px-3 py-1.5 rounded-lg font-medium transition-colors cursor-pointer flex items-center gap-1.5",
+                mode === "realtime"
+                  ? "bg-[#D6B77A] text-[#17130B] font-bold"
+                  : "text-[#898D94] hover:text-[#F5F2EC]"
+              )}
+            >
+              <Radio className="w-3 h-3" />
+              <span>Real-Time Live</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode("benchmark")}
+              className={cn(
+                "px-3 py-1.5 rounded-lg font-medium transition-colors cursor-pointer flex items-center gap-1.5",
+                mode === "benchmark"
+                  ? "bg-[#D6B77A] text-[#17130B] font-bold"
+                  : "text-[#898D94] hover:text-[#F5F2EC]"
+              )}
+            >
+              <Sparkles className="w-3 h-3" />
+              <span>Benchmark Mode</span>
+            </button>
+          </div>
+
+          {/* Test Live Ping */}
+          <button
+            type="button"
+            onClick={handleTestPing}
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#12151A] border border-[#252A32] hover:border-[#38BDF8] text-xs font-medium text-[#38BDF8] transition-colors cursor-pointer"
+          >
+            <Zap className="w-3.5 h-3.5" />
+            <span>Test Visit Ping</span>
+          </button>
+
+          {/* Refresh Button */}
           <button
             type="button"
             disabled={refreshing}
@@ -258,7 +359,83 @@ export function AdminAnalyticsClient() {
         </div>
       </div>
 
-      {/* B. Global Date Range & Multi-Dimensional Filters */}
+      {pingStatus && (
+        <div className="px-4 py-2.5 rounded-xl bg-[#38BDF8]/15 border border-[#38BDF8]/30 text-xs font-mono text-[#38BDF8] flex items-center gap-2 animate-fade-in">
+          <Activity className="w-4 h-4 animate-spin" />
+          <span>{pingStatus}</span>
+        </div>
+      )}
+
+      {/* ----------------------------------------------------
+          REAL-TIME ACTIVE STATUS STRIP
+      ---------------------------------------------------- */}
+      <div className="rounded-2xl bg-gradient-to-r from-[#12151A] via-[#10141C] to-[#12151A] border border-[#252A32] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#56C58B] animate-pulse" />
+            <span className="font-semibold text-xs text-[#F5F2EC]">
+              Active Visitors Right Now:
+            </span>
+          </div>
+          <span className="font-heading font-bold text-lg text-[#56C58B] font-mono">
+            {loading ? "..." : activeUsers}
+          </span>
+          <span className="text-[11px] text-[#898D94] border-l border-[#252A32] pl-3 hidden sm:inline">
+            {activeUsers === 0
+              ? "Awaiting live public visits"
+              : `${activeUsers} active session${activeUsers > 1 ? "s" : ""} in the last 5 minutes`}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-3 text-[11px]">
+          <label className="flex items-center gap-1.5 cursor-pointer text-[#898D94] hover:text-[#F5F2EC]">
+            <input
+              type="checkbox"
+              checked={autoRefresh}
+              onChange={(e) => setAutoRefresh(e.target.checked)}
+              className="rounded border-[#252A32] bg-[#0D0F12] accent-[#56C58B] cursor-pointer"
+            />
+            <span>Auto-poll (12s)</span>
+          </label>
+
+          <Link
+            href="/"
+            target="_blank"
+            className="inline-flex items-center gap-1 text-[#D6B77A] hover:underline"
+          >
+            <span>Open Public Site</span>
+            <ExternalLink className="w-3 h-3" />
+          </Link>
+        </div>
+      </div>
+
+      {/* ----------------------------------------------------
+          ZERO TRAFFIC REALTIME NOTICE (Image / Context parity)
+      ---------------------------------------------------- */}
+      {isZeroTraffic && (
+        <div className="p-4 rounded-2xl bg-[#161B24] border border-[#2B3547] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 font-semibold text-[#F5F2EC]">
+              <Sparkles className="w-4 h-4 text-[#D6B77A]" />
+              <span>Real-Time Visitor Tracking Online</span>
+            </div>
+            <p className="text-[#898D94] text-[11px] leading-relaxed max-w-2xl">
+              Zero external visitors recorded for this period yet. The first-party listener is active on all public routes (<code className="text-[#D6B77A] font-mono">/</code>, <code className="text-[#D6B77A] font-mono">/work</code>, <code className="text-[#D6B77A] font-mono">/services</code>, <code className="text-[#D6B77A] font-mono">/contact</code>). As visitors arrive, real traffic counts, device splits, and geographic data will populate automatically.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setMode("benchmark")}
+            className="px-3.5 py-2 rounded-xl bg-[#1D2433] hover:bg-[#252E40] border border-[#3A4761] text-[#D6B77A] font-medium text-xs whitespace-nowrap cursor-pointer transition-colors"
+          >
+            View Benchmark Simulation
+          </button>
+        </div>
+      )}
+
+      {/* ----------------------------------------------------
+          B. GLOBAL DATE RANGE & MULTI-DIMENSIONAL FILTERS
+      ---------------------------------------------------- */}
       <div className="rounded-2xl bg-[#12151A] border border-[#252A32] p-4 flex flex-wrap items-center justify-between gap-3 text-xs">
         {/* Date Ranges */}
         <div className="flex flex-wrap items-center gap-1.5">
@@ -314,7 +491,9 @@ export function AdminAnalyticsClient() {
         </div>
       )}
 
-      {/* C. Business Performance KPIs with Comparison */}
+      {/* ----------------------------------------------------
+          C. BUSINESS PERFORMANCE KPIS WITH COMPARISON
+      ---------------------------------------------------- */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Visitors */}
         <div className="rounded-2xl bg-[#12151A] border border-[#252A32] p-4 space-y-2">
@@ -421,7 +600,9 @@ export function AdminAnalyticsClient() {
         </div>
       </div>
 
-      {/* D. Conversion Funnel (6 Stages) */}
+      {/* ----------------------------------------------------
+          D. CONVERSION FUNNEL (6 Stages)
+      ---------------------------------------------------- */}
       <div className="rounded-2xl bg-[#12151A] border border-[#252A32] p-5 space-y-4">
         <div className="flex items-center justify-between border-b border-[#1E222A] pb-3">
           <div>
@@ -463,7 +644,9 @@ export function AdminAnalyticsClient() {
         </div>
       </div>
 
-      {/* 2-Column Split: Acquisition Channels & Website Engagement */}
+      {/* ----------------------------------------------------
+          2-COLUMN SPLIT: ACQUISITION & WEBSITE ENGAGEMENT
+      ---------------------------------------------------- */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
         {/* E. Acquisition Analytics (7 cols) */}
         <div className="lg:col-span-7 rounded-2xl bg-[#12151A] border border-[#252A32] p-5 space-y-4">
@@ -583,23 +766,31 @@ export function AdminAnalyticsClient() {
             <span className="text-xs font-semibold text-[#F5F2EC] block">
               Top Geographic Territories
             </span>
-            <div className="flex flex-wrap gap-2 text-[11px]">
-              {data?.website?.geographicDistribution?.map((geo) => (
-                <span
-                  key={geo.country}
-                  className="px-2.5 py-1 rounded-lg bg-[#0D0F12] border border-[#1E222A] text-[#B2B4BA]"
-                >
-                  {geo.country}: <strong className="text-[#F5F2EC]">{geo.share}%</strong>
-                </span>
-              ))}
-            </div>
+            {data?.website?.geographicDistribution && data.website.geographicDistribution.length > 0 ? (
+              <div className="flex flex-wrap gap-2 text-[11px]">
+                {data.website.geographicDistribution.map((geo) => (
+                  <span
+                    key={geo.country}
+                    className="px-2.5 py-1 rounded-lg bg-[#0D0F12] border border-[#1E222A] text-[#B2B4BA]"
+                  >
+                    {geo.country}: <strong className="text-[#F5F2EC]">{geo.share}%</strong>
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <div className="text-[11px] text-[#777D87] italic">
+                Awaiting geographic visitor sessions...
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* F. SEO Search Performance Analytics & Most Visited Pages */}
+      {/* ----------------------------------------------------
+          F. SEO SEARCH PERFORMANCE & MOST VISITED PAGES
+      ---------------------------------------------------- */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-        {/* SEO Search Console Query Performance (7 cols) */}
+        {/* Search Performance */}
         <div className="lg:col-span-7 rounded-2xl bg-[#12151A] border border-[#252A32] p-5 space-y-4">
           <div className="flex items-center justify-between border-b border-[#1E222A] pb-3">
             <div>
@@ -611,7 +802,7 @@ export function AdminAnalyticsClient() {
               </p>
             </div>
             <Link
-              href="/admin/seo?tab=advanced"
+              href="/admin/seo"
               className="text-xs text-[#D6B77A] hover:underline inline-flex items-center gap-1"
             >
               <span>Technical SEO</span>
@@ -646,39 +837,45 @@ export function AdminAnalyticsClient() {
             </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-[#0D0F12] text-[#777D87] font-mono text-[10px] uppercase">
-                <tr>
-                  <th className="py-2 px-3">Search Query</th>
-                  <th className="py-2 px-3">Impressions</th>
-                  <th className="py-2 px-3">Clicks</th>
-                  <th className="py-2 px-3 text-right">Avg. Position</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#1E222A]">
-                {data?.seo?.topQueries?.map((q) => (
-                  <tr key={q.query} className="hover:bg-[#191D23]/40">
-                    <td className="py-2.5 px-3 font-medium text-[#F5F2EC]">
-                      {q.query}
-                    </td>
-                    <td className="py-2.5 px-3 font-mono text-[#B2B4BA]">
-                      {q.impressions.toLocaleString()}
-                    </td>
-                    <td className="py-2.5 px-3 font-mono text-[#73C794]">
-                      {q.clicks}
-                    </td>
-                    <td className="py-2.5 px-3 text-right font-mono text-[#D6B77A]">
-                      {q.position}
-                    </td>
+          {data?.seo?.topQueries && data.seo.topQueries.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-[#0D0F12] text-[#777D87] font-mono text-[10px] uppercase">
+                  <tr>
+                    <th className="py-2 px-3">Search Query</th>
+                    <th className="py-2 px-3">Impressions</th>
+                    <th className="py-2 px-3">Clicks</th>
+                    <th className="py-2 px-3 text-right">Avg. Position</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-[#1E222A]">
+                  {data.seo.topQueries.map((q) => (
+                    <tr key={q.query} className="hover:bg-[#191D23]/40">
+                      <td className="py-2.5 px-3 font-medium text-[#F5F2EC]">
+                        {q.query}
+                      </td>
+                      <td className="py-2.5 px-3 font-mono text-[#B2B4BA]">
+                        {q.impressions.toLocaleString()}
+                      </td>
+                      <td className="py-2.5 px-3 font-mono text-[#73C794]">
+                        {q.clicks}
+                      </td>
+                      <td className="py-2.5 px-3 text-right font-mono text-[#D6B77A]">
+                        {q.position}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="py-8 text-center text-xs text-[#898D94] italic font-mono border border-dashed border-[#1E222A] rounded-xl">
+              Connect Google Search Console in SEO &amp; Metadata to stream verified keyword impressions.
+            </div>
+          )}
         </div>
 
-        {/* Most Visited Pages (5 cols) */}
+        {/* Most Visited Pages */}
         <div className="lg:col-span-5 rounded-2xl bg-[#12151A] border border-[#252A32] p-5 space-y-4">
           <div className="flex items-center justify-between border-b border-[#1E222A] pb-3">
             <h2 className="font-heading text-sm font-semibold text-[#F5F2EC]">
@@ -688,30 +885,38 @@ export function AdminAnalyticsClient() {
           </div>
 
           <div className="space-y-3 text-xs">
-            {data?.website?.mostVisitedPages?.map((p) => (
-              <div
-                key={p.path}
-                className="p-3 rounded-xl bg-[#0D0F12] border border-[#1E222A] space-y-1.5"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-[#F5F2EC] truncate max-w-[200px]">
-                    {p.title}
-                  </span>
-                  <span className="font-mono text-[#D6B77A] text-[11px]">
-                    {p.views.toLocaleString()} views
-                  </span>
+            {data?.website?.mostVisitedPages && data.website.mostVisitedPages.length > 0 ? (
+              data.website.mostVisitedPages.map((p) => (
+                <div
+                  key={p.path}
+                  className="p-3 rounded-xl bg-[#0D0F12] border border-[#1E222A] space-y-1.5"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium text-[#F5F2EC] truncate max-w-[200px]">
+                      {p.title}
+                    </span>
+                    <span className="font-mono text-[#D6B77A] text-[11px]">
+                      {p.views.toLocaleString()} views
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-[10px] text-[#777D87]">
+                    <span className="font-mono">{p.path}</span>
+                    <span>Avg: {p.avgDuration}</span>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between text-[10px] text-[#777D87]">
-                  <span className="font-mono">{p.path}</span>
-                  <span>Avg: {p.avgDuration}</span>
-                </div>
+              ))
+            ) : (
+              <div className="py-12 text-center text-xs text-[#898D94] italic font-mono border border-dashed border-[#1E222A] rounded-xl">
+                No pageview traffic logged yet for this period.
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>
 
-      {/* K. Service & Division Analytics across 4 EDYREX Divisions */}
+      {/* ----------------------------------------------------
+          K. SERVICE & DIVISION PERFORMANCE ACROSS 4 DIVISIONS
+      ---------------------------------------------------- */}
       <div className="rounded-2xl bg-[#12151A] border border-[#252A32] p-5 space-y-4">
         <div className="flex items-center justify-between border-b border-[#1E222A] pb-3">
           <div>
@@ -757,7 +962,9 @@ export function AdminAnalyticsClient() {
         </div>
       </div>
 
-      {/* J & L: Project Delivery Performance & Content Performance */}
+      {/* ----------------------------------------------------
+          J & L: PROJECT DELIVERY & CONTENT PERFORMANCE
+      ---------------------------------------------------- */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* Project Delivery Analytics */}
         <div className="rounded-2xl bg-[#12151A] border border-[#252A32] p-5 space-y-4">
@@ -802,24 +1009,30 @@ export function AdminAnalyticsClient() {
           </div>
 
           <div className="space-y-2 text-xs">
-            {data?.content?.topCaseStudies?.map((cs) => (
-              <div
-                key={cs.id}
-                className="p-2.5 rounded-xl bg-[#0D0F12] border border-[#1E222A] flex items-center justify-between"
-              >
-                <div className="min-w-0">
-                  <span className="font-medium text-[#F5F2EC] block truncate">
-                    {cs.title}
-                  </span>
-                  <span className="text-[10px] font-mono text-[#777D87]">
-                    /work/{cs.slug}
+            {data?.content?.topCaseStudies && data.content.topCaseStudies.length > 0 ? (
+              data.content.topCaseStudies.map((cs) => (
+                <div
+                  key={cs.id}
+                  className="p-2.5 rounded-xl bg-[#0D0F12] border border-[#1E222A] flex items-center justify-between"
+                >
+                  <div className="min-w-0">
+                    <span className="font-medium text-[#F5F2EC] block truncate">
+                      {cs.title}
+                    </span>
+                    <span className="text-[10px] font-mono text-[#777D87]">
+                      /work/{cs.slug}
+                    </span>
+                  </div>
+                  <span className="text-[11px] font-mono text-[#D6B77A] shrink-0">
+                    {cs.views.toLocaleString()} views
                   </span>
                 </div>
-                <span className="text-[11px] font-mono text-[#D6B77A] shrink-0">
-                  {cs.views.toLocaleString()} views
-                </span>
+              ))
+            ) : (
+              <div className="py-6 text-center text-xs text-[#898D94] italic font-mono">
+                No case study views logged yet.
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>
