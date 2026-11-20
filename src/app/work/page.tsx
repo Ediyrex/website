@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 };
 
 export default async function WorkPage() {
-  const projects = await getPublishedProjects();
+  const projects = await getPublishedProjects({ placement: "work_archive" });
 
   return (
     <div className="bg-[#0C0D0F]">

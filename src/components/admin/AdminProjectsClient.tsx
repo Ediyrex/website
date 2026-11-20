@@ -23,11 +23,29 @@ import {
   Calendar,
   ChevronLeft,
   ChevronRight,
+  Sparkles,
+  Clock,
+  AlertCircle,
 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { cn } from "@/lib/utils";
 import { useAdminUser } from "./AdminContext";
 import { MediaPickerModal, type MediaAssetItem } from "./MediaPickerModal";
+import { FeaturedWorkManager } from "./work/FeaturedWorkManager";
+import {
+  PublicPlacementPreviewModal,
+  type PreviewProjectData,
+} from "./work/PublicPlacementPreviewModal";
+import { INITIAL_SECTORS } from "@/components/sections/IndustriesPage/industries.data";
+
+export interface PlacementFormItem {
+  destination: "homepage" | "work_archive" | "division" | "industry" | "campaign";
+  targetId?: string | null;
+  displayOrder: number;
+  isActive: boolean;
+  featuredFrom?: string;
+  featuredUntil?: string;
+}
 
 interface ProjectListRow {
   id: string;
@@ -83,6 +101,7 @@ interface ProjectFormState {
   repositoryUrl: string;
   isFeatured: boolean;
   displayOrder: number;
+  placements: PlacementFormItem[];
   status: "draft" | "published" | "archived";
   seoTitle: string;
   seoDescription: string;
@@ -119,6 +138,9 @@ export function AdminProjectsClient() {
     categories: [],
   });
   const [serviceOptions, setServiceOptions] = useState<ServiceOption[]>([]);
+  const [activeTab, setActiveTab] = useState<"projects" | "featured">(
+    searchParams.get("tab") === "featured" ? "featured" : "projects"
+  );
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
@@ -134,6 +156,7 @@ export function AdminProjectsClient() {
 
   const [editorOpen, setEditorOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [placementPreviewOpen, setPlacementPreviewOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<ProjectFormState | null>(null);
   const [techDraft, setTechDraft] = useState("");
@@ -245,6 +268,7 @@ export function AdminProjectsClient() {
       repositoryUrl: "",
       isFeatured: false,
       displayOrder: projectsList.length + 1,
+      placements: [],
       status: "draft",
       seoTitle: "",
       seoDescription: "",
@@ -290,6 +314,7 @@ export function AdminProjectsClient() {
       repositoryUrl: d.repositoryUrl || "",
       isFeatured: Boolean(d.isFeatured),
       displayOrder: d.displayOrder ?? 0,
+      placements: Array.isArray(d.placements) ? d.placements : [],
       status: d.status || "draft",
       seoTitle: d.seoTitle || "",
       seoDescription: d.seoDescription || "",
@@ -412,6 +437,7 @@ export function AdminProjectsClient() {
       repositoryUrl: form.repositoryUrl || null,
       isFeatured: form.isFeatured,
       displayOrder: form.displayOrder,
+      placements: form.placements || [],
       status: form.status,
       seoTitle: form.seoTitle || null,
       seoDescription: form.seoDescription || null,
@@ -524,7 +550,40 @@ export function AdminProjectsClient() {
         )}
       </div>
 
-      {/* 4-Card KPI Strip */}
+      {/* Module Navigation Tabs */}
+      <div className="flex items-center gap-2 border-b border-[#1E222A] pb-3">
+        <button
+          type="button"
+          onClick={() => setActiveTab("projects")}
+          className={cn(
+            "px-4 py-2 rounded-lg text-xs font-heading font-semibold transition-colors cursor-pointer",
+            activeTab === "projects"
+              ? "bg-[#D9B875] text-[#090A0C]"
+              : "bg-[#111419] text-[#898D94] hover:text-[#F5F2EC] border border-[#1E222A]"
+          )}
+        >
+          All Portfolio Projects ({stats.totalAll})
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("featured")}
+          className={cn(
+            "px-4 py-2 rounded-lg text-xs font-heading font-semibold transition-colors cursor-pointer flex items-center gap-1.5",
+            activeTab === "featured"
+              ? "bg-[#F06419] text-white"
+              : "bg-[#111419] text-[#898D94] hover:text-[#F5F2EC] border border-[#1E222A]"
+          )}
+        >
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>Featured Work Placements</span>
+        </button>
+      </div>
+
+      {activeTab === "featured" ? (
+        <FeaturedWorkManager />
+      ) : (
+        <>
+          {/* 4-Card KPI Strip */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="p-5 rounded-xl bg-[#111419] border border-[#1E222A] space-y-2.5">
           <div className="flex items-center gap-2.5 text-xs text-[#9CA3AF]">
@@ -1005,6 +1064,8 @@ export function AdminProjectsClient() {
           </div>
         </div>
       </div>
+      </>
+      )}
 
       {/* Create / Edit Modal */}
       {editorOpen && form && (
@@ -1366,10 +1427,10 @@ export function AdminProjectsClient() {
                 </div>
               </div>
 
-              {/* Links, Order & Featured */}
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
-                <div className="space-y-1.5 sm:col-span-2">
-                  <label className="text-xs font-mono text-[#B2B4BA]">Live URL</label>
+              {/* External Links */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-mono text-[#B2B4BA]">Live Demo / Project URL</label>
                   <input
                     type="url"
                     value={form.liveUrl}
@@ -1379,30 +1440,317 @@ export function AdminProjectsClient() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-mono text-[#B2B4BA]">Order</label>
+                  <label className="text-xs font-mono text-[#B2B4BA]">Repository URL (Optional)</label>
                   <input
-                    type="number"
-                    min={0}
-                    value={form.displayOrder}
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        displayOrder: Number(e.target.value) || 0,
-                      })
-                    }
+                    type="url"
+                    value={form.repositoryUrl}
+                    onChange={(e) => setForm({ ...form, repositoryUrl: e.target.value })}
+                    placeholder="https://github.com/..."
                     className="w-full h-9 px-3 rounded-lg bg-[#0D0F12] border border-[#252A32] text-xs text-[#F5F3EE]"
                   />
                 </div>
-                <label className="inline-flex items-center gap-2 h-9 text-xs text-[#F5F3EE] cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={form.isFeatured}
-                    onChange={(e) =>
-                      setForm({ ...form, isFeatured: e.target.checked })
-                    }
-                  />
-                  <span>Featured</span>
-                </label>
+              </div>
+
+              {/* SECTION: Publishing & Placement */}
+              <div className="p-4 sm:p-5 rounded-xl bg-[#0E1013] border border-[#252A32] space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#1E222A] pb-3">
+                  <div>
+                    <div className="font-heading font-semibold text-sm text-[#F5F2EC] flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-[#F06419]" />
+                      <span>Publishing &amp; Placement</span>
+                    </div>
+                    <p className="text-[11px] text-[#898D94]">
+                      Control publication lifecycle, editorial featured curation, and public website placements.
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setPlacementPreviewOpen(true)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#161A1F] border border-[#D9B875]/40 text-xs font-mono text-[#D9B875] hover:bg-[#D9B875]/10 transition-colors cursor-pointer"
+                  >
+                    <Eye className="w-3.5 h-3.5" />
+                    <span>PREVIEW PUBLIC PLACEMENT</span>
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {/* Publication Status */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-mono text-[#B2B4BA]">
+                      Publication Status *
+                    </label>
+                    <select
+                      value={form.status}
+                      onChange={(e) => {
+                        const nextStatus = e.target.value as ProjectFormState["status"];
+                        setForm({
+                          ...form,
+                          status: nextStatus,
+                          isFeatured: nextStatus === "published" ? form.isFeatured : false,
+                        });
+                      }}
+                      className="w-full h-10 px-3 rounded-lg bg-[#12151A] border border-[#252A32] text-xs text-[#F5F2EC] focus:border-[#D9B875]"
+                    >
+                      <option value="draft">Draft (Internal only)</option>
+                      <option value="published">Published (Public)</option>
+                      <option value="archived">Archived (Unlisted)</option>
+                    </select>
+                  </div>
+
+                  {/* Display Position */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-mono text-[#B2B4BA]">
+                      Display Position / Order
+                    </label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={form.displayOrder}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          displayOrder: Number(e.target.value) || 0,
+                        })
+                      }
+                      className="w-full h-10 px-3 rounded-lg bg-[#12151A] border border-[#252A32] text-xs text-[#F5F2EC]"
+                    />
+                  </div>
+
+                  {/* Featured Selection Toggle */}
+                  <div className="space-y-1.5 flex flex-col justify-end">
+                    <label className="inline-flex items-center gap-2.5 h-10 px-3 rounded-lg bg-[#12151A] border border-[#252A32] text-xs text-[#F5F2EC] cursor-pointer hover:border-[#F06419]/40 transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={form.isFeatured}
+                        onChange={(e) => {
+                          const nextChecked = e.target.checked;
+                          setForm({
+                            ...form,
+                            isFeatured: nextChecked,
+                            placements:
+                              nextChecked && form.placements.length === 0
+                                ? [
+                                    {
+                                      destination: "homepage",
+                                      targetId: "primary",
+                                      displayOrder: 1,
+                                      isActive: true,
+                                    },
+                                  ]
+                                : form.placements,
+                          });
+                        }}
+                      />
+                      <span className="font-semibold flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-[#F06419]" />
+                        <span>Set as Featured</span>
+                      </span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Status Notice if Draft */}
+                {form.isFeatured && form.status !== "published" && (
+                  <div className="p-3 rounded-lg bg-[#2A1E14] border border-[#E9B45A]/40 text-xs text-[#E9B45A] flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span>
+                      Draft and Archived projects cannot appear in public placements. Publish this project to enable public featured placements.
+                    </span>
+                  </div>
+                )}
+
+                {/* Placement Destinations (Revealed when Set as Featured is enabled) */}
+                {form.isFeatured && form.status === "published" && (
+                  <div className="space-y-3 pt-3 border-t border-[#1E222A]">
+                    <div className="text-xs font-mono uppercase tracking-wider text-[#D9B875]">
+                      Available Placement Destinations
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {/* Homepage Placement */}
+                      <label className="p-3 rounded-lg bg-[#12151A] border border-[#252A32] hover:border-[#F06419]/40 flex items-start gap-2.5 cursor-pointer transition-colors">
+                        <input
+                          type="checkbox"
+                          className="mt-0.5"
+                          checked={form.placements.some((p) => p.destination === "homepage")}
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            const next = checked
+                              ? [
+                                  ...form.placements.filter((p) => p.destination !== "homepage"),
+                                  {
+                                    destination: "homepage" as const,
+                                    targetId: "primary",
+                                    displayOrder: 1,
+                                    isActive: true,
+                                  },
+                                ]
+                              : form.placements.filter((p) => p.destination !== "homepage");
+                            setForm({ ...form, placements: next });
+                          }}
+                        />
+                        <div className="text-xs space-y-0.5">
+                          <span className="font-semibold text-[#F5F2EC] flex items-center gap-1.5">
+                            <span>Homepage Featured</span>
+                            <span className="px-1.5 py-0.2 rounded text-[10px] font-mono bg-[#F06419]/20 text-[#F06419]">
+                              Selected Works
+                            </span>
+                          </span>
+                          <p className="text-[11px] text-[#898D94]">
+                            Prominent editorial showcase card on the EDYREX homepage.
+                          </p>
+                        </div>
+                      </label>
+
+                      {/* Work Archive Placement */}
+                      <label className="p-3 rounded-lg bg-[#12151A] border border-[#252A32] hover:border-[#D9B875]/40 flex items-start gap-2.5 cursor-pointer transition-colors">
+                        <input
+                          type="checkbox"
+                          className="mt-0.5"
+                          checked={form.placements.some((p) => p.destination === "work_archive")}
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            const next = checked
+                              ? [
+                                  ...form.placements.filter((p) => p.destination !== "work_archive"),
+                                  {
+                                    destination: "work_archive" as const,
+                                    targetId: null,
+                                    displayOrder: form.displayOrder || 1,
+                                    isActive: true,
+                                  },
+                                ]
+                              : form.placements.filter((p) => p.destination !== "work_archive");
+                            setForm({ ...form, placements: next });
+                          }}
+                        />
+                        <div className="text-xs space-y-0.5">
+                          <span className="font-semibold text-[#F5F2EC] flex items-center gap-1.5">
+                            <span>Work Archive Featured</span>
+                            <span className="px-1.5 py-0.2 rounded text-[10px] font-mono bg-[#D9B875]/20 text-[#D9B875]">
+                              /work
+                            </span>
+                          </span>
+                          <p className="text-[11px] text-[#898D94]">
+                            Curated lead card positioning within the public Work &amp; Case Studies archive.
+                          </p>
+                        </div>
+                      </label>
+
+                      {/* Relevant Service Division */}
+                      <div className="p-3 rounded-lg bg-[#12151A] border border-[#252A32] space-y-2">
+                        <label className="flex items-start gap-2.5 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            className="mt-0.5"
+                            checked={form.placements.some((p) => p.destination === "division")}
+                            onChange={(e) => {
+                              const checked = e.target.checked;
+                              const next = checked
+                                ? [
+                                    ...form.placements.filter((p) => p.destination !== "division"),
+                                    {
+                                      destination: "division" as const,
+                                      targetId: "ai",
+                                      displayOrder: 1,
+                                      isActive: true,
+                                    },
+                                  ]
+                                : form.placements.filter((p) => p.destination !== "division");
+                              setForm({ ...form, placements: next });
+                            }}
+                          />
+                          <div className="text-xs space-y-0.5">
+                            <span className="font-semibold text-[#F5F2EC]">Relevant Service Division</span>
+                            <p className="text-[11px] text-[#898D94]">
+                              Featured within the associated service division blueprint section.
+                            </p>
+                          </div>
+                        </label>
+                        {form.placements.some((p) => p.destination === "division") && (
+                          <select
+                            value={
+                              form.placements.find((p) => p.destination === "division")?.targetId ||
+                              "ai"
+                            }
+                            onChange={(e) => {
+                              const targetId = e.target.value;
+                              setForm({
+                                ...form,
+                                placements: form.placements.map((p) =>
+                                  p.destination === "division" ? { ...p, targetId } : p
+                                ),
+                              });
+                            }}
+                            className="w-full h-8 px-2 rounded bg-[#0D0F12] border border-[#252A32] text-xs text-[#F5F2EC]"
+                          >
+                            <option value="branding">Branding &amp; Marketing</option>
+                            <option value="media">Media &amp; Content Production</option>
+                            <option value="digital">Web, Apps &amp; Digital Products</option>
+                            <option value="ai">AI &amp; Automation</option>
+                          </select>
+                        )}
+                      </div>
+
+                      {/* Relevant Industry Sector */}
+                      <div className="p-3 rounded-lg bg-[#12151A] border border-[#252A32] space-y-2">
+                        <label className="flex items-start gap-2.5 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            className="mt-0.5"
+                            checked={form.placements.some((p) => p.destination === "industry")}
+                            onChange={(e) => {
+                              const checked = e.target.checked;
+                              const next = checked
+                                ? [
+                                    ...form.placements.filter((p) => p.destination !== "industry"),
+                                    {
+                                      destination: "industry" as const,
+                                      targetId: "healthcare-clinics",
+                                      displayOrder: 1,
+                                      isActive: true,
+                                    },
+                                  ]
+                                : form.placements.filter((p) => p.destination !== "industry");
+                              setForm({ ...form, placements: next });
+                            }}
+                          />
+                          <div className="text-xs space-y-0.5">
+                            <span className="font-semibold text-[#F5F2EC]">Relevant Industry Sector</span>
+                            <p className="text-[11px] text-[#898D94]">
+                              Featured on the corresponding industry vertical index page.
+                            </p>
+                          </div>
+                        </label>
+                        {form.placements.some((p) => p.destination === "industry") && (
+                          <select
+                            value={
+                              form.placements.find((p) => p.destination === "industry")?.targetId ||
+                              "healthcare-clinics"
+                            }
+                            onChange={(e) => {
+                              const targetId = e.target.value;
+                              setForm({
+                                ...form,
+                                placements: form.placements.map((p) =>
+                                  p.destination === "industry" ? { ...p, targetId } : p
+                                ),
+                              });
+                            }}
+                            className="w-full h-8 px-2 rounded bg-[#0D0F12] border border-[#252A32] text-xs text-[#F5F2EC]"
+                          >
+                            {INITIAL_SECTORS.map((s) => (
+                              <option key={s.slug} value={s.slug}>
+                                {s.name}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Optional Case Study */}
@@ -1702,6 +2050,30 @@ export function AdminProjectsClient() {
             })),
           });
         }}
+      />
+
+      {/* Public Placement Live Preview Modal from Editor */}
+      <PublicPlacementPreviewModal
+        isOpen={placementPreviewOpen}
+        onClose={() => setPlacementPreviewOpen(false)}
+        project={
+          form
+            ? {
+                title: form.title || "Untitled Project",
+                slug: form.slug || "untitled",
+                summary: form.summary || "No summary provided.",
+                description: form.description,
+                projectType: form.projectType,
+                industry: form.industry,
+                coverAssetUrl: form.coverAssetUrl,
+                techStack: form.techStack,
+                destination: form.placements[0]?.destination
+                  ? `Featured on ${form.placements[0].destination}`
+                  : "Homepage Featured",
+                displayOrder: form.displayOrder,
+              }
+            : null
+        }
       />
     </div>
   );

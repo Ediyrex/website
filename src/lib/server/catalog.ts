@@ -9,6 +9,7 @@ import {
   projectMedia,
   mediaAssets,
   studioProducts,
+  featuredPlacements,
 } from "@/db";
 import { SERVICES_DATA } from "@/features/services/data";
 import { PROJECTS_DATA } from "@/features/work/data";
@@ -106,6 +107,8 @@ function mapProjectClassification(
 export async function getPublishedProjects(options?: {
   category?: string;
   featuredOnly?: boolean;
+  placement?: "homepage" | "work_archive" | "division" | "industry" | "campaign";
+  targetId?: string;
 }): Promise<ProjectItem[]> {
   const db = getDb();
   if (!db) {
@@ -136,17 +139,63 @@ export async function getPublishedProjects(options?: {
     return items;
   }
 
-  const conditions = [eq(projects.status, "published")];
-  if (options?.featuredOnly) {
-    conditions.push(eq(projects.isFeatured, true));
+  let projectRows: (typeof projects.$inferSelect)[] = [];
+  const placedProjectIds = new Set<string>();
+
+  // When a specific placement is requested, query manual editorial featured placements
+  if (options?.placement) {
+    const placementConditions = [
+      eq(featuredPlacements.destination, options.placement),
+      eq(featuredPlacements.isActive, true),
+      eq(projects.status, "published"),
+    ];
+    if (options.targetId) {
+      placementConditions.push(eq(featuredPlacements.targetId, options.targetId));
+    }
+
+    const placed = await db
+      .select({
+        project: projects,
+      })
+      .from(featuredPlacements)
+      .innerJoin(projects, eq(featuredPlacements.projectId, projects.id))
+      .where(and(...placementConditions))
+      .orderBy(asc(featuredPlacements.displayOrder), desc(projects.publishedAt))
+      .limit(100);
+
+    if (placed.length > 0) {
+      placed.forEach((r) => placedProjectIds.add(r.project.id));
+      if (options.featuredOnly) {
+        projectRows = placed.map((r) => r.project);
+      } else {
+        const remaining = await db
+          .select()
+          .from(projects)
+          .where(eq(projects.status, "published"))
+          .orderBy(asc(projects.displayOrder), desc(projects.publishedAt))
+          .limit(100);
+        projectRows = [
+          ...placed.map((r) => r.project),
+          ...remaining.filter((p) => !placedProjectIds.has(p.id)),
+        ];
+      }
+    }
   }
 
-  const projectRows = await db
-    .select()
-    .from(projects)
-    .where(and(...conditions))
-    .orderBy(asc(projects.displayOrder), desc(projects.publishedAt))
-    .limit(100);
+  // Fallback to standard published projects query if not placement-specific or placement was empty
+  if (projectRows.length === 0) {
+    const conditions = [eq(projects.status, "published")];
+    if (options?.featuredOnly) {
+      conditions.push(eq(projects.isFeatured, true));
+    }
+
+    projectRows = await db
+      .select()
+      .from(projects)
+      .where(and(...conditions))
+      .orderBy(asc(projects.displayOrder), desc(projects.publishedAt))
+      .limit(100);
+  }
 
   if (projectRows.length === 0) {
     return [];
@@ -257,7 +306,7 @@ export async function getPublishedProjects(options?: {
       repositoryUrl: row.repositoryUrl ?? undefined,
       seoTitle: row.seoTitle ?? undefined,
       seoDescription: row.seoDescription ?? undefined,
-      featured: row.isFeatured,
+      featured: options?.placement ? placedProjectIds.has(row.id) : row.isFeatured,
       isPublished: true,
       createdAt: (row.publishedAt ?? row.createdAt).toISOString(),
       updatedAt: row.updatedAt.toISOString(),
@@ -272,6 +321,13 @@ export async function getPublishedProjects(options?: {
   }
 
   return mapped;
+}
+
+export async function getFeaturedProjectsByPlacement(
+  destination: "homepage" | "work_archive" | "division" | "industry" | "campaign",
+  targetId?: string
+): Promise<ProjectItem[]> {
+  return getPublishedProjects({ placement: destination, targetId, featuredOnly: true });
 }
 
 export async function getPublishedProjectBySlug(

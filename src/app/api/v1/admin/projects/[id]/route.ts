@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 import { z } from "zod";
 import {
   caseStudies,
+  featuredPlacements,
   getDb,
   mediaAssets,
   projectMedia,
@@ -51,7 +52,7 @@ export async function GET(
       return apiNotFound("Project not found.");
     }
 
-    const [linkedServices, galleryRows, [study], coverRows, ogRows] =
+    const [linkedServices, galleryRows, [study], coverRows, ogRows, placementRows] =
       await Promise.all([
         db
           .select({ serviceId: projectServices.serviceId })
@@ -87,6 +88,11 @@ export async function GET(
               .where(eq(mediaAssets.id, project.ogImageAssetId))
               .limit(1)
           : Promise.resolve([]),
+        db
+          .select()
+          .from(featuredPlacements)
+          .where(eq(featuredPlacements.projectId, id))
+          .orderBy(asc(featuredPlacements.displayOrder)),
       ]);
 
     return apiOk({
@@ -96,6 +102,7 @@ export async function GET(
       serviceIds: linkedServices.map((s) => s.serviceId),
       galleryAssets: galleryRows,
       galleryAssetIds: galleryRows.map((g) => g.id),
+      placements: placementRows,
       caseStudy: study
         ? {
             challenge: study.challenge,
@@ -176,7 +183,34 @@ export async function PATCH(
     const publishedAt =
       data.status === "published" ? existing.publishedAt ?? new Date() : existing.publishedAt;
 
+    // Rule: Draft or Archived projects cannot be featured publicly
+    let effectiveIsFeatured = data.status === "published" ? data.isFeatured : false;
+
     const updated = await db.transaction(async (tx) => {
+      // Sync featured placements if status changed or placements payload provided
+      if (data.status !== "published") {
+        await tx.delete(featuredPlacements).where(eq(featuredPlacements.projectId, id));
+        effectiveIsFeatured = false;
+      } else if (data.placements !== undefined) {
+        await tx.delete(featuredPlacements).where(eq(featuredPlacements.projectId, id));
+        if (data.isFeatured && data.placements.length > 0) {
+          effectiveIsFeatured = true;
+          await tx.insert(featuredPlacements).values(
+            data.placements.map((p) => ({
+              projectId: id,
+              destination: p.destination,
+              targetId: p.targetId || null,
+              displayOrder: p.displayOrder,
+              isActive: p.isActive !== false,
+              featuredFrom: p.featuredFrom ? new Date(p.featuredFrom) : null,
+              featuredUntil: p.featuredUntil ? new Date(p.featuredUntil) : null,
+            }))
+          );
+        } else {
+          effectiveIsFeatured = false;
+        }
+      }
+
       const [row] = await tx
         .update(projects)
         .set({
@@ -193,7 +227,7 @@ export async function PATCH(
           techStack: data.techStack,
           liveUrl: data.liveUrl || null,
           repositoryUrl: data.repositoryUrl || null,
-          isFeatured: data.isFeatured,
+          isFeatured: effectiveIsFeatured,
           displayOrder: data.displayOrder,
           status: data.status,
           seoTitle: data.seoTitle || null,

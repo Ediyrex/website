@@ -248,3 +248,33 @@ export const projectMedia = pgTable(
   ]
 );
 
+export const featuredPlacements = pgTable(
+  "featured_placements",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    projectId: uuid("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    destination: varchar("destination", { length: 64 }).notNull(), // 'homepage' | 'work_archive' | 'division' | 'industry' | 'campaign'
+    targetId: varchar("target_id", { length: 120 }), // division slug (e.g. 'ai', 'branding') or industry slug (e.g. 'healthcare-clinics') or campaign identifier
+    displayOrder: integer("display_order").notNull().default(0),
+    isActive: boolean("is_active").notNull().default(true),
+    featuredFrom: timestamp("featured_from", { withTimezone: true, mode: "date" }),
+    featuredUntil: timestamp("featured_until", { withTimezone: true, mode: "date" }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("idx_featured_placements_dest").on(
+      table.destination,
+      table.targetId,
+      table.displayOrder
+    ),
+    index("idx_featured_placements_project").on(table.projectId),
+  ]
+);
+

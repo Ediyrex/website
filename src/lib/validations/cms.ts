@@ -53,6 +53,25 @@ export const caseStudyInputSchema = z.object({
     .default([]),
 });
 
+export const placementDestinationEnum = z.enum([
+  "homepage",
+  "work_archive",
+  "division",
+  "industry",
+  "campaign",
+]);
+
+export const featuredPlacementInputSchema = z.object({
+  projectId: z.string().uuid("Invalid project ID."),
+  destination: placementDestinationEnum,
+  targetId: optionalSafeText(120),
+  displayOrder: z.coerce.number().int().min(0).max(9999).default(0),
+  isActive: z.boolean().default(true),
+  featuredFrom: z.string().datetime().optional().nullable(),
+  featuredUntil: z.string().datetime().optional().nullable(),
+  confirmReplace: z.boolean().optional().default(false),
+});
+
 export const projectUpsertSchema = z.object({
   title: safeText(180, 2),
   slug: z
@@ -77,6 +96,20 @@ export const projectUpsertSchema = z.object({
   repositoryUrl: safeHttpOrRelativeUrlSchema,
   isFeatured: z.boolean().default(false),
   displayOrder: z.coerce.number().int().min(0).max(9999).default(0),
+  placements: z
+    .array(
+      z.object({
+        destination: placementDestinationEnum,
+        targetId: optionalSafeText(120),
+        displayOrder: z.coerce.number().int().min(0).max(9999).default(0),
+        isActive: z.boolean().default(true),
+        featuredFrom: z.string().datetime().optional().nullable(),
+        featuredUntil: z.string().datetime().optional().nullable(),
+      })
+    )
+    .max(20)
+    .optional()
+    .default([]),
   status: z.enum(["draft", "published", "archived"]).default("draft"),
   seoTitle: optionalSafeText(160),
   seoDescription: optionalSafeText(320),

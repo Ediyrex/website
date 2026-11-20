@@ -22,6 +22,7 @@ import {
   projectServices,
   caseStudies,
   projectMedia,
+  featuredPlacements,
 } from "./catalog";
 import { mediaAssets } from "./media";
 import {
@@ -71,7 +72,18 @@ export const projectsRelations = relations(projects, ({ one, many }) => ({
   }),
   projectServices: many(projectServices),
   projectMedia: many(projectMedia),
+  featuredPlacements: many(featuredPlacements),
 }));
+
+export const featuredPlacementsRelations = relations(
+  featuredPlacements,
+  ({ one }) => ({
+    project: one(projects, {
+      fields: [featuredPlacements.projectId],
+      references: [projects.id],
+    }),
+  })
+);
 
 export const projectServicesRelations = relations(
   projectServices,

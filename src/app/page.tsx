@@ -30,7 +30,7 @@ import {
 
 export default async function HomePage() {
   const [projects, studioProducts] = await Promise.all([
-    getPublishedProjects(),
+    getPublishedProjects({ placement: "homepage" }),
     getPublishedStudioProducts(),
   ]);
 

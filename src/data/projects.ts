@@ -218,7 +218,7 @@ export function mapToSelectedWorkProjects(
       previewVariant,
       tags,
       caseStudyUrl: `/work/${project.slug}`,
-      featured: override ? override.featured : (project.featured ?? false),
+      featured: typeof project.featured === "boolean" ? project.featured : (override?.featured ?? false),
       isPublished: project.isPublished ?? true,
       filterCategories:
         override?.filterCategories ?? inferFilterCategories(project),

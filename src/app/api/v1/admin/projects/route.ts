@@ -2,6 +2,7 @@ import { and, asc, desc, eq, ilike, or, sql } from "drizzle-orm";
 import type { NextRequest } from "next/server";
 import {
   caseStudies,
+  featuredPlacements,
   getDb,
   mediaAssets,
   projectMedia,
@@ -191,6 +192,10 @@ export async function POST(request: NextRequest) {
     const normalizedClientIsPublic = isClientProject ? data.clientIsPublic : false;
     const publishedAt = data.status === "published" ? new Date() : null;
 
+    // Rule: Draft/Archived projects cannot be featured publicly
+    const effectiveIsFeatured =
+      data.status === "published" && data.isFeatured && Boolean(data.placements && data.placements.length > 0);
+
     const created = await db.transaction(async (tx) => {
       const [row] = await tx
         .insert(projects)
@@ -208,7 +213,7 @@ export async function POST(request: NextRequest) {
           techStack: data.techStack,
           liveUrl: data.liveUrl || null,
           repositoryUrl: data.repositoryUrl || null,
-          isFeatured: data.isFeatured,
+          isFeatured: effectiveIsFeatured,
           displayOrder: data.displayOrder,
           status: data.status,
           seoTitle: data.seoTitle || null,
@@ -220,6 +225,20 @@ export async function POST(request: NextRequest) {
           publishedAt,
         })
         .returning();
+
+      if (effectiveIsFeatured && data.placements && data.placements.length > 0) {
+        await tx.insert(featuredPlacements).values(
+          data.placements.map((p) => ({
+            projectId: row.id,
+            destination: p.destination,
+            targetId: p.targetId || null,
+            displayOrder: p.displayOrder,
+            isActive: p.isActive !== false,
+            featuredFrom: p.featuredFrom ? new Date(p.featuredFrom) : null,
+            featuredUntil: p.featuredUntil ? new Date(p.featuredUntil) : null,
+          }))
+        );
+      }
 
       if (data.serviceIds.length > 0) {
         await tx
