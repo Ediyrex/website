@@ -464,7 +464,7 @@ export async function getPublishedProjectBySlug(
 export async function getPublishedStudioProducts(): Promise<HybridProduct[]> {
   const db = getDb();
   if (!db) {
-    return [];
+    return HYBRID_PRODUCTS_DATA;
   }
 
   const rows = await db

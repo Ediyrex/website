@@ -54,36 +54,15 @@ export function WhyEdiyrexSection({
           </div>
         </div>
 
-        {/* Region B: Operating Principles */}
-        {products && products.length > 0 ? (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-12 items-start">
-            <div className="lg:col-span-5">
-              <OperatingPrinciples />
-            </div>
-            <div className="lg:col-span-7">
-              <InHouseProducts products={products} />
-            </div>
+        {/* Region B & C: Operating Principles (Left) + In-House Products (Right) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-12 items-start">
+          <div className="lg:col-span-5">
+            <OperatingPrinciples />
           </div>
-        ) : (
-          <div className="border-t border-[#D8CEC3] pt-12 lg:pt-16">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-start">
-              <div className="lg:col-span-4 space-y-3">
-                <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-[#FF6500] font-semibold block">
-                  Operational Framework
-                </span>
-                <h3 className="text-[28px] sm:text-[34px] font-bold text-[#111111] leading-[1.15] tracking-[-0.03em]">
-                  How we operate
-                </h3>
-                <p className="text-[14.5px] sm:text-[15.5px] text-[#44403D] leading-relaxed">
-                  Core principles governing every project, line of code, and creative deliverable from inception to deployment.
-                </p>
-              </div>
-              <div className="lg:col-span-8">
-                <OperatingPrinciples />
-              </div>
-            </div>
+          <div className="lg:col-span-7">
+            <InHouseProducts products={products} />
           </div>
-        )}
+        </div>
       </div>
     </section>
   );
