@@ -4,7 +4,6 @@ import React, { useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import gsap from "gsap";
-import { AlertCircle } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import type { ProjectItem } from "@/types";
 import { enrichProjects, PUBLISHED_PROJECTS } from "./projects.data";
@@ -59,16 +58,6 @@ export function WorkHero({ projects }: { projects?: ProjectItem[] }) {
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-10">
           {/* Left Typography Column */}
           <div className="space-y-6 lg:col-span-6">
-            <div data-work-hero className="flex flex-wrap items-center gap-2.5">
-              <span className="inline-flex items-center rounded-full border border-[#F06419]/60 bg-[#F06419]/10 px-3.5 py-1 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-[#F06419]">
-                PORTFOLIO &amp; CASE STUDIES
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-[#D9B875]/45 bg-[#14171C] px-3.5 py-1 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-[#D9B875]">
-                <AlertCircle className="h-3 w-3" aria-hidden="true" />
-                CONCEPT WORK CLEARLY LABELED
-              </span>
-            </div>
-
             <h1
               data-work-hero
               style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}
