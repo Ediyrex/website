@@ -4,6 +4,7 @@ import {
   getPublishedProjectBySlug,
   getPublishedProjects,
 } from "@/lib/server/catalog";
+import { PROJECTS_DATA } from "@/features/work/data";
 import { CaseStudyHero } from "@/components/sections/CaseStudy/CaseStudyHero";
 import { CaseStudyVisual } from "@/components/sections/CaseStudy/CaseStudyVisual";
 import { CaseStudyDocumentation } from "@/components/sections/CaseStudy/CaseStudyDocumentation";
@@ -16,9 +17,22 @@ type CaseStudyPageProps = {
 };
 
 export async function generateStaticParams() {
-  const projects = await getPublishedProjects();
-  return projects.map((project) => ({
-    slug: project.slug,
+  const projects = await getPublishedProjects().catch(() => []);
+  const slugs = new Set<string>();
+
+  for (const p of projects) {
+    if (p.slug) slugs.add(p.slug);
+  }
+
+  // Ensure Next.js cache components build-time validation always has at least one static param
+  if (slugs.size === 0) {
+    for (const p of PROJECTS_DATA) {
+      if (p.slug) slugs.add(p.slug);
+    }
+  }
+
+  return Array.from(slugs).map((slug) => ({
+    slug,
   }));
 }
 
