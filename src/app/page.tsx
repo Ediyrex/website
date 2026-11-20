@@ -23,17 +23,26 @@ import { EngagementSection } from "@/components/sections/engagement/EngagementSe
 import { StudioComparisonSection } from "@/components/sections/StudioComparisonSection/StudioComparisonSection";
 import { StandardsSection } from "@/components/sections/StandardsSection/StandardsSection";
 import { FinalCtaSection } from "@/components/sections/FinalCtaSection";
+import {
+  getPublishedProjects,
+  getPublishedStudioProducts,
+} from "@/lib/server/catalog";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [projects, studioProducts] = await Promise.all([
+    getPublishedProjects(),
+    getPublishedStudioProducts(),
+  ]);
+
   return (
     <>
       <Hero />
       <AboutSection />
       <ThreeDivisionsSection />
       <StudioArchitecture />
-      <SelectedWork />
+      <SelectedWork projects={projects} />
       <OperationalShift />
-      <WhyEdiyrexSection />
+      <WhyEdiyrexSection products={studioProducts} />
       <WorkflowSection />
       <EngagementSection />
       <StudioComparisonSection />

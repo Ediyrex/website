@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
+import type { HybridProduct } from "@/types";
 import { StudioManifesto } from "./components/StudioManifesto";
 import { StudioFlywheel } from "./components/StudioFlywheel";
 import { OperatingPrinciples } from "./components/OperatingPrinciples";
@@ -8,7 +9,11 @@ import { InHouseProducts } from "./components/InHouseProducts";
 import { BottomWave } from "./components/BottomWave";
 import { initWhyEdiyrexAnimations } from "./animations/whyEdiyrexAnimations";
 
-export function WhyEdiyrexSection() {
+export function WhyEdiyrexSection({
+  products,
+}: {
+  products?: HybridProduct[];
+}) {
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -55,7 +60,7 @@ export function WhyEdiyrexSection() {
             <OperatingPrinciples />
           </div>
           <div className="lg:col-span-7">
-            <InHouseProducts />
+            <InHouseProducts products={products} />
           </div>
         </div>
       </div>

@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import type { ProjectItem } from "@/types";
 import {
+  mapToSelectedWorkProjects,
   SELECTED_WORK_PROJECTS,
   WORK_FILTER_OPTIONS,
   type WorkFilterKey,
@@ -13,7 +15,7 @@ import { ProjectGallery } from "./ProjectGallery";
 import { ImpactStats } from "./ImpactStats";
 import { initSelectedWorkAnimations } from "./animations";
 
-export function SelectedWork() {
+export function SelectedWork({ projects }: { projects?: ProjectItem[] }) {
   const sectionRef = useRef<HTMLElement>(null);
   const [activeFilter, setActiveFilter] = useState<WorkFilterKey>("all");
 
@@ -23,17 +25,24 @@ export function SelectedWork() {
     return initSelectedWorkAnimations(el);
   }, []);
 
+  const items = useMemo(() => {
+    return projects && projects.length > 0
+      ? mapToSelectedWorkProjects(projects)
+      : SELECTED_WORK_PROJECTS;
+  }, [projects]);
+
   const { featuredProject, galleryProjects } = useMemo(() => {
-    const matching = SELECTED_WORK_PROJECTS.filter((project) =>
+    const matching = items.filter((project) =>
       project.filterCategories.includes(activeFilter)
     );
-    const featured = matching.find((project) => project.featured) ?? null;
+    const featured =
+      matching.find((project) => project.featured) ?? matching[0] ?? null;
     const gallery = matching.filter((project) => project !== featured);
     return {
       featuredProject: featured,
       galleryProjects: gallery,
     };
-  }, [activeFilter]);
+  }, [items, activeFilter]);
 
   return (
     <section

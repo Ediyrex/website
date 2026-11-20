@@ -1,5 +1,6 @@
 import { PROJECTS_DATA } from "@/features/work/data";
 import { HYBRID_PRODUCTS_DATA } from "@/features/products/data";
+import type { ProjectItem } from "@/types";
 
 export type WorkFilterKey =
   | "all"
@@ -107,6 +108,123 @@ export const SELECTED_WORK_PROJECTS: readonly SelectedWorkProject[] =
       filterCategories: override?.filterCategories ?? ["all"],
     };
   });
+
+function inferFilterCategories(project: ProjectItem): readonly WorkFilterKey[] {
+  const cats = new Set<WorkFilterKey>(["all"]);
+  const cat = (project.category || "").toLowerCase();
+  const searchStr = `${project.title} ${project.summary || ""} ${project.description || ""} ${(project.servicesDemonstrated || []).join(" ")}`.toLowerCase();
+
+  if (
+    cat === "ai" ||
+    searchStr.includes("ai") ||
+    searchStr.includes("agent") ||
+    searchStr.includes("voice")
+  ) {
+    cats.add("ai-agents");
+  }
+  if (
+    cat === "branding" ||
+    searchStr.includes("brand") ||
+    searchStr.includes("identity") ||
+    searchStr.includes("packaging")
+  ) {
+    cats.add("brand-identity");
+  }
+  if (
+    cat === "media" ||
+    searchStr.includes("video") ||
+    searchStr.includes("motion") ||
+    searchStr.includes("cinematic") ||
+    searchStr.includes("film")
+  ) {
+    cats.add("media-video");
+  }
+  if (
+    cat === "digital" ||
+    searchStr.includes("dashboard") ||
+    searchStr.includes("platform") ||
+    searchStr.includes("web") ||
+    searchStr.includes("dadv") ||
+    searchStr.includes("telemetry") ||
+    searchStr.includes("app")
+  ) {
+    cats.add("platforms-tools");
+  }
+  if (
+    searchStr.includes("automation") ||
+    searchStr.includes("n8n") ||
+    searchStr.includes("workflow") ||
+    searchStr.includes("ops")
+  ) {
+    cats.add("automation");
+  }
+
+  if (cats.size === 1) {
+    if (cat === "branding") cats.add("brand-identity");
+    else if (cat === "media") cats.add("media-video");
+    else if (cat === "digital") cats.add("platforms-tools");
+    else if (cat === "ai") cats.add("ai-agents");
+    else cats.add("platforms-tools");
+  }
+
+  return Array.from(cats);
+}
+
+export function mapToSelectedWorkProjects(
+  items?: ProjectItem[]
+): readonly SelectedWorkProject[] {
+  if (!items || items.length === 0) {
+    return SELECTED_WORK_PROJECTS;
+  }
+
+  return items.map((project, idx) => {
+    const override = SELECTED_WORK_OVERRIDES[project.slug];
+    const tags =
+      override?.tags ??
+      (project.servicesDemonstrated && project.servicesDemonstrated.length > 0
+        ? project.servicesDemonstrated.slice(0, 3)
+        : project.techStack && project.techStack.length > 0
+          ? project.techStack.slice(0, 3)
+          : ["Studio Project"]);
+
+    const previewVariant: ProjectPreviewVariant | undefined =
+      override?.previewVariant ??
+      (project.slug.includes("lumina")
+        ? "lumina"
+        : project.slug.includes("strata")
+          ? "strata"
+          : project.slug.includes("voice")
+            ? "vocalis"
+            : (["lumina", "strata", "vocalis"] as const)[idx % 3]);
+
+    return {
+      id: project.id,
+      slug: project.slug,
+      title: project.title,
+      category:
+        override?.category ??
+        (project.featured
+          ? "FEATURED CASE STUDY"
+          : project.category
+            ? project.category.toUpperCase()
+            : "PROJECT"),
+      description:
+        override?.description ??
+        project.summary ??
+        project.description ??
+        "",
+      thumbnail:
+        project.coverImage || "/images/projects/concept-digital-strata.svg",
+      previewVariant,
+      tags,
+      caseStudyUrl: `/work/${project.slug}`,
+      featured: override ? override.featured : (project.featured ?? false),
+      isPublished: project.isPublished ?? true,
+      filterCategories:
+        override?.filterCategories ?? inferFilterCategories(project),
+    };
+  });
+}
 
 export interface StudioImpactStat {
   id: string;

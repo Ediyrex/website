@@ -1,4 +1,5 @@
 import { HYBRID_PRODUCTS_DATA } from "@/features/products/data";
+import type { HybridProduct } from "@/types";
 
 export interface OperatingPrinciple {
   number: string;
@@ -83,4 +84,38 @@ export const IN_HOUSE_PRODUCTS: readonly InHouseProductItem[] =
       href: meta?.href ?? "/services",
     };
   });
+
+export function mapToInHouseProducts(
+  products?: HybridProduct[]
+): readonly InHouseProductItem[] {
+  if (!products || products.length === 0) {
+    return IN_HOUSE_PRODUCTS;
+  }
+
+  const visuals: InHouseProductVisual[] = ["energy", "waveform", "layers"];
+
+  return products.map((product, idx) => {
+    const meta = PRODUCT_META[product.slug];
+    const statusUpper = (
+      product.status ? product.status.toUpperCase() : "BETA"
+    ) as InHouseProductItem["status"];
+    const validStatus: InHouseProductItem["status"] = [
+      "BETA",
+      "ALPHA",
+      "RESEARCH",
+    ].includes(statusUpper)
+      ? statusUpper
+      : "BETA";
+
+    return {
+      id: product.id,
+      slug: product.slug,
+      name: meta?.name ?? product.name,
+      status: validStatus,
+      description: meta?.description ?? product.tagline ?? product.description,
+      visual: meta?.visual ?? visuals[idx % visuals.length],
+      href: meta?.href ?? product.demoUrl ?? "/services",
+    };
+  });
+}
 

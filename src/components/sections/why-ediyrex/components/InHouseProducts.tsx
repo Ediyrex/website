@@ -1,8 +1,21 @@
 import React from "react";
-import { IN_HOUSE_PRODUCTS } from "../data/studioProducts";
+import type { HybridProduct } from "@/types";
+import {
+  IN_HOUSE_PRODUCTS,
+  mapToInHouseProducts,
+} from "../data/studioProducts";
 import { ProductCard } from "./ProductCard";
 
-export function InHouseProducts() {
+export function InHouseProducts({
+  products,
+}: {
+  products?: HybridProduct[];
+}) {
+  const items =
+    products && products.length > 0
+      ? mapToInHouseProducts(products)
+      : IN_HOUSE_PRODUCTS;
+
   return (
     <div className="space-y-6">
       {/* Header Row: Left Heading + Right Supporting Description */}
@@ -20,7 +33,7 @@ export function InHouseProducts() {
 
       {/* Three Equal-Sized Clickable Product Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 items-stretch">
-        {IN_HOUSE_PRODUCTS.map((product) => (
+        {items.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>
