@@ -86,7 +86,7 @@ const NAV_GROUPS: NavGroup[] = [
     title: "GROWTH",
     items: [
       { href: "/admin/seo", label: "SEO & Metadata", icon: SearchCheck },
-      { href: "/admin", label: "Analytics", icon: Activity, exact: true },
+      { href: "/admin/analytics", label: "Analytics", icon: Activity },
     ],
   },
   {
@@ -329,7 +329,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                   } else if (item.href === "/admin/industries") {
                     isActive = pathname === "/admin/industries" || (pathname === "/admin/services" && currentView === "industries");
                   } else if (item.exact) {
-                    isActive = pathname === "/admin" || pathname === "/admin/dashboard";
+                    isActive = pathname === "/admin" || pathname === "/admin/dashboard" || pathname === "/admin/overview";
                   } else {
                     isActive = pathname.startsWith(item.href.split("?")[0]);
                   }
