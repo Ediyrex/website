@@ -142,12 +142,114 @@ export const serviceUpsertSchema = z.object({
   isFeatured: z.boolean().default(false),
   displayOrder: z.coerce.number().int().min(0).max(9999).default(0),
   status: z.enum(["draft", "published", "archived"]).default("draft"),
+  processStages: z
+    .array(
+      z.object({
+        title: safeText(120, 1),
+        description: safeText(500, 1),
+        iconName: optionalSafeText(64),
+        displayOrder: z.coerce.number().int().min(0).max(99).optional(),
+      })
+    )
+    .max(12)
+    .default([]),
+  industryIds: z.array(z.string().trim()).max(30).default([]),
+  projectIds: z.array(z.string().uuid()).max(20).default([]),
   seoTitle: optionalSafeText(160),
   seoDescription: optionalSafeText(320),
   ogTitle: optionalSafeText(160),
   ogDescription: optionalSafeText(320),
   ogImageAssetId: z.string().uuid().optional().nullable(),
   noIndex: z.boolean().default(false),
+});
+
+export const industryChallengeSchema = z.object({
+  title: safeText(140, 1),
+  description: safeText(1000, 1),
+  displayOrder: z.coerce.number().int().min(0).max(99).optional(),
+});
+
+export const industryOpportunitySchema = z.object({
+  title: safeText(140, 1),
+  description: safeText(1000, 1),
+  displayOrder: z.coerce.number().int().min(0).max(99).optional(),
+});
+
+export const industrySolutionSchema = z.object({
+  title: safeText(140, 1),
+  description: safeText(1000, 1),
+  serviceIds: z.array(z.string().trim()).max(10).default([]),
+  divisionIds: z.array(z.string().trim()).max(4).default([]),
+  displayOrder: z.coerce.number().int().min(0).max(99).optional(),
+});
+
+export const industryFaqSchema = z.object({
+  question: safeText(240, 1),
+  answer: safeText(2000, 1),
+  displayOrder: z.coerce.number().int().min(0).max(99).optional(),
+});
+
+export const industryUpsertSchema = z.object({
+  name: safeText(140, 2),
+  slug: z
+    .string()
+    .trim()
+    .min(2)
+    .max(120)
+    .toLowerCase()
+    .regex(slugPattern, "Slug must contain lowercase letters, numbers, and hyphens only."),
+  tagline: safeText(240, 0).default(""),
+  shortDescription: safeText(500, 0).default(""),
+  description: safeText(20000, 0).default(""),
+  heroHeadline: optionalSafeText(240),
+  heroDescription: optionalSafeText(2000),
+  heroSupportingLabel: optionalSafeText(140),
+  ctaLabel: safeText(80, 0).default("Discuss Your Sector"),
+  ctaDestination: safeHttpOrRelativeUrlSchema.default("/contact"),
+  subIndustries: z.array(safeText(80, 1)).max(20).default([]),
+  deliverables: z.array(safeText(200, 1)).max(20).default([]),
+  challenges: z.array(industryChallengeSchema).max(20).default([]),
+  opportunities: z.array(industryOpportunitySchema).max(20).default([]),
+  solutions: z.array(industrySolutionSchema).max(20).default([]),
+  faqs: z.array(industryFaqSchema).max(20).default([]),
+  coverImageUrl: safeHttpOrRelativeUrlSchema.default(""),
+  coverAssetId: z.string().uuid().optional().nullable(),
+  displayOrder: z.coerce.number().int().min(0).max(9999).default(0),
+  status: z.enum(["draft", "published", "archived"]).default("draft"),
+  isFeatured: z.boolean().default(false),
+  isHeroFeatured: z.boolean().default(false),
+  seoTitle: optionalSafeText(160),
+  seoDescription: optionalSafeText(320),
+  ogTitle: optionalSafeText(160),
+  ogDescription: optionalSafeText(320),
+  ogImageAssetId: z.string().uuid().optional().nullable(),
+  canonicalUrl: safeHttpOrRelativeUrlSchema,
+  serviceIds: z.array(z.string().trim()).max(30).default([]),
+  divisionIds: z.array(z.string().trim()).max(10).default([]),
+  sectorArchitectureIds: z.array(z.string().trim()).max(20).default([]),
+  projectIds: z.array(z.string().uuid()).max(20).default([]),
+});
+
+export const sectorArchitectureUpsertSchema = z.object({
+  slug: z
+    .string()
+    .trim()
+    .min(2)
+    .max(120)
+    .toLowerCase()
+    .regex(slugPattern, "Slug must contain lowercase letters, numbers, and hyphens only."),
+  number: optionalSafeText(20),
+  category: safeText(160, 2),
+  title: safeText(180, 2),
+  description: safeText(2000, 5),
+  capabilities: z.array(safeText(60, 1)).max(20).default([]),
+  industryIds: z.array(z.string().trim()).max(30).default([]),
+  serviceIds: z.array(z.string().trim()).max(30).default([]),
+  displayOrder: z.coerce.number().int().min(0).max(9999).default(0),
+  status: z.enum(["draft", "published", "archived"]).default("draft"),
+  isFeatured: z.boolean().default(true),
+  isHighlighted: z.boolean().default(false),
+  detailRoute: safeHttpOrRelativeUrlSchema.default("/contact"),
 });
 
 export const divisionCreateSchema = z.object({

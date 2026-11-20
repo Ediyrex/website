@@ -1,6 +1,13 @@
 import { and, asc, eq, ilike, or, sql } from "drizzle-orm";
 import type { NextRequest } from "next/server";
-import { getDb, mediaAssets, serviceDivisions, services } from "@/db";
+import {
+  getDb,
+  mediaAssets,
+  serviceDivisions,
+  services,
+  industryServices,
+  projectServices,
+} from "@/db";
 import {
   apiBadRequest,
   apiError,
@@ -117,6 +124,7 @@ export async function GET(request: NextRequest) {
             totalAll: sql<number>`count(*)::int`,
             publishedCount: sql<number>`count(*) filter (where ${services.status} = 'published')::int`,
             draftCount: sql<number>`count(*) filter (where ${services.status} = 'draft')::int`,
+            featuredCount: sql<number>`count(*) filter (where ${services.isFeatured} = true)::int`,
           })
           .from(services),
         db
@@ -145,6 +153,7 @@ export async function GET(request: NextRequest) {
         totalAll: globalStats?.totalAll ?? 0,
         publishedCount: globalStats?.publishedCount ?? 0,
         draftCount: globalStats?.draftCount ?? 0,
+        featuredCount: globalStats?.featuredCount ?? 0,
         divisionsCount: groupedDivisions.length,
         divisionCounts: groupedDivisions,
       },
@@ -218,6 +227,7 @@ export async function POST(request: NextRequest) {
         categoryLabel: data.categoryLabel || null,
         deliverables: data.deliverables,
         features: data.features,
+        processStages: data.processStages || [],
         showPricing: data.showPricing,
         startingPrice: data.startingPrice || null,
         iconName: data.iconName || null,
@@ -234,6 +244,24 @@ export async function POST(request: NextRequest) {
         publishedAt,
       })
       .returning();
+
+    if (data.industryIds && data.industryIds.length > 0) {
+      for (const industryId of data.industryIds) {
+        await db
+          .insert(industryServices)
+          .values({ industryId, serviceId: created.id })
+          .onConflictDoNothing();
+      }
+    }
+
+    if (data.projectIds && data.projectIds.length > 0) {
+      for (const projectId of data.projectIds) {
+        await db
+          .insert(projectServices)
+          .values({ projectId, serviceId: created.id })
+          .onConflictDoNothing();
+      }
+    }
 
     await recordAuditLog({
       actorUserId: auth.session.userId,

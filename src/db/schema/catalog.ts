@@ -70,6 +70,17 @@ export const services = pgTable(
     categoryLabel: varchar("category_label", { length: 80 }),
     deliverables: jsonb("deliverables").$type<string[]>().notNull().default([]),
     features: jsonb("features").$type<string[]>().notNull().default([]),
+    processStages: jsonb("process_stages")
+      .$type<
+        {
+          title: string;
+          description: string;
+          iconName?: string | null;
+          displayOrder?: number;
+        }[]
+      >()
+      .notNull()
+      .default([]),
     showPricing: boolean("show_pricing").notNull().default(false),
     startingPrice: varchar("starting_price", { length: 80 }),
     iconName: varchar("icon_name", { length: 64 }),
@@ -277,4 +288,159 @@ export const featuredPlacements = pgTable(
     index("idx_featured_placements_project").on(table.projectId),
   ]
 );
+
+export const industries = pgTable(
+  "industries",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    slug: varchar("slug", { length: 120 }).notNull().unique(),
+    name: varchar("name", { length: 140 }).notNull(),
+    tagline: varchar("tagline", { length: 240 }).notNull().default(""),
+    shortDescription: varchar("short_description", { length: 500 }).notNull().default(""),
+    description: text("description").notNull().default(""),
+    heroHeadline: varchar("hero_headline", { length: 240 }),
+    heroDescription: text("hero_description"),
+    heroSupportingLabel: varchar("hero_supporting_label", { length: 140 }),
+    ctaLabel: varchar("cta_label", { length: 80 }).notNull().default("Discuss Your Sector"),
+    ctaDestination: varchar("cta_destination", { length: 160 }).notNull().default("/contact"),
+    subIndustries: jsonb("sub_industries").$type<string[]>().notNull().default([]),
+    deliverables: jsonb("deliverables").$type<string[]>().notNull().default([]),
+    challenges: jsonb("challenges")
+      .$type<{ title: string; description: string; displayOrder?: number }[]>()
+      .notNull()
+      .default([]),
+    opportunities: jsonb("opportunities")
+      .$type<{ title: string; description: string; displayOrder?: number }[]>()
+      .notNull()
+      .default([]),
+    solutions: jsonb("solutions")
+      .$type<
+        {
+          title: string;
+          description: string;
+          serviceIds?: string[];
+          divisionIds?: string[];
+          displayOrder?: number;
+        }[]
+      >()
+      .notNull()
+      .default([]),
+    faqs: jsonb("faqs")
+      .$type<{ question: string; answer: string; displayOrder?: number }[]>()
+      .notNull()
+      .default([]),
+    coverImageUrl: text("cover_image_url").notNull().default(""),
+    coverAssetId: uuid("cover_asset_id").references(() => mediaAssets.id, {
+      onDelete: "set null",
+    }),
+    displayOrder: integer("display_order").notNull().default(0),
+    status: publicationStatusEnum("status").notNull().default("draft"),
+    isFeatured: boolean("is_featured").notNull().default(false),
+    isHeroFeatured: boolean("is_hero_featured").notNull().default(false),
+    seoTitle: varchar("seo_title", { length: 160 }),
+    seoDescription: varchar("seo_description", { length: 320 }),
+    ogTitle: varchar("og_title", { length: 160 }),
+    ogDescription: varchar("og_description", { length: 320 }),
+    ogImageAssetId: uuid("og_image_asset_id").references(() => mediaAssets.id, {
+      onDelete: "set null",
+    }),
+    canonicalUrl: varchar("canonical_url", { length: 300 }),
+    publishedAt: timestamp("published_at", { withTimezone: true, mode: "date" }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    check("chk_industries_display_order", sql`${table.displayOrder} >= 0`),
+    index("idx_industries_published")
+      .on(table.displayOrder)
+      .where(sql`${table.status} = 'published'`),
+    index("idx_industries_featured")
+      .on(table.displayOrder)
+      .where(sql`${table.status} = 'published' AND ${table.isFeatured} = true`),
+    index("idx_industries_hero")
+      .on(table.displayOrder)
+      .where(sql`${table.isHeroFeatured} = true`),
+  ]
+);
+
+export const sectorArchitectures = pgTable(
+  "sector_architectures",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    slug: varchar("slug", { length: 120 }).notNull().unique(),
+    number: varchar("number", { length: 20 }),
+    category: varchar("category", { length: 160 }).notNull(),
+    title: varchar("title", { length: 180 }).notNull(),
+    description: text("description").notNull(),
+    capabilities: jsonb("capabilities").$type<string[]>().notNull().default([]),
+    displayOrder: integer("display_order").notNull().default(0),
+    status: publicationStatusEnum("status").notNull().default("draft"),
+    isFeatured: boolean("is_featured").notNull().default(true),
+    isHighlighted: boolean("is_highlighted").notNull().default(false),
+    detailRoute: varchar("detail_route", { length: 200 }).default("/contact"),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    check("chk_sector_architectures_display_order", sql`${table.displayOrder} >= 0`),
+    index("idx_sector_architectures_order").on(table.displayOrder),
+  ]
+);
+
+export const industryServices = pgTable(
+  "industry_services",
+  {
+    industryId: uuid("industry_id")
+      .notNull()
+      .references(() => industries.id, { onDelete: "cascade" }),
+    serviceId: uuid("service_id")
+      .notNull()
+      .references(() => services.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    primaryKey({ columns: [table.industryId, table.serviceId] }),
+    index("idx_industry_services_service").on(table.serviceId),
+  ]
+);
+
+export const industrySectorArchitectures = pgTable(
+  "industry_sector_architectures",
+  {
+    industryId: uuid("industry_id")
+      .notNull()
+      .references(() => industries.id, { onDelete: "cascade" }),
+    sectorArchitectureId: uuid("sector_architecture_id")
+      .notNull()
+      .references(() => sectorArchitectures.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    primaryKey({ columns: [table.industryId, table.sectorArchitectureId] }),
+    index("idx_ind_sec_arch_sec").on(table.sectorArchitectureId),
+  ]
+);
+
+export const industryProjects = pgTable(
+  "industry_projects",
+  {
+    industryId: uuid("industry_id")
+      .notNull()
+      .references(() => industries.id, { onDelete: "cascade" }),
+    projectId: uuid("project_id")
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    primaryKey({ columns: [table.industryId, table.projectId] }),
+    index("idx_industry_projects_proj").on(table.projectId),
+  ]
+);
+
 

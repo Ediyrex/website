@@ -8,6 +8,9 @@ import {
   projectServices,
   serviceDivisions,
   services,
+  industryServices,
+  industries,
+  projects,
 } from "@/db";
 import {
   apiBadRequest,
@@ -51,7 +54,7 @@ export async function GET(
       return apiNotFound("Service not found.");
     }
 
-    const [coverRows, ogRows] = await Promise.all([
+    const [coverRows, ogRows, indRows, projRows] = await Promise.all([
       service.coverAssetId
         ? db
             .select({
@@ -74,12 +77,34 @@ export async function GET(
             .where(eq(mediaAssets.id, service.ogImageAssetId))
             .limit(1)
         : Promise.resolve([]),
+      db
+        .select({
+          industryId: industryServices.industryId,
+          name: industries.name,
+          slug: industries.slug,
+        })
+        .from(industryServices)
+        .innerJoin(industries, eq(industryServices.industryId, industries.id))
+        .where(eq(industryServices.serviceId, id)),
+      db
+        .select({
+          projectId: projectServices.projectId,
+          title: projects.title,
+          slug: projects.slug,
+        })
+        .from(projectServices)
+        .innerJoin(projects, eq(projectServices.projectId, projects.id))
+        .where(eq(projectServices.serviceId, id)),
     ]);
 
     return apiOk({
       ...service,
       coverAsset: coverRows[0] ?? null,
       ogImageAsset: ogRows[0] ?? null,
+      industryIds: indRows.map((r) => r.industryId),
+      projectIds: projRows.map((r) => r.projectId),
+      industries: indRows,
+      projects: projRows,
     });
   } catch (err) {
     return handleApiError(err, "GET /api/v1/admin/services/[id]");
@@ -171,6 +196,7 @@ export async function PATCH(
         categoryLabel: data.categoryLabel || null,
         deliverables: data.deliverables,
         features: data.features,
+        processStages: data.processStages || [],
         showPricing: data.showPricing,
         startingPrice: data.startingPrice || null,
         iconName: data.iconName || null,
@@ -188,6 +214,28 @@ export async function PATCH(
       })
       .where(eq(services.id, id))
       .returning();
+
+    // Sync industryServices
+    await db.delete(industryServices).where(eq(industryServices.serviceId, id));
+    if (data.industryIds && data.industryIds.length > 0) {
+      for (const industryId of data.industryIds) {
+        await db
+          .insert(industryServices)
+          .values({ industryId, serviceId: id })
+          .onConflictDoNothing();
+      }
+    }
+
+    // Sync projectServices
+    await db.delete(projectServices).where(eq(projectServices.serviceId, id));
+    if (data.projectIds && data.projectIds.length > 0) {
+      for (const projectId of data.projectIds) {
+        await db
+          .insert(projectServices)
+          .values({ projectId, serviceId: id })
+          .onConflictDoNothing();
+      }
+    }
 
     await recordAuditLog({
       actorUserId: auth.session.userId,

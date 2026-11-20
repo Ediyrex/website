@@ -4,6 +4,7 @@ import { z } from "zod";
 import { getDb, serviceDivisions } from "@/db";
 import {
   apiBadRequest,
+  apiForbidden,
   apiNotFound,
   apiOk,
   apiServerError,
@@ -108,6 +109,58 @@ export async function PATCH(
     return apiOk(updated);
   } catch (err) {
     return handleApiError(err, "PATCH /api/v1/admin/divisions/[id]");
+  }
+}
+
+export async function DELETE(
+  _request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    const auth = await requireAdminRole(["admin"]);
+    if (auth.errorResponse) return auth.errorResponse;
+
+    const { id } = await context.params;
+    if (!uuidSchema.safeParse(id).success) {
+      return apiBadRequest("Invalid division identifier.");
+    }
+
+    const db = getDb();
+    if (!db) {
+      return apiServerError("Database connection unavailable.");
+    }
+
+    const [existing] = await db
+      .select({ id: serviceDivisions.id, slug: serviceDivisions.slug, name: serviceDivisions.name })
+      .from(serviceDivisions)
+      .where(eq(serviceDivisions.id, id))
+      .limit(1);
+
+    if (!existing) {
+      return apiNotFound("Division not found.");
+    }
+
+    const CANONICAL_SLUGS = ["branding", "media", "digital", "ai"];
+    if (CANONICAL_SLUGS.includes(existing.slug)) {
+      return apiForbidden(
+        "The four canonical divisions (Branding, Media, Web Dev, AI) are protected and cannot be deleted."
+      );
+    }
+
+    await db.delete(serviceDivisions).where(eq(serviceDivisions.id, id));
+
+    await recordAuditLog({
+      actorUserId: auth.session.userId,
+      actorEmailSnapshot: auth.session.email,
+      action: "division.deleted",
+      entityType: "service_division",
+      entityId: id,
+      metadata: { slug: existing.slug, name: existing.name },
+    });
+
+    return apiOk({ success: true, deletedId: id });
+  } catch (err) {
+    return handleApiError(err, "DELETE /api/v1/admin/divisions/[id]");
   }
 }
 

@@ -79,7 +79,7 @@ const NAV_GROUPS: NavGroup[] = [
     title: "BUSINESS",
     items: [
       { href: "/admin/services", label: "Services", icon: Layers },
-      { href: "/admin/services?view=industries", label: "Industries", icon: LayoutGrid },
+      { href: "/admin/industries", label: "Industries", icon: LayoutGrid },
     ],
   },
   {
@@ -324,6 +324,10 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                     isActive = pathname === "/admin/inquiries" && currentView === "clients";
                   } else if (item.href === "/admin/inquiries?view=followups") {
                     isActive = pathname === "/admin/inquiries" && currentView === "followups";
+                  } else if (item.href === "/admin/services") {
+                    isActive = pathname === "/admin/services" && currentView !== "industries";
+                  } else if (item.href === "/admin/industries") {
+                    isActive = pathname === "/admin/industries" || (pathname === "/admin/services" && currentView === "industries");
                   } else if (item.exact) {
                     isActive = pathname === "/admin" || pathname === "/admin/dashboard";
                   } else {

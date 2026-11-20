@@ -23,6 +23,11 @@ import {
   caseStudies,
   projectMedia,
   featuredPlacements,
+  industries,
+  sectorArchitectures,
+  industryServices,
+  industrySectorArchitectures,
+  industryProjects,
 } from "./catalog";
 import { mediaAssets } from "./media";
 import {
@@ -95,6 +100,65 @@ export const projectServicesRelations = relations(
     service: one(services, {
       fields: [projectServices.serviceId],
       references: [services.id],
+    }),
+  })
+);
+
+export const industriesRelations = relations(industries, ({ one, many }) => ({
+  coverAsset: one(mediaAssets, {
+    fields: [industries.coverAssetId],
+    references: [mediaAssets.id],
+  }),
+  industryServices: many(industryServices),
+  industrySectorArchitectures: many(industrySectorArchitectures),
+  industryProjects: many(industryProjects),
+}));
+
+export const sectorArchitecturesRelations = relations(
+  sectorArchitectures,
+  ({ many }) => ({
+    industrySectorArchitectures: many(industrySectorArchitectures),
+  })
+);
+
+export const industryServicesRelations = relations(
+  industryServices,
+  ({ one }) => ({
+    industry: one(industries, {
+      fields: [industryServices.industryId],
+      references: [industries.id],
+    }),
+    service: one(services, {
+      fields: [industryServices.serviceId],
+      references: [services.id],
+    }),
+  })
+);
+
+export const industrySectorArchitecturesRelations = relations(
+  industrySectorArchitectures,
+  ({ one }) => ({
+    industry: one(industries, {
+      fields: [industrySectorArchitectures.industryId],
+      references: [industries.id],
+    }),
+    sectorArchitecture: one(sectorArchitectures, {
+      fields: [industrySectorArchitectures.sectorArchitectureId],
+      references: [sectorArchitectures.id],
+    }),
+  })
+);
+
+export const industryProjectsRelations = relations(
+  industryProjects,
+  ({ one }) => ({
+    industry: one(industries, {
+      fields: [industryProjects.industryId],
+      references: [industries.id],
+    }),
+    project: one(projects, {
+      fields: [industryProjects.projectId],
+      references: [projects.id],
     }),
   })
 );

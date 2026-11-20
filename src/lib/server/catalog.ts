@@ -10,7 +10,18 @@ import {
   mediaAssets,
   studioProducts,
   featuredPlacements,
+  industries,
+  sectorArchitectures,
+  industryServices,
+  industrySectorArchitectures,
+  industryProjects,
 } from "@/db";
+import { sql } from "drizzle-orm";
+import { INITIAL_SECTORS, type SectorRecord } from "@/components/sections/IndustriesPage/industries.data";
+import {
+  FEATURED_SECTOR_ARCHITECTURES,
+  type SectorArchitecture,
+} from "@/components/sections/IndustriesPage/sector-intelligence.data";
 import { SERVICES_DATA } from "@/features/services/data";
 import { PROJECTS_DATA } from "@/features/work/data";
 import { HYBRID_PRODUCTS_DATA } from "@/features/products/data";
@@ -675,3 +686,223 @@ export async function getPublishedDivisions(): Promise<HomepageDivisionItem[]> {
     };
   });
 }
+
+export async function ensureBusinessManagementTables(
+  db: NonNullable<ReturnType<typeof getDb>>
+): Promise<void> {
+  try {
+    await db.execute(sql`
+      ALTER TABLE "services" ADD COLUMN IF NOT EXISTS "process_stages" jsonb NOT NULL DEFAULT '[]'::jsonb;
+
+      CREATE TABLE IF NOT EXISTS "industries" (
+        "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        "slug" varchar(120) NOT NULL UNIQUE,
+        "name" varchar(140) NOT NULL,
+        "tagline" varchar(240) NOT NULL DEFAULT '',
+        "short_description" varchar(500) NOT NULL DEFAULT '',
+        "description" text NOT NULL DEFAULT '',
+        "hero_headline" varchar(240),
+        "hero_description" text,
+        "hero_supporting_label" varchar(140),
+        "cta_label" varchar(80) NOT NULL DEFAULT 'Discuss Your Sector',
+        "cta_destination" varchar(160) NOT NULL DEFAULT '/contact',
+        "sub_industries" jsonb NOT NULL DEFAULT '[]'::jsonb,
+        "deliverables" jsonb NOT NULL DEFAULT '[]'::jsonb,
+        "challenges" jsonb NOT NULL DEFAULT '[]'::jsonb,
+        "opportunities" jsonb NOT NULL DEFAULT '[]'::jsonb,
+        "solutions" jsonb NOT NULL DEFAULT '[]'::jsonb,
+        "faqs" jsonb NOT NULL DEFAULT '[]'::jsonb,
+        "cover_image_url" text NOT NULL DEFAULT '',
+        "cover_asset_id" uuid REFERENCES "media_assets"("id") ON DELETE SET NULL,
+        "display_order" integer NOT NULL DEFAULT 0,
+        "status" "publication_status" NOT NULL DEFAULT 'draft',
+        "is_featured" boolean NOT NULL DEFAULT false,
+        "is_hero_featured" boolean NOT NULL DEFAULT false,
+        "seo_title" varchar(160),
+        "seo_description" varchar(320),
+        "og_title" varchar(160),
+        "og_description" varchar(320),
+        "og_image_asset_id" uuid REFERENCES "media_assets"("id") ON DELETE SET NULL,
+        "canonical_url" varchar(300),
+        "published_at" timestamp with time zone,
+        "created_at" timestamp with time zone NOT NULL DEFAULT now(),
+        "updated_at" timestamp with time zone NOT NULL DEFAULT now(),
+        CONSTRAINT "chk_industries_display_order" CHECK ("display_order" >= 0)
+      );
+
+      CREATE INDEX IF NOT EXISTS "idx_industries_published" ON "industries" ("display_order") WHERE "status" = 'published';
+      CREATE INDEX IF NOT EXISTS "idx_industries_featured" ON "industries" ("display_order") WHERE "status" = 'published' AND "is_featured" = true;
+      CREATE INDEX IF NOT EXISTS "idx_industries_hero" ON "industries" ("display_order") WHERE "is_hero_featured" = true;
+
+      CREATE TABLE IF NOT EXISTS "sector_architectures" (
+        "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        "slug" varchar(120) NOT NULL UNIQUE,
+        "number" varchar(20),
+        "category" varchar(160) NOT NULL,
+        "title" varchar(180) NOT NULL,
+        "description" text NOT NULL,
+        "capabilities" jsonb NOT NULL DEFAULT '[]'::jsonb,
+        "display_order" integer NOT NULL DEFAULT 0,
+        "status" "publication_status" NOT NULL DEFAULT 'draft',
+        "is_featured" boolean NOT NULL DEFAULT true,
+        "is_highlighted" boolean NOT NULL DEFAULT false,
+        "detail_route" varchar(200) DEFAULT '/contact',
+        "created_at" timestamp with time zone NOT NULL DEFAULT now(),
+        "updated_at" timestamp with time zone NOT NULL DEFAULT now(),
+        CONSTRAINT "chk_sector_architectures_display_order" CHECK ("display_order" >= 0)
+      );
+
+      CREATE INDEX IF NOT EXISTS "idx_sector_architectures_order" ON "sector_architectures" ("display_order");
+
+      CREATE TABLE IF NOT EXISTS "industry_services" (
+        "industry_id" uuid NOT NULL REFERENCES "industries"("id") ON DELETE CASCADE,
+        "service_id" uuid NOT NULL REFERENCES "services"("id") ON DELETE CASCADE,
+        PRIMARY KEY ("industry_id", "service_id")
+      );
+
+      CREATE INDEX IF NOT EXISTS "idx_industry_services_service" ON "industry_services" ("service_id");
+
+      CREATE TABLE IF NOT EXISTS "industry_sector_architectures" (
+        "industry_id" uuid NOT NULL REFERENCES "industries"("id") ON DELETE CASCADE,
+        "sector_architecture_id" uuid NOT NULL REFERENCES "sector_architectures"("id") ON DELETE CASCADE,
+        PRIMARY KEY ("industry_id", "sector_architecture_id")
+      );
+
+      CREATE INDEX IF NOT EXISTS "idx_ind_sec_arch_sec" ON "industry_sector_architectures" ("sector_architecture_id");
+
+      CREATE TABLE IF NOT EXISTS "industry_projects" (
+        "industry_id" uuid NOT NULL REFERENCES "industries"("id") ON DELETE CASCADE,
+        "project_id" uuid NOT NULL REFERENCES "projects"("id") ON DELETE CASCADE,
+        PRIMARY KEY ("industry_id", "project_id")
+      );
+
+      CREATE INDEX IF NOT EXISTS "idx_industry_projects_proj" ON "industry_projects" ("project_id");
+    `);
+  } catch (err) {
+    // If table already exists or DDL is constrained in certain pooled modes, ignore
+  }
+}
+
+export async function ensureIndustryEditorialDefaults(
+  db: NonNullable<ReturnType<typeof getDb>>
+): Promise<void> {
+  await ensureBusinessManagementTables(db);
+  const existing = await db.select({ id: industries.id }).from(industries).limit(1);
+  if (existing.length === 0) {
+    for (const sector of INITIAL_SECTORS) {
+      await db.insert(industries).values({
+        slug: sector.slug,
+        name: sector.name,
+        tagline: sector.tagline,
+        shortDescription: sector.description,
+        description: sector.description,
+        heroHeadline: sector.name,
+        heroDescription: sector.description,
+        deliverables: [...sector.deliverables],
+        ctaLabel: sector.ctaLabel,
+        ctaDestination: "/contact",
+        displayOrder: sector.displayOrder,
+        status: sector.published ? "published" : "draft",
+        isFeatured: sector.featured,
+        isHeroFeatured: sector.featured,
+        publishedAt: sector.published ? new Date() : null,
+      }).onConflictDoNothing();
+    }
+  }
+}
+
+export async function ensureSectorArchitectureDefaults(
+  db: NonNullable<ReturnType<typeof getDb>>
+): Promise<void> {
+  await ensureBusinessManagementTables(db);
+  const existing = await db
+    .select({ id: sectorArchitectures.id })
+    .from(sectorArchitectures)
+    .limit(1);
+
+  if (existing.length === 0) {
+    for (const arch of FEATURED_SECTOR_ARCHITECTURES) {
+      await db.insert(sectorArchitectures).values({
+        slug: arch.slug,
+        number: arch.number || null,
+        category: arch.category,
+        title: arch.title,
+        description: arch.description,
+        capabilities: [...arch.capabilities],
+        displayOrder: arch.displayOrder,
+        status: arch.published ? "published" : "draft",
+        isFeatured: arch.featured,
+        isHighlighted: Boolean(arch.highlighted),
+        detailRoute: arch.detailRoute || "/contact",
+      }).onConflictDoNothing();
+    }
+  }
+}
+
+export async function getPublishedIndustries(): Promise<SectorRecord[]> {
+  const db = getDb();
+  if (!db) {
+    return INITIAL_SECTORS.filter((s) => s.published);
+  }
+
+  await ensureIndustryEditorialDefaults(db);
+
+  const rows = await db
+    .select()
+    .from(industries)
+    .where(eq(industries.status, "published"))
+    .orderBy(asc(industries.displayOrder), asc(industries.name));
+
+  if (rows.length === 0) {
+    return INITIAL_SECTORS.filter((s) => s.published);
+  }
+
+  return rows.map((row) => ({
+    id: row.id,
+    slug: row.slug,
+    name: row.name,
+    tagline: row.tagline,
+    description: row.shortDescription || row.description,
+    deliverables: Array.isArray(row.deliverables) ? row.deliverables : [],
+    ctaLabel: row.ctaLabel || "Enquire for " + row.name,
+    featured: row.isFeatured,
+    published: row.status === "published",
+    displayOrder: row.displayOrder,
+  }));
+}
+
+export async function getPublishedSectorArchitectures(): Promise<SectorArchitecture[]> {
+  const db = getDb();
+  if (!db) {
+    return FEATURED_SECTOR_ARCHITECTURES.filter((a) => a.published);
+  }
+
+  await ensureSectorArchitectureDefaults(db);
+
+  const rows = await db
+    .select()
+    .from(sectorArchitectures)
+    .where(eq(sectorArchitectures.status, "published"))
+    .orderBy(asc(sectorArchitectures.displayOrder), asc(sectorArchitectures.title));
+
+  if (rows.length === 0) {
+    return FEATURED_SECTOR_ARCHITECTURES.filter((a) => a.published);
+  }
+
+  return rows.map((row) => ({
+    id: row.id,
+    slug: row.slug,
+    number: row.number || undefined,
+    category: row.category,
+    title: row.title,
+    description: row.description,
+    capabilities: Array.isArray(row.capabilities) ? row.capabilities : [],
+    industryIds: [],
+    published: row.status === "published",
+    featured: row.isFeatured,
+    highlighted: row.isHighlighted,
+    displayOrder: row.displayOrder,
+    detailRoute: row.detailRoute || "/contact",
+  }));
+}
+

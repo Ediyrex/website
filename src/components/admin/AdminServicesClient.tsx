@@ -31,6 +31,8 @@ import { Badge } from "@/components/ui/Badge";
 import { cn } from "@/lib/utils";
 import { useAdminUser } from "./AdminContext";
 import { MediaPickerModal, type MediaAssetItem } from "./MediaPickerModal";
+import { PublicServicePreviewModal } from "./services/PublicServicePreviewModal";
+import { AdminIndustriesClient } from "./industries/AdminIndustriesClient";
 
 interface DivisionRow {
   id: string;
@@ -76,6 +78,7 @@ interface ServicesStats {
   totalAll: number;
   publishedCount: number;
   draftCount: number;
+  featuredCount?: number;
   divisionsCount: number;
   divisionCounts: { slug: string; name: string; count: number }[];
 }
@@ -113,6 +116,7 @@ interface ServiceFormState {
   categoryLabel: string;
   deliverables: string[];
   features: string[];
+  processStages: { title: string; description: string; iconName?: string; displayOrder?: number }[];
   showPricing: boolean;
   startingPrice: string;
   iconName: string;
@@ -128,6 +132,8 @@ interface ServiceFormState {
   ogImageAssetId: string | null;
   ogImageAssetUrl: string | null;
   noIndex: boolean;
+  industryIds: string[];
+  projectIds: string[];
 }
 
 function slugify(value: string): string {
@@ -143,12 +149,21 @@ export function AdminServicesClient() {
   const searchParams = useSearchParams();
   const { canEdit, isAdmin } = useAdminUser();
 
+  const currentView = searchParams.get("view");
+  if (currentView === "industries") {
+    return <AdminIndustriesClient />;
+  }
+
+  const [activeTab, setActiveTab] = useState<"services" | "divisions">("services");
   const [servicesList, setServicesList] = useState<ServiceRow[]>([]);
   const [divisions, setDivisions] = useState<DivisionRow[]>([]);
+  const [availableIndustries, setAvailableIndustries] = useState<{ id: string; name: string }[]>([]);
+  const [availableProjects, setAvailableProjects] = useState<{ id: string; title: string }[]>([]);
   const [stats, setStats] = useState<ServicesStats>({
     totalAll: 0,
     publishedCount: 0,
     draftCount: 0,
+    featuredCount: 0,
     divisionsCount: 0,
     divisionCounts: [],
   });
@@ -169,6 +184,8 @@ export function AdminServicesClient() {
   const [saving, setSaving] = useState(false);
   const [deliverableDraft, setDeliverableDraft] = useState("");
   const [featureDraft, setFeatureDraft] = useState("");
+  const [stageDraftTitle, setStageDraftTitle] = useState("");
+  const [stageDraftDesc, setStageDraftDesc] = useState("");
   const [form, setForm] = useState<ServiceFormState | null>(null);
   const [previewService, setPreviewService] = useState<ServiceFormState | null>(null);
   const [pickerTarget, setPickerTarget] = useState<
@@ -196,9 +213,11 @@ export function AdminServicesClient() {
     if (divisionFilter) params.set("division", divisionFilter);
     if (query.trim()) params.set("q", query.trim());
 
-    const [svcRes, divRes] = await Promise.all([
+    const [svcRes, divRes, indRes, projRes] = await Promise.all([
       fetch(`/api/v1/admin/services?${params.toString()}`),
       fetch("/api/v1/admin/divisions"),
+      fetch("/api/v1/admin/industries?limit=100").catch(() => null),
+      fetch("/api/v1/admin/projects?limit=100").catch(() => null),
     ]);
 
     if (svcRes.status === 401) {
@@ -206,9 +225,26 @@ export function AdminServicesClient() {
       return null;
     }
 
-    const [svcJson, divJson] = await Promise.all([svcRes.json(), divRes.json()]);
+    const [svcJson, divJson, indJson, projJson] = await Promise.all([
+      svcRes.json(),
+      divRes.json(),
+      indRes ? indRes.json().catch(() => null) : null,
+      projRes ? projRes.json().catch(() => null) : null,
+    ]);
+
     if (!svcRes.ok) {
       throw new Error(svcJson.message || "Unable to fetch services.");
+    }
+
+    if (indJson?.data) {
+      setAvailableIndustries(
+        indJson.data.map((i: { id: string; name: string }) => ({ id: i.id, name: i.name }))
+      );
+    }
+    if (projJson?.data) {
+      setAvailableProjects(
+        projJson.data.map((p: { id: string; title: string }) => ({ id: p.id, title: p.title }))
+      );
     }
 
     return {
@@ -280,6 +316,7 @@ export function AdminServicesClient() {
       categoryLabel: "",
       deliverables: [],
       features: [],
+      processStages: [],
       showPricing: false,
       startingPrice: "",
       iconName: "Layers",
@@ -295,8 +332,13 @@ export function AdminServicesClient() {
       ogImageAssetId: null,
       ogImageAssetUrl: null,
       noIndex: false,
+      industryIds: [],
+      projectIds: [],
     });
     setDeliverableDraft("");
+    setFeatureDraft("");
+    setStageDraftTitle("");
+    setStageDraftDesc("");
     setEditorOpen(true);
   }, [divisions, servicesList.length]);
 
@@ -317,6 +359,7 @@ export function AdminServicesClient() {
       categoryLabel: d.categoryLabel || "",
       deliverables: Array.isArray(d.deliverables) ? d.deliverables : [],
       features: Array.isArray(d.features) ? d.features : [],
+      processStages: Array.isArray(d.processStages) ? d.processStages : [],
       showPricing: Boolean(d.showPricing),
       startingPrice: d.startingPrice || "",
       iconName: d.iconName || "",
@@ -332,6 +375,8 @@ export function AdminServicesClient() {
       ogImageAssetId: d.ogImageAssetId || null,
       ogImageAssetUrl: d.ogImageAsset?.secureUrl || null,
       noIndex: Boolean(d.noIndex),
+      industryIds: Array.isArray(d.industryIds) ? d.industryIds : [],
+      projectIds: Array.isArray(d.projectIds) ? d.projectIds : [],
     };
   }, []);
 
@@ -405,6 +450,9 @@ export function AdminServicesClient() {
       categoryLabel: form.categoryLabel.trim() || null,
       deliverables: form.deliverables,
       features: form.features,
+      processStages: form.processStages,
+      industryIds: form.industryIds,
+      projectIds: form.projectIds,
       showPricing: form.showPricing,
       startingPrice: form.startingPrice.trim() || null,
       iconName: form.iconName || null,
@@ -514,6 +562,55 @@ export function AdminServicesClient() {
     setFeatureDraft("");
   };
 
+  const addProcessStage = () => {
+    const title = stageDraftTitle.trim();
+    const description = stageDraftDesc.trim();
+    if (!title || !form) return;
+    setForm({
+      ...form,
+      processStages: [
+        ...form.processStages,
+        {
+          title,
+          description,
+          displayOrder: form.processStages.length + 1,
+        },
+      ],
+    });
+    setStageDraftTitle("");
+    setStageDraftDesc("");
+  };
+
+  const removeProcessStage = (index: number) => {
+    if (!form) return;
+    setForm({
+      ...form,
+      processStages: form.processStages.filter((_, i) => i !== index),
+    });
+  };
+
+  const toggleIndustry = (industryId: string) => {
+    if (!form) return;
+    const exists = form.industryIds.includes(industryId);
+    setForm({
+      ...form,
+      industryIds: exists
+        ? form.industryIds.filter((id) => id !== industryId)
+        : [...form.industryIds, industryId],
+    });
+  };
+
+  const toggleProject = (projectId: string) => {
+    if (!form) return;
+    const exists = form.projectIds.includes(projectId);
+    setForm({
+      ...form,
+      projectIds: exists
+        ? form.projectIds.filter((id) => id !== projectId)
+        : [...form.projectIds, projectId],
+    });
+  };
+
   const startIdx = totalFiltered === 0 ? 0 : (pageNum - 1) * rowsPerPage + 1;
   const endIdx = Math.min(pageNum * rowsPerPage, totalFiltered);
   const divisionSummaryText = divisions.map((d) => d.name).join(" · ");
@@ -555,72 +652,106 @@ export function AdminServicesClient() {
         )}
       </div>
 
-      {/* 4-Card KPI Strip */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-5 rounded-xl bg-[#111419] border border-[#1E222A] space-y-2.5">
-          <div className="flex items-center gap-2.5 text-xs text-[#9CA3AF]">
-            <span className="p-2 rounded-lg bg-[#1A160E] border border-[#D6B77A]/30 text-[#D6B77A]">
-              <Layers className="w-4 h-4" />
+      {/* 5-Card KPI Strip */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
+        <div className="p-4 rounded-xl bg-[#111419] border border-[#1E222A] space-y-2">
+          <div className="flex items-center gap-2 text-xs text-[#9CA3AF]">
+            <span className="p-1.5 rounded-lg bg-[#1A160E] border border-[#D6B77A]/30 text-[#D6B77A]">
+              <Layers className="w-3.5 h-3.5" />
             </span>
             <span>Total Services</span>
           </div>
-          <div className="font-heading font-bold text-3xl text-[#F5F3EE]">
+          <div className="font-heading font-bold text-2xl text-[#F5F3EE]">
             {loading ? "—" : stats.totalAll}
           </div>
         </div>
 
-        <div className="p-5 rounded-xl bg-[#111419] border border-[#1E222A] space-y-2.5">
-          <div className="flex items-center gap-2.5 text-xs text-[#9CA3AF]">
-            <span className="p-2 rounded-lg bg-[#112419] border border-[#54C99A]/30 text-[#54C99A]">
-              <CheckCircle2 className="w-4 h-4" />
+        <div className="p-4 rounded-xl bg-[#111419] border border-[#1E222A] space-y-2">
+          <div className="flex items-center gap-2 text-xs text-[#9CA3AF]">
+            <span className="p-1.5 rounded-lg bg-[#112419] border border-[#54C99A]/30 text-[#54C99A]">
+              <CheckCircle2 className="w-3.5 h-3.5" />
             </span>
             <span>Published</span>
           </div>
-          <div className="font-heading font-bold text-3xl text-[#F5F3EE]">
+          <div className="font-heading font-bold text-2xl text-[#F5F3EE]">
             {loading ? "—" : stats.publishedCount}
           </div>
         </div>
 
-        <div className="p-5 rounded-xl bg-[#111419] border border-[#1E222A] space-y-2.5">
-          <div className="flex items-center gap-2.5 text-xs text-[#9CA3AF]">
-            <span className="p-2 rounded-lg bg-[#1D1629] border border-[#B5A0F5]/30 text-[#B5A0F5]">
-              <Edit3 className="w-4 h-4" />
+        <div className="p-4 rounded-xl bg-[#111419] border border-[#1E222A] space-y-2">
+          <div className="flex items-center gap-2 text-xs text-[#9CA3AF]">
+            <span className="p-1.5 rounded-lg bg-[#1D1629] border border-[#B5A0F5]/30 text-[#B5A0F5]">
+              <Edit3 className="w-3.5 h-3.5" />
             </span>
             <span>Drafts</span>
           </div>
-          <div className="font-heading font-bold text-3xl text-[#F5F3EE]">
+          <div className="font-heading font-bold text-2xl text-[#F5F3EE]">
             {loading ? "—" : stats.draftCount}
           </div>
         </div>
 
-        <div className="p-5 rounded-xl bg-[#111419] border border-[#1E222A] space-y-2">
-          <div className="flex items-center gap-2.5 text-xs text-[#9CA3AF]">
-            <span className="p-2 rounded-lg bg-[#1A160E] border border-[#D6B77A]/30 text-[#D6B77A]">
-              <LayoutGrid className="w-4 h-4" />
+        <div className="p-4 rounded-xl bg-[#111419] border border-[#1E222A] space-y-2">
+          <div className="flex items-center gap-2 text-xs text-[#9CA3AF]">
+            <span className="p-1.5 rounded-lg bg-[#261510] border border-[#F06419]/30 text-[#F06419]">
+              <Sparkles className="w-3.5 h-3.5" />
+            </span>
+            <span>Featured</span>
+          </div>
+          <div className="font-heading font-bold text-2xl text-[#F5F3EE]">
+            {loading ? "—" : (stats.featuredCount ?? 0)}
+          </div>
+        </div>
+
+        <div className="p-4 rounded-xl bg-[#111419] border border-[#1E222A] space-y-2 col-span-2 sm:col-span-1">
+          <div className="flex items-center gap-2 text-xs text-[#9CA3AF]">
+            <span className="p-1.5 rounded-lg bg-[#1A160E] border border-[#D6B77A]/30 text-[#D6B77A]">
+              <LayoutGrid className="w-3.5 h-3.5" />
             </span>
             <span>Divisions</span>
           </div>
-          <div className="font-heading font-bold text-3xl text-[#F5F3EE]">
+          <div className="font-heading font-bold text-2xl text-[#F5F3EE]">
             {loading ? "—" : stats.divisionsCount || divisions.length}
           </div>
-          {divisionSummaryText && (
-            <div className="text-[11px] text-[#777D87] truncate">
-              {divisionSummaryText}
-            </div>
-          )}
-          <button
-            type="button"
-            onClick={() => setShowDivisionsPanel((v) => !v)}
-            className="mt-1 text-[11px] font-medium text-[#D6B77A] hover:underline cursor-pointer"
-          >
-            {showDivisionsPanel
-              ? "Hide Homepage Divisions ↑"
-              : "Manage Homepage Cards (01–04) →"}
-          </button>
         </div>
       </div>
 
-      {showDivisionsPanel && (
+      {/* Top Tab Switcher */}
+      <div className="flex items-center gap-2 border-b border-[#1E222A] pb-px">
+        <button
+          type="button"
+          onClick={() => setActiveTab("services")}
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold tracking-wide border-b-2 transition-colors ${
+            activeTab === "services"
+              ? "border-[#D6B77A] text-[#D6B77A]"
+              : "border-transparent text-[#8E95A2] hover:text-[#F5F2EC]"
+          }`}
+        >
+          <Layers className="w-4 h-4" />
+          <span>Services Directory</span>
+          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#181C22] text-[#8E95A2]">
+            {servicesList.length}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab("divisions")}
+          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold tracking-wide border-b-2 transition-colors ${
+            activeTab === "divisions"
+              ? "border-[#D6B77A] text-[#D6B77A]"
+              : "border-transparent text-[#8E95A2] hover:text-[#F5F2EC]"
+          }`}
+        >
+          <LayoutGrid className="w-4 h-4" />
+          <span>Manage Divisions (01–04)</span>
+          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#181C22] text-[#8E95A2]">
+            {divisions.length}
+          </span>
+        </button>
+      </div>
+
+      {/* Divisions Showcase Tab */}
+      {activeTab === "divisions" && (
         <div className="rounded-2xl bg-[#111419] border border-[#252A32] p-5 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
@@ -696,485 +827,490 @@ export function AdminServicesClient() {
         </div>
       )}
 
-      {/* Division Filter Tabs */}
-      <div className="flex items-center gap-6 border-b border-[#1E222A] overflow-x-auto">
-        <button
-          type="button"
-          onClick={() => {
-            setDivisionFilter("");
-            setPageNum(1);
-          }}
-          className={cn(
-            "pb-3 text-xs font-medium inline-flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap cursor-pointer",
-            divisionFilter === ""
-              ? "border-[#D6B77A] text-[#F5F3EE]"
-              : "border-transparent text-[#8D939E] hover:text-white"
-          )}
-        >
-          <span>All Services</span>
-          <span className="px-2 py-0.5 rounded-full bg-[#181C23] border border-[#252A32] text-[10px] font-mono text-[#B2B4BA]">
-            {stats.totalAll}
-          </span>
-        </button>
-
-        {stats.divisionCounts.map((div) => (
-          <button
-            key={div.slug}
-            type="button"
-            onClick={() => {
-              setDivisionFilter(div.slug);
-              setPageNum(1);
-            }}
-            className={cn(
-              "pb-3 text-xs font-medium inline-flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap cursor-pointer",
-              divisionFilter === div.slug
-                ? "border-[#D6B77A] text-[#F5F3EE]"
-                : "border-transparent text-[#8D939E] hover:text-white"
-            )}
-          >
-            <span>{div.name}</span>
-            <span className="px-2 py-0.5 rounded-full bg-[#181C23] border border-[#252A32] text-[10px] font-mono text-[#B2B4BA]">
-              {div.count}
-            </span>
-          </button>
-        ))}
-      </div>
-
-      {/* Filters & View Mode Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-3 flex-1 min-w-[260px]">
-          <div className="relative flex-1 max-w-sm min-w-[200px]">
-            <Search className="w-4 h-4 text-[#777D87] absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => {
-                setQuery(e.target.value);
+      {/* Services Directory Tab */}
+      {activeTab === "services" && (
+        <>
+          {/* Division Filter Tabs */}
+          <div className="flex items-center gap-6 border-b border-[#1E222A] overflow-x-auto">
+            <button
+              type="button"
+              onClick={() => {
+                setDivisionFilter("");
                 setPageNum(1);
               }}
-              placeholder="Search services..."
-              className="w-full h-10 pl-9 pr-3 rounded-lg bg-[#111419] border border-[#1E222A] text-sm text-[#F5F3EE] placeholder-[#6D7480] focus:outline-none focus:border-[#D6B77A]"
-            />
-          </div>
+              className={cn(
+                "pb-3 text-xs font-medium inline-flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap cursor-pointer",
+                divisionFilter === ""
+                  ? "border-[#D6B77A] text-[#F5F3EE]"
+                  : "border-transparent text-[#8D939E] hover:text-white"
+              )}
+            >
+              <span>All Services</span>
+              <span className="px-2 py-0.5 rounded-full bg-[#181C23] border border-[#252A32] text-[10px] font-mono text-[#B2B4BA]">
+                {stats.totalAll}
+              </span>
+            </button>
 
-          <select
-            value={divisionFilter}
-            onChange={(e) => {
-              setDivisionFilter(e.target.value);
-              setPageNum(1);
-            }}
-            aria-label="Filter services by division"
-            className="h-10 px-3 rounded-lg bg-[#111419] border border-[#1E222A] text-xs text-[#F5F3EE] focus:outline-none focus:border-[#D6B77A]"
-          >
-            <option value="">All Divisions</option>
-            {divisions.map((d) => (
-              <option key={d.id} value={d.slug}>
-                {d.name}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={statusFilter}
-            onChange={(e) => {
-              setStatusFilter(e.target.value);
-              setPageNum(1);
-            }}
-            aria-label="Filter services by status"
-            className="h-10 px-3 rounded-lg bg-[#111419] border border-[#1E222A] text-xs text-[#F5F3EE] focus:outline-none focus:border-[#D6B77A]"
-          >
-            <option value="">All Status</option>
-            <option value="published">Published</option>
-            <option value="draft">Draft</option>
-            <option value="archived">Archived</option>
-          </select>
-        </div>
-
-        {/* Grid / List Toggle */}
-        <div className="inline-flex items-center p-1 rounded-lg bg-[#111419] border border-[#1E222A]">
-          <button
-            type="button"
-            onClick={() => setViewMode("grid")}
-            aria-label="Grid view"
-            className={cn(
-              "p-2 rounded-md transition-colors cursor-pointer",
-              viewMode === "grid"
-                ? "bg-[#D6B77A] text-[#08090B]"
-                : "text-[#8D939E] hover:text-white"
-            )}
-          >
-            <LayoutGrid className="w-4 h-4" />
-          </button>
-          <button
-            type="button"
-            onClick={() => setViewMode("list")}
-            aria-label="List view"
-            className={cn(
-              "p-2 rounded-md transition-colors cursor-pointer",
-              viewMode === "list"
-                ? "bg-[#D6B77A] text-[#08090B]"
-                : "text-[#8D939E] hover:text-white"
-            )}
-          >
-            <List className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-
-      {error && (
-        <div className="p-3.5 rounded-xl bg-[#2A1414] border border-[#F28B82]/40 text-xs text-[#F28B82]">
-          {error}
-        </div>
-      )}
-      {success && (
-        <div className="p-3.5 rounded-xl bg-[#13261C] border border-[#7CD69F]/40 text-xs text-[#7CD69F]">
-          {success}
-        </div>
-      )}
-
-      {/* Grid View (Default matching mockup) */}
-      {viewMode === "grid" ? (
-        loading ? (
-          <div className="py-14 text-center text-xs font-mono text-[#777D87]">
-            Loading services...
-          </div>
-        ) : servicesList.length === 0 ? (
-          <div className="p-12 rounded-2xl bg-[#111419] border border-[#1E222A] text-center space-y-2">
-            <p className="text-sm text-[#F5F3EE]">No services found.</p>
-            <p className="text-xs text-[#777D87]">
-              Adjust filters or click Add Service to create a studio offering.
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-            {servicesList.map((svc) => {
-              const Icon = getServiceIcon(svc.iconName, svc.divisionSlug);
-              const delivCount = Array.isArray(svc.deliverables)
-                ? svc.deliverables.length
-                : 0;
-
-              return (
-                <article
-                  key={svc.id}
-                  className="group rounded-2xl bg-[#111419] border border-[#1E222A] hover:border-[#D6B77A]/40 transition-colors overflow-hidden flex flex-col justify-between relative"
-                >
-                  {/* Subtle Card Header Texture */}
-                  <div className="relative p-4 pb-3 bg-gradient-to-br from-[#1C170F]/60 via-[#111419] to-[#0B0D10]">
-                    {svc.coverAssetUrl && (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img
-                        src={svc.coverAssetUrl}
-                        alt={svc.title}
-                        className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none"
-                      />
-                    )}
-                    <div className="relative z-10 flex items-center justify-between gap-2">
-                      <span
-                        className={cn(
-                          "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border",
-                          svc.status === "published"
-                            ? "bg-[#0D2117]/85 text-[#7CD69F] border-[#54C99A]/40"
-                            : svc.status === "draft"
-                              ? "bg-[#241D11]/85 text-[#D6B77A] border-[#D6B77A]/40"
-                              : "bg-[#15181F]/85 text-[#9CA3AF] border-[#252A32]"
-                        )}
-                      >
-                        <span
-                          className={cn(
-                            "w-1.5 h-1.5 rounded-full",
-                            svc.status === "published"
-                              ? "bg-[#7CD69F]"
-                              : svc.status === "draft"
-                                ? "bg-[#D6B77A]"
-                                : "bg-[#9CA3AF]"
-                          )}
-                        />
-                        <span className="capitalize">{svc.status}</span>
-                      </span>
-
-                      {canEdit && (
-                        <div className="relative">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setOpenMenuId(
-                                openMenuId === svc.id ? null : svc.id
-                              )
-                            }
-                            aria-label={`Actions for ${svc.title}`}
-                            className="w-7 h-7 rounded-md bg-[#0B0D10]/70 border border-[#252A32] text-[#B2B4BA] hover:text-white flex items-center justify-center cursor-pointer"
-                          >
-                            <MoreHorizontal className="w-4 h-4" />
-                          </button>
-
-                          {openMenuId === svc.id && (
-                            <div className="absolute right-0 top-9 w-40 py-1.5 rounded-xl bg-[#14181F] border border-[#252A32] shadow-2xl text-xs z-30">
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setOpenMenuId(null);
-                                  openEditModal(svc.id);
-                                }}
-                                className="w-full px-3.5 py-2 text-left text-[#D6B77A] hover:bg-[#1C212B] flex items-center gap-2 cursor-pointer"
-                              >
-                                <Edit3 className="w-3.5 h-3.5" />
-                                <span>Edit Service</span>
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setOpenMenuId(null);
-                                  handleDeleteService(svc);
-                                }}
-                                className="w-full px-3.5 py-2 text-left text-[#F28B82] hover:bg-[#2A1414] flex items-center gap-2 cursor-pointer"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                                <span>Delete</span>
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Card Body */}
-                  <div className="px-4 pb-4 flex-1 flex flex-col justify-between gap-4">
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-[#1A160E] border border-[#D6B77A]/30 text-[#D6B77A] flex items-center justify-center shrink-0 mt-0.5">
-                        <Icon className="w-4 h-4" />
-                      </div>
-                      <div className="min-w-0 flex-1 space-y-1">
-                        <div className="flex items-start justify-between gap-2">
-                          <button
-                            type="button"
-                            onClick={() => canEdit && openEditModal(svc.id)}
-                            className="text-left font-heading font-semibold text-[15px] text-[#F5F3EE] hover:text-[#D6B77A] transition-colors line-clamp-1 cursor-pointer"
-                          >
-                            {svc.title}
-                          </button>
-                          <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
-                            <button
-                              type="button"
-                              onClick={async () => {
-                                try {
-                                  const mapped = await fetchServiceFormById(svc.id);
-                                  setPreviewService(mapped);
-                                } catch {
-                                  setError("Unable to load service preview.");
-                                }
-                              }}
-                              aria-label={`Preview ${svc.title}`}
-                              className="text-[#777D87] hover:text-[#D6B77A] cursor-pointer"
-                            >
-                              <Eye className="w-3.5 h-3.5" />
-                            </button>
-                            <Link
-                              href={`/services/${svc.divisionSlug}`}
-                              target="_blank"
-                              aria-label={`View ${svc.divisionName} services page`}
-                              className="text-[#777D87] hover:text-[#F5F3EE]"
-                            >
-                              <ExternalLink className="w-3.5 h-3.5" />
-                            </Link>
-                          </div>
-                        </div>
-                        <p className="text-xs text-[#8D939E] line-clamp-2 leading-relaxed">
-                          {svc.summary}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Card Footer */}
-                    <div className="pt-3 border-t border-[#1E222A] flex items-center justify-between gap-2 text-[11px]">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span
-                          className={cn(
-                            "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md border font-medium",
-                            getDivisionBadgeClass(svc.divisionSlug)
-                          )}
-                        >
-                          {svc.divisionName}
-                        </span>
-                        {svc.categoryLabel && (
-                          <span className="px-2 py-0.5 rounded-md bg-[#181C23] border border-[#252A32] text-[#B2B4BA] truncate">
-                            {svc.categoryLabel}
-                          </span>
-                        )}
-                        <span className="font-mono text-[#777D87] truncate">
-                          {svc.showPricing && svc.startingPrice
-                            ? svc.startingPrice
-                            : delivCount > 0
-                              ? `${delivCount} deliverables`
-                              : `/${svc.slug}`}
-                        </span>
-                      </div>
-                      <span className="font-mono text-[#6D7480] shrink-0">
-                        #{svc.displayOrder}
-                      </span>
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        )
-      ) : (
-        /* List View Table */
-        <div className="rounded-xl bg-[#111419] border border-[#1E222A] overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-[#1E222A] text-[11px] font-mono uppercase tracking-wider text-[#6D7480] bg-[#0B0D10]">
-                  <th className="py-3 px-4">Service</th>
-                  <th className="py-3 px-4">Division</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4">Featured</th>
-                  <th className="py-3 px-4">Order</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#1E222A] text-sm">
-                {loading ? (
-                  <tr>
-                    <td
-                      colSpan={6}
-                      className="p-8 text-center text-xs font-mono text-[#777D87]"
-                    >
-                      Loading services...
-                    </td>
-                  </tr>
-                ) : servicesList.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={6}
-                      className="p-8 text-center text-xs text-[#777D87]"
-                    >
-                      No services found.
-                    </td>
-                  </tr>
-                ) : (
-                  servicesList.map((svc) => (
-                    <tr key={svc.id} className="hover:bg-[#151920]">
-                      <td className="py-3.5 px-4">
-                        <div className="flex items-center gap-3">
-                          {svc.coverAssetUrl ? (
-                            /* eslint-disable-next-line @next/next/no-img-element */
-                            <img
-                              src={svc.coverAssetUrl}
-                              alt={svc.title}
-                              className="w-10 h-10 rounded-lg object-cover border border-[#252A32] shrink-0"
-                            />
-                          ) : (
-                            <div className="w-10 h-10 rounded-lg bg-[#0D0F12] border border-[#252A32] flex items-center justify-center text-[#777D87] shrink-0">
-                              <ImageIcon className="w-4 h-4" />
-                            </div>
-                          )}
-                          <div>
-                            <div className="font-medium text-[#F5F3EE]">
-                              {svc.title}
-                            </div>
-                            <div className="text-xs font-mono text-[#777D87]">
-                              /{svc.slug}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-3.5 px-4 text-xs text-[#B2B4BA]">
-                        {svc.divisionName}
-                      </td>
-                      <td className="py-3.5 px-4">
-                        <Badge
-                          variant={
-                            svc.status === "published" ? "accent" : "default"
-                          }
-                        >
-                          {svc.status}
-                        </Badge>
-                      </td>
-                      <td className="py-3.5 px-4 text-xs text-[#B2B4BA]">
-                        {svc.isFeatured ? "Featured" : "Standard"}
-                      </td>
-                      <td className="py-3.5 px-4 font-mono text-xs text-[#777D87]">
-                        #{svc.displayOrder}
-                      </td>
-                      <td className="py-3.5 px-4 text-right">
-                        {canEdit && (
-                          <div className="inline-flex items-center gap-1.5">
-                            <button
-                              type="button"
-                              onClick={() => openEditModal(svc.id)}
-                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#191D23] border border-[#252A32] text-xs text-[#F5F3EE] hover:border-[#D6B77A] cursor-pointer"
-                            >
-                              <Edit3 className="w-3.5 h-3.5" />
-                              <span>Edit</span>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteService(svc)}
-                              aria-label={`Delete ${svc.title}`}
-                              className="p-1.5 rounded-lg text-[#777D87] hover:text-[#F28B82] hover:bg-[#2A1414] cursor-pointer"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  ))
+            {stats.divisionCounts.map((div) => (
+              <button
+                key={div.slug}
+                type="button"
+                onClick={() => {
+                  setDivisionFilter(div.slug);
+                  setPageNum(1);
+                }}
+                className={cn(
+                  "pb-3 text-xs font-medium inline-flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap cursor-pointer",
+                  divisionFilter === div.slug
+                    ? "border-[#D6B77A] text-[#F5F3EE]"
+                    : "border-transparent text-[#8D939E] hover:text-white"
                 )}
-              </tbody>
-            </table>
+              >
+                <span>{div.name}</span>
+                <span className="px-2 py-0.5 rounded-full bg-[#181C23] border border-[#252A32] text-[10px] font-mono text-[#B2B4BA]">
+                  {div.count}
+                </span>
+              </button>
+            ))}
           </div>
-        </div>
+
+          {/* Filters & View Mode Toolbar */}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-3 flex-1 min-w-[260px]">
+              <div className="relative flex-1 max-w-sm min-w-[200px]">
+                <Search className="w-4 h-4 text-[#777D87] absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={query}
+                  onChange={(e) => {
+                    setQuery(e.target.value);
+                    setPageNum(1);
+                  }}
+                  placeholder="Search services..."
+                  className="w-full h-10 pl-9 pr-3 rounded-lg bg-[#111419] border border-[#1E222A] text-sm text-[#F5F3EE] placeholder-[#6D7480] focus:outline-none focus:border-[#D6B77A]"
+                />
+              </div>
+
+              <select
+                value={divisionFilter}
+                onChange={(e) => {
+                  setDivisionFilter(e.target.value);
+                  setPageNum(1);
+                }}
+                aria-label="Filter services by division"
+                className="h-10 px-3 rounded-lg bg-[#111419] border border-[#1E222A] text-xs text-[#F5F3EE] focus:outline-none focus:border-[#D6B77A]"
+              >
+                <option value="">All Divisions</option>
+                {divisions.map((d) => (
+                  <option key={d.id} value={d.slug}>
+                    {d.name}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={statusFilter}
+                onChange={(e) => {
+                  setStatusFilter(e.target.value);
+                  setPageNum(1);
+                }}
+                aria-label="Filter services by status"
+                className="h-10 px-3 rounded-lg bg-[#111419] border border-[#1E222A] text-xs text-[#F5F3EE] focus:outline-none focus:border-[#D6B77A]"
+              >
+                <option value="">All Status</option>
+                <option value="published">Published</option>
+                <option value="draft">Draft</option>
+                <option value="archived">Archived</option>
+              </select>
+            </div>
+
+            {/* Grid / List Toggle */}
+            <div className="inline-flex items-center p-1 rounded-lg bg-[#111419] border border-[#1E222A]">
+              <button
+                type="button"
+                onClick={() => setViewMode("grid")}
+                aria-label="Grid view"
+                className={cn(
+                  "p-2 rounded-md transition-colors cursor-pointer",
+                  viewMode === "grid"
+                    ? "bg-[#D6B77A] text-[#08090B]"
+                    : "text-[#8D939E] hover:text-white"
+                )}
+              >
+                <LayoutGrid className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("list")}
+                aria-label="List view"
+                className={cn(
+                  "p-2 rounded-md transition-colors cursor-pointer",
+                  viewMode === "list"
+                    ? "bg-[#D6B77A] text-[#08090B]"
+                    : "text-[#8D939E] hover:text-white"
+                )}
+              >
+                <List className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {error && (
+            <div className="p-3.5 rounded-xl bg-[#2A1414] border border-[#F28B82]/40 text-xs text-[#F28B82]">
+              {error}
+            </div>
+          )}
+          {success && (
+            <div className="p-3.5 rounded-xl bg-[#13261C] border border-[#7CD69F]/40 text-xs text-[#7CD69F]">
+              {success}
+            </div>
+          )}
+
+          {/* Grid View (Default matching mockup) */}
+          {viewMode === "grid" ? (
+            loading ? (
+              <div className="py-14 text-center text-xs font-mono text-[#777D87]">
+                Loading services...
+              </div>
+            ) : servicesList.length === 0 ? (
+              <div className="p-12 rounded-2xl bg-[#111419] border border-[#1E222A] text-center space-y-2">
+                <p className="text-sm text-[#F5F3EE]">No services found.</p>
+                <p className="text-xs text-[#777D87]">
+                  Adjust filters or click Add Service to create a studio offering.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                {servicesList.map((svc) => {
+                  const Icon = getServiceIcon(svc.iconName, svc.divisionSlug);
+                  const delivCount = Array.isArray(svc.deliverables)
+                    ? svc.deliverables.length
+                    : 0;
+
+                  return (
+                    <article
+                      key={svc.id}
+                      className="group rounded-2xl bg-[#111419] border border-[#1E222A] hover:border-[#D6B77A]/40 transition-colors overflow-hidden flex flex-col justify-between relative"
+                    >
+                      {/* Subtle Card Header Texture */}
+                      <div className="relative p-4 pb-3 bg-gradient-to-br from-[#1C170F]/60 via-[#111419] to-[#0B0D10]">
+                        {svc.coverAssetUrl && (
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img
+                            src={svc.coverAssetUrl}
+                            alt={svc.title}
+                            className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none"
+                          />
+                        )}
+                        <div className="relative z-10 flex items-center justify-between gap-2">
+                          <span
+                            className={cn(
+                              "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border",
+                              svc.status === "published"
+                                ? "bg-[#0D2117]/85 text-[#7CD69F] border-[#54C99A]/40"
+                                : svc.status === "draft"
+                                  ? "bg-[#241D11]/85 text-[#D6B77A] border-[#D6B77A]/40"
+                                  : "bg-[#15181F]/85 text-[#9CA3AF] border-[#252A32]"
+                            )}
+                          >
+                            <span
+                              className={cn(
+                                "w-1.5 h-1.5 rounded-full",
+                                svc.status === "published"
+                                  ? "bg-[#7CD69F]"
+                                  : svc.status === "draft"
+                                    ? "bg-[#D6B77A]"
+                                    : "bg-[#9CA3AF]"
+                              )}
+                            />
+                            <span className="capitalize">{svc.status}</span>
+                          </span>
+
+                          {canEdit && (
+                            <div className="relative">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setOpenMenuId(
+                                    openMenuId === svc.id ? null : svc.id
+                                  )
+                                }
+                                aria-label={`Actions for ${svc.title}`}
+                                className="w-7 h-7 rounded-md bg-[#0B0D10]/70 border border-[#252A32] text-[#B2B4BA] hover:text-white flex items-center justify-center cursor-pointer"
+                              >
+                                <MoreHorizontal className="w-4 h-4" />
+                              </button>
+
+                              {openMenuId === svc.id && (
+                                <div className="absolute right-0 top-9 w-40 py-1.5 rounded-xl bg-[#14181F] border border-[#252A32] shadow-2xl text-xs z-30">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setOpenMenuId(null);
+                                      openEditModal(svc.id);
+                                    }}
+                                    className="w-full px-3.5 py-2 text-left text-[#D6B77A] hover:bg-[#1C212B] flex items-center gap-2 cursor-pointer"
+                                  >
+                                    <Edit3 className="w-3.5 h-3.5" />
+                                    <span>Edit Service</span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setOpenMenuId(null);
+                                      handleDeleteService(svc);
+                                    }}
+                                    className="w-full px-3.5 py-2 text-left text-[#F28B82] hover:bg-[#2A1414] flex items-center gap-2 cursor-pointer"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                    <span>Delete</span>
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Card Body */}
+                      <div className="px-4 pb-4 flex-1 flex flex-col justify-between gap-4">
+                        <div className="flex items-start gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-[#1A160E] border border-[#D6B77A]/30 text-[#D6B77A] flex items-center justify-center shrink-0 mt-0.5">
+                            <Icon className="w-4 h-4" />
+                          </div>
+                          <div className="min-w-0 flex-1 space-y-1">
+                            <div className="flex items-start justify-between gap-2">
+                              <button
+                                type="button"
+                                onClick={() => canEdit && openEditModal(svc.id)}
+                                className="text-left font-heading font-semibold text-[15px] text-[#F5F3EE] hover:text-[#D6B77A] transition-colors line-clamp-1 cursor-pointer"
+                              >
+                                {svc.title}
+                              </button>
+                              <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
+                                <button
+                                  type="button"
+                                  onClick={async () => {
+                                    try {
+                                      const mapped = await fetchServiceFormById(svc.id);
+                                      setPreviewService(mapped);
+                                    } catch {
+                                      setError("Unable to load service preview.");
+                                    }
+                                  }}
+                                  aria-label={`Preview ${svc.title}`}
+                                  className="text-[#777D87] hover:text-[#D6B77A] cursor-pointer"
+                                >
+                                  <Eye className="w-3.5 h-3.5" />
+                                </button>
+                                <Link
+                                  href={`/services/${svc.divisionSlug}`}
+                                  target="_blank"
+                                  aria-label={`View ${svc.divisionName} services page`}
+                                  className="text-[#777D87] hover:text-[#F5F3EE]"
+                                >
+                                  <ExternalLink className="w-3.5 h-3.5" />
+                                </Link>
+                              </div>
+                            </div>
+                            <p className="text-xs text-[#8D939E] line-clamp-2 leading-relaxed">
+                              {svc.summary}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Card Footer */}
+                        <div className="pt-3 border-t border-[#1E222A] flex items-center justify-between gap-2 text-[11px]">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span
+                              className={cn(
+                                "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md border font-medium",
+                                getDivisionBadgeClass(svc.divisionSlug)
+                              )}
+                            >
+                              {svc.divisionName}
+                            </span>
+                            {svc.categoryLabel && (
+                              <span className="px-2 py-0.5 rounded-md bg-[#181C23] border border-[#252A32] text-[#B2B4BA] truncate">
+                                {svc.categoryLabel}
+                              </span>
+                            )}
+                            <span className="font-mono text-[#777D87] truncate">
+                              {svc.showPricing && svc.startingPrice
+                                ? svc.startingPrice
+                                : delivCount > 0
+                                  ? `${delivCount} deliverables`
+                                  : `/${svc.slug}`}
+                            </span>
+                          </div>
+                          <span className="font-mono text-[#6D7480] shrink-0">
+                            #{svc.displayOrder}
+                          </span>
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )
+          ) : (
+            /* List View Table */
+            <div className="rounded-xl bg-[#111419] border border-[#1E222A] overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-[#1E222A] text-[11px] font-mono uppercase tracking-wider text-[#6D7480] bg-[#0B0D10]">
+                      <th className="py-3 px-4">Service</th>
+                      <th className="py-3 px-4">Division</th>
+                      <th className="py-3 px-4">Status</th>
+                      <th className="py-3 px-4">Featured</th>
+                      <th className="py-3 px-4">Order</th>
+                      <th className="py-3 px-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#1E222A] text-sm">
+                    {loading ? (
+                      <tr>
+                        <td
+                          colSpan={6}
+                          className="p-8 text-center text-xs font-mono text-[#777D87]"
+                        >
+                          Loading services...
+                        </td>
+                      </tr>
+                    ) : servicesList.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan={6}
+                          className="p-8 text-center text-xs text-[#777D87]"
+                        >
+                          No services found.
+                        </td>
+                      </tr>
+                    ) : (
+                      servicesList.map((svc) => (
+                        <tr key={svc.id} className="hover:bg-[#151920]">
+                          <td className="py-3.5 px-4">
+                            <div className="flex items-center gap-3">
+                              {svc.coverAssetUrl ? (
+                                /* eslint-disable-next-line @next/next/no-img-element */
+                                <img
+                                  src={svc.coverAssetUrl}
+                                  alt={svc.title}
+                                  className="w-10 h-10 rounded-lg object-cover border border-[#252A32] shrink-0"
+                                />
+                              ) : (
+                                <div className="w-10 h-10 rounded-lg bg-[#0D0F12] border border-[#252A32] flex items-center justify-center text-[#777D87] shrink-0">
+                                  <ImageIcon className="w-4 h-4" />
+                                </div>
+                              )}
+                              <div>
+                                <div className="font-medium text-[#F5F3EE]">
+                                  {svc.title}
+                                </div>
+                                <div className="text-xs font-mono text-[#777D87]">
+                                  /{svc.slug}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-3.5 px-4 text-xs text-[#B2B4BA]">
+                            {svc.divisionName}
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <Badge
+                              variant={
+                                svc.status === "published" ? "accent" : "default"
+                              }
+                            >
+                              {svc.status}
+                            </Badge>
+                          </td>
+                          <td className="py-3.5 px-4 text-xs text-[#B2B4BA]">
+                            {svc.isFeatured ? "Featured" : "Standard"}
+                          </td>
+                          <td className="py-3.5 px-4 font-mono text-xs text-[#777D87]">
+                            #{svc.displayOrder}
+                          </td>
+                          <td className="py-3.5 px-4 text-right">
+                            {canEdit && (
+                              <div className="inline-flex items-center gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => openEditModal(svc.id)}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#191D23] border border-[#252A32] text-xs text-[#F5F3EE] hover:border-[#D6B77A] cursor-pointer"
+                                >
+                                  <Edit3 className="w-3.5 h-3.5" />
+                                  <span>Edit</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteService(svc)}
+                                  aria-label={`Delete ${svc.title}`}
+                                  className="p-1.5 rounded-lg text-[#777D87] hover:text-[#F28B82] hover:bg-[#2A1414] cursor-pointer"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Pagination Footer */}
+          <div className="px-4 py-3 rounded-xl bg-[#111419] border border-[#1E222A] flex flex-wrap items-center justify-between gap-4 text-xs text-[#8D939E]">
+            <div>
+              Showing {startIdx}–{endIdx} of {totalFiltered} services
+            </div>
+
+            <div className="flex items-center gap-4">
+              <label className="inline-flex items-center gap-2">
+                <span>Rows per page</span>
+                <select
+                  value={rowsPerPage}
+                  onChange={(e) => {
+                    setRowsPerPage(Number(e.target.value));
+                    setPageNum(1);
+                  }}
+                  className="h-8 px-2 rounded bg-[#0B0D10] border border-[#1E222A] text-xs text-[#F5F3EE]"
+                >
+                  <option value={6}>6</option>
+                  <option value={12}>12</option>
+                  <option value={24}>24</option>
+                </select>
+              </label>
+
+              <div className="inline-flex items-center gap-1">
+                <button
+                  type="button"
+                  disabled={pageNum <= 1}
+                  onClick={() => setPageNum((p) => Math.max(1, p - 1))}
+                  className="w-8 h-8 rounded-md bg-[#0B0D10] border border-[#1E222A] flex items-center justify-center disabled:opacity-40 cursor-pointer"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                </button>
+                <span className="w-8 h-8 rounded-md bg-[#D6B77A] text-[#08090B] font-semibold flex items-center justify-center">
+                  {pageNum}
+                </span>
+                <button
+                  type="button"
+                  disabled={pageNum >= totalPages}
+                  onClick={() => setPageNum((p) => Math.min(totalPages, p + 1))}
+                  className="w-8 h-8 rounded-md bg-[#0B0D10] border border-[#1E222A] flex items-center justify-center disabled:opacity-40 cursor-pointer"
+                >
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
       )}
-
-      {/* Pagination Footer */}
-      <div className="px-4 py-3 rounded-xl bg-[#111419] border border-[#1E222A] flex flex-wrap items-center justify-between gap-4 text-xs text-[#8D939E]">
-        <div>
-          Showing {startIdx}–{endIdx} of {totalFiltered} services
-        </div>
-
-        <div className="flex items-center gap-4">
-          <label className="inline-flex items-center gap-2">
-            <span>Rows per page</span>
-            <select
-              value={rowsPerPage}
-              onChange={(e) => {
-                setRowsPerPage(Number(e.target.value));
-                setPageNum(1);
-              }}
-              className="h-8 px-2 rounded bg-[#0B0D10] border border-[#1E222A] text-xs text-[#F5F3EE]"
-            >
-              <option value={6}>6</option>
-              <option value={12}>12</option>
-              <option value={24}>24</option>
-            </select>
-          </label>
-
-          <div className="inline-flex items-center gap-1">
-            <button
-              type="button"
-              disabled={pageNum <= 1}
-              onClick={() => setPageNum((p) => Math.max(1, p - 1))}
-              className="w-8 h-8 rounded-md bg-[#0B0D10] border border-[#1E222A] flex items-center justify-center disabled:opacity-40 cursor-pointer"
-            >
-              <ChevronLeft className="w-3.5 h-3.5" />
-            </button>
-            <span className="w-8 h-8 rounded-md bg-[#D6B77A] text-[#08090B] font-semibold flex items-center justify-center">
-              {pageNum}
-            </span>
-            <button
-              type="button"
-              disabled={pageNum >= totalPages}
-              onClick={() => setPageNum((p) => Math.min(totalPages, p + 1))}
-              className="w-8 h-8 rounded-md bg-[#0B0D10] border border-[#1E222A] flex items-center justify-center disabled:opacity-40 cursor-pointer"
-            >
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-      </div>
 
       {/* Create / Edit Service Modal */}
       {editorOpen && form && (
@@ -1413,6 +1549,169 @@ export function AdminServicesClient() {
                 </div>
               </div>
 
+              {/* Process & Methodology Stages */}
+              <div className="p-4 rounded-xl bg-[#0D0F12] border border-[#252A32] space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-mono uppercase tracking-wider text-[#D6B77A]">
+                    Process &amp; Methodology Stages
+                  </span>
+                  <span className="text-[11px] font-mono text-[#777D87]">
+                    {form.processStages.length} stages configured
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <input
+                      type="text"
+                      value={stageDraftTitle}
+                      onChange={(e) => setStageDraftTitle(e.target.value)}
+                      placeholder="Stage Title (e.g. 01 / Discovery & Architecture)"
+                      className="h-9 px-3 rounded-lg bg-[#12151A] border border-[#252A32] text-xs text-[#F5F3EE]"
+                    />
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={stageDraftDesc}
+                        onChange={(e) => setStageDraftDesc(e.target.value)}
+                        placeholder="Stage description and delivery cadence"
+                        className="flex-1 h-9 px-3 rounded-lg bg-[#12151A] border border-[#252A32] text-xs text-[#F5F3EE]"
+                      />
+                      <button
+                        type="button"
+                        onClick={addProcessStage}
+                        className="px-3 h-9 rounded-lg bg-[#191D23] border border-[#3A414B] text-xs text-[#D6B77A] hover:border-[#D6B77A] cursor-pointer"
+                      >
+                        Add Stage
+                      </button>
+                    </div>
+                  </div>
+
+                  {form.processStages.length > 0 && (
+                    <div className="space-y-1.5 pt-2">
+                      {form.processStages.map((stage, idx) => (
+                        <div
+                          key={`${stage.title}-${idx}`}
+                          className="flex items-center justify-between p-2.5 rounded-lg bg-[#12151A] border border-[#1E222A] text-xs"
+                        >
+                          <div className="space-y-0.5 min-w-0 pr-3">
+                            <div className="font-semibold text-[#F5F3EE] truncate">
+                              <span className="font-mono text-[#D6B77A] mr-1.5">
+                                #{idx + 1}
+                              </span>
+                              {stage.title}
+                            </div>
+                            {stage.description && (
+                              <p className="text-[11px] text-[#8D939E] truncate">
+                                {stage.description}
+                              </p>
+                            )}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeProcessStage(idx)}
+                            className="text-[#777D87] hover:text-[#F28B82] p-1 cursor-pointer shrink-0"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Industry Relationships Multi-Select */}
+              <div className="p-4 rounded-xl bg-[#0D0F12] border border-[#252A32] space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-mono uppercase tracking-wider text-[#D6B77A]">
+                    Target Industries ({form.industryIds.length} selected)
+                  </span>
+                  <span className="text-[10px] text-[#777D87]">
+                    Associates offering with visitor sector pages
+                  </span>
+                </div>
+                {availableIndustries.length === 0 ? (
+                  <p className="text-xs text-[#777D87] italic">
+                    No industries registered yet. Add them in Business → Industries.
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-36 overflow-y-auto pr-1">
+                    {availableIndustries.map((ind) => {
+                      const selected = form.industryIds.includes(ind.id);
+                      return (
+                        <button
+                          key={ind.id}
+                          type="button"
+                          onClick={() => toggleIndustry(ind.id)}
+                          className={`flex items-center gap-2 p-2 rounded-lg text-left text-xs transition-colors border cursor-pointer ${
+                            selected
+                              ? "bg-[#D6B77A]/10 border-[#D6B77A]/50 text-[#F5F3EE]"
+                              : "bg-[#12151A] border-[#1E222A] text-[#8D939E] hover:text-[#F5F3EE]"
+                          }`}
+                        >
+                          <span
+                            className={`w-3.5 h-3.5 rounded flex items-center justify-center text-[10px] border ${
+                              selected
+                                ? "bg-[#D6B77A] border-[#D6B77A] text-[#08090B] font-bold"
+                                : "border-[#3A414B]"
+                            }`}
+                          >
+                            {selected ? "✓" : ""}
+                          </span>
+                          <span className="truncate">{ind.name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Related Work / Portfolio Cases */}
+              <div className="p-4 rounded-xl bg-[#0D0F12] border border-[#252A32] space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-mono uppercase tracking-wider text-[#D6B77A]">
+                    Showcase Case Studies ({form.projectIds.length} linked)
+                  </span>
+                  <span className="text-[10px] text-[#777D87]">
+                    Featured on service public landing page
+                  </span>
+                </div>
+                {availableProjects.length === 0 ? (
+                  <p className="text-xs text-[#777D87] italic">
+                    No projects found in portfolio repository.
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-36 overflow-y-auto pr-1">
+                    {availableProjects.map((proj) => {
+                      const selected = form.projectIds.includes(proj.id);
+                      return (
+                        <button
+                          key={proj.id}
+                          type="button"
+                          onClick={() => toggleProject(proj.id)}
+                          className={`flex items-center gap-2 p-2 rounded-lg text-left text-xs transition-colors border cursor-pointer ${
+                            selected
+                              ? "bg-[#F06419]/10 border-[#F06419]/50 text-[#F5F3EE]"
+                              : "bg-[#12151A] border-[#1E222A] text-[#8D939E] hover:text-[#F5F3EE]"
+                          }`}
+                        >
+                          <span
+                            className={`w-3.5 h-3.5 rounded flex items-center justify-center text-[10px] border ${
+                              selected
+                                ? "bg-[#F06419] border-[#F06419] text-white font-bold"
+                                : "border-[#3A414B]"
+                            }`}
+                          >
+                            {selected ? "✓" : ""}
+                          </span>
+                          <span className="truncate">{proj.title}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
               {/* Pricing Visibility */}
               <div className="p-4 rounded-xl bg-[#0D0F12] border border-[#252A32] grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
                 <label className="inline-flex items-center gap-2 text-xs text-[#F5F3EE] cursor-pointer">
@@ -1645,87 +1944,18 @@ export function AdminServicesClient() {
 
       {/* Service Preview Modal */}
       {previewService && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-2xl max-h-[88vh] flex flex-col rounded-2xl bg-[#12151A] border border-[#252A32] overflow-hidden shadow-2xl">
-            <div className="px-6 py-4 border-b border-[#252A32] flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-mono uppercase text-[#D6B77A]">
-                  Service Preview
-                </span>
-                <span className="text-xs text-[#777D87] font-mono">
-                  /{previewService.slug}
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setPreviewService(null)}
-                className="text-[#777D87] hover:text-white cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="p-6 overflow-y-auto space-y-5">
-              {previewService.coverAssetUrl && (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img
-                  src={previewService.coverAssetUrl}
-                  alt={previewService.title}
-                  className="w-full aspect-[16/9] object-cover rounded-xl border border-[#252A32]"
-                />
-              )}
-              <div className="space-y-2">
-                <div className="flex flex-wrap items-center gap-2">
-                  {previewService.categoryLabel && (
-                    <span className="px-2 py-0.5 rounded bg-[#191D23] border border-[#252A32] text-[11px] text-[#B2B4BA]">
-                      {previewService.categoryLabel}
-                    </span>
-                  )}
-                  {previewService.showPricing && previewService.startingPrice && (
-                    <span className="px-2.5 py-0.5 rounded bg-[#1A160E] border border-[#D6B77A]/30 text-[11px] font-mono text-[#D6B77A]">
-                      {previewService.startingPrice}
-                    </span>
-                  )}
-                </div>
-                <h2 className="font-heading text-2xl font-bold text-[#F5F3EE]">
-                  {previewService.title}
-                </h2>
-                <p className="text-sm text-[#B2B4BA] leading-relaxed">
-                  {previewService.description}
-                </p>
-              </div>
-              {previewService.deliverables.length > 0 && (
-                <div className="space-y-1.5">
-                  <h3 className="text-xs font-mono uppercase text-[#777D87]">
-                    Deliverables
-                  </h3>
-                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs text-[#E5E2DC]">
-                    {previewService.deliverables.map((d) => (
-                      <li key={d} className="flex items-center gap-2">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#7CD69F] shrink-0" />
-                        <span>{d}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {previewService.features.length > 0 && (
-                <div className="space-y-1.5">
-                  <h3 className="text-xs font-mono uppercase text-[#777D87]">
-                    Key Features
-                  </h3>
-                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs text-[#D6B77A]">
-                    {previewService.features.map((f) => (
-                      <li key={f} className="flex items-center gap-2">
-                        <Sparkles className="w-3.5 h-3.5 shrink-0" />
-                        <span>{f}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+        <PublicServicePreviewModal
+          open={Boolean(previewService)}
+          onClose={() => setPreviewService(null)}
+          service={{
+            ...previewService,
+            divisionName: divisions.find((d) => d.id === previewService.divisionId)?.name,
+            divisionSlug: divisions.find((d) => d.id === previewService.divisionId)?.slug,
+            industryNames: availableIndustries
+              .filter((i) => previewService.industryIds?.includes(i.id))
+              .map((i) => i.name),
+          }}
+        />
       )}
 
       {/* Division Showcase Editor Modal */}
