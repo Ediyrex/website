@@ -4,7 +4,6 @@ import { WorkHero } from "@/components/sections/WorkPage/WorkHero";
 import { WorkShowcase } from "@/components/sections/WorkPage/WorkShowcase";
 import { WorkCTA } from "@/components/sections/WorkPage/WorkCTA";
 
-export const instant = false;
 
 export const metadata: Metadata = {
   title: "Work & Case Studies",

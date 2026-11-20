@@ -211,10 +211,10 @@ export function WorkShowcase({ projects }: { projects?: ProjectItem[] }) {
             {archiveProjects.length > 0 && (
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {archiveProjects.map((project) => (
-                    <article
-                      key={project.id}
-                      className="group flex flex-col justify-between overflow-hidden rounded-lg border border-[#292E35] bg-[#12151A] transition-colors duration-200 hover:border-[#4A5059]"
-                    >
+                  <article
+                    key={project.id}
+                    className="group flex flex-col justify-between overflow-hidden rounded-lg border border-[#292E35] bg-[#12151A] transition-colors duration-200 hover:border-[#4A5059]"
+                  >
                       <div>
                         {/* Card Metadata Header */}
                         <div className="flex items-center justify-between gap-2 border-b border-[#292E35] px-5 py-3">
