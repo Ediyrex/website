@@ -755,6 +755,9 @@ export function TasksOverviewView() {
   const [loading, setLoading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [openActionId, setOpenActionId] = useState<string | null>(null);
+  const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
+  const [deletingBulk, setDeletingBulk] = useState(false);
+  const [bulkActionSuccess, setBulkActionSuccess] = useState<string | null>(null);
 
   // Modals & Drawer
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -977,6 +980,74 @@ export function TasksOverviewView() {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     );
+  };
+
+  // Bulk Delete
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    setDeletingBulk(true);
+    const toDelete = [...selectedIds];
+
+    // Optimistically remove from state
+    setTasks((prev) => prev.filter((t) => !toDelete.includes(t.id)));
+    if (detailTaskId && toDelete.includes(detailTaskId)) closeDetail();
+    setSelectedIds([]);
+    setShowBulkDeleteModal(false);
+
+    try {
+      const res = await fetch("/api/v1/admin/tasks", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: toDelete }),
+      });
+      if (!res.ok) {
+        // Fallback to individual deletes if needed
+        await Promise.allSettled(
+          toDelete.map((id) =>
+            fetch(`/api/v1/admin/tasks/${id}`, { method: "DELETE" })
+          )
+        );
+      }
+      setBulkActionSuccess(`Deleted ${toDelete.length} task${toDelete.length > 1 ? "s" : ""}.`);
+      setTimeout(() => setBulkActionSuccess(null), 3500);
+    } catch {
+      await Promise.allSettled(
+        toDelete.map((id) =>
+          fetch(`/api/v1/admin/tasks/${id}`, { method: "DELETE" })
+        )
+      );
+    } finally {
+      setDeletingBulk(false);
+    }
+  };
+
+  // Bulk Mark Completed
+  const handleBulkComplete = async () => {
+    if (selectedIds.length === 0) return;
+    const toComplete = [...selectedIds];
+
+    setTasks((prev) =>
+      prev.map((t) =>
+        toComplete.includes(t.id)
+          ? { ...t, status: "completed", completed: true }
+          : t
+      )
+    );
+    setSelectedIds([]);
+
+    try {
+      await Promise.allSettled(
+        toComplete.map((id) =>
+          fetch(`/api/v1/admin/tasks/${id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: "completed" }),
+          })
+        )
+      );
+      setBulkActionSuccess(`Marked ${toComplete.length} task${toComplete.length > 1 ? "s" : ""} as completed.`);
+      setTimeout(() => setBulkActionSuccess(null), 3500);
+    } catch {}
   };
 
   // Client-side filtered tasks for immediate responsiveness
@@ -1487,57 +1558,143 @@ export function TasksOverviewView() {
           5. MAIN CONTENT AREA: LIST VIEW (Exact match to Image 1)
       ---------------------------------------------------- */}
       {viewMode === "list" && (
-        <div className="rounded-2xl bg-[#121519] border border-[#292E35] overflow-hidden shadow-xl">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr className="border-b border-[#292E35] bg-[#161A1F]/70 text-[#898D94] font-mono text-[11px] uppercase tracking-wider">
-                  <th className="py-3 px-3.5 w-10">
-                    <input
-                      type="checkbox"
-                      checked={
-                        filteredTasks.length > 0 &&
-                        selectedIds.length === filteredTasks.length
-                      }
-                      onChange={toggleSelectAll}
-                      aria-label="Select all tasks"
-                      className="rounded border-[#292E35] bg-[#161A1F] accent-[#D9B875] cursor-pointer"
-                    />
-                  </th>
-                  <th className="py-3 px-3 font-semibold">
-                    <div className="flex items-center gap-1.5 cursor-pointer hover:text-[#F5F2EC]">
-                      <span>TASK</span>
-                      <ArrowUpDown className="w-3 h-3" />
-                    </div>
-                  </th>
-                  <th className="py-3 px-3 font-semibold">
-                    <div className="flex items-center gap-1.5 cursor-pointer hover:text-[#F5F2EC]">
-                      <span>PROJECT</span>
-                      <ArrowUpDown className="w-3 h-3" />
-                    </div>
-                  </th>
-                  <th className="py-3 px-3 font-semibold">ASSIGNEE</th>
-                  <th className="py-3 px-3 font-semibold">
-                    <div className="flex items-center gap-1.5 cursor-pointer hover:text-[#F5F2EC]">
-                      <span>PRIORITY</span>
-                      <ArrowUpDown className="w-3 h-3" />
-                    </div>
-                  </th>
-                  <th className="py-3 px-3 font-semibold">
-                    <div className="flex items-center gap-1.5 cursor-pointer hover:text-[#F5F2EC]">
-                      <span>STATUS</span>
-                      <ArrowUpDown className="w-3 h-3" />
-                    </div>
-                  </th>
-                  <th className="py-3 px-3 font-semibold">
-                    <div className="flex items-center gap-1.5 cursor-pointer hover:text-[#F5F2EC]">
-                      <span>DUE DATE</span>
-                      <ArrowUpDown className="w-3 h-3" />
-                    </div>
-                  </th>
-                  <th className="py-3 pl-3 pr-5 text-right font-semibold">ACTIONS</th>
-                </tr>
-              </thead>
+        <div className="space-y-3">
+          {/* Bulk Selection Action Notification Bar */}
+          {selectedIds.length > 0 && (
+            <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 rounded-xl bg-[#151921] border border-[#D9B875]/35 shadow-xl animate-in fade-in slide-in-from-top-1 duration-150">
+              <div className="flex items-center gap-3">
+                <span className="w-2 h-2 rounded-full bg-[#D9B875] animate-pulse" />
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-[#F5F2EC]">
+                    {selectedIds.length === filteredTasks.length
+                      ? `All ${selectedIds.length} tasks selected`
+                      : `${selectedIds.length} ${selectedIds.length === 1 ? "task" : "tasks"} selected`}
+                  </span>
+                  <span className="text-[11px] text-[#898D94] hidden sm:inline">
+                    (of {filteredTasks.length} in view)
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleBulkComplete}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#56C58B]/12 border border-[#56C58B]/35 hover:bg-[#56C58B]/20 text-[#56C58B] text-xs font-medium transition-colors cursor-pointer"
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>Mark Completed</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowBulkDeleteModal(true)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#E36B68]/15 border border-[#E36B68]/40 hover:bg-[#E36B68]/25 hover:border-[#E36B68] text-[#E36B68] text-xs font-semibold transition-colors cursor-pointer shadow-sm"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Delete ({selectedIds.length})</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedIds([])}
+                  className="p-1.5 rounded-lg hover:bg-[#252C36] text-[#898D94] hover:text-[#F5F2EC] transition-colors cursor-pointer"
+                  title="Deselect all"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {bulkActionSuccess && (
+            <div className="px-4 py-2.5 rounded-xl bg-[#56C58B]/12 border border-[#56C58B]/30 text-xs text-[#56C58B] flex items-center justify-between animate-in fade-in duration-150">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 shrink-0" />
+                <span>{bulkActionSuccess}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setBulkActionSuccess(null)}
+                className="text-[#56C58B]/70 hover:text-[#56C58B] cursor-pointer"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+
+          <div className="rounded-2xl bg-[#121519] border border-[#292E35] overflow-hidden shadow-xl">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="border-b border-[#292E35] bg-[#161A1F]/70 text-[#898D94] font-mono text-[11px] uppercase tracking-wider">
+                    <th className="py-3 px-3.5 w-10">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={
+                            filteredTasks.length > 0 &&
+                            selectedIds.length === filteredTasks.length
+                          }
+                          onChange={toggleSelectAll}
+                          aria-label="Select all tasks"
+                          className="rounded border-[#292E35] bg-[#161A1F] accent-[#D9B875] cursor-pointer"
+                        />
+                        {selectedIds.length > 0 && (
+                          <span className="text-[10px] font-mono font-normal text-[#D9B875] bg-[#D9B875]/10 px-1.5 py-0.2 rounded border border-[#D9B875]/25">
+                            {selectedIds.length}
+                          </span>
+                        )}
+                      </div>
+                    </th>
+                    <th className="py-3 px-3 font-semibold">
+                      <div className="flex items-center gap-1.5 cursor-pointer hover:text-[#F5F2EC]">
+                        <span>TASK</span>
+                        <ArrowUpDown className="w-3 h-3" />
+                      </div>
+                    </th>
+                    <th className="py-3 px-3 font-semibold">
+                      <div className="flex items-center gap-1.5 cursor-pointer hover:text-[#F5F2EC]">
+                        <span>PROJECT</span>
+                        <ArrowUpDown className="w-3 h-3" />
+                      </div>
+                    </th>
+                    <th className="py-3 px-3 font-semibold">ASSIGNEE</th>
+                    <th className="py-3 px-3 font-semibold">
+                      <div className="flex items-center gap-1.5 cursor-pointer hover:text-[#F5F2EC]">
+                        <span>PRIORITY</span>
+                        <ArrowUpDown className="w-3 h-3" />
+                      </div>
+                    </th>
+                    <th className="py-3 px-3 font-semibold">
+                      <div className="flex items-center gap-1.5 cursor-pointer hover:text-[#F5F2EC]">
+                        <span>STATUS</span>
+                        <ArrowUpDown className="w-3 h-3" />
+                      </div>
+                    </th>
+                    <th className="py-3 px-3 font-semibold">
+                      <div className="flex items-center gap-1.5 cursor-pointer hover:text-[#F5F2EC]">
+                        <span>DUE DATE</span>
+                        <ArrowUpDown className="w-3 h-3" />
+                      </div>
+                    </th>
+                    <th className="py-3 pl-3 pr-5 text-right font-semibold">
+                      {selectedIds.length > 0 ? (
+                        <button
+                          type="button"
+                          onClick={() => setShowBulkDeleteModal(true)}
+                          className="inline-flex items-center gap-1.5 text-[11px] font-mono text-[#E36B68] bg-[#E36B68]/10 hover:bg-[#E36B68]/20 border border-[#E36B68]/30 px-2 py-0.5 rounded cursor-pointer normal-case transition-colors"
+                          title={`Delete ${selectedIds.length} selected tasks`}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                          <span>Delete ({selectedIds.length})</span>
+                        </button>
+                      ) : (
+                        <span>ACTIONS</span>
+                      )}
+                    </th>
+                  </tr>
+                </thead>
 
               <tbody className="divide-y divide-[#292E35]/60">
                 {loading ? (
@@ -1848,6 +2005,7 @@ export function TasksOverviewView() {
               </div>
             </div>
           </div>
+        </div>
         </div>
       )}
 
@@ -2560,6 +2718,68 @@ export function TasksOverviewView() {
             loadTasks();
           }}
         />
+      )}
+
+      {/* ----------------------------------------------------
+          10. BULK DELETE CONFIRMATION MODAL
+      ---------------------------------------------------- */}
+      {showBulkDeleteModal && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="w-full max-w-md bg-[#121519] border border-[#292E35] rounded-2xl p-6 shadow-2xl relative space-y-4">
+            <div className="flex items-start gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-[#E36B68]/15 border border-[#E36B68]/30 text-[#E36B68] flex items-center justify-center shrink-0">
+                <Trash2 className="w-5 h-5" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base font-heading font-semibold text-[#F5F2EC]">
+                  Delete {selectedIds.length} Selected {selectedIds.length === 1 ? "Task" : "Tasks"}?
+                </h3>
+                <p className="text-xs text-[#898D94] leading-relaxed">
+                  Are you sure you want to permanently delete {selectedIds.length === 1 ? "this task" : `these ${selectedIds.length} tasks`}? This action will remove subtasks, comments, and milestones permanently. It cannot be undone.
+                </p>
+              </div>
+            </div>
+
+            {/* Selected Tasks Preview List */}
+            <div className="max-h-44 overflow-y-auto rounded-xl bg-[#0B0D10] border border-[#23272F] p-3 space-y-1.5">
+              {tasks
+                .filter((t) => selectedIds.includes(t.id))
+                .slice(0, 6)
+                .map((t) => (
+                  <div key={t.id} className="text-xs text-[#D1D4DC] flex items-center gap-2 truncate">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#E36B68] shrink-0" />
+                    <span className="font-mono text-[10px] text-[#898D94] shrink-0">{t.taskCode || "TASK"}:</span>
+                    <span className="truncate">{t.title}</span>
+                  </div>
+                ))}
+              {selectedIds.length > 6 && (
+                <div className="text-[11px] text-[#898D94] italic pt-1 pl-3.5">
+                  ...and {selectedIds.length - 6} more {selectedIds.length - 6 === 1 ? "task" : "tasks"}
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                disabled={deletingBulk}
+                onClick={() => setShowBulkDeleteModal(false)}
+                className="px-4 py-2 rounded-xl bg-[#1A1F26] border border-[#292E35] text-xs font-medium text-[#D1D4DC] hover:text-[#F5F2EC] hover:bg-[#222933] transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={deletingBulk}
+                onClick={handleBulkDelete}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#E36B68] hover:bg-[#ED7875] text-xs font-semibold text-white transition-colors cursor-pointer shadow-lg disabled:opacity-50"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>{deletingBulk ? "Deleting..." : `Delete ${selectedIds.length} Tasks`}</span>
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

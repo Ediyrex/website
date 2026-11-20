@@ -472,3 +472,54 @@ export async function POST(request: NextRequest) {
     return handleApiError(err, "POST /api/v1/admin/tasks");
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const auth = await requireAdminRole(["admin", "editor"]);
+    if (auth.errorResponse) return auth.errorResponse;
+
+    let body: { ids?: string[] } = {};
+    try {
+      body = await request.json();
+    } catch {
+      return apiBadRequest("Invalid JSON body.");
+    }
+
+    const ids = Array.isArray(body?.ids)
+      ? body.ids.filter((id): id is string => typeof id === "string" && id.length > 0)
+      : [];
+
+    if (ids.length === 0) {
+      return apiBadRequest("No task IDs provided for deletion.");
+    }
+
+    const db = getDb();
+    if (!db) {
+      return apiServerError("Database connection unavailable.");
+    }
+
+    // Delete tasks matching given IDs
+    const deleted = await db
+      .delete(studioTasks)
+      .where(inArray(studioTasks.id, ids))
+      .returning({ id: studioTasks.id, title: studioTasks.title });
+
+    if (deleted.length > 0) {
+      await recordAuditLog({
+        actorUserId: auth.session.userId,
+        actorEmailSnapshot: auth.session.email,
+        action: "tasks.bulk_deleted",
+        entityType: "studio_task",
+        entityId: deleted[0].id,
+        metadata: {
+          deletedCount: deleted.length,
+          taskTitles: deleted.map((d) => d.title).slice(0, 10),
+        },
+      });
+    }
+
+    return apiOk({ deletedCount: deleted.length, ids });
+  } catch (err) {
+    return handleApiError(err, "DELETE /api/v1/admin/tasks");
+  }
+}
