@@ -27,6 +27,7 @@ const nextConfig: NextConfig = {
       { source: "/services/agents-and-automation", destination: "/services/ai", statusCode: 301 },
       { source: "/privacy-policy", destination: "/privacy", statusCode: 301 },
       { source: "/terms-and-conditions", destination: "/terms", statusCode: 301 },
+      { source: "/admin/integrations", destination: "/admin/settings?tab=integrations", statusCode: 301 },
     ];
   },
   turbopack: {

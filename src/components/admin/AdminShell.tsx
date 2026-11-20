@@ -92,7 +92,6 @@ const NAV_GROUPS: NavGroup[] = [
   {
     title: "SYSTEM",
     items: [
-      { href: "/admin/settings?tab=integrations", label: "Integrations", icon: Settings },
       { href: "/admin/team", label: "Team & Roles", icon: Users },
       { href: "/admin/settings", label: "Settings", icon: Settings },
     ],
