@@ -1,5 +1,5 @@
 import { unstable_rethrow } from "next/navigation";
-import { and, asc, desc, eq, gte, lt, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gte, lt, lte, sql } from "drizzle-orm";
 import type { NextRequest } from "next/server";
 import { crmClients, crmFollowups, enquiries, getDb } from "@/db";
 import {
@@ -26,11 +26,17 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const filter = searchParams.get("filter")?.trim() || "upcoming";
     const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
 
     const conditions = [];
     if (filter === "upcoming") {
       conditions.push(eq(crmFollowups.completed, false));
       conditions.push(gte(crmFollowups.dueAt, now));
+    } else if (filter === "today") {
+      conditions.push(eq(crmFollowups.completed, false));
+      conditions.push(gte(crmFollowups.dueAt, startOfToday));
+      conditions.push(lte(crmFollowups.dueAt, endOfToday));
     } else if (filter === "overdue") {
       conditions.push(eq(crmFollowups.completed, false));
       conditions.push(lt(crmFollowups.dueAt, now));
@@ -40,7 +46,7 @@ export async function GET(request: NextRequest) {
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-    const [rows, [{ upcoming }], [{ overdue }], [{ completed }]] =
+    const [rows, [{ upcoming }], [{ today }], [{ overdue }], [{ completed }]] =
       await Promise.all([
         db
           .select({
@@ -79,6 +85,16 @@ export async function GET(request: NextRequest) {
             )
           ),
         db
+          .select({ today: sql<number>`count(*)::int` })
+          .from(crmFollowups)
+          .where(
+            and(
+              eq(crmFollowups.completed, false),
+              gte(crmFollowups.dueAt, startOfToday),
+              lte(crmFollowups.dueAt, endOfToday)
+            )
+          ),
+        db
           .select({ overdue: sql<number>`count(*)::int` })
           .from(crmFollowups)
           .where(
@@ -97,6 +113,7 @@ export async function GET(request: NextRequest) {
       followups: rows,
       counts: {
         upcoming,
+        today,
         overdue,
         completed,
         all: upcoming + overdue + completed,

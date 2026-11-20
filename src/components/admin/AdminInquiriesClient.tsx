@@ -150,12 +150,13 @@ export function AdminInquiriesClient() {
   const [followupsData, setFollowupsData] = useState<CrmFollowupRow[]>([]);
   const [followupCounts, setFollowupCounts] = useState({
     upcoming: 0,
+    today: 0,
     overdue: 0,
     completed: 0,
     all: 0,
   });
   const [followupFilter, setFollowupFilter] = useState<
-    "upcoming" | "overdue" | "completed" | "all"
+    "upcoming" | "today" | "overdue" | "completed" | "all"
   >("upcoming");
   const [loadingFollowups, setLoadingFollowups] = useState(false);
 
@@ -1068,7 +1069,7 @@ export function AdminInquiriesClient() {
                       </th>
                       <th className="py-3.5 px-3 font-normal min-w-[180px]">Contact / Organisation</th>
                       <th className="py-3.5 px-3 font-normal whitespace-nowrap">Service Interest</th>
-                      <th className="py-3.5 px-3 font-normal whitespace-nowrap">Stage</th>
+                      <th className="py-3.5 px-3 font-normal whitespace-nowrap min-w-[130px]">Stage</th>
                       <th className="py-3.5 px-3 font-normal whitespace-nowrap">Priority</th>
                       <th className="py-3.5 px-3 font-normal whitespace-nowrap">Owner</th>
                       <th className="py-3.5 px-3 font-normal whitespace-nowrap">Next Follow-up</th>
@@ -1088,11 +1089,49 @@ export function AdminInquiriesClient() {
                       </tr>
                     ) : displayRows.length === 0 ? (
                       <tr>
-                        <td
-                          colSpan={9}
-                          className="py-10 text-center text-xs text-[#898D94]"
-                        >
-                          No inquiries match the current filters.
+                        <td colSpan={9} className="py-16 px-4">
+                          <div className="max-w-md mx-auto text-center space-y-3">
+                            <div className="w-12 h-12 rounded-2xl bg-[#161A1F] border border-[#292E35] flex items-center justify-center mx-auto text-[#898D94]">
+                              <Users className="w-6 h-6 text-[#F06419]" />
+                            </div>
+                            <h3 className="font-heading font-semibold text-base text-[#F5F2EC]">
+                              {paginationMeta.total === 0
+                                ? "No inquiries or leads found"
+                                : "No matching inquiries"}
+                            </h3>
+                            <p className="text-xs text-[#898D94] leading-relaxed">
+                              {paginationMeta.total === 0
+                                ? "Incoming inquiries from your website contact forms and Project Brief Desk will appear here in real time."
+                                : "Try clearing your search query or adjusting your stage, service, or priority filters."}
+                            </p>
+                            {paginationMeta.total === 0 ? (
+                              canEdit && (
+                                <button
+                                  type="button"
+                                  onClick={() => setShowAddInquiry(true)}
+                                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#F06419] hover:bg-[#d95510] text-[#0C0E10] text-xs font-bold transition-colors cursor-pointer mt-2"
+                                >
+                                  <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                                  <span>Add Inquiry</span>
+                                </button>
+                              )
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setStatusFilter("all");
+                                  setSearchQuery("");
+                                  setServiceFilter("all");
+                                  setSourceFilter("all");
+                                  setPriorityFilter("all");
+                                  setPage(1);
+                                }}
+                                className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-lg bg-[#161A1F] border border-[#292E35] hover:border-[#363B43] text-xs text-[#F5F2EC] transition-colors cursor-pointer"
+                              >
+                                <span>Reset Filters</span>
+                              </button>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ) : (
@@ -1155,10 +1194,10 @@ export function AdminInquiriesClient() {
                             </td>
 
                             {/* Stage */}
-                            <td className="py-3.5 px-3 whitespace-nowrap">
+                            <td className="py-3.5 px-3 min-w-[130px] whitespace-nowrap">
                               <span
                                 className={cn(
-                                  "inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold uppercase tracking-wider border whitespace-nowrap",
+                                  "inline-flex items-center px-3 py-1 rounded-full text-[10.5px] font-mono font-semibold uppercase tracking-wider border whitespace-nowrap leading-none",
                                   isNew
                                     ? "bg-[#2D160E] text-[#F06419] border-[#F06419]/40"
                                     : isInDiscussion
@@ -1491,9 +1530,9 @@ export function AdminInquiriesClient() {
                   <button
                     type="button"
                     onClick={() => setShowAddInquiry(true)}
-                    className="p-2.5 rounded-xl bg-[#F06419] hover:bg-[#d95510] text-[#0C0E10] font-bold text-[11px] flex flex-col items-center justify-center text-center shadow-[0_4px_16px_rgb(240_100_25_/_20%)] transition-colors min-h-[74px] cursor-pointer"
+                    className="p-3 rounded-xl bg-[#F06419] hover:bg-[#d95510] text-[#0C0E10] font-bold text-xs flex flex-col items-center justify-center text-center shadow-[0_4px_16px_rgb(240_100_25_/_20%)] transition-colors min-h-[82px] cursor-pointer"
                   >
-                    <span className="text-sm leading-none mb-1 font-bold">+</span>
+                    <Plus className="w-4 h-4 mb-1.5 stroke-[2.5]" />
                     <span className="leading-tight">Add Inquiry</span>
                   </button>
 
@@ -1501,11 +1540,9 @@ export function AdminInquiriesClient() {
                   <button
                     type="button"
                     onClick={() => setShowAddClient(true)}
-                    className="p-2.5 rounded-xl bg-[#161A1F] border border-[#292E35] hover:border-[#F06419] text-[#F5F2EC] text-[11px] font-medium flex flex-col items-center justify-center text-center hover:shadow-[0_0_16px_rgba(240,100,25,0.15)] transition-all duration-200 min-h-[74px] cursor-pointer group"
+                    className="p-3 rounded-xl bg-[#161A1F] border border-[#292E35] hover:border-[#F06419] text-[#F5F2EC] text-xs font-medium flex flex-col items-center justify-center text-center hover:shadow-[0_0_16px_rgba(240,100,25,0.15)] transition-all duration-200 min-h-[82px] cursor-pointer group"
                   >
-                    <span className="text-sm leading-none mb-1 text-[#898D94] group-hover:text-[#F06419] transition-colors">
-                      +
-                    </span>
+                    <UserPlus className="w-4 h-4 mb-1.5 text-[#898D94] group-hover:text-[#F06419] transition-colors" />
                     <span className="leading-tight">Add Client</span>
                   </button>
 
@@ -1519,20 +1556,20 @@ export function AdminInquiriesClient() {
                         clientId: null,
                       })
                     }
-                    className="p-2.5 rounded-xl bg-[#161A1F] border border-[#292E35] hover:border-[#F06419] text-[#B8B9BC] hover:text-[#F5F2EC] text-[11px] font-medium flex flex-col items-center justify-center gap-1.5 text-center hover:shadow-[0_0_16px_rgba(240,100,25,0.15)] transition-all duration-200 min-h-[74px] cursor-pointer group"
+                    className="p-3 rounded-xl bg-[#161A1F] border border-[#292E35] hover:border-[#F06419] text-[#B8B9BC] hover:text-[#F5F2EC] text-xs font-medium flex flex-col items-center justify-center text-center hover:shadow-[0_0_16px_rgba(240,100,25,0.15)] transition-all duration-200 min-h-[82px] cursor-pointer group"
                   >
-                    <Calendar className="w-4 h-4 text-[#898D94] group-hover:text-[#F06419] transition-colors" />
-                    <span className="leading-tight text-center">Schedule Follow-up</span>
+                    <Calendar className="w-4 h-4 mb-1.5 text-[#898D94] group-hover:text-[#F06419] transition-colors" />
+                    <span className="leading-tight">Schedule Follow-up</span>
                   </button>
 
                   {/* Export Records */}
                   <button
                     type="button"
                     onClick={handleExport}
-                    className="p-2.5 rounded-xl bg-[#161A1F] border border-[#292E35] hover:border-[#F06419] text-[#B8B9BC] hover:text-[#F5F2EC] text-[11px] font-medium flex flex-col items-center justify-center gap-1.5 text-center hover:shadow-[0_0_16px_rgba(240,100,25,0.15)] transition-all duration-200 min-h-[74px] cursor-pointer group"
+                    className="p-3 rounded-xl bg-[#161A1F] border border-[#292E35] hover:border-[#F06419] text-[#B8B9BC] hover:text-[#F5F2EC] text-xs font-medium flex flex-col items-center justify-center text-center hover:shadow-[0_0_16px_rgba(240,100,25,0.15)] transition-all duration-200 min-h-[82px] cursor-pointer group"
                   >
-                    <Download className="w-4 h-4 text-[#898D94] group-hover:text-[#F06419] transition-colors" />
-                    <span className="leading-tight text-center">Export Records</span>
+                    <Download className="w-4 h-4 mb-1.5 text-[#898D94] group-hover:text-[#F06419] transition-colors" />
+                    <span className="leading-tight">Export Records</span>
                   </button>
                 </div>
               </div>
