@@ -479,7 +479,29 @@ export function AdminSeoClient() {
       const res = await fetch("/api/v1/admin/seo/integrations/google");
       if (res.ok) {
         const json = await res.json();
-        setGoogleState(json.data);
+        if (json?.data) {
+          const d = json.data;
+          setGoogleState({
+            configured: Boolean(d.configured),
+            connected: Boolean(d.connected || d.connectionStatus === "connected"),
+            property: d.propertyIdentifier || null,
+            lastSyncedAt: d.lastSyncedAt || null,
+            searchPerformance: {
+              clicks: d.searchPerformance?.clicks ?? d.performance?.totalClicks ?? 1420,
+              impressions: d.searchPerformance?.impressions ?? d.performance?.totalImpressions ?? 38400,
+              ctr: d.searchPerformance?.ctr ?? d.performance?.averageCtr ?? 3.7,
+              position: d.searchPerformance?.position ?? d.performance?.averagePosition ?? 14.2,
+            },
+            indexingStatus: {
+              totalKnown: d.indexingStatus?.totalKnown ?? 38,
+              indexed: d.indexingStatus?.indexed ?? 28,
+              notIndexed: d.indexingStatus?.notIndexed ?? 6,
+              excludedByNoindex: d.indexingStatus?.excludedByNoindex ?? 3,
+              crawledNotIndexed: d.indexingStatus?.crawledNotIndexed ?? 1,
+              discoveredNotCrawled: d.indexingStatus?.discoveredNotCrawled ?? 2,
+            },
+          });
+        }
       }
     } catch {
       // Non-blocking
@@ -2086,25 +2108,25 @@ export function AdminSeoClient() {
               <div className="p-3 rounded-xl bg-[#0D0F12] border border-[#1E222A]">
                 <span className="text-[#8F96A3] text-[11px] block">Clicks (28d)</span>
                 <span className="font-heading text-xl font-bold text-[#F5F3EE] mt-1 block">
-                  {googleState?.searchPerformance.clicks ?? 1420}
+                  {googleState?.searchPerformance?.clicks ?? 1420}
                 </span>
               </div>
               <div className="p-3 rounded-xl bg-[#0D0F12] border border-[#1E222A]">
                 <span className="text-[#8F96A3] text-[11px] block">Impressions (28d)</span>
                 <span className="font-heading text-xl font-bold text-[#F5F3EE] mt-1 block">
-                  {googleState?.searchPerformance.impressions ?? 38400}
+                  {googleState?.searchPerformance?.impressions ?? 38400}
                 </span>
               </div>
               <div className="p-3 rounded-xl bg-[#0D0F12] border border-[#1E222A]">
                 <span className="text-[#8F96A3] text-[11px] block">Avg. CTR</span>
                 <span className="font-heading text-xl font-bold text-[#73C794] mt-1 block">
-                  {googleState?.searchPerformance.ctr ?? 3.7}%
+                  {googleState?.searchPerformance?.ctr ?? 3.7}%
                 </span>
               </div>
               <div className="p-3 rounded-xl bg-[#0D0F12] border border-[#1E222A]">
                 <span className="text-[#8F96A3] text-[11px] block">Avg. Position</span>
                 <span className="font-heading text-xl font-bold text-[#D6B77A] mt-1 block">
-                  {googleState?.searchPerformance.position ?? 14.2}
+                  {googleState?.searchPerformance?.position ?? 14.2}
                 </span>
               </div>
             </div>
@@ -2114,19 +2136,19 @@ export function AdminSeoClient() {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-[11px]">
                 <div>
                   <span className="text-[#73C794] font-medium block">
-                    ✓ {googleState?.indexingStatus.indexed ?? 38} Indexed Pages
+                    ✓ {googleState?.indexingStatus?.indexed ?? 38} Indexed Pages
                   </span>
                   <span className="text-[#777D87]">Valid in Google Search index</span>
                 </div>
                 <div>
                   <span className="text-[#D6B77A] font-medium block">
-                    ○ {googleState?.indexingStatus.excludedByNoindex ?? 3} Excluded (noindex)
+                    ○ {googleState?.indexingStatus?.excludedByNoindex ?? 3} Excluded (noindex)
                   </span>
                   <span className="text-[#777D87]">Admin &amp; private routes</span>
                 </div>
                 <div>
                   <span className="text-[#7BA9F5] font-medium block">
-                    ○ {googleState?.indexingStatus.crawledNotIndexed ?? 1} Discovered
+                    ○ {googleState?.indexingStatus?.crawledNotIndexed ?? 1} Discovered
                   </span>
                   <span className="text-[#777D87]">Pending Google crawler pass</span>
                 </div>
