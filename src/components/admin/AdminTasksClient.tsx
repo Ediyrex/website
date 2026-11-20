@@ -35,7 +35,19 @@ import type {
   TaskWorkflowStatus,
 } from "./pms/pms-types";
 
-export function AdminTasksClient() {
+export interface AdminTasksClientProps {
+  basePath?: string;
+  defaultView?: PmsMainView;
+  titleOverride?: string;
+  descriptionOverride?: string;
+}
+
+export function AdminTasksClient({
+  basePath = "/admin/tasks",
+  defaultView = "overview",
+  titleOverride,
+  descriptionOverride,
+}: AdminTasksClientProps = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, canEdit } = useAdminUser();
@@ -57,7 +69,7 @@ export function AdminTasksClient() {
       viewParam === "workflow" ||
       viewParam === "reports"
     ? viewParam
-    : "overview";
+    : defaultView;
 
   const updateRoute = useCallback(
     (updates: Record<string, string | null>) => {
@@ -67,9 +79,9 @@ export function AdminTasksClient() {
         else params.set(k, v);
       }
       const qs = params.toString();
-      router.replace(qs ? `/admin/tasks?${qs}` : "/admin/tasks");
+      router.replace(qs ? `${basePath}?${qs}` : basePath);
     },
-    [router, searchParams]
+    [basePath, router, searchParams]
   );
 
   // Dashboard / list state
@@ -169,6 +181,12 @@ export function AdminTasksClient() {
     initialStatus: TaskWorkflowStatus;
   }>({ open: false, initialStatus: "todo" });
   const [errorBanner, setErrorBanner] = useState("");
+
+  useEffect(() => {
+    if (searchParams.get("create") === "1" && canEdit) {
+      setNewProjectModal({ open: true });
+    }
+  }, [searchParams, canEdit]);
 
   const loadProjectsOverview = useCallback(async () => {
     setLoadingProjects(true);
@@ -624,8 +642,9 @@ export function AdminTasksClient() {
                 ? "Starred Projects"
                 : activeView === "all"
                 ? "All Studio Projects"
-                : "Projects & Tasks — Overview"
+                : titleOverride || (basePath === "/admin/projects" ? "Project Management" : "Projects & Tasks — Overview")
             }
+            description={descriptionOverride}
             projects={projects}
             kpis={kpis}
             upcomingDeadlines={upcomingDeadlines}

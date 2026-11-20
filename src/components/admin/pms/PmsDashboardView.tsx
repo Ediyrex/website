@@ -28,6 +28,7 @@ import {
 
 interface PmsDashboardViewProps {
   title: string;
+  description?: string;
   projects: PmsProjectSummary[];
   kpis: {
     total: number;
@@ -62,6 +63,7 @@ interface PmsDashboardViewProps {
 
 export function PmsDashboardView({
   title,
+  description,
   projects,
   kpis,
   upcomingDeadlines,
@@ -98,8 +100,8 @@ export function PmsDashboardView({
             {title}
           </h1>
           <p className="text-sm text-[#A1A6AE] mt-1">
-            Monitor studio projects, delivery milestones, team workload, and
-            active tasks.
+            {description ||
+              "Manage internal project execution, tasks, milestones, team assignments and delivery."}
           </p>
         </div>
 

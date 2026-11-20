@@ -719,13 +719,23 @@ export function PmsProjectWorkspace({
             )}
 
             {permissions.canManageProject && (
-              <button
-                type="button"
-                onClick={() => setShowProgressEditor((v) => !v)}
-                className="h-9 px-3.5 rounded-lg bg-[#D4AF77] text-[#08090B] text-xs font-semibold hover:bg-[#E2C28E] cursor-pointer"
-              >
-                Update Progress
-              </button>
+              <>
+                <Link
+                  href={`/admin/work?createFrom=${project.id}`}
+                  title="Create a public portfolio entry from this internal project"
+                  className="h-9 px-3 rounded-lg text-xs font-semibold border border-[#D4AF77]/40 bg-[#D4AF77]/10 text-[#D4AF77] hover:bg-[#D4AF77]/20 transition-colors inline-flex items-center gap-1.5"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>Create Portfolio Entry</span>
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setShowProgressEditor((v) => !v)}
+                  className="h-9 px-3.5 rounded-lg bg-[#D4AF77] text-[#08090B] text-xs font-semibold hover:bg-[#E2C28E] cursor-pointer"
+                >
+                  Update Progress
+                </button>
+              </>
             )}
 
             {permissions.canEditTasks && (

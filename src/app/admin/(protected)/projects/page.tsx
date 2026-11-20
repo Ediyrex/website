@@ -1,9 +1,9 @@
 import React, { Suspense } from "react";
 import type { Metadata } from "next";
-import { AdminProjectsClient } from "@/components/admin/AdminProjectsClient";
+import { AdminTasksClient } from "@/components/admin/AdminTasksClient";
 
 export const metadata: Metadata = {
-  title: "Projects CMS",
+  title: "Project Management",
   robots: { index: false, follow: false },
 };
 
@@ -12,12 +12,16 @@ export default function AdminProjectsPage() {
     <Suspense
       fallback={
         <div className="py-12 text-xs font-mono text-[#777D87]">
-          Loading projects editor...
+          Loading Project Management...
         </div>
       }
     >
-      <AdminProjectsClient />
+      <AdminTasksClient
+        basePath="/admin/projects"
+        defaultView="overview"
+        titleOverride="Project Management"
+        descriptionOverride="Manage internal project execution, tasks, milestones, team assignments and delivery."
+      />
     </Suspense>
   );
 }
-

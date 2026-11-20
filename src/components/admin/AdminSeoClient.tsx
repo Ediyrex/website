@@ -762,7 +762,7 @@ export function AdminSeoClient() {
 
   const getFullEditHref = (entry: SeoEntryRow) => {
     if (entry.kind === "page") return `/admin/pages?edit=${entry.id}`;
-    if (entry.kind === "portfolio") return `/admin/projects?edit=${entry.id}`;
+    if (entry.kind === "portfolio") return `/admin/work?edit=${entry.id}`;
     if (entry.kind === "service") return `/admin/services?edit=${entry.id}`;
     return `/admin/blog?edit=${entry.id}`;
   };

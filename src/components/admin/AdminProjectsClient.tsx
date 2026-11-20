@@ -332,6 +332,7 @@ export function AdminProjectsClient() {
   useEffect(() => {
     const editId = searchParams.get("edit");
     const createFlag = searchParams.get("create");
+    const createFrom = searchParams.get("createFrom");
     let ignore = false;
 
     if (editId) {
@@ -351,6 +352,29 @@ export function AdminProjectsClient() {
             );
           }
         });
+    } else if (createFrom && !editorOpen && !form) {
+      fetch(`/api/v1/admin/pms/projects/${createFrom}`)
+        .then((r) => r.json())
+        .then((json) => {
+          if (!ignore && json?.data?.project) {
+            const p = json.data.project;
+            openCreateModal();
+            setForm((prev) =>
+              prev
+                ? {
+                    ...prev,
+                    title: p.title || "",
+                    summary: p.summary || "",
+                    clientName: p.clientCompany || p.clientName || "",
+                    clientIsPublic: Boolean(p.clientCompany || p.clientName),
+                    projectType: "client",
+                    slug: slugify(p.title || ""),
+                  }
+                : null
+            );
+          }
+        })
+        .catch(() => {});
     } else if (createFlag === "1" && !editorOpen && !form) {
       Promise.resolve().then(() => {
         if (!ignore) openCreateModal();
@@ -481,10 +505,10 @@ export function AdminProjectsClient() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="font-heading font-bold text-2xl sm:text-[28px] tracking-tight text-[#F5F3EE]">
-            Portfolio
+            Portfolio &amp; Case Studies
           </h1>
           <p className="text-sm text-[#8D939E]">
-            Manage your portfolio projects, case studies, and creative work.
+            Manage public portfolio entries, case studies, creative showcases, concepts and R&amp;D publishing.
           </p>
         </div>
 
@@ -495,7 +519,7 @@ export function AdminProjectsClient() {
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#D6B77A] text-[#08090B] text-xs font-semibold hover:bg-[#E2C68F] transition-colors cursor-pointer shadow-sm"
           >
             <Plus className="w-4 h-4" />
-            <span>Add Portfolio Project</span>
+            <span>Add Portfolio Entry</span>
           </button>
         )}
       </div>
@@ -507,7 +531,7 @@ export function AdminProjectsClient() {
             <span className="p-2 rounded-lg bg-[#1A160E] border border-[#D6B77A]/30 text-[#D6B77A]">
               <FolderKanban className="w-4 h-4" />
             </span>
-            <span>Total Projects</span>
+            <span>Total Portfolio Entries</span>
           </div>
           <div className="font-heading font-bold text-3xl text-[#F5F3EE]">
             {loading ? "—" : stats.totalAll}

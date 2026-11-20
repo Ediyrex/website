@@ -71,7 +71,7 @@ const NAV_GROUPS: NavGroup[] = [
     title: "CONTENT",
     items: [
       { href: "/admin/pages", label: "Pages & CMS", icon: FileText },
-      { href: "/admin/projects", label: "Work & Case Studies", icon: BookOpen },
+      { href: "/admin/work", label: "Work & Case Studies", icon: BookOpen },
       { href: "/admin/media", label: "Media Library", icon: ImageIcon },
     ],
   },
@@ -512,7 +512,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                   {searchResults.projects.map((p) => (
                     <Link
                       key={p.id}
-                      href={`/admin/projects?edit=${p.id}`}
+                      href={`/admin/work?edit=${p.id}`}
                       onClick={() => setSearchOpen(false)}
                       className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-[#191D23]"
                     >
