@@ -11,10 +11,12 @@ export function InHouseProducts({
 }: {
   products?: HybridProduct[];
 }) {
-  const items =
-    products && products.length > 0
-      ? mapToInHouseProducts(products)
-      : IN_HOUSE_PRODUCTS;
+  // Hide in-house products until real projects are published by the studio
+  if (!products || products.length === 0) {
+    return null;
+  }
+
+  const items = mapToInHouseProducts(products);
 
   return (
     <div className="space-y-6">

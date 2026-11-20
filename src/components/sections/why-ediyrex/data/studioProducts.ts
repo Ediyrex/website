@@ -71,25 +71,13 @@ const PRODUCT_META: Record<
   },
 };
 
-export const IN_HOUSE_PRODUCTS: readonly InHouseProductItem[] =
-  HYBRID_PRODUCTS_DATA.map((product) => {
-    const meta = PRODUCT_META[product.slug];
-    return {
-      id: product.id,
-      slug: product.slug,
-      name: meta?.name ?? product.name,
-      status: product.status.toUpperCase() as InHouseProductItem["status"],
-      description: meta?.description ?? product.tagline,
-      visual: meta?.visual ?? "layers",
-      href: meta?.href ?? "/services",
-    };
-  });
+export const IN_HOUSE_PRODUCTS: readonly InHouseProductItem[] = [];
 
 export function mapToInHouseProducts(
   products?: HybridProduct[]
 ): readonly InHouseProductItem[] {
   if (!products || products.length === 0) {
-    return IN_HOUSE_PRODUCTS;
+    return [];
   }
 
   const visuals: InHouseProductVisual[] = ["energy", "waveform", "layers"];
