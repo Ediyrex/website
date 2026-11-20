@@ -1,4 +1,7 @@
 import { desc, gte, lte, isNull, sql, and, eq, inArray, lt } from "drizzle-orm";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 import {
   auditLogs,
   blogPosts,
