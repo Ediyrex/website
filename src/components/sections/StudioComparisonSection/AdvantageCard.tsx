@@ -57,7 +57,7 @@ export function AdvantageCard({
         transition={{ duration: 0.4, delay: index * 0.07, ease: [0.16, 1, 0.3, 1] }}
         whileHover={{ y: -6, transition: { duration: 0.22, ease: "easeOut" } }}
         className={cn(
-          "group relative flex h-full flex-col justify-between rounded-[20px] bg-[#FFFCF8] p-5 sm:p-6 cursor-pointer overflow-hidden transition-all duration-300 select-none",
+          "group relative flex h-full flex-col justify-between rounded-[20px] bg-[#FFFCF8] p-5 sm:p-6 cursor-pointer overflow-hidden transition-all duration-500 select-none",
           isHighlighted
             ? "border border-[#FF6900] shadow-[0_20px_42px_-16px_rgba(255,105,0,0.32)]"
             : "border border-[#E5DED5] shadow-[0_8px_24px_-18px_rgba(17,17,17,0.08)] hover:border-[#FF9A48]/70"
@@ -66,7 +66,7 @@ export function AdvantageCard({
         {/* Dynamic Cursor Spotlight Radial Glow */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 rounded-[20px] transition-opacity duration-300"
+          className="pointer-events-none absolute inset-0 rounded-[20px] transition-opacity duration-500"
           style={{
             opacity: isHighlighted ? 1 : 0,
             background: isHovered
@@ -79,7 +79,7 @@ export function AdvantageCard({
         <div
           aria-hidden="true"
           className={cn(
-            "pointer-events-none absolute top-0 inset-x-4 h-[2px] transition-opacity duration-300",
+            "pointer-events-none absolute top-0 inset-x-4 h-[2px] transition-opacity duration-500",
             isHighlighted
               ? "opacity-100 bg-gradient-to-r from-transparent via-[#FF6900] to-transparent shadow-[0_0_12px_#FF6900]"
               : "opacity-0"

@@ -1,11 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AdvantageCard } from "./AdvantageCard";
 import { KEY_ADVANTAGES } from "./comparison.data";
 
+const CYCLE_INTERVAL_MS = 3200;
+
 export function AdvantageGrid() {
-  const [activeId, setActiveId] = useState<string>("adv-disciplines");
+  const [activeIndex, setActiveIndex] = useState<number>(0);
+  const [isPaused, setIsPaused] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (isPaused) return;
+
+    const timer = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % KEY_ADVANTAGES.length);
+    }, CYCLE_INTERVAL_MS);
+
+    return () => clearInterval(timer);
+  }, [isPaused]);
 
   return (
     <div className="space-y-7 pt-2">
@@ -24,15 +37,19 @@ export function AdvantageGrid() {
         />
       </div>
 
-      {/* Responsive 5-card grid with interactive spotlight effects */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 lg:gap-5">
+      {/* Responsive 5-card grid with timed cycling spotlight effect */}
+      <div
+        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 lg:gap-5"
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+      >
         {KEY_ADVANTAGES.map((advantage, index) => (
           <AdvantageCard
             key={advantage.id}
             advantage={advantage}
             index={index}
-            isActive={activeId === advantage.id}
-            onSelect={() => setActiveId(advantage.id)}
+            isActive={activeIndex === index}
+            onSelect={() => setActiveIndex(index)}
           />
         ))}
       </div>
