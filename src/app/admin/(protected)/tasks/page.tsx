@@ -1,6 +1,6 @@
 import React, { Suspense } from "react";
 import type { Metadata } from "next";
-import { AdminTasksClient } from "@/components/admin/AdminTasksClient";
+import { TasksOverviewView } from "@/components/admin/tasks/TasksOverviewView";
 
 export const metadata: Metadata = {
   title: "Tasks",
@@ -11,17 +11,12 @@ export default function AdminTasksPage() {
   return (
     <Suspense
       fallback={
-        <div className="py-12 text-xs font-mono text-[#777D87]">
-          Loading Tasks...
+        <div className="py-12 text-xs font-mono text-[#898D94]">
+          Loading Tasks Workspace...
         </div>
       }
     >
-      <AdminTasksClient
-        basePath="/admin/tasks"
-        defaultView="my-tasks"
-        titleOverride="Tasks"
-        descriptionOverride="Track and manage team assignments, deliverables, and operational progress."
-      />
+      <TasksOverviewView />
     </Suspense>
   );
 }
