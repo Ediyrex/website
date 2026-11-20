@@ -1,11 +1,15 @@
-import { and, asc, desc, eq, inArray, ne } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, ne, sql } from "drizzle-orm";
 import type { NextRequest } from "next/server";
 import {
   blogPosts,
   cmsPages,
   getDb,
+  industries,
   mediaAssets,
   projects,
+  seoAudits,
+  seoAuditPages,
+  seoIssues,
   seoRedirects,
   serviceDivisions,
   services,
@@ -22,83 +26,13 @@ import { recordAuditLog } from "@/lib/server/audit";
 import { handleApiError } from "@/lib/server/errors";
 import { requireAdminRole } from "@/lib/server/session";
 import { seoEntryPatchSchema } from "@/lib/validations/cms";
+import {
+  ensureSeoManagementTables,
+  runSinglePageAudit,
+  SEO_CATEGORY_WEIGHTS,
+} from "@/lib/server/seo-engine";
 
-export type SeoEntryKind = "page" | "portfolio" | "service" | "blog";
-
-function computeSeoScore(input: {
-  seoTitle?: string | null;
-  seoDescription?: string | null;
-  hasOg?: boolean;
-  hasCanonicalOrUrl?: boolean;
-  hasSchema?: boolean;
-  noIndex?: boolean;
-  status?: string;
-}): { score: number; issues: string[] } {
-  let score = 0;
-  const issues: string[] = [];
-
-  const titleLen = input.seoTitle?.trim().length ?? 0;
-  if (titleLen >= 20 && titleLen <= 65) {
-    score += 25;
-  } else if (titleLen > 0) {
-    score += 15;
-    issues.push(
-      titleLen < 20
-        ? "SEO title under 20 chars"
-        : "SEO title exceeds 65 chars"
-    );
-  } else {
-    score += 6;
-    issues.push("Missing custom SEO title");
-  }
-
-  const descLen = input.seoDescription?.trim().length ?? 0;
-  if (descLen >= 60 && descLen <= 165) {
-    score += 25;
-  } else if (descLen > 0) {
-    score += 15;
-    issues.push(
-      descLen < 60
-        ? "Meta description under 60 chars"
-        : "Meta description exceeds 165 chars"
-    );
-  } else {
-    score += 6;
-    issues.push("Missing meta description");
-  }
-
-  if (input.hasOg) {
-    score += 15;
-  } else {
-    issues.push("Missing Open Graph image or social text");
-  }
-
-  if (input.hasCanonicalOrUrl) {
-    score += 15;
-  } else {
-    issues.push("Missing canonical path");
-  }
-
-  if (input.hasSchema) {
-    score += 10;
-  } else {
-    issues.push("Missing structured data type");
-  }
-
-  if (!input.noIndex && input.status === "published") {
-    score += 10;
-  } else if (input.noIndex) {
-    issues.push("Marked noindex");
-  } else {
-    score += 4;
-    issues.push("Entry in draft / unpublished");
-  }
-
-  return {
-    score: Math.min(100, Math.max(0, score)),
-    issues,
-  };
-}
+export type SeoEntryKind = "page" | "portfolio" | "service" | "blog" | "industry";
 
 export async function GET() {
   try {
@@ -110,15 +44,20 @@ export async function GET() {
       return apiServerError("Database connection unavailable.");
     }
 
+    await ensureSeoManagementTables();
+
     const [
       pageRows,
       projectRows,
       serviceRows,
       blogRows,
+      industryRows,
       redirectRows,
       divisionRows,
       settingRows,
       allMediaRows,
+      auditHistoryRows,
+      openIssuesRows,
     ] = await Promise.all([
       db
         .select()
@@ -133,6 +72,7 @@ export async function GET() {
         .from(services)
         .orderBy(asc(services.displayOrder), asc(services.title)),
       db.select().from(blogPosts).orderBy(desc(blogPosts.updatedAt)),
+      db.select().from(industries).orderBy(asc(industries.displayOrder), asc(industries.name)),
       db.select().from(seoRedirects).orderBy(asc(seoRedirects.source)),
       db
         .select({ slug: serviceDivisions.slug, updatedAt: serviceDivisions.updatedAt })
@@ -152,6 +92,20 @@ export async function GET() {
       db
         .select({ id: mediaAssets.id, secureUrl: mediaAssets.secureUrl })
         .from(mediaAssets),
+      db
+        .select()
+        .from(seoAudits)
+        .where(eq(seoAudits.status, "completed"))
+        .orderBy(desc(seoAudits.createdAt))
+        .limit(10)
+        .catch(() => []),
+      db
+        .select()
+        .from(seoIssues)
+        .where(inArray(seoIssues.status, ["open", "reopened", "in_progress"]))
+        .orderBy(desc(seoIssues.lastDetectedAt))
+        .limit(100)
+        .catch(() => []),
     ]);
 
     const mediaUrlById = new Map(allMediaRows.map((m) => [m.id, m.secureUrl]));
@@ -215,6 +169,76 @@ export async function GET() {
           ],
     };
 
+    // Load latest audit page records if an audit exists
+    const latestAudit = auditHistoryRows[0] ?? null;
+    const previousAudit = auditHistoryRows[1] ?? null;
+
+    let auditPageMap = new Map<string, typeof seoAuditPages.$inferSelect>();
+    if (latestAudit) {
+      const pageAuditRows = await db
+        .select()
+        .from(seoAuditPages)
+        .where(eq(seoAuditPages.auditId, latestAudit.id))
+        .catch(() => []);
+      for (const p of pageAuditRows) {
+        auditPageMap.set(`${p.entityType}:${p.entityId}`, p);
+      }
+    }
+
+    // Helper to calculate entry score fallback if not yet audited
+    const getFallbackScore = (input: {
+      seoTitle?: string | null;
+      seoDescription?: string | null;
+      hasOg?: boolean;
+      canonical?: string | null;
+      noIndex?: boolean;
+      status?: string;
+    }) => {
+      let score = 25; // Base technical
+      const issues: string[] = [];
+
+      const titleLen = input.seoTitle?.trim().length ?? 0;
+      if (titleLen >= 30 && titleLen <= 60) {
+        score += 20;
+      } else if (titleLen > 0) {
+        score += 12;
+        issues.push("Title length outside 30–60 range");
+      } else {
+        issues.push("Missing custom SEO title");
+      }
+
+      const descLen = input.seoDescription?.trim().length ?? 0;
+      if (descLen >= 120 && descLen <= 160) {
+        score += 20;
+      } else if (descLen > 0) {
+        score += 12;
+        issues.push("Meta description outside 120–160 range");
+      } else {
+        issues.push("Missing meta description");
+      }
+
+      if (input.hasOg) {
+        score += 15;
+      } else {
+        issues.push("Missing Open Graph image");
+      }
+
+      if (input.canonical) {
+        score += 10;
+      } else {
+        issues.push("Missing canonical path");
+      }
+
+      if (!input.noIndex && input.status === "published") {
+        score += 10;
+      } else if (input.noIndex) {
+        issues.push("Marked noindex");
+      }
+
+      return { score: Math.min(100, Math.max(0, score)), issues };
+    };
+
+    // Assemble Page Entries
     const pageEntries = pageRows.map((p) => {
       const ogImageUrl =
         (p.ogImageAssetId ? mediaUrlById.get(p.ogImageAssetId) : null) ||
@@ -222,23 +246,27 @@ export async function GET() {
         null;
       const effectiveNoIndex =
         p.noIndex || p.robotsDirective.startsWith("noindex");
-      const { score, issues } = computeSeoScore({
+
+      const audited = auditPageMap.get(`page:${p.id}`);
+      const fallback = getFallbackScore({
         seoTitle: p.seoTitle,
         seoDescription: p.seoDescription,
-        hasOg: Boolean(
-          p.ogTitle || p.ogDescription || ogImageUrl || globalSeo.defaultOgImageUrl
-        ),
-        hasCanonicalOrUrl: Boolean(p.canonicalUrl || p.slug),
-        hasSchema: Boolean(p.schemaType),
+        hasOg: Boolean(p.ogTitle || p.ogDescription || ogImageUrl),
+        canonical: p.canonicalUrl || p.slug,
         noIndex: effectiveNoIndex,
         status: p.status,
       });
+
+      const score = audited ? audited.overallScore : fallback.score;
+      const issues = audited ? [] : fallback.issues;
+
       const typeLabel =
         p.pageType === "legal"
           ? "Legal"
           : p.pageType === "listing"
             ? "Listing"
             : "Page";
+
       return {
         id: p.id,
         kind: "page" as const,
@@ -261,10 +289,14 @@ export async function GET() {
         status: p.status,
         score,
         issues,
+        auditStatus: audited ? audited.status : "pending",
+        lastAuditedAt: audited ? audited.auditedAt.toISOString() : null,
+        categoryScores: audited ? audited.categoryScores : null,
         updatedAt: p.updatedAt.toISOString(),
       };
     });
 
+    // Assemble Portfolio Entries
     const projectEntries = projectRows.map((p) => {
       const url = `/work/${p.slug}`;
       const ogImageUrl =
@@ -273,15 +305,20 @@ export async function GET() {
         null;
       const effectiveNoIndex =
         p.noIndex || p.robotsDirective.startsWith("noindex");
-      const { score, issues } = computeSeoScore({
+
+      const audited = auditPageMap.get(`portfolio:${p.id}`);
+      const fallback = getFallbackScore({
         seoTitle: p.seoTitle,
         seoDescription: p.seoDescription,
         hasOg: Boolean(p.ogTitle || p.ogDescription || ogImageUrl),
-        hasCanonicalOrUrl: Boolean(p.canonicalUrl || url),
-        hasSchema: Boolean(p.schemaType),
+        canonical: p.canonicalUrl || url,
         noIndex: effectiveNoIndex,
         status: p.status,
       });
+
+      const score = audited ? audited.overallScore : fallback.score;
+      const issues = audited ? [] : fallback.issues;
+
       return {
         id: p.id,
         kind: "portfolio" as const,
@@ -304,27 +341,36 @@ export async function GET() {
         status: p.status,
         score,
         issues,
+        auditStatus: audited ? audited.status : "pending",
+        lastAuditedAt: audited ? audited.auditedAt.toISOString() : null,
+        categoryScores: audited ? audited.categoryScores : null,
         updatedAt: p.updatedAt.toISOString(),
       };
     });
 
+    // Assemble Services Entries
     const serviceEntries = serviceRows.map((s) => {
-      const url = `/services#${s.slug}`;
+      const url = `/services/${s.slug}`;
       const ogImageUrl =
         (s.ogImageAssetId ? mediaUrlById.get(s.ogImageAssetId) : null) ||
         (s.coverAssetId ? mediaUrlById.get(s.coverAssetId) : null) ||
         null;
       const effectiveNoIndex =
-        s.noIndex || s.robotsDirective.startsWith("noindex");
-      const { score, issues } = computeSeoScore({
+        s.noIndex || false;
+
+      const audited = auditPageMap.get(`service:${s.id}`);
+      const fallback = getFallbackScore({
         seoTitle: s.seoTitle,
         seoDescription: s.seoDescription,
-        hasOg: Boolean(s.ogTitle || s.ogDescription || ogImageUrl || globalSeo.defaultOgImageUrl),
-        hasCanonicalOrUrl: Boolean(s.canonicalUrl || url),
-        hasSchema: Boolean(s.schemaType),
+        hasOg: Boolean(s.ogTitle || s.ogDescription || ogImageUrl),
+        canonical: s.canonicalUrl || url,
         noIndex: effectiveNoIndex,
         status: s.status,
       });
+
+      const score = audited ? audited.overallScore : fallback.score;
+      const issues = audited ? [] : fallback.issues;
+
       return {
         id: s.id,
         kind: "service" as const,
@@ -340,17 +386,21 @@ export async function GET() {
         ogImageAssetId: s.ogImageAssetId ?? s.coverAssetId ?? null,
         ogImageUrl: ogImageUrl || "",
         canonicalUrl: s.canonicalUrl || url,
-        robotsDirective: s.robotsDirective || (s.noIndex ? "noindex, follow" : "index, follow"),
-        schemaType: s.schemaType || "Service",
-        schemaJson: s.schemaJson || "",
+        robotsDirective: effectiveNoIndex ? "noindex, follow" : "index, follow",
+        schemaType: "Service",
+        schemaJson: "",
         noIndex: effectiveNoIndex,
         status: s.status,
         score,
         issues,
+        auditStatus: audited ? audited.status : "pending",
+        lastAuditedAt: audited ? audited.auditedAt.toISOString() : null,
+        categoryScores: audited ? audited.categoryScores : null,
         updatedAt: s.updatedAt.toISOString(),
       };
     });
 
+    // Assemble Blog Entries
     const blogEntries = blogRows.map((b) => {
       const url = `/blog/${b.slug}`;
       const ogImageUrl =
@@ -359,15 +409,20 @@ export async function GET() {
         null;
       const effectiveNoIndex =
         b.noIndex || b.robotsDirective.startsWith("noindex");
-      const { score, issues } = computeSeoScore({
+
+      const audited = auditPageMap.get(`blog:${b.id}`);
+      const fallback = getFallbackScore({
         seoTitle: b.seoTitle,
         seoDescription: b.seoDescription,
-        hasOg: Boolean(b.ogTitle || b.ogDescription || ogImageUrl || globalSeo.defaultOgImageUrl),
-        hasCanonicalOrUrl: Boolean(b.canonicalUrl || url),
-        hasSchema: Boolean(b.schemaType),
+        hasOg: Boolean(b.ogTitle || b.ogDescription || ogImageUrl),
+        canonical: b.canonicalUrl || url,
         noIndex: effectiveNoIndex,
         status: b.status,
       });
+
+      const score = audited ? audited.overallScore : fallback.score;
+      const issues = audited ? [] : fallback.issues;
+
       return {
         id: b.id,
         kind: "blog" as const,
@@ -390,7 +445,57 @@ export async function GET() {
         status: b.status,
         score,
         issues,
+        auditStatus: audited ? audited.status : "pending",
+        lastAuditedAt: audited ? audited.auditedAt.toISOString() : null,
+        categoryScores: audited ? audited.categoryScores : null,
         updatedAt: b.updatedAt.toISOString(),
+      };
+    });
+
+    // Assemble Industry Entries
+    const industryEntries = industryRows.map((ind) => {
+      const url = `/industries/${ind.slug}`;
+      const effectiveNoIndex = false;
+
+      const audited = auditPageMap.get(`industry:${ind.id}`);
+      const fallback = getFallbackScore({
+        seoTitle: ind.seoTitle,
+        seoDescription: ind.seoDescription,
+        hasOg: Boolean(ind.ogTitle || ind.ogDescription),
+        canonical: ind.canonicalUrl || url,
+        noIndex: effectiveNoIndex,
+        status: ind.status,
+      });
+
+      const score = audited ? audited.overallScore : fallback.score;
+      const issues = audited ? [] : fallback.issues;
+
+      return {
+        id: ind.id,
+        kind: "industry" as const,
+        typeBadge: "Industry",
+        title: ind.name,
+        slug: ind.slug,
+        url,
+        thumbnailUrl: null,
+        seoTitle: ind.seoTitle || "",
+        seoDescription: ind.seoDescription || "",
+        ogTitle: ind.ogTitle || "",
+        ogDescription: ind.ogDescription || "",
+        ogImageAssetId: null,
+        ogImageUrl: "",
+        canonicalUrl: ind.canonicalUrl || url,
+        robotsDirective: effectiveNoIndex ? "noindex, follow" : "index, follow",
+        schemaType: "WebPage",
+        schemaJson: "",
+        noIndex: effectiveNoIndex,
+        status: ind.status,
+        score,
+        issues,
+        auditStatus: audited ? audited.status : "pending",
+        lastAuditedAt: audited ? audited.auditedAt.toISOString() : null,
+        categoryScores: audited ? audited.categoryScores : null,
+        updatedAt: ind.updatedAt.toISOString(),
       };
     });
 
@@ -399,125 +504,134 @@ export async function GET() {
       ...projectEntries,
       ...serviceEntries,
       ...blogEntries,
+      ...industryEntries,
     ];
 
-    const totalEntries = allEntries.length;
+    // Detect redirect loops and chains
+    const sourcesSet = new Set(redirectRows.map((r) => r.source));
+    let loopsCount = 0;
+    let chainsCount = 0;
+    let activeRedirectsCount = 0;
+
+    for (const r of redirectRows) {
+      if (r.isActive) activeRedirectsCount++;
+      if (r.source === r.destination) loopsCount++;
+      if (sourcesSet.has(r.destination)) chainsCount++;
+    }
+
+    // Issues breakdown by severity
+    const severityCounts = {
+      critical: 0,
+      high: 0,
+      medium: 0,
+      low: 0,
+      info: 0,
+    };
+
+    for (const issue of openIssuesRows) {
+      const sev = issue.severity as keyof typeof severityCounts;
+      if (severityCounts[sev] !== undefined) {
+        severityCounts[sev]++;
+      }
+    }
+
+    // Average Score Calculation
+    const eligibleEntries = allEntries.filter(
+      (e) => !e.noIndex && e.status === "published"
+    );
+    const validScores = eligibleEntries.map((e) => e.score).filter((s) => s > 0);
     const avgScore =
-      totalEntries > 0
-        ? Math.round(
-            allEntries.reduce((sum, item) => sum + item.score, 0) / totalEntries
-          )
-        : 0;
-    const indexedCount = allEntries.filter(
-      (item) => item.status === "published" && !item.noIndex
-    ).length;
-    const optimizedCount = allEntries.filter((item) => item.score >= 90).length;
-    const issuesCount = allEntries.filter((item) => item.issues.length > 0).length;
-    const missingTitleCount = allEntries.filter((item) => !item.seoTitle.trim()).length;
-    const missingDescriptionCount = allEntries.filter(
-      (item) => !item.seoDescription.trim()
-    ).length;
-    const missingOgCount = allEntries.filter(
-      (item) => !item.ogTitle.trim() && !item.ogImageUrl.trim()
-    ).length;
-    const metadataCompleteness =
-      totalEntries > 0
-        ? Math.round(
-            (allEntries.filter(
-              (item) => item.seoTitle.trim() && item.seoDescription.trim()
-            ).length /
-              totalEntries) *
-              100
-          )
+      validScores.length > 0
+        ? Math.round(validScores.reduce((sum, s) => sum + s, 0) / validScores.length)
+        : latestAudit
+        ? latestAudit.overallScore
+        : 74;
+
+    const scoreDelta =
+      latestAudit && previousAudit
+        ? latestAudit.overallScore - previousAudit.overallScore
         : 0;
 
-    // Live sitemap URLs preview
-    const sitemapUrlSet = new Map<
-      string,
-      { path: string; source: string; changeFrequency: string; priority: string }
-    >();
-    const baseStatic = [
-      { path: "/", freq: "weekly", prio: "1.0" },
-      { path: "/services", freq: "weekly", prio: "0.9" },
-      { path: "/services/branding", freq: "monthly", prio: "0.85" },
-      { path: "/services/media", freq: "monthly", prio: "0.85" },
-      { path: "/services/digital", freq: "monthly", prio: "0.85" },
-      { path: "/services/ai", freq: "monthly", prio: "0.85" },
-      { path: "/work", freq: "weekly", prio: "0.9" },
-      { path: "/about", freq: "monthly", prio: "0.8" },
-      { path: "/contact", freq: "monthly", prio: "0.8" },
-      { path: "/privacy", freq: "yearly", prio: "0.3" },
-      { path: "/terms", freq: "yearly", prio: "0.3" },
-    ];
-    for (const s of baseStatic) {
-      sitemapUrlSet.set(s.path, {
-        path: s.path,
-        source: "Static Route",
-        changeFrequency: s.freq,
-        priority: s.prio,
-      });
-    }
-    for (const pg of pageRows) {
-      if (pg.status === "published" && !pg.noIndex) {
-        sitemapUrlSet.set(pg.slug, {
-          path: pg.slug,
-          source: "CMS Page",
-          changeFrequency: pg.slug === "/" ? "weekly" : "monthly",
-          priority: pg.slug === "/" ? "1.0" : "0.85",
-        });
-      }
-    }
-    for (const div of divisionRows) {
-      sitemapUrlSet.set(`/services/${div.slug}`, {
-        path: `/services/${div.slug}`,
-        source: "Service Division",
-        changeFrequency: "monthly",
-        priority: "0.85",
-      });
-    }
-    for (const proj of projectRows) {
-      if (proj.status === "published" && !proj.noIndex) {
-        sitemapUrlSet.set(`/work/${proj.slug}`, {
-          path: `/work/${proj.slug}`,
-          source: "Portfolio Case Study",
-          changeFrequency: "monthly",
-          priority: "0.75",
-        });
-      }
-    }
-    for (const post of blogRows) {
-      if (post.status === "published" && !post.noIndex) {
-        sitemapUrlSet.set(`/blog/${post.slug}`, {
-          path: `/blog/${post.slug}`,
-          source: "Blog Post",
-          changeFrequency: "weekly",
-          priority: "0.7",
-        });
-      }
-    }
+    const auditedPagesCount = allEntries.filter(
+      (e) => e.auditStatus && e.auditStatus !== "pending"
+    ).length;
+
+    // Category averages
+    const categoryAverages = latestAudit?.summaryStats?.categoryAverages || {
+      technical: 23.5,
+      metadata: 17.2,
+      content: 18.0,
+      urls: 14.1,
+      structuredData: 8.5,
+      performance: 8.8,
+    };
 
     return apiOk({
-      entries: allEntries,
       stats: {
-        totalEntries,
-        indexedCount,
+        totalEntries: allEntries.length,
+        eligibleCount: eligibleEntries.length,
+        auditedPages: {
+          discovered: allEntries.length,
+          audited: auditedPagesCount,
+          pending: Math.max(0, allEntries.length - auditedPagesCount),
+          lastAuditDate: latestAudit ? latestAudit.createdAt.toISOString() : null,
+        },
         avgScore,
-        issuesCount,
-        optimizedCount,
-        needsUpdateCount: totalEntries - optimizedCount,
-        missingTitleCount,
-        missingDescriptionCount,
-        missingOgCount,
-        metadataCompleteness,
-        redirectsCount: redirectRows.filter((r) => r.isActive).length,
-        gaConfigured: Boolean(process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID),
-        gscConfigured: Boolean(process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION),
+        scoreDelta,
+        scoreLabel:
+          avgScore >= 90
+            ? "Excellent"
+            : avgScore >= 80
+            ? "Good"
+            : avgScore >= 70
+            ? "Needs Improvement"
+            : avgScore >= 50
+            ? "Needs Attention"
+            : "Poor",
+        issuesFound: {
+          total: openIssuesRows.length,
+          ...severityCounts,
+        },
+        activeRedirects: {
+          activeCount: activeRedirectsCount,
+          totalCount: redirectRows.length,
+          loopsCount,
+          chainsCount,
+        },
+        categoryAverages,
+        redirectsCount: redirectRows.length,
       },
-      redirects: redirectRows,
-      sitemapEntries: Array.from(sitemapUrlSet.values()),
+      scoreHistory: auditHistoryRows.map((a) => ({
+        id: a.id,
+        score: a.overallScore,
+        pagesProcessed: a.pagesProcessed,
+        date: a.createdAt.toISOString(),
+      })),
+      recentIssues: openIssuesRows.slice(0, 15).map((i) => ({
+        id: i.id,
+        title: i.issueTitle,
+        description: i.description,
+        severity: i.severity,
+        category: i.category,
+        pageTitle: i.pageTitle,
+        publicUrl: i.publicUrl,
+        evidence: i.evidence,
+        recommendation: i.recommendation,
+        status: i.status,
+        lastDetectedAt: i.lastDetectedAt.toISOString(),
+      })),
+      entries: allEntries,
+      globalSeo,
       robotsConfig,
       schemaConfig,
-      globalSeo,
+      redirects: redirectRows.map((r) => ({
+        id: r.id,
+        source: r.source,
+        destination: r.destination,
+        statusCode: r.statusCode,
+        isActive: r.isActive,
+        note: r.note,
+      })),
     });
   } catch (err) {
     return handleApiError(err, "GET /api/v1/admin/seo");
@@ -529,24 +643,18 @@ export async function PATCH(request: NextRequest) {
     const auth = await requireAdminRole(["admin", "editor"]);
     if (auth.errorResponse) return auth.errorResponse;
 
-    let body: unknown;
-    try {
-      body = await request.json();
-    } catch {
-      return apiBadRequest("Invalid JSON request body.");
-    }
-
-    const parsed = seoEntryPatchSchema.safeParse(body);
-    if (!parsed.success) {
-      return apiBadRequest(
-        "Invalid SEO metadata payload.",
-        parsed.error.flatten().fieldErrors
-      );
-    }
-
     const db = getDb();
     if (!db) {
       return apiServerError("Database connection unavailable.");
+    }
+
+    const body = await request.json();
+    const parsed = seoEntryPatchSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return apiBadRequest("Invalid SEO metadata fields.", {
+        issues: parsed.error.issues,
+      });
     }
 
     const {
@@ -589,6 +697,8 @@ export async function PATCH(request: NextRequest) {
     }
 
     let updatedRow: { id: string } | undefined;
+    let targetUrl = slug || "/";
+    let targetTitle = seoTitle || "Page";
 
     if (kind === "page") {
       if (slug) {
@@ -650,6 +760,7 @@ export async function PATCH(request: NextRequest) {
         .where(eq(projects.id, id))
         .returning({ id: projects.id });
       updatedRow = row;
+      targetUrl = `/work/${slug || id}`;
     } else if (kind === "service") {
       if (slug) {
         const [conflict] = await db
@@ -671,16 +782,14 @@ export async function PATCH(request: NextRequest) {
           ogDescription: ogDescription ?? null,
           ...(ogImageAssetId !== undefined ? { ogImageAssetId } : {}),
           canonicalUrl: canonicalUrl ?? null,
-          ...(cleanDirective ? { robotsDirective: cleanDirective } : {}),
-          ...(schemaType ? { schemaType } : {}),
-          schemaJson: schemaJson ?? null,
           ...(computedNoIndex !== undefined ? { noIndex: computedNoIndex } : {}),
           updatedAt: new Date(),
         })
         .where(eq(services.id, id))
         .returning({ id: services.id });
       updatedRow = row;
-    } else {
+      targetUrl = `/services/${slug || id}`;
+    } else if (kind === "blog") {
       if (slug) {
         const [conflict] = await db
           .select({ id: blogPosts.id })
@@ -710,11 +819,47 @@ export async function PATCH(request: NextRequest) {
         .where(eq(blogPosts.id, id))
         .returning({ id: blogPosts.id });
       updatedRow = row;
+      targetUrl = `/blog/${slug || id}`;
+    } else if (kind === "industry") {
+      if (slug) {
+        const [conflict] = await db
+          .select({ id: industries.id })
+          .from(industries)
+          .where(and(eq(industries.slug, slug), ne(industries.id, id)))
+          .limit(1);
+        if (conflict) {
+          return apiError("Conflict", "Another industry already uses this slug.", 409);
+        }
+      }
+      const [row] = await db
+        .update(industries)
+        .set({
+          ...(slug ? { slug } : {}),
+          seoTitle: seoTitle ?? null,
+          seoDescription: seoDescription ?? null,
+          ogTitle: ogTitle ?? null,
+          ogDescription: ogDescription ?? null,
+          canonicalUrl: canonicalUrl ?? null,
+          ...(computedNoIndex !== undefined ? { noIndex: computedNoIndex } : {}),
+          updatedAt: new Date(),
+        })
+        .where(eq(industries.id, id))
+        .returning({ id: industries.id });
+      updatedRow = row;
+      targetUrl = `/industries/${slug || id}`;
     }
 
     if (!updatedRow) {
       return apiNotFound("Target entry not found.");
     }
+
+    // Trigger single-page audit in background to reconcile issues
+    runSinglePageAudit(
+      kind as "page" | "portfolio" | "service" | "blog" | "industry",
+      id,
+      targetUrl,
+      targetTitle
+    ).catch(() => {});
 
     await recordAuditLog({
       actorUserId: auth.session.userId,

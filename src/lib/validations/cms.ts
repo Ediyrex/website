@@ -562,7 +562,7 @@ export const cmsPageUpsertSchema = z.object({
 });
 
 export const seoEntryPatchSchema = z.object({
-  kind: z.enum(["page", "portfolio", "service", "blog"]),
+  kind: z.enum(["page", "portfolio", "service", "blog", "industry"]),
   id: z.string().uuid("Invalid entry identifier."),
   slug: z.string().trim().min(1).max(200).optional(),
   seoTitle: optionalSafeText(160),
@@ -588,7 +588,7 @@ export const seoBulkPatchSchema = z.object({
   items: z
     .array(
       z.object({
-        kind: z.enum(["page", "portfolio", "service", "blog"]),
+        kind: z.enum(["page", "portfolio", "service", "blog", "industry"]),
         id: z.string().uuid(),
       })
     )

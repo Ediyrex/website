@@ -1,6 +1,14 @@
 import { and, eq } from "drizzle-orm";
 import type { MetadataRoute } from "next";
-import { blogPosts, cmsPages, getDb, projects, serviceDivisions } from "@/db";
+import {
+  blogPosts,
+  cmsPages,
+  getDb,
+  industries,
+  projects,
+  serviceDivisions,
+  services,
+} from "@/db";
 import { PROJECTS_DATA } from "@/features/work/data";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -40,7 +48,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   try {
-    const [dbPages, dbDivisions, dbProjects, dbBlogs] = await Promise.all([
+    const [dbPages, dbDivisions, dbServices, dbProjects, dbBlogs, dbIndustries] = await Promise.all([
       db
         .select({ slug: cmsPages.slug, updatedAt: cmsPages.updatedAt })
         .from(cmsPages)
@@ -50,6 +58,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         .from(serviceDivisions)
         .where(eq(serviceDivisions.isActive, true)),
       db
+        .select({ slug: services.slug, updatedAt: services.updatedAt })
+        .from(services)
+        .where(and(eq(services.status, "published"), eq(services.noIndex, false))),
+      db
         .select({ slug: projects.slug, updatedAt: projects.updatedAt })
         .from(projects)
         .where(and(eq(projects.status, "published"), eq(projects.noIndex, false))),
@@ -57,6 +69,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         .select({ slug: blogPosts.slug, updatedAt: blogPosts.updatedAt })
         .from(blogPosts)
         .where(and(eq(blogPosts.status, "published"), eq(blogPosts.noIndex, false))),
+      db
+        .select({ slug: industries.slug, updatedAt: industries.updatedAt })
+        .from(industries)
+        .where(eq(industries.status, "published")),
     ]);
 
     const urlMap = new Map<string, MetadataRoute.Sitemap[number]>();
@@ -87,6 +103,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         lastModified: div.updatedAt,
         changeFrequency: "monthly",
         priority: 0.85,
+      });
+    }
+
+    for (const svc of dbServices) {
+      const fullUrl = `${siteUrl}/services/${svc.slug}`;
+      urlMap.set(fullUrl, {
+        url: fullUrl,
+        lastModified: svc.updatedAt,
+        changeFrequency: "monthly",
+        priority: 0.8,
+      });
+    }
+
+    for (const ind of dbIndustries) {
+      const fullUrl = `${siteUrl}/industries/${ind.slug}`;
+      urlMap.set(fullUrl, {
+        url: fullUrl,
+        lastModified: ind.updatedAt,
+        changeFrequency: "monthly",
+        priority: 0.8,
       });
     }
 

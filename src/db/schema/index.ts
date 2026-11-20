@@ -8,6 +8,7 @@ export * from "./enquiries";
 export * from "./content";
 export * from "./pms";
 export * from "./calendar";
+export * from "./seo";
 
 import { users, roles, userRoles, sessions } from "./auth";
 import {
@@ -237,5 +238,27 @@ export const calendarEventsRelations = relations(calendarEvents, ({ one }) => ({
     references: [googleCalendars.id],
   }),
 }));
+
+import { seoAudits, seoAuditPages, seoCheckResults, seoIssues } from "./seo";
+
+export const seoAuditsRelations = relations(seoAudits, ({ many }) => ({
+  pages: many(seoAuditPages),
+}));
+
+export const seoAuditPagesRelations = relations(seoAuditPages, ({ one, many }) => ({
+  audit: one(seoAudits, {
+    fields: [seoAuditPages.auditId],
+    references: [seoAudits.id],
+  }),
+  checks: many(seoCheckResults),
+}));
+
+export const seoCheckResultsRelations = relations(seoCheckResults, ({ one }) => ({
+  auditPage: one(seoAuditPages, {
+    fields: [seoCheckResults.auditPageId],
+    references: [seoAuditPages.id],
+  }),
+}));
+
 
 
