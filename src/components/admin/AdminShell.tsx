@@ -193,7 +193,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
         setUnreadCount(0);
       }
-    } catch {}
+    } catch { }
   };
 
   const handleMarkAsRead = async (id: string) => {
@@ -207,7 +207,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
       );
       setUnreadCount((c) => Math.max(0, c - 1));
-    } catch {}
+    } catch { }
   };
 
   const initials = user.displayName
@@ -247,7 +247,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             setSearchResults(json.data);
           }
         })
-        .catch(() => {})
+        .catch(() => { })
         .finally(() => {
           if (!ignore) setSearching(false);
         });
