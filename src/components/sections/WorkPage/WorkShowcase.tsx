@@ -115,8 +115,8 @@ export function WorkShowcase({ projects }: { projects?: ProjectItem[] }) {
         {filteredProjects.length === 0 ? (
           <div className="rounded-lg border border-[#292E35] bg-[#12151A] p-12 text-center">
             <p className="font-heading text-lg font-semibold text-[#F5EFE5]">
-              No projects in this category yet. More work is being added to the
-              archive.
+              No projects in this category yet. More work is being added
+              regularly.
             </p>
             <button
               type="button"
@@ -207,21 +207,10 @@ export function WorkShowcase({ projects }: { projects?: ProjectItem[] }) {
               </div>
             )}
 
-            {/* Section 05 — Project Archive (3-Column Desktop Grid) */}
+            {/* Section 05 — Additional Work Grid (3-Column Desktop Grid) */}
             {archiveProjects.length > 0 && (
-              <div className="space-y-6">
-                <div className="flex items-center gap-2.5 border-b border-[#292E35] pb-4">
-                  <span
-                    aria-hidden="true"
-                    className="h-2.5 w-2.5 shrink-0 bg-[#F06419]"
-                  />
-                  <h2 className="font-mono text-xs font-semibold uppercase tracking-[0.16em] text-[#F5EFE5]">
-                    PROJECT ARCHIVE
-                  </h2>
-                </div>
-
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {archiveProjects.map((project) => (
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {archiveProjects.map((project) => (
                     <article
                       key={project.id}
                       className="group flex flex-col justify-between overflow-hidden rounded-lg border border-[#292E35] bg-[#12151A] transition-colors duration-200 hover:border-[#4A5059]"
@@ -295,7 +284,6 @@ export function WorkShowcase({ projects }: { projects?: ProjectItem[] }) {
                     </article>
                   ))}
                 </div>
-              </div>
             )}
           </>
         )}
