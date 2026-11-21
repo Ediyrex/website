@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
+import { motion } from "motion/react";
 import { STUDIO_RETAINERS } from "./services.data";
 
 export function RetainerModels() {
@@ -18,33 +21,53 @@ export function RetainerModels() {
 
         <Link
           href="/contact"
-          className="inline-flex shrink-0 items-center gap-1.5 font-mono text-xs uppercase tracking-[0.14em] text-[#F07824] transition-colors hover:text-[#F5F2EC]"
+          className="group inline-flex shrink-0 items-center gap-1.5 font-mono text-xs uppercase tracking-[0.14em] text-[#F07824] transition-colors hover:text-[#F5F2EC]"
         >
           Discuss Support Scope
-          <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
+          <ArrowUpRight
+            className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1 group-hover:-translate-y-1"
+            aria-hidden="true"
+          />
         </Link>
       </div>
 
       <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {STUDIO_RETAINERS.map((retainer) => (
-          <div
+        {STUDIO_RETAINERS.map((retainer, idx) => (
+          <motion.div
             key={retainer.id}
-            className="rounded-lg border border-[#292E35] bg-[#121519] p-5"
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-20px" }}
+            transition={{
+              duration: 0.4,
+              delay: idx * 0.08,
+              ease: [0.16, 1, 0.3, 1],
+            }}
+            className="group relative overflow-hidden rounded-lg border border-[#292E35] bg-[#121519] p-5 transition-all duration-300 hover:-translate-y-1 hover:border-[#F07824]/50 hover:bg-[#161B21] hover:shadow-[0_12px_30px_rgba(0,0,0,0.45)]"
           >
-            <span className="font-mono text-[11px] font-medium tracking-[0.16em] text-[#F07824]">
+            {/* Top glowing line on hover */}
+            <div className="absolute left-0 right-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-[#F07824] to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+
+            <span className="inline-block font-mono text-[11px] font-semibold tracking-[0.16em] text-[#F07824] transition-transform duration-200 group-hover:scale-105">
               {retainer.number}
             </span>
-            <h4 className="mt-2 text-base font-medium tracking-tight text-[#F5F2EC]">
+            <h4 className="mt-2 text-base font-medium tracking-tight text-[#F5F2EC] transition-colors group-hover:text-white">
               {retainer.title}
             </h4>
-            <ul className="mt-3 space-y-1.5 border-t border-[#292E35] pt-3">
+            <ul className="mt-3 space-y-2 border-t border-[#292E35] pt-3">
               {retainer.items.map((item) => (
-                <li key={item} className="text-xs leading-relaxed text-[#B8B9BC]">
-                  • {item}
+                <li
+                  key={item}
+                  className="flex items-start gap-2 text-xs leading-relaxed text-[#B8B9BC] transition-transform duration-200 group-hover:translate-x-0.5"
+                >
+                  <span className="select-none font-bold text-[#F07824]">
+                    •
+                  </span>
+                  <span>{item}</span>
                 </li>
               ))}
             </ul>
-          </div>
+          </motion.div>
         ))}
       </div>
     </div>
