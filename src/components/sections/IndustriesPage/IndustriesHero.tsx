@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
+import { motion } from "motion/react";
 import {
   INDUSTRY_HERO_CONFIG,
   INITIAL_SECTORS,
@@ -43,7 +44,7 @@ export function IndustriesHero({
       {/* Subtle Warm Amber Atmospheric Background Glow */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -top-40 right-0 w-[500px] lg:w-[700px] h-[500px] lg:h-[700px] rounded-full bg-[radial-gradient(ellipse_at_center,_rgba(240,100,25,0.065)_0%,_rgba(0,0,0,0)_70%)] blur-3xl -z-0"
+        className="pointer-events-none absolute -top-40 right-0 w-[500px] lg:w-[700px] h-[500px] lg:h-[700px] rounded-full bg-[radial-gradient(ellipse_at_center,_rgba(240,100,25,0.065)_0%,_rgba(0,0,0,0)_70%)] blur-3xl -z-0 animate-pulse duration-[6000ms]"
       />
 
       <div className="relative z-10 max-w-[1450px] mx-auto px-5 sm:px-8 lg:px-12 space-y-8 lg:space-y-12">
@@ -62,7 +63,12 @@ export function IndustriesHero({
         {/* Main 2-Column Editorial Manifesto */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 xl:gap-16 pt-2 items-start">
           {/* Left Column: Headline, Description & Action CTAs */}
-          <div className="lg:col-span-7 xl:col-span-7 flex flex-col space-y-6 sm:space-y-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+            className="lg:col-span-7 xl:col-span-7 flex flex-col space-y-6 sm:space-y-8"
+          >
             <h1 className="font-heading font-extrabold text-[clamp(2.5rem,4.6vw,4.75rem)] leading-[0.98] tracking-[-0.035em] text-[#F5F2EC]">
               <span className="block">{INDUSTRY_HERO_CONFIG.headline.line1}</span>
               <span className="block italic text-[#F06419] font-extrabold">
@@ -79,24 +85,29 @@ export function IndustriesHero({
               <a
                 href={`#${INDUSTRY_HERO_CONFIG.primaryCta.targetId}`}
                 onClick={scrollToDirectory}
-                className="inline-flex items-center justify-center gap-2.5 px-6 sm:px-7 py-3.5 sm:py-4 rounded-xl bg-[#F06419] text-[#171717] font-bold text-sm sm:text-base hover:bg-[#E05308] transition-colors shadow-sm shrink-0 uppercase tracking-wide font-mono"
+                className="group inline-flex items-center justify-center gap-2.5 px-6 sm:px-7 py-3.5 sm:py-4 rounded-xl bg-[#F06419] text-[#171717] font-bold text-sm sm:text-base hover:bg-[#E05308] hover:shadow-[0_4px_24px_rgba(240,100,25,0.35)] hover:scale-[1.02] active:scale-[0.98] transition-all shadow-sm shrink-0 uppercase tracking-wide font-mono cursor-pointer"
               >
                 <span>{INDUSTRY_HERO_CONFIG.primaryCta.label}</span>
-                <ArrowUpRight className="w-4 h-4 shrink-0" />
+                <ArrowUpRight className="w-4 h-4 shrink-0 transition-transform duration-200 group-hover:translate-x-1 group-hover:-translate-y-1" />
               </a>
 
               <Link
                 href={INDUSTRY_HERO_CONFIG.secondaryCta.href}
-                className="inline-flex items-center justify-center gap-2.5 px-6 sm:px-7 py-3.5 sm:py-4 rounded-xl border border-[#444444] text-[#F5F2EC] font-semibold text-sm sm:text-base hover:border-[#F06419] hover:text-[#F06419] hover:bg-[#F06419]/10 transition-colors shrink-0 uppercase tracking-wide font-mono"
+                className="group inline-flex items-center justify-center gap-2.5 px-6 sm:px-7 py-3.5 sm:py-4 rounded-xl border border-[#444444] text-[#F5F2EC] font-semibold text-sm sm:text-base hover:border-[#F06419] hover:text-[#F06419] hover:bg-[#F06419]/10 hover:scale-[1.02] active:scale-[0.98] transition-all shrink-0 uppercase tracking-wide font-mono"
               >
                 <span>{INDUSTRY_HERO_CONFIG.secondaryCta.label}</span>
-                <ArrowUpRight className="w-4 h-4 shrink-0" />
+                <ArrowUpRight className="w-4 h-4 shrink-0 transition-transform duration-200 group-hover:translate-x-1 group-hover:-translate-y-1" />
               </Link>
             </div>
-          </div>
+          </motion.div>
 
           {/* Right Column: Sector Index Directory */}
-          <div className="lg:col-span-5 xl:col-span-5 flex flex-col space-y-4 lg:border-l lg:border-[#262A33] lg:pl-10 xl:pl-12">
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.55, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+            className="lg:col-span-5 xl:col-span-5 flex flex-col space-y-4 lg:border-l lg:border-[#262A33] lg:pl-10 xl:pl-12"
+          >
             {/* Sector Index Header Row */}
             <div className="flex items-center justify-between pb-3 border-b border-[#262A33]">
               <span className="text-xs sm:text-[13px] font-mono font-bold uppercase tracking-[0.16em] text-[#D9B875]">
@@ -116,20 +127,20 @@ export function IndustriesHero({
                   <Link
                     key={sector.id}
                     href={`#${sector.slug}`}
-                    className="group flex items-center justify-between py-2.5 sm:py-3 transition-colors hover:border-[#F06419]/60"
+                    className="group flex items-center justify-between py-2.5 sm:py-3 px-2.5 -mx-2.5 rounded-xl transition-all duration-200 hover:bg-[#15181E] hover:border-l-2 hover:border-l-[#F06419]"
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <span className="font-heading font-bold text-lg sm:text-xl text-[#F06419] shrink-0 group-hover:text-[#FF762F] transition-colors">
+                      <span className="font-heading font-bold text-lg sm:text-xl text-[#F06419] shrink-0 group-hover:text-[#FF762F] group-hover:scale-105 transition-all duration-200">
                         {displayNumber}
                       </span>
                       <span className="text-[#898D94] font-mono text-sm shrink-0">
                         /
                       </span>
-                      <span className="font-heading font-semibold text-base sm:text-[17px] text-[#F5F2EC] truncate group-hover:text-[#F06419] transition-colors">
+                      <span className="font-heading font-semibold text-base sm:text-[17px] text-[#F5F2EC] truncate group-hover:text-[#F06419] group-hover:translate-x-1 transition-all duration-200">
                         {sector.name}
                       </span>
                     </div>
-                    <ArrowUpRight className="w-4 h-4 text-[#898D94] shrink-0 group-hover:text-[#F06419] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+                    <ArrowUpRight className="w-4 h-4 text-[#898D94] shrink-0 group-hover:text-[#F06419] group-hover:translate-x-1 group-hover:-translate-y-1 transition-all duration-200" />
                   </Link>
                 );
               })}
@@ -140,25 +151,25 @@ export function IndustriesHero({
               <a
                 href={`#${INDUSTRY_HERO_CONFIG.primaryCta.targetId}`}
                 onClick={scrollToDirectory}
-                className="group flex items-start justify-between gap-3 text-left transition-colors"
+                className="group flex items-start justify-between gap-3 text-left p-3 -mx-3 rounded-xl transition-all duration-300 hover:bg-[#15181E] hover:border-l-2 hover:border-l-[#F06419] hover:shadow-lg cursor-pointer"
               >
                 <div className="space-y-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-base text-[#F06419] font-mono font-bold">
+                    <span className="text-base text-[#F06419] font-mono font-bold group-hover:scale-110 transition-transform">
                       +
                     </span>
                     <span className="font-heading font-bold text-sm sm:text-base text-[#F5F2EC] group-hover:text-[#F06419] transition-colors uppercase tracking-wide">
                       AND MANY MORE INDUSTRIES
                     </span>
                   </div>
-                  <p className="text-xs text-[#898D94] leading-relaxed max-w-sm">
+                  <p className="text-xs text-[#898D94] leading-relaxed max-w-sm group-hover:text-[#B8B9BC] transition-colors">
                     Your industry doesn&apos;t have to fit into a predefined category. Explore more sectors or discuss a solution shaped around your business.
                   </p>
                 </div>
-                <ArrowUpRight className="w-4 h-4 text-[#F06419] shrink-0 mt-1 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+                <ArrowUpRight className="w-4 h-4 text-[#F06419] shrink-0 mt-1 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-200" />
               </a>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>
