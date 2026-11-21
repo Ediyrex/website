@@ -1,3 +1,7 @@
+"use client";
+
+import { motion } from "motion/react";
+import { cn } from "@/lib/utils";
 import type { FaqCategoryData } from "./faq.data";
 import { FAQItem } from "./FAQItem";
 
@@ -15,15 +19,20 @@ export function FAQCategory({
   onToggleQuestion,
 }: FAQCategoryProps) {
   return (
-    <section
+    <motion.section
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-30px" }}
+      transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
       id={`faq-category-${category.id}`}
       aria-labelledby={`faq-heading-${category.id}`}
       className="scroll-mt-28"
     >
       <div
-        className={`flex items-center justify-between border-b-[1.5px] pb-3 transition-colors duration-300 ${
+        className={cn(
+          "flex items-center justify-between border-b-[1.5px] pb-3 transition-colors duration-300 relative",
           isHighlighted ? "border-[#F06419]" : "border-[#171717]"
-        }`}
+        )}
       >
         <h3
           id={`faq-heading-${category.id}`}
@@ -50,7 +59,7 @@ export function FAQCategory({
           />
         ))}
       </div>
-    </section>
+    </motion.section>
   );
 }
 

@@ -1,3 +1,6 @@
+"use client";
+
+import { motion } from "motion/react";
 import type { FaqCategoryData } from "./faq.data";
 import { FAQTopicNavigation } from "./FAQTopicNavigation";
 import { FAQContactPanel } from "./FAQContactPanel";
@@ -14,7 +17,13 @@ export function FAQIntroduction({
   onSelectCategory,
 }: FAQIntroductionProps) {
   return (
-    <aside className="min-w-0 lg:sticky lg:top-24 lg:self-start lg:border-r lg:border-[#CFC5B9] lg:pr-10">
+    <motion.aside
+      initial={{ opacity: 0, x: -20 }}
+      whileInView={{ opacity: 1, x: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      className="min-w-0 lg:sticky lg:top-24 lg:self-start lg:border-r lg:border-[#CFC5B9] lg:pr-10"
+    >
       <h2
         style={{ fontFamily: "var(--font-archivo-narrow), sans-serif" }}
         className="text-[clamp(3rem,5.2vw,5.4rem)] font-bold uppercase leading-[0.86] tracking-[-0.025em]"
@@ -38,7 +47,7 @@ export function FAQIntroduction({
       />
 
       <FAQContactPanel />
-    </aside>
+    </motion.aside>
   );
 }
 

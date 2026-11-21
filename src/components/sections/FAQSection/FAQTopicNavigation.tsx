@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import type { FaqCategoryData } from "./faq.data";
 
 interface FAQTopicNavigationProps {
@@ -19,7 +20,7 @@ export function FAQTopicNavigation({
         BROWSE BY TOPIC
       </p>
 
-      <ul className="divide-y divide-[#CFC5B9] border-t border-b border-[#CFC5B9]">
+      <ul className="divide-y divide-[#CFC5B9] border-b border-t border-[#CFC5B9]">
         {categories.map((category) => {
           const isActive = activeCategoryId === category.id;
 
@@ -28,24 +29,44 @@ export function FAQTopicNavigation({
               <button
                 type="button"
                 onClick={() => onSelectCategory(category.id)}
-                className="group flex w-full cursor-pointer items-center justify-between gap-3 py-3 text-left transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F06419]"
+                className={cn(
+                  "group flex w-full cursor-pointer items-center justify-between gap-3 rounded-[3px] py-3 text-left transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F06419]",
+                  isActive
+                    ? "bg-[#EFE7DC] pl-3.5 pr-2 shadow-xs"
+                    : "px-2 hover:bg-[#EFE7DC]/60 hover:pl-3"
+                )}
               >
                 <span className="flex items-center gap-3.5">
-                  <span className="font-mono text-[13px] font-semibold tracking-[0.12em] text-[#F06419]">
+                  <span
+                    className={cn(
+                      "font-mono text-[13px] font-semibold tracking-[0.12em] transition-transform duration-200",
+                      isActive
+                        ? "scale-105 text-[#F06419]"
+                        : "text-[#F06419] group-hover:scale-105"
+                    )}
+                  >
                     {category.number}
                   </span>
                   <span
-                    className={`font-[var(--font-space-grotesk)] text-[17px] leading-snug transition-colors duration-200 sm:text-[18px] ${
+                    className={cn(
+                      "font-[var(--font-space-grotesk)] text-[17px] leading-snug transition-colors duration-200 sm:text-[18px]",
                       isActive
                         ? "font-bold text-[#F06419]"
                         : "font-semibold text-[#171717] group-hover:text-[#F06419]"
-                    }`}
+                    )}
                   >
                     {category.title}
                   </span>
                 </span>
 
-                <span className="font-mono text-[13px] text-[#77716A] transition-colors group-hover:text-[#49433E]">
+                <span
+                  className={cn(
+                    "font-mono text-[13px] transition-colors duration-200",
+                    isActive
+                      ? "font-medium text-[#F06419]"
+                      : "text-[#77716A] group-hover:text-[#171717]"
+                  )}
+                >
                   ({category.questionCount})
                 </span>
               </button>
