@@ -1,7 +1,5 @@
+import { NextRequest } from "next/server";
 import { desc, gte, lte, isNull, sql, and, eq, inArray, lt } from "drizzle-orm";
-
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
 import {
   auditLogs,
   blogPosts,
@@ -138,7 +136,7 @@ function getFallbackOverview(now: Date) {
   };
 }
 
-export async function GET() {
+export async function GET(_request: NextRequest) {
   const now = new Date();
   try {
     const auth = await requireAdminRole(["admin", "editor", "viewer"]);
