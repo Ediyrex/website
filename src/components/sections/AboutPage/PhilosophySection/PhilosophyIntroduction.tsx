@@ -1,6 +1,17 @@
+"use client";
+
+import React from "react";
+import { motion } from "motion/react";
+
 export function PhilosophyIntroduction() {
   return (
-    <div className="grid grid-cols-1 gap-8 lg:grid-cols-[54%_1px_1fr] lg:items-center lg:gap-10">
+    <motion.div
+      initial={{ opacity: 0, y: 18 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      className="grid grid-cols-1 gap-8 lg:grid-cols-[54%_1px_1fr] lg:items-center lg:gap-10"
+    >
       <h2
         style={{ fontFamily: "var(--font-space-grotesk), system-ui, sans-serif" }}
         className="text-[clamp(2.25rem,4.2vw,3.9rem)] font-bold leading-[0.98] tracking-[-0.03em] text-[#F5F2EC]"
@@ -21,7 +32,6 @@ export function PhilosophyIntroduction() {
         connected system — giving us greater context, faster execution and
         stronger outcomes.
       </p>
-    </div>
+    </motion.div>
   );
 }
-

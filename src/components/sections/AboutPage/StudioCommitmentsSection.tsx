@@ -1,4 +1,7 @@
+"use client";
+
 import React from "react";
+import { motion } from "motion/react";
 
 interface Commitment {
   index: string;
@@ -36,7 +39,13 @@ export function StudioCommitmentsSection() {
     >
       <div className="max-w-[1500px] mx-auto px-5 sm:px-8 lg:px-14">
         {/* Section Header */}
-        <div className="space-y-4">
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="space-y-4"
+        >
           {/* Headline with Orange Italic Accent */}
           <h2 className="font-heading font-extrabold text-[clamp(2.5rem,4.5vw,4.25rem)] leading-[1.05] tracking-[-0.035em] text-[#F5F3EE]">
             Credibility earned through
@@ -51,21 +60,29 @@ export function StudioCommitmentsSection() {
           <p className="text-base sm:text-lg text-[#8A8F99] leading-relaxed max-w-2xl pt-1">
             The principles that guide how we work, build and partner with every client.
           </p>
-        </div>
+        </motion.div>
 
         {/* 3 Columns Swiss Grid with Vertical Dividers */}
         <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-[#252A32] mt-12 lg:mt-16 pt-2">
-          {COMMITMENTS.map((item) => (
-            <div
+          {COMMITMENTS.map((item, idx) => (
+            <motion.div
               key={item.index}
-              className="py-8 md:py-2 md:px-8 first:pl-0 last:pr-0 flex flex-col justify-between space-y-5"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-30px" }}
+              transition={{
+                duration: 0.45,
+                delay: idx * 0.08,
+                ease: [0.16, 1, 0.3, 1],
+              }}
+              className="group py-8 md:py-4 md:px-8 first:pl-0 last:pr-0 flex flex-col justify-between space-y-5 rounded-xl transition-all duration-200 hover:bg-[#121519]/50"
             >
               <div className="space-y-3">
                 {/* Orange-bordered pill badge */}
-                <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded border border-[#FF6900] text-[#FF6900] font-mono text-[11px] font-bold tracking-wider">
+                <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded border border-[#FF6900] text-[#FF6900] font-mono text-[11px] font-bold tracking-wider group-hover:bg-[#FF6900]/10 transition-colors">
                   {item.index}
                 </span>
-                <h3 className="font-heading font-extrabold text-[17px] sm:text-[18px] text-[#F5F3EE] tracking-tight uppercase leading-snug">
+                <h3 className="font-heading font-extrabold text-[17px] sm:text-[18px] text-[#F5F3EE] tracking-tight uppercase leading-snug group-hover:text-[#FF6900] transition-colors">
                   {item.title}
                 </h3>
                 <p className="text-xs sm:text-[13.5px] text-[#8A8F99] leading-relaxed">
@@ -76,13 +93,12 @@ export function StudioCommitmentsSection() {
               {/* Bottom Orange Accent Bar */}
               <span
                 aria-hidden="true"
-                className="block w-8 h-[2px] bg-[#FF6900]"
+                className="block w-8 h-[2px] bg-[#FF6900] transition-all duration-300 group-hover:w-16 group-hover:bg-[#FF762F]"
               />
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
     </section>
   );
 }
-

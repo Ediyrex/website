@@ -19,6 +19,7 @@ import {
   Copy,
 } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
+import { motion } from "motion/react";
 import { useBookingModal } from "@/features/bookings";
 import { TurnstileWidget, useTurnstile } from "@/features/turnstile";
 import { useWaitExplanation } from "@/hooks/ui-speed";
@@ -425,14 +426,29 @@ export function ProjectBriefDesk() {
   return (
     <section
       aria-label="Contact and Project Brief Desk"
-      className="w-full bg-[#0C0D0F] text-[#F5F2EC] pt-28 pb-20 sm:pt-36 sm:pb-28"
+      className="relative overflow-hidden w-full bg-[#0C0D0F] text-[#F5F2EC] pt-28 pb-20 sm:pt-36 sm:pb-28"
     >
-      <div className="max-w-[1460px] mx-auto px-5 sm:px-8 lg:px-12">
+      {/* Ambient Breathing Glow */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-40 -left-40 h-[600px] w-[600px] rounded-full bg-[#F06419]/10 blur-[140px]"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-32 top-1/3 h-[500px] w-[500px] rounded-full bg-[#F06419]/5 blur-[130px]"
+      />
+
+      <div className="relative z-10 max-w-[1460px] mx-auto px-5 sm:px-8 lg:px-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-14 xl:gap-16 items-start">
           {/* ========================================================= */}
           {/* LEFT COLUMN: PROJECT INVITATION & DIRECT CONTACT           */}
           {/* ========================================================= */}
-          <div className="lg:col-span-5 xl:col-span-5 space-y-8 lg:space-y-10 lg:pr-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="lg:col-span-5 xl:col-span-5 space-y-8 lg:space-y-10 lg:pr-4"
+          >
             {/* 01. Section Identifier */}
             <div className="flex items-center gap-3">
               <span className="w-2.5 h-2.5 bg-[#F06419] inline-block shrink-0" />
@@ -514,7 +530,7 @@ export function ProjectBriefDesk() {
                 DIRECT CONTACT
               </span>
 
-              <div className="flex items-center gap-4 p-4 rounded-[14px] bg-[#121519] border border-[#292E35] hover:border-[#3D4450] transition-colors">
+              <div className="flex items-center gap-4 p-4 rounded-[14px] bg-[#121519] border border-[#292E35] hover:border-[#F06419]/60 hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(240,100,25,0.15)] transition-all duration-200">
                 <div className="w-12 h-12 rounded-[10px] border border-[#F06419]/60 bg-[#0E1012] flex items-center justify-center shrink-0 text-[#F06419]">
                   <Mail className="w-5 h-5" />
                 </div>
@@ -545,7 +561,7 @@ export function ProjectBriefDesk() {
               </div>
 
               {/* Direct Phone Line */}
-              <div className="flex items-center gap-4 p-4 rounded-[14px] bg-[#121519] border border-[#292E35] hover:border-[#3D4450] transition-colors">
+              <div className="flex items-center gap-4 p-4 rounded-[14px] bg-[#121519] border border-[#292E35] hover:border-[#F06419]/60 hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(240,100,25,0.15)] transition-all duration-200">
                 <div className="w-12 h-12 rounded-[10px] border border-[#F06419]/60 bg-[#0E1012] flex items-center justify-center shrink-0 text-[#F06419]">
                   <Phone className="w-5 h-5" />
                 </div>
@@ -576,7 +592,7 @@ export function ProjectBriefDesk() {
                 DIRECT CALENDAR
               </span>
 
-              <div className="p-4 sm:p-5 rounded-[14px] bg-[#121519] border border-[#292E35] space-y-3">
+              <div className="p-4 sm:p-5 rounded-[14px] bg-[#121519] border border-[#292E35] hover:border-[#F06419]/50 transition-colors space-y-3">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-[10px] border border-[#F06419]/50 bg-[#0E1012] flex items-center justify-center shrink-0 text-[#F06419]">
                     <Calendar className="w-5 h-5" />
@@ -594,19 +610,24 @@ export function ProjectBriefDesk() {
                 <button
                   type="button"
                   onClick={() => openBookingModal()}
-                  className="w-full py-3.5 px-4 rounded-[8px] bg-[#F06419] hover:bg-[#FF7828] text-black font-mono font-bold text-xs uppercase tracking-wider transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer shadow-[0_4px_20px_-4px_rgba(240,100,25,0.4)] active:scale-[0.99]"
+                  className="w-full py-3.5 px-4 rounded-xl bg-[#F06419] hover:bg-[#FF7828] text-black font-mono font-bold text-xs uppercase tracking-wider transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-[0_4px_20px_-4px_rgba(240,100,25,0.4)] hover:shadow-[0_6px_25px_rgba(240,100,25,0.5)] hover:scale-[1.02] active:scale-[0.98]"
                 >
                   <Calendar className="w-4 h-4" />
                   <span>Schedule a Meeting</span>
                 </button>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* ========================================================= */}
           {/* RIGHT COLUMN: PROJECT BRIEF DESK (3-STEP PROGRESSIVE FORM) */}
           {/* ========================================================= */}
-          <div className="lg:col-span-7 xl:col-span-7">
+          <motion.div
+            initial={{ opacity: 0, y: 22 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+            className="lg:col-span-7 xl:col-span-7"
+          >
             <div className="rounded-[20px] sm:rounded-[24px] bg-[#121519] border border-[#292E35] p-6 sm:p-8 lg:p-10 shadow-[0_12px_40px_rgba(0,0,0,0.4)]">
               {/* Header: Project Brief Desk & Step Counter */}
               <div className="flex items-center justify-between pb-4 border-b border-[#292E35]">
@@ -728,9 +749,9 @@ export function ProjectBriefDesk() {
                         <div
                           key={division.id}
                           onClick={() => toggleDivision(division.id)}
-                          className={`p-5 rounded-[14px] border cursor-pointer transition-all flex flex-col justify-between min-h-[135px] select-none ${isSelected
-                            ? "border-[#F06419] bg-[#F06419]/[0.08]"
-                            : "border-[#292E35] bg-[#0E1012] hover:border-[#3D4450]"
+                          className={`p-5 rounded-[14px] border cursor-pointer transition-all duration-200 hover:-translate-y-0.5 flex flex-col justify-between min-h-[135px] select-none ${isSelected
+                            ? "border-[#F06419] bg-[#F06419]/[0.08] shadow-[0_4px_20px_rgba(240,100,25,0.15)]"
+                            : "border-[#292E35] bg-[#0E1012] hover:border-[#F06419]/50 hover:bg-[#121519]"
                             }`}
                         >
                           <div className="flex items-start justify-between gap-2">
@@ -823,10 +844,10 @@ export function ProjectBriefDesk() {
                     <button
                       type="button"
                       onClick={handleProceedToStep2}
-                      className="w-full py-4 rounded-[8px] bg-[#F06419] text-black font-mono font-bold text-xs sm:text-sm uppercase tracking-wider hover:bg-[#D95612] transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                      className="group w-full py-4 rounded-xl bg-[#F06419] text-black font-mono font-bold text-xs sm:text-sm uppercase tracking-wider hover:bg-[#D95612] hover:shadow-[0_4px_24px_rgba(240,100,25,0.4)] hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
                     >
                       <span>CONTINUE TO SCOPE</span>
-                      <ArrowRight className="w-4 h-4" />
+                      <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
                     </button>
                   </div>
                 </div>
@@ -1084,19 +1105,19 @@ export function ProjectBriefDesk() {
                         setStepErrors({});
                         setCurrentStep(1);
                       }}
-                      className="w-full sm:w-auto px-6 py-4 rounded-[8px] border border-[#292E35] bg-transparent text-[#F5F2EC] hover:bg-[#1A1E24] hover:border-[#3D4450] font-mono text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                      className="group w-full sm:w-auto px-6 py-4 rounded-xl border border-[#292E35] bg-transparent text-[#F5F2EC] hover:bg-[#1A1E24] hover:border-[#3D4450] hover:scale-[1.01] active:scale-[0.99] font-mono text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer"
                     >
-                      <ArrowLeft className="w-4 h-4" />
+                      <ArrowLeft className="w-4 h-4 transition-transform duration-200 group-hover:-translate-x-1" />
                       <span>BACK TO PROJECT DIRECTION</span>
                     </button>
 
                     <button
                       type="button"
                       onClick={handleProceedToStep3}
-                      className="w-full sm:flex-1 py-4 rounded-[8px] bg-[#F06419] text-black font-mono font-bold text-xs sm:text-sm uppercase tracking-wider hover:bg-[#D95612] transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                      className="group w-full sm:flex-1 py-4 rounded-xl bg-[#F06419] text-black font-mono font-bold text-xs sm:text-sm uppercase tracking-wider hover:bg-[#D95612] hover:shadow-[0_4px_24px_rgba(240,100,25,0.4)] hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
                     >
                       <span>CONTINUE TO YOUR DETAILS</span>
-                      <ArrowRight className="w-4 h-4" />
+                      <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
                     </button>
                   </div>
                 </div>
@@ -1332,16 +1353,16 @@ export function ProjectBriefDesk() {
                         setStepErrors({});
                         setCurrentStep(2);
                       }}
-                      className="w-full sm:w-auto px-6 py-4 rounded-[8px] border border-[#292E35] bg-transparent text-[#F5F2EC] hover:bg-[#1A1E24] hover:border-[#3D4450] font-mono text-xs font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                      className="group w-full sm:w-auto px-6 py-4 rounded-xl border border-[#292E35] bg-transparent text-[#F5F2EC] hover:bg-[#1A1E24] hover:border-[#3D4450] hover:scale-[1.01] active:scale-[0.99] font-mono text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer"
                     >
-                      <ArrowLeft className="w-4 h-4" />
+                      <ArrowLeft className="w-4 h-4 transition-transform duration-200 group-hover:-translate-x-1" />
                       <span>BACK TO SCOPE</span>
                     </button>
 
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full sm:flex-1 py-4 px-6 rounded-[8px] bg-[#F06419] text-black font-mono font-bold text-xs sm:text-sm uppercase tracking-wider hover:bg-[#D95612] transition-all duration-75 active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer shadow-md disabled:opacity-60"
+                      className="group w-full sm:flex-1 py-4 px-6 rounded-xl bg-[#F06419] text-black font-mono font-bold text-xs sm:text-sm uppercase tracking-wider hover:bg-[#D95612] hover:shadow-[0_4px_24px_rgba(240,100,25,0.4)] hover:scale-[1.01] active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md disabled:opacity-60"
                     >
                       {isSubmitting ? (
                         <div className="flex items-center gap-2">
@@ -1351,7 +1372,7 @@ export function ProjectBriefDesk() {
                       ) : (
                         <>
                           <span>SUBMIT PROJECT ENQUIRY</span>
-                          <ArrowRight className="w-4 h-4" />
+                          <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
                         </>
                       )}
                     </button>
@@ -1488,7 +1509,7 @@ export function ProjectBriefDesk() {
                 </div>
               )}
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>

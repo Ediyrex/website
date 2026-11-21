@@ -1,6 +1,9 @@
+"use client";
+
 import React from "react";
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
+import { motion } from "motion/react";
 
 interface LeadershipCommitment {
   number: string;
@@ -35,7 +38,13 @@ export function HumanElementSection() {
     >
       <div className="max-w-[1450px] mx-auto px-5 sm:px-8 lg:px-12 space-y-8 lg:space-y-10">
         {/* Display Headline */}
-        <div className="space-y-3">
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="space-y-3"
+        >
           <h2 className="font-heading font-extrabold text-[clamp(2.5rem,4.5vw,4.5rem)] leading-[0.98] tracking-[-0.035em] text-[#0B0D10]">
             The people you meet.
             <br />
@@ -47,7 +56,7 @@ export function HumanElementSection() {
             At EDYREX, you work directly with the people shaping your ideas, making decisions and
             delivering the work. No unnecessary layers between thinking and execution.
           </p>
-        </div>
+        </motion.div>
 
         {/* Horizontal Divider */}
         <div className="h-px bg-[#EAE5DC] w-full" />
@@ -55,15 +64,21 @@ export function HumanElementSection() {
         {/* Main Content: 2-Column Split */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-0 items-start">
           {/* Left Column: Founder Portrait & Identity */}
-          <div className="lg:col-span-5 lg:pr-10 xl:pr-12 lg:border-r lg:border-[#EAE5DC] space-y-5">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="lg:col-span-5 lg:pr-10 xl:pr-12 lg:border-r lg:border-[#EAE5DC] space-y-5"
+          >
             {/* Portrait Frame */}
-            <div className="relative aspect-square sm:aspect-[4/4.2] rounded-[16px] overflow-hidden bg-[#FFFFFF] border border-[#EAE5DC] shadow-md">
+            <div className="group relative aspect-square sm:aspect-[4/4.2] rounded-[16px] overflow-hidden bg-[#FFFFFF] border border-[#EAE5DC] shadow-md hover:shadow-lg transition-shadow duration-300">
               <Image
                 src="/images/about/founder.jpg"
                 alt="Founder of EDYREX studio in dramatic studio lighting"
                 fill
                 sizes="(min-width: 1024px) 35vw, (min-width: 768px) 50vw, 100vw"
-                className="object-cover object-top"
+                className="object-cover object-top transition-transform duration-700 ease-out group-hover:scale-105"
                 priority
               />
             </div>
@@ -80,10 +95,16 @@ export function HumanElementSection() {
                 Founder &amp; Principal Technologist &middot; EDYREX
               </p>
             </div>
-          </div>
+          </motion.div>
 
           {/* Right Column: Founder Note & 3 Core Commitments */}
-          <div className="lg:col-span-7 lg:pl-10 xl:pl-14 space-y-7">
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.5, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+            className="lg:col-span-7 lg:pl-10 xl:pl-14 space-y-7"
+          >
             {/* Top Subheader */}
             <div>
               <span className="text-[11px] sm:text-xs font-mono font-bold uppercase tracking-[0.18em] text-[#9E7B35] block">
@@ -105,13 +126,21 @@ export function HumanElementSection() {
 
             {/* Three Numbered Rows */}
             <div className="divide-y divide-[#EAE5DC] border-t border-b border-[#EAE5DC]">
-              {LEADERSHIP_COMMITMENTS.map((item) => (
-                <div
+              {LEADERSHIP_COMMITMENTS.map((item, idx) => (
+                <motion.div
                   key={item.number}
-                  className="py-5 sm:py-6 flex items-center justify-between gap-4 group transition-colors hover:bg-[#FFFFFF] px-2 rounded-lg"
+                  initial={{ opacity: 0, y: 15 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-20px" }}
+                  transition={{
+                    duration: 0.4,
+                    delay: 0.15 + idx * 0.06,
+                    ease: [0.16, 1, 0.3, 1],
+                  }}
+                  className="py-5 sm:py-6 flex items-center justify-between gap-4 group transition-all duration-200 hover:bg-[#FFFFFF] hover:shadow-sm px-3 rounded-xl cursor-default"
                 >
                   <div className="flex items-center gap-4 sm:gap-6 min-w-0 flex-1">
-                    <span className="font-heading font-extrabold text-3xl sm:text-4xl text-[#FF6900] leading-none shrink-0 w-12 sm:w-14">
+                    <span className="font-heading font-extrabold text-3xl sm:text-4xl text-[#FF6900] leading-none shrink-0 w-12 sm:w-14 transition-transform duration-200 group-hover:scale-105 group-hover:text-[#FF762F]">
                       {item.number}
                     </span>
                     <span
@@ -119,7 +148,7 @@ export function HumanElementSection() {
                       className="w-px h-10 bg-[#EAE5DC] shrink-0"
                     />
                     <div className="space-y-0.5 min-w-0 flex-1">
-                      <h4 className="font-heading font-extrabold text-base sm:text-lg text-[#0B0D10] uppercase tracking-tight leading-snug">
+                      <h4 className="font-heading font-extrabold text-base sm:text-lg text-[#0B0D10] uppercase tracking-tight leading-snug group-hover:text-[#FF6900] transition-colors">
                         {item.title}
                       </h4>
                       <p className="text-xs sm:text-[13px] text-[#555962] leading-relaxed">
@@ -129,18 +158,24 @@ export function HumanElementSection() {
                   </div>
 
                   <ArrowUpRight className="w-6 h-6 text-[#FF6900] shrink-0 transition-transform duration-200 group-hover:translate-x-1 group-hover:-translate-y-1" />
-                </div>
+                </motion.div>
               ))}
             </div>
-          </div>
+          </motion.div>
         </div>
 
         {/* Bottom Subline Bar */}
-        <div className="pt-6 border-t border-[#EAE5DC]">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-20px" }}
+          transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+          className="pt-6 border-t border-[#EAE5DC]"
+        >
           <span className="font-mono text-xs sm:text-[13px] font-bold uppercase tracking-[0.18em] text-[#FF6900] block">
             SMALL TEAMS. DIRECT COMMUNICATION. REAL OWNERSHIP.
           </span>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

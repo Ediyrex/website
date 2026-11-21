@@ -1,6 +1,9 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
 import { ArrowUpRight, Layers, Mic } from "lucide-react";
+import { motion } from "motion/react";
 
 interface StudioPrinciple {
   index: string;
@@ -99,7 +102,13 @@ export function WhyEdiyrexSection() {
       <div className="max-w-[1500px] mx-auto px-5 sm:px-8 lg:px-14">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 xl:gap-14 items-start">
           {/* Left Column: Heading, Subtitle, 4 Principles, and CTAs */}
-          <div className="lg:col-span-7 xl:col-span-7 flex flex-col justify-between space-y-10">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="lg:col-span-7 xl:col-span-7 flex flex-col justify-between space-y-10"
+          >
             {/* Header Block */}
             <div className="space-y-4">
               {/* Display Headline */}
@@ -125,16 +134,16 @@ export function WhyEdiyrexSection() {
               {PRINCIPLES.map((principle, idx) => (
                 <div
                   key={principle.index}
-                  className={`flex flex-col justify-between space-y-4 ${
+                  className={`group flex flex-col justify-between space-y-4 transition-all duration-200 ${
                     idx === 0 ? "sm:pr-5 xl:pr-6" : "sm:px-5 xl:px-6"
                   } ${idx > 0 ? "pt-5 sm:pt-0" : ""}`}
                 >
                   <div className="space-y-2.5">
                     {/* Orange-bordered pill badge */}
-                    <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-[5px] border border-[#FF6900] text-[#FF6900] font-mono text-[11px] font-bold tracking-wider">
+                    <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-[5px] border border-[#FF6900] text-[#FF6900] font-mono text-[11px] font-bold tracking-wider group-hover:bg-[#FF6900]/10 transition-colors">
                       {principle.index}
                     </span>
-                    <h3 className="font-heading font-extrabold text-[15px] sm:text-[16px] text-[#0B0D10] tracking-tight leading-snug uppercase pt-1">
+                    <h3 className="font-heading font-extrabold text-[15px] sm:text-[16px] text-[#0B0D10] tracking-tight leading-snug uppercase pt-1 group-hover:text-[#FF6900] transition-colors">
                       {principle.title}
                     </h3>
                     <p className="text-xs sm:text-[13px] text-[#555962] leading-relaxed">
@@ -144,7 +153,7 @@ export function WhyEdiyrexSection() {
                   {/* Bottom Orange Accent Bar */}
                   <span
                     aria-hidden="true"
-                    className="block w-10 h-[2.5px] bg-[#FF6900]"
+                    className="block w-10 h-[2.5px] bg-[#FF6900] transition-all duration-300 group-hover:w-16 group-hover:bg-[#E55E00]"
                   />
                 </div>
               ))}
@@ -154,23 +163,29 @@ export function WhyEdiyrexSection() {
             <div className="flex flex-wrap items-center gap-4 pt-4">
               <Link
                 href="#philosophy"
-                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#FF6900] text-white text-sm font-bold hover:bg-[#E55E00] transition-colors shadow-sm"
+                className="group inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-[#FF6900] text-white text-sm font-bold hover:bg-[#E55E00] hover:shadow-[0_4px_20px_rgba(255,105,0,0.35)] hover:scale-[1.02] active:scale-[0.98] transition-all shadow-sm"
               >
                 <span>Explore our studio approach</span>
-                <ArrowUpRight className="w-4 h-4 text-white" strokeWidth={2.5} />
+                <ArrowUpRight className="w-4 h-4 text-white transition-transform duration-200 group-hover:translate-x-1 group-hover:-translate-y-1" strokeWidth={2.5} />
               </Link>
               <Link
                 href="/work"
-                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-transparent border border-[#0B0D10] text-[#0B0D10] text-sm font-semibold hover:bg-[#0B0D10] hover:text-white transition-all duration-200"
+                className="group inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-transparent border border-[#0B0D10] text-[#0B0D10] text-sm font-semibold hover:bg-[#0B0D10] hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
               >
                 <span>View our work</span>
-                <ArrowUpRight className="w-4 h-4" />
+                <ArrowUpRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1 group-hover:-translate-y-1" />
               </Link>
             </div>
-          </div>
+          </motion.div>
 
           {/* Right Column: In-House Labs Showcase */}
-          <div className="lg:col-span-5 xl:col-span-5">
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.5, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+            className="lg:col-span-5 xl:col-span-5"
+          >
             <div className="p-6 sm:p-8 rounded-[28px] bg-[#FFFFFF] border border-[#EAE5DC] shadow-[0_4px_24px_rgba(0,0,0,0.03)] space-y-6">
               {/* Card Header */}
               <div className="flex items-start justify-between gap-4 border-b border-[#EAE5DC] pb-5">
@@ -194,11 +209,11 @@ export function WhyEdiyrexSection() {
                   return (
                     <div
                       key={product.id}
-                      className="p-5 sm:p-6 rounded-2xl bg-[#FAF8F5] border border-[#EAE5DC] hover:border-[#FF6900]/50 hover:bg-[#FFFFFF] transition-all duration-200 flex items-center gap-5"
+                      className="group p-5 sm:p-6 rounded-2xl bg-[#FAF8F5] border border-[#EAE5DC] hover:border-[#FF6900]/50 hover:bg-[#FFFFFF] hover:-translate-y-1 hover:shadow-[0_8px_25px_rgba(0,0,0,0.05)] transition-all duration-200 flex items-center gap-5 cursor-default"
                     >
                       {/* Left Icon with Vertical Divider Rule */}
                       <div className="pr-4 border-r border-[#EAE5DC] flex items-center justify-center self-stretch shrink-0">
-                        <div className="w-12 h-12 rounded-xl bg-[#FFFFFF] border border-[#FF6900]/30 text-[#FF6900] flex items-center justify-center shrink-0 shadow-sm">
+                        <div className="w-12 h-12 rounded-xl bg-[#FFFFFF] border border-[#FF6900]/30 text-[#FF6900] flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 group-hover:bg-[#FF6900]/10 group-hover:border-[#FF6900] transition-all">
                           <Icon className="w-5 h-5 text-[#FF6900]" />
                         </div>
                       </div>
@@ -206,7 +221,7 @@ export function WhyEdiyrexSection() {
                       {/* Content Area */}
                       <div className="flex-1 min-w-0 space-y-2">
                         <div className="flex items-center justify-between gap-2">
-                          <h4 className="font-heading font-bold text-base text-[#0B0D10] truncate">
+                          <h4 className="font-heading font-bold text-base text-[#0B0D10] truncate group-hover:text-[#FF6900] transition-colors">
                             {product.name}
                           </h4>
                           <span className="shrink-0 text-[10px] font-mono font-bold uppercase px-2.5 py-0.5 rounded-full border border-[#FF6900] text-[#FF6900] bg-[#FF6900]/5 tracking-wider">
@@ -221,7 +236,7 @@ export function WhyEdiyrexSection() {
                           {product.techStack.map((tech) => (
                             <span
                               key={tech}
-                              className="text-[10px] sm:text-[10.5px] font-mono px-2 py-0.5 rounded-[4px] bg-[#FFFFFF] text-[#555962] border border-[#EAE5DC] font-medium"
+                              className="text-[10px] sm:text-[10.5px] font-mono px-2 py-0.5 rounded-[4px] bg-[#FFFFFF] text-[#555962] border border-[#EAE5DC] font-medium group-hover:border-[#FF6900]/30 transition-colors"
                             >
                               {tech}
                             </span>
@@ -233,7 +248,7 @@ export function WhyEdiyrexSection() {
                 })}
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>

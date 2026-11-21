@@ -1,5 +1,8 @@
+"use client";
+
 import React from "react";
 import { CheckCircle2 } from "lucide-react";
+import { motion } from "motion/react";
 
 interface FragmentedNode {
   index: string;
@@ -63,7 +66,13 @@ export function BrandStorySection() {
     >
       <div className="max-w-[1450px] mx-auto px-5 sm:px-8 lg:px-12 space-y-10 lg:space-y-12">
         {/* 02. SECTION INTRODUCTION */}
-        <div className="space-y-4">
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="space-y-4"
+        >
           <h2 className="font-heading font-extrabold text-[clamp(2.35rem,4.4vw,4.25rem)] leading-[0.98] tracking-[-0.035em] text-[#0B0D10]">
             Great ideas shouldn&apos;t get lost between teams.
             <br />
@@ -77,12 +86,18 @@ export function BrandStorySection() {
             Yet traditional agency structures often separate these disciplines, creating unnecessary
             handoffs, repeated conversations and disconnected execution.
           </p>
-        </div>
+        </motion.div>
 
         {/* 03. DIAGRAMS WRAPPER */}
         <div className="space-y-6">
           {/* STAGE 01 — THE FRAGMENTED MODEL */}
-          <div className="rounded-[20px] bg-[#FFFFFF] border border-[#EAE5DC] p-5 sm:p-7 lg:p-8 space-y-7 shadow-[0_4px_24px_rgba(0,0,0,0.03)]">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="rounded-[20px] bg-[#FFFFFF] border border-[#EAE5DC] p-5 sm:p-7 lg:p-8 space-y-7 shadow-[0_4px_24px_rgba(0,0,0,0.03)]"
+          >
             {/* Stage Status Header */}
             <div className="flex flex-wrap items-center gap-3 pb-4 border-b border-[#EAE5DC]">
               <div className="flex items-center gap-2 text-[#F06464]">
@@ -104,12 +119,12 @@ export function BrandStorySection() {
               {FRAGMENTED_NODES.map((node, idx) => (
                 <React.Fragment key={node.index}>
                   {/* Node Box */}
-                  <div className="flex-1 rounded-[14px] border border-[#EAE5DC] bg-[#FAF8F5] p-5 min-h-[110px] flex flex-col justify-between">
-                    <span className="font-mono text-xs font-bold text-[#F06419] block mb-2">
+                  <div className="group flex-1 rounded-[14px] border border-[#EAE5DC] bg-[#FAF8F5] p-5 min-h-[110px] flex flex-col justify-between transition-all duration-200 hover:-translate-y-1 hover:border-[#F06464]/60 hover:shadow-md cursor-default">
+                    <span className="font-mono text-xs font-bold text-[#F06419] block mb-2 transition-transform duration-200 group-hover:scale-105">
                       {node.index}
                     </span>
                     <div>
-                      <h3 className="font-heading font-extrabold text-[16px] sm:text-[17px] text-[#0B0D10] tracking-tight uppercase leading-tight">
+                      <h3 className="font-heading font-extrabold text-[16px] sm:text-[17px] text-[#0B0D10] tracking-tight uppercase leading-tight group-hover:text-[#F06464] transition-colors">
                         {node.title}
                       </h3>
                       <p className="text-[12.5px] sm:text-[13px] text-[#555962] mt-1 leading-snug">
@@ -146,12 +161,12 @@ export function BrandStorySection() {
                 <span>Business operations remain disconnected.</span>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* TRANSITION ARROW */}
           <div className="w-full flex items-center justify-center py-2">
             <svg
-              className="w-7 h-7 text-[#F06419]"
+              className="w-7 h-7 text-[#F06419] animate-bounce"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -162,7 +177,13 @@ export function BrandStorySection() {
           </div>
 
           {/* STAGE 02 — THE EDYREX MODEL (Vibrant Signal Orange Container) */}
-          <div className="rounded-[22px] sm:rounded-[24px] bg-[#F06419] p-6 sm:p-9 lg:p-10 text-[#090A0D] shadow-xl relative">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+            className="rounded-[22px] sm:rounded-[24px] bg-[#F06419] p-6 sm:p-9 lg:p-10 text-[#090A0D] shadow-xl relative transition-shadow duration-300 hover:shadow-[0_8px_30px_rgba(240,100,25,0.4)]"
+          >
             {/* Model Header */}
             <div className="flex items-center gap-3 pb-2">
               <div className="flex items-center gap-2">
@@ -187,8 +208,8 @@ export function BrandStorySection() {
               {CONNECTED_DIVISIONS.map((division, idx) => (
                 <React.Fragment key={division.index}>
                   {/* Discipline Card */}
-                  <div className="flex-1 rounded-[14px] border-[1.8px] border-[#090A0D] bg-transparent p-5 sm:p-6 min-h-[110px] flex flex-col justify-between">
-                    <span className="font-mono text-xs font-bold text-[#090A0D] block mb-2">
+                  <div className="group flex-1 rounded-[14px] border-[1.8px] border-[#090A0D] bg-transparent p-5 sm:p-6 min-h-[110px] flex flex-col justify-between transition-all duration-200 hover:-translate-y-1 hover:bg-[#090A0D]/5 cursor-default">
+                    <span className="font-mono text-xs font-bold text-[#090A0D] block mb-2 transition-transform duration-200 group-hover:scale-105">
                       {division.index}
                     </span>
                     <h4 className="font-heading font-extrabold text-[15px] sm:text-[16px] text-[#090A0D] uppercase tracking-tight leading-snug">
@@ -214,16 +235,22 @@ export function BrandStorySection() {
             {/* Centered Pill Badge Signature with Flanking Lines */}
             <div className="flex items-center justify-center pt-8 mt-3">
               <span aria-hidden="true" className="h-px bg-[#090A0D]/35 flex-1" />
-              <div className="px-5 py-2 rounded-full bg-[#090A0D] text-[#F5F2EC] text-[11px] sm:text-xs font-mono font-bold uppercase tracking-[0.16em] mx-4 shrink-0 shadow-sm">
+              <div className="px-5 py-2 rounded-full bg-[#090A0D] text-[#F5F2EC] text-[11px] sm:text-xs font-mono font-bold uppercase tracking-[0.16em] mx-4 shrink-0 shadow-sm transition-transform duration-200 hover:scale-105 cursor-default">
                 EDIYREX / ONE CONNECTED TEAM
               </div>
               <span aria-hidden="true" className="h-px bg-[#090A0D]/35 flex-1" />
             </div>
-          </div>
+          </motion.div>
         </div>
 
         {/* 04. STAGE 03 — THE STUDIO THESIS */}
-        <div className="pt-8 border-t border-[#EAE5DC] flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8">
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="pt-8 border-t border-[#EAE5DC] flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8"
+        >
           <span className="text-xs sm:text-[14px] font-mono font-bold uppercase tracking-[0.18em] text-[#F06419] shrink-0">
             THE STUDIO THESIS
           </span>
@@ -235,7 +262,7 @@ export function BrandStorySection() {
             We founded EDIYREX to bring high-craft creative direction and robust technical
             engineering together, executed through one connected team.
           </p>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
